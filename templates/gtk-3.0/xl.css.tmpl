@@ -14,7 +14,11 @@ iconview, flowboxchild, switch, switch slider, check, radio, scale slider, scrol
 .primary-toolbar button, headerbar button, headerbar button.titlebutton, .titlebar button.titlebutton {
   transition-duration: {{hover_out_ms}}ms;
   transition-timing-function: ease-out;
-  transition-delay: 0; }
+  transition-delay: 0;
+  /* colours and gradients fade; shadows switch at once: GTK 3 garbles a
+     blurred shadow while animating between two blur sizes (blocks and
+     streaks round the widget when the hover shadow is bigger) */
+  transition-property: color, background-color, background-image, border-color, outline-color; }
 
 button:hover, button.flat:hover, button.sidebar-button:hover, entry:hover, spinbutton:hover,
 menuitem:hover, menubar > menuitem:hover, notebook > header > tabs > tab:hover, row:hover,
