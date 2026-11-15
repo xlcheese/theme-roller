@@ -318,7 +318,29 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # --- Integration
     t["adw.accent_name"] = nearest_adw_accent(theme["accent"])
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
+    _title_gradient(t, style)
     return t
+
+
+def _title_gradient(t: dict[str, str], style: sty.Style) -> None:
+    """The focused title bar's gradient in the style's [title_bar] shape (smooth
+    by default), as CSS for header bars and draw ops for Muffin's title bars."""
+    tb = style.title_bar
+    shape = (tb.get("gradient_shape", "smooth"), float(tb.get("split_step", 0.4)),
+             float(tb.get("glass_return", 0.4)))
+    top, bottom = t["wb.title_top"], t["wb.title_bottom"]
+    t["wb.title_grad"] = pal.gradient_css(top, bottom, *shape)
+    stops = pal.gradient_stops(top, bottom, *shape)
+
+    def grad(y: str, h: str, a: str, b: str) -> str:
+        return (f'<gradient type="vertical" x="0" y="{y}" width="width" height="{h}">'
+                f'<color value="{a}"/><color value="{b}"/></gradient>')
+    if len(stops) == 4:
+        # metacity gradients have evenly spaced colours, so a step is two gradients
+        t["wb.ops.titlebar_focused"] = (grad("0", "height/2", stops[0][1], stops[1][1]) + "\n\t"
+                                        + grad("height/2", "height-height/2", stops[2][1], stops[3][1]))
+    else:
+        t["wb.ops.titlebar_focused"] = grad("0", "height", top, bottom)
 
 
 def warnings(settings: dict) -> list[str]:

@@ -91,10 +91,7 @@
 <!-- ::: TITLE BAR: the gradient ends in the menubar/toolbar color; unfocused is flat ::: -->
 
 <draw_ops name="titlebar_focused">
-	<gradient type="vertical" x="0" y="0" width="width" height="height">
-		<color value="{{wb.title_top}}"/>
-		<color value="{{wb.title_bottom}}"/>
-	</gradient>
+	{{wb.ops.titlebar_focused}}
 </draw_ops>
 <draw_ops name="titlebar_unfocused">
 	<rectangle color="{{wb.unfocused}}" x="0" y="0" width="width" height="height" filled="true"/>

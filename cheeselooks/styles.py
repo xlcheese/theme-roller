@@ -69,7 +69,10 @@ NOTIFICATION_KINDS = ("line", "flat", "bordered")
 NOTIFICATION_KEYS = ("kind", "color")
 # [title_bar]: the 1px light line along the top of header bars, as white at
 # this alpha (0 = none); highlight_dark on dark title bars (light title text)
-TITLE_BAR_KEYS = {"highlight": 0.15, "highlight_dark": 0.08}
+TITLE_BAR_KEYS = {"highlight": 0.15, "highlight_dark": 0.08,
+                  # the title bar's own gradient shape (smooth unless set; the
+                  # style's gradient_shape doesn't apply to title bars)
+                  "gradient_shape": "smooth", "split_step": 0.4, "glass_return": 0.4}
 # Settings a style can suggest in [defaults] (applied when the style is picked
 # and on a fresh install). Panel and menu values are optional: left out, the
 # panel and menus follow Global.
@@ -253,8 +256,11 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
             if k not in TITLE_BAR_KEYS:
                 warnings.append(f"title_bar.{k} is not a known title bar setting and is ignored "
                                 f"(known: {', '.join(TITLE_BAR_KEYS)})")
+            elif k == "gradient_shape":
+                if v not in pal.GRADIENT_SHAPES:
+                    errors.append(f"title_bar.gradient_shape must be one of {', '.join(pal.GRADIENT_SHAPES)}")
             elif isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 1:
-                errors.append(f"title_bar.{k} must be a number from 0 (none) to 1 (white)")
+                errors.append(f"title_bar.{k} must be a number from 0 to 1")
 
     defaults = data.get("defaults", {})
     if not isinstance(defaults, dict):

@@ -113,10 +113,7 @@ w('''<?xml version="1.0"?>
 <!-- ::: TITLE BAR: the gradient ends in the menubar/toolbar color; unfocused is flat ::: -->
 
 <draw_ops name="titlebar_focused">
-\t<gradient type="vertical" x="0" y="0" width="width" height="height">
-\t\t<color value="{{wb.title_top}}"/>
-\t\t<color value="{{wb.title_bottom}}"/>
-\t</gradient>
+\t{{wb.ops.titlebar_focused}}
 </draw_ops>
 <draw_ops name="titlebar_unfocused">
 \t<rectangle color="{{wb.unfocused}}" x="0" y="0" width="width" height="height" filled="true"/>
