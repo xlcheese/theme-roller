@@ -439,6 +439,8 @@ switch:focus-visible, notebook > header > tabs > tab:focus-visible, row:focus-vi
   outline-color: {{focus.ring}};
   outline-style: {{focus.style}};
   outline-width: {{focus.width}}px; }
+row:selected:focus-visible, gridview > child:selected:focus-visible, listview > row:selected:focus-visible {
+  outline-color: {{focus.ring_selected}}; }
 
 vte-terminal {
   color: {{term.text}};

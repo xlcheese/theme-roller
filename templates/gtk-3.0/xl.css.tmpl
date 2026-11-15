@@ -498,6 +498,9 @@ notebook > header > tabs > tab:focus, row:focus, .view:focus {
   outline-style: {{focus.style}};
   outline-width: {{focus.width}}px;
   -gtk-outline-radius: {{r}}px; }
+row:selected:focus, .view:selected:focus, treeview.view:selected:focus, iconview:selected:focus,
+flowboxchild:selected:focus {
+  outline-color: {{focus.ring_selected}}; }
 
 vte-terminal, vte-terminal.terminal-screen, terminal-window vte-terminal {
   color: {{term.text}};

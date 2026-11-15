@@ -296,12 +296,17 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     fr = d["focus_ring"]
     if fr["custom"]:
         # your own ring: solid, in your color (or the accent), at your width (0 = off)
-        t["focus.ring"] = pal.rgba(fr["color"] or theme["accent"], 1.0)
+        ring = fr["color"] or theme["accent"]
+        t["focus.ring"] = pal.rgba(ring, 1.0)
+        # on selected rows (the accent): the same colour blended two-thirds into
+        # the selection, so a ring that's quiet on buttons isn't a white outline there
+        t["focus.ring_selected"] = pal.mix(theme["select"], ring, 0.35)
         t["focus.width"] = str(fr["width"])
         t["focus.style"] = "solid" if fr["width"] else "none"
     else:
         # default: subtle, like Mint-Y: 1px dashed, text color at 25%
         t["focus.ring"] = pal.rgba(theme["text"], 0.25)
+        t["focus.ring_selected"] = pal.rgba(theme["accent_fg"], 0.35)
         t["focus.width"] = "1"
         t["focus.style"] = "dashed"
 
