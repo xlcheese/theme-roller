@@ -192,7 +192,7 @@ def geometry(style: str, t: dict[str, str]) -> Geometry:
     # the click area reaches a few px past the face on every side
     if style == "classic":
         side = _even(max(18, ctl * 0.72))
-        return centred(side + 6, side + 8, side, side, 0)
+        return centred(side + 4, side + 8, side, side, 0)     # 4px apart, as Clearlooks
     if style == "dots":
         # 16px: in GTK the face is drawn on the icon node, which is never
         # smaller than the 16px icon inside it (a smaller face put the glyph off centre)
@@ -871,6 +871,11 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
             out.append(selectors + " {\n  " + "\n  ".join(decl) + " }")
     if style == "linked":
         out += _linked_css(t, g, fc, gtk4, bases, pseudos, classes, h)
+    if style == "classic" and not gtk4:
+        # GTK 3's header bar adds 6px between window buttons: cancel it, so the
+        # buttons are 4px apart as on the window borders (and in Clearlooks)
+        out.append(",\n".join(f"{b} + button.titlebutton" for b in bases)
+                   + f" {{ margin-left: -{GTK3_BUTTON_SPACING}px; }}")
     if glyphs and "unmaximize" in glyphs and glyphs["unmaximize"] != glyphs["maximize"]:
         # a maximized window's maximize button restores: its own glyph
         win = "window.maximized" if gtk4 else ".maximized"
