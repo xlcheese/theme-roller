@@ -680,6 +680,12 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         try:
             self.theme_css.load_from_path(str(self.preview_dir / "gtk-3.0" / "gtk.css"))
             self.extra_css.load_from_data(self._extra_css(t).encode())
+            # make every widget re-read its style and size: without this GTK 3
+            # sometimes kept a property the new CSS no longer sets (a Linked
+            # shadow after switching back) or didn't re-measure resized title
+            # buttons (Gargantuan's could vanish until the window was reopened)
+            Gtk.StyleContext.reset_widgets(Gdk.Screen.get_default())
+            self.queue_resize()
         except GLib.Error as exc:
             self.status.set_text(f"Preview CSS problem: {exc.message}")
         if self.data["theme"] == themes.CUSTOM:

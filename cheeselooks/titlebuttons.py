@@ -34,7 +34,7 @@ from . import shape
 STYLES = {
     "flat": "xl-Cheeselooks Flat",
     "drawn": "xl-Cheeselooks",
-    "linked": "Linked",
+    "linked": "xl-Cheeselooks Linked",
     "classic": "Classic",
     "dots": "Dots",
     "gargantuan": "Gargantuan",
@@ -72,7 +72,7 @@ GTK3_BUTTON_SPACING = 6   # GtkHeaderBar's spacing between its window buttons
 # Glyphs. Every set is ours (drawn as SVG at the size each style uses), so
 # apps, window borders and the settings app's picker always match, except
 # "icons", which takes the icon theme's (GTK draws those itself; window borders
-# get copies from the icon theme at Apply, falling back to "theme").
+# get copies from the icon theme at Apply, falling back to "regular").
 #
 #   stroked glyphs: a path on a 16px box, 1.6px round strokes
 GLYPHS = {
@@ -84,7 +84,7 @@ GLYPHS = {
     "plus": "M8 3.8V12.2M3.8 8H12.2",
 }
 #   filled glyphs on a 16px box: Mint-Y's window button artwork (GPL-3+,
-#   Linux Mint), redrawn here as our own "theme" set
+#   Linux Mint), redrawn here as our own "regular" set
 FILLED = {
     "mint-close": "M4.795 3.912l-.883.883.147.146L7.117 8 4.06 11.059l-.147.146.883.883.146-.147L8 8.883"
                   "l3.059 3.058.146.147.883-.883-.147-.146L8.883 8l3.058-3.059.147-.146-.883-.883-.146.147"
@@ -94,12 +94,12 @@ FILLED = {
     "mint-restore": "m3 5v8h8V5Zm1 1h6v6H4ZM5 3v1h7v7h1V3Z",
 }
 GLYPH_SETS = {
-    "theme": {"close": "mint-close", "minimize": "mint-min", "maximize": "mint-max", "unmaximize": "mint-restore"},
+    "regular": {"close": "mint-close", "minimize": "mint-min", "maximize": "mint-max", "unmaximize": "mint-restore"},
     "thin": {"close": "thin-x", "minimize": "thin-min", "maximize": "thin-max", "unmaximize": "thin-restore"},
     "chevrons": {"close": "x", "minimize": "chevron-down", "maximize": "chevron-up", "unmaximize": "diamond"},
     "marks": {"close": "x", "minimize": "minus", "maximize": "plus", "unmaximize": "plus"},
 }
-GLYPH_SET_NAMES = {"theme": "Theme", "thin": "Thin", "chevrons": "Chevrons", "marks": "Marks",
+GLYPH_SET_NAMES = {"regular": "Regular", "thin": "Thin", "chevrons": "Chevrons", "marks": "Marks",
                    "icons": "Icon Theme"}
 # each style's own set (the picker shows it until you choose another)
 STYLE_GLYPHS = {"dots": "marks", "gargantuan": "thin", "gargantuan-circles": "thin",
@@ -108,7 +108,7 @@ STYLE_GLYPHS = {"dots": "marks", "gargantuan": "thin", "gargantuan-circles": "th
 
 def glyph_set(style: str, chosen: str | None) -> str:
     """The glyph set in use: yours, else the style's own."""
-    return chosen or STYLE_GLYPHS.get(style, "theme")
+    return chosen or STYLE_GLYPHS.get(style, "regular")
 
 
 def _glyphs(t: dict[str, str], style: str) -> dict[str, str]:
@@ -332,17 +332,20 @@ def _split_color(c: str) -> tuple[str, float]:
 
 
 def glyph_svg(name: str, color: str, size: int = 16) -> str:
-    """A glyph in one colour. Filled and stroked glyphs are drawn on a 16px box
-    (scaled to the size by whoever shows them); thin ones at the size itself."""
+    """A glyph in one colour, as an SVG the size it's shown. Filled and stroked
+    glyphs are drawn on a 16px grid; thin ones are drawn for the size itself."""
     c, a = _split_color(color)
+    # written at the size it's shown (the drawing stays on its 16px grid): GTK 3
+    # turns an SVG into pixels at its own size before scaling, so a 16px SVG
+    # shown at 24 (Gargantuan) was blurred
     if name in FILLED:
-        return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 16 16">'
                 f'<path d="{FILLED[name]}" fill="{c}" fill-opacity="{a:g}"/></svg>')
     if name.startswith("thin-"):
         return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
                 f'viewBox="0 0 {size} {size}"><path d="{_thin(name, size)}" fill="none" stroke="{c}" '
                 f'stroke-opacity="{a:g}" stroke-width="1" stroke-linecap="square" stroke-linejoin="miter"/></svg>')
-    return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 16 16">'
             f'<path d="{GLYPHS[name]}" fill="none" stroke="{c}" stroke-opacity="{a:g}" stroke-width="1.6" '
             'stroke-linecap="round" stroke-linejoin="miter"/></svg>')
 
@@ -513,8 +516,8 @@ def metacity(style: str, t: dict[str, str]) -> tuple[dict[str, str], dict[str, s
                     f'width="{s}" height="{s}"/>\n')
         if icons:        # the icon theme's glyph, copied in the right colour
             svg = icon_theme_glyph(fn, color)
-            if svg is None and fn in GLYPH_SETS["theme"]:
-                svg = glyph_svg(GLYPH_SETS["theme"][fn], color, s)      # none there: ours
+            if svg is None and fn in GLYPH_SETS["regular"]:
+                svg = glyph_svg(GLYPH_SETS["regular"][fn], color, s)    # none there: ours
             if svg is not None:
                 c, _a = _split_color(color)
                 name = _name("icon", fn, c, str(s))
@@ -581,6 +584,56 @@ def _inset_only(shadow: str) -> str:
     return ", ".join(inset) if inset else "none"
 
 
+def _group_shadow(shadow: str, pos: str) -> str:
+    """A Linked button's share of the group's outer layers (pos: first, middle,
+    last, only), kept with its inner ones. The recess becomes strips: the dark
+    one along the top of every button (and the left of the first), the light
+    one along the bottom (and the right of the last). A drop shadow is pulled in
+    at the sides by its blur, so it doesn't spill onto the next button."""
+    parts, depth, cur = [], 0, ""
+    for ch in shadow:
+        depth += ch == "("
+        depth -= ch == ")"
+        if ch == "," and depth == 0:
+            parts.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    parts.append(cur.strip())
+    out = []
+
+    def num(v: str) -> float:
+        return float(v[:-2]) if v.endswith("px") else float(v)
+
+    def px(v: float) -> str:
+        return "0" if v == 0 else f"{v:g}px"
+    for layer in parts:
+        if not layer or layer == "none":
+            continue
+        if layer.startswith("inset") or pos == "only":
+            out.append(layer)
+            continue
+        m = re.match(r"(\S+) (\S+) (\S+)(?: (\S+px|0))? (.+)$", layer)
+        if not m:
+            out.append(layer)
+            continue
+        x, y, blur = num(m.group(1)), num(m.group(2)), num(m.group(3))
+        spread = num(m.group(4)) if m.group(4) else 0.0
+        color = m.group(5)
+        if blur == 0 and spread == 0 and x == y and x != 0:         # a recess side
+            if x > 0:                                               # light: bottom, right end
+                out.append(f"0 {px(x)} 0 {color}")
+                if pos == "last":
+                    out.append(f"{px(x)} 0 0 {color}")
+            else:                                                   # dark: top, left end
+                out.append(f"0 {px(y)} 0 {color}")
+                if pos == "first":
+                    out.append(f"{px(x)} 0 0 {color}")
+        else:                                                       # a drop shadow
+            out.append(f"{px(x)} {px(y)} {px(blur)} {px(spread - blur)} {color}")
+    return ", ".join(out) if out else "none"
+
+
 def _linked_css(t: dict[str, str], g: Geometry, fc: dict, gtk4: bool, bases: list[str],
                 pseudos: dict, classes: dict, h: int) -> list[str]:
     """Linked: corners only at the group's two ends, one shared border between
@@ -619,21 +672,22 @@ def _linked_css(t: dict[str, str], g: Geometry, fc: dict, gtk4: bool, bases: lis
                 continue
             sels = [f"{b}{cls}{p} + {nxt}" + ("" if not gtk4 else ":not(.osd)") for b in bases for p in pseudo_list]
             out.append(",\n".join(sels) + f" {{ border-left-color: {face.border}; }}")
-    # the group: outer layers (recess, drop shadow) on the box round the buttons,
-    # held to the buttons' height by margins
-    outer = t["wbp.w.button.g4_outer" if gtk4 else "wbp.w.button.outer"]
-    hi = int(t["wb.height_inner"])
-    mt = (hi - h) // 2
-    side = "start" if t["wb.button_layout"].startswith("close") else "end"
-    if gtk4:
-        box = f"headerbar windowcontrols.{side}"
-    else:
-        gside = "left" if side == "start" else "right"
-        box = f"headerbar box.{gside}, .titlebar box.{gside}"
-        out.append(f"headerbar box.{gside} > separator.titlebutton, .titlebar box.{gside} > separator.titlebutton "
-                   "{ min-width: 0; margin: 0; background: none; }")
-    out.append(f"{box} {{\n  border-radius: {r}px;\n  margin-top: {mt}px;\n  margin-bottom: {hi - h - mt}px;\n"
-               f"  box-shadow: {outer}; }}")
+    # the group's outer layers (recess, drop shadow), split between the buttons
+    # by position: a box round them only fits a header bar of exactly the
+    # title bar's height (taller header bars left a gap under the buttons)
+    pos_sel = {"first": [":first-child"], "last": [":last-child"], "only": [":first-child:last-child"]}
+    for pos, suffixes in pos_sel.items():
+        for kind, cls in classes.items():
+            for state in STATES:
+                face = fc[(kind, state)]
+                if face.shape != "rect":
+                    continue
+                shadow = _group_shadow(face.shadow4 if gtk4 else face.shadow3, pos)
+                sels = [f"{b}{cls}{p}{sfx}" for b in bases for p in pseudos[state] for sfx in suffixes]
+                if pos == "first" and not gtk4:      # GTK 3's hidden separator comes first
+                    sels += [f"{b.split(' ')[0]} separator + button.titlebutton{cls}{p}"
+                             for b in bases for p in pseudos[state]]
+                out.append(",\n".join(sels) + f" {{ box-shadow: {shadow}; }}")
     return out
 
 
@@ -675,7 +729,11 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
         margin = "0"
     else:
         h, margin = g.h, f"0 {g.gap // 2}px"
-    border_px = 0 if g.inner else 1
+    # Gargantuan faces have no border: none at all, so they reach the window's
+    # edge (a transparent 1px border left a strip of title bar round the face,
+    # since backgrounds are drawn inside the border)
+    borderless = g.full_height and style == "gargantuan"
+    border_px = 0 if (g.inner or borderless) else 1
     out.append(f"{sel('', '')} {{\n  min-width: {g.w - 2 * border_px}px;\n  min-height: {h - 2 * border_px}px;\n"
                f"  padding: 0;\n  margin: {margin};\n  -gtk-icon-shadow: none; }}")
     if g.full_height:
@@ -715,7 +773,7 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
     if g.inner:
         box_w, box_h = g.fw - 2, g.fh - 2
     else:
-        box_w, box_h = g.w - 2, h - 2
+        box_w, box_h = g.w - 2 * border_px, h - 2 * border_px
     # faces too small to hold the 16px icon inside a 1px border draw their
     # outline as an inset ring instead (dots)
     ring = g.inner and min(g.fw, g.fh) - 2 < 16
@@ -786,11 +844,13 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
             layers = bg_layers(face, glyphs.get(fn) if glyphs and fn else None)
             shadow = (face.shadow4 if gtk4 else face.shadow3) if (drawn and face.shape == "rect") else "none"
             if style == "linked":
-                shadow = _inset_only(shadow)
+                shadow = _group_shadow(shadow, "middle")
             decl = [f"border-radius: {radius};", f"border: 1px solid {border};", f"box-shadow: {shadow};",
                     f"background-color: {bg};"] + bg_decl(*layers)
             if style == "linked":
                 decl = decl[1:]                    # corners: see the position rules below
+            if borderless:
+                decl[1] = "border: none;"
             if ring:
                 decl[1] = "border: none;"
                 inner_ring = f"inset 0 0 0 1px {border}"

@@ -184,6 +184,8 @@ def from_dict(data: dict) -> dict:
     wb = merged.get("window_borders")
     if isinstance(wb, dict) and wb.get("button_style") in titlebuttons.OLD_NAMES:
         wb["button_style"] = titlebuttons.OLD_NAMES[wb["button_style"]]     # names before v1
+    if isinstance(wb, dict) and wb.get("button_glyphs") == "theme":
+        wb["button_glyphs"] = "regular"                                      # renamed
     merged["version"] = SETTINGS_VERSION
     problems = validate(merged)
     if problems:
