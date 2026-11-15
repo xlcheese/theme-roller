@@ -659,10 +659,6 @@ def _linked_css(t: dict[str, str], g: Geometry, fc: dict, gtk4: bool, bases: lis
     out.append(rule(":last-child", f"border-radius: 0 {r}px {r}px 0;"))
     out.append(rule(":first-child:last-child", f"border-radius: {r}px;"))
     out.append(rule(":not(:last-child)", "border-right-width: 0;"))
-    if not gtk4:
-        # GTK 3's header bar spaces its window buttons 6px apart (a box
-        # property, not CSS): pull every button left by that much
-        out.append(rule("", f"margin-left: -{GTK3_BUTTON_SPACING}px;"))
     # the shared edge takes the hovered / pressed button's border colour
     nxt = "button" if gtk4 else "button.titlebutton"
     for kind, cls in classes.items():
@@ -871,11 +867,12 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
             out.append(selectors + " {\n  " + "\n  ".join(decl) + " }")
     if style == "linked":
         out += _linked_css(t, g, fc, gtk4, bases, pseudos, classes, h)
-    if style == "classic" and not gtk4:
-        # GTK 3's header bar adds 6px between window buttons: cancel it, so the
-        # buttons are 4px apart as on the window borders (and in Clearlooks)
+    if not gtk4:
+        # GTK 3's header bar adds 6px between window buttons (a box property,
+        # not CSS): cancel it for every style, so GTK 3 apps space their title
+        # buttons as Muffin's window borders and GTK 4 apps do
         out.append(",\n".join(f"{b} + button.titlebutton" for b in bases)
-                   + f" {{ margin-left: -{GTK3_BUTTON_SPACING}px; }}")
+                   + f" {{ margin-left: {g.gap // 2 - GTK3_BUTTON_SPACING}px; }}")
     if glyphs and "unmaximize" in glyphs and glyphs["unmaximize"] != glyphs["maximize"]:
         # a maximized window's maximize button restores: its own glyph
         win = "window.maximized" if gtk4 else ".maximized"
