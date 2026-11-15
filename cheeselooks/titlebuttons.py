@@ -143,7 +143,7 @@ def geometry(style: str, t: dict[str, str]) -> Geometry:
         if style == "gargantuan":
             return Geometry(w, h, w, h, 0, 0, bw, 0, 24, True)
         d = min(_even(height * 0.8), h - 4)             # a larger circle in a wide slot
-        w = d + round((w - d) * 0.8)                    # the gap between circles 20% smaller
+        w = d + round((w - d) * 0.64)                   # the gap between circles 20% smaller, twice
         return Geometry(w, h, d, d, 0, 0, bw, 0, 24, True, True)
     # the click area reaches a few px past the face on every side
     if style == "classic":
@@ -488,7 +488,10 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
         out.append(f"{sel('', child)} {{\n  min-width: 0;\n  min-height: 0;\n  margin: 0;\n  padding: 0;\n"
                    f"  border: none;\n  border-radius: 0;\n  box-shadow: none;\n"
                    f"  background-color: transparent;\n  background-image: none;\n"
-                   f"  color: {'transparent' if glyphs else 'inherit'}; }}")
+                   f"  color: {'transparent' if glyphs else 'inherit'};\n"
+                   # no fade of its own: the glyph follows the button's colour as
+                   # it fades (with its own transition it lagged behind the face)
+                   f"  transition: none; }}")
 
     # glyph offsets in whole pixels (a glyph on a half pixel is blurry)
     if g.inner:
@@ -579,6 +582,10 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
                         "-gtk-icon-shadow: none;"] + decl
             # our own glyphs replace the icon, which stays but is hidden
             decl.append(f"color: {'transparent' if glyphs else (face.glyph or 'transparent')};")
+            # the face fades, the glyph colour switches at once: a fading text
+            # colour lagged well behind the face (a dark x on the coral close)
+            decl.append("transition-property: " + ("background-color, border-color;" if gtk4
+                        else "background-color, background-image, border-color;"))
             out.append(selectors + " {\n  " + "\n  ".join(decl) + " }")
     if glyphs and "unmaximize" in glyphs and glyphs["unmaximize"] != glyphs["maximize"]:
         # a maximized window's maximize button restores: its own glyph
