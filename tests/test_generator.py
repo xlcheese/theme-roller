@@ -848,6 +848,27 @@ class RenderAndInstallTests(unittest.TestCase):
                 cli.revert_desktop()
                 self.assertEqual(store["panels-height"], "['1:40', '2:30']")   # Revert puts it back
 
+    def test_theme_duplicate_and_rename(self):
+        import os
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as home, \
+                mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": f"{home}/c", "XDG_DATA_HOME": f"{home}/d"}):
+            self.assertEqual(themes.duplicate("xl-Classic"), "xl-Classic copy")      # built-in -> yours
+            self.assertEqual(themes.copy_name("xl-Classic"), "xl-Classic copy 2")
+            self.assertEqual(themes.load("xl-Classic copy")["style"]["name"], "xl-Classic")
+            themes.save_custom(themes.load("xl-Classic copy"), "xl-Classic copy")
+            themes.rename("xl-Classic copy", "Blue Classic")
+            names = [n for n, _f, _b in themes.list_themes()]
+            self.assertIn("Blue Classic", names)
+            self.assertNotIn("xl-Classic copy", names)
+            self.assertEqual(themes.based_on(), "Blue Classic")                      # Custom follows
+            with self.assertRaises(themes.ThemeError):
+                themes.rename("Blue Classic", "xl-Gummy")                           # taken
+            with self.assertRaises(themes.ThemeError):
+                themes.rename("xl-Gummy", "Mine")                                   # built-in
+            with self.assertRaises(themes.ThemeError):
+                themes.rename("Blue Classic", "x" * 41)                             # too long
+
     def test_install_and_revert(self):
         st = styles.load(DEFAULT_STYLE)
         with tempfile.TemporaryDirectory() as tmp:

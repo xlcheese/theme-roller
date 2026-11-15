@@ -313,9 +313,17 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.save_btn = Gtk.Button(label="Save Theme…")
         self.save_btn.set_tooltip_text("Keep your Custom settings as a theme with its own name")
         self.save_btn.connect("clicked", self.on_save_theme)
+        self.dup_btn = Gtk.Button(label="Duplicate Theme")
+        self.dup_btn.set_tooltip_text("Save a copy of the selected theme as one of your themes")
+        self.dup_btn.connect("clicked", self.on_duplicate_theme)
+        self.rename_btn = Gtk.Button(label="Rename Theme")
+        self.rename_btn.set_tooltip_text("Rename one of your themes (built-in themes keep their names)")
+        self.rename_btn.connect("clicked", self.on_rename_theme)
         self.delete_btn = Gtk.Button(label="Delete Theme")
         self.delete_btn.connect("clicked", self.on_delete_theme)
         buttons.pack_start(self.save_btn, False, False, 0)
+        buttons.pack_start(self.dup_btn, False, False, 0)
+        buttons.pack_start(self.rename_btn, False, False, 0)
         buttons.pack_start(self.delete_btn, False, False, 0)
         grid.attach(buttons, 0, row + 2, 2, 1)
         sep = Gtk.Separator(margin_top=6, margin_bottom=6)
@@ -753,7 +761,10 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         self.apply_btn.set_sensitive(not _same(self.data, self.applied) or self.data["theme"] != self.applied["theme"])
         self.save_btn.set_sensitive(self.data["theme"] == themes.CUSTOM)
         row = self.theme_list.get_selected_row()
-        self.delete_btn.set_sensitive(bool(row) and not row.builtin and row.theme_name != themes.CUSTOM)
+        yours = bool(row) and not row.builtin and row.theme_name != themes.CUSTOM
+        self.delete_btn.set_sensitive(yours)
+        self.rename_btn.set_sensitive(yours)
+        self.dup_btn.set_sensitive(bool(row) and row.theme_name != themes.CUSTOM)
 
     # -------------------------------------------------------------- actions
     def on_theme_selected(self, _list: Gtk.ListBox, row: Gtk.ListBoxRow | None) -> None:
@@ -846,6 +857,79 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.status.set_text(f"Saved the theme “{name}”.")
             break
         dialog.destroy()
+
+    def _ask_name(self, title: str, text: str, name: str) -> str | None:
+        """A small dialog with a name box (filled in and selected); None if cancelled.
+        Problems with the name show in the dialog, which stays open."""
+        dialog = Gtk.Dialog(title=title, transient_for=self, modal=True)
+        dialog.add_buttons("Cancel", Gtk.ResponseType.CANCEL, title.split()[0], Gtk.ResponseType.OK)
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        area = dialog.get_content_area()
+        area.set_spacing(8)
+        area.set_border_width(12)
+        area.add(Gtk.Label(label=text, xalign=0, wrap=True, max_width_chars=50))
+        entry = Gtk.Entry(activates_default=True, text=name, max_length=themes.MAX_NAME)
+        area.add(entry)
+        problem = Gtk.Label(xalign=0, wrap=True, max_width_chars=50)
+        problem.get_style_context().add_class("dim-label")
+        area.add(problem)
+        dialog.show_all()
+        entry.grab_focus()
+        entry.select_region(0, -1)
+        result = None
+        while dialog.run() == Gtk.ResponseType.OK:
+            try:
+                result = themes.check_new_name(entry.get_text())
+                break
+            except themes.ThemeError as exc:
+                msg = str(exc)
+                problem.set_text(msg[:1].upper() + msg[1:] + ".")     # keep the name's own capitals
+        dialog.destroy()
+        return result
+
+    def on_duplicate_theme(self, _button: Gtk.Button) -> None:
+        row = self.theme_list.get_selected_row()
+        if not row or row.theme_name == themes.CUSTOM:
+            return
+        name = self._ask_name("Duplicate Theme", f"A copy of “{row.theme_name}”, as one of your themes:",
+                              themes.copy_name(row.theme_name))
+        if name is None:
+            return
+        try:
+            themes.duplicate(row.theme_name, name)
+        except themes.ThemeError as exc:
+            self.status.set_text(str(exc))
+            return
+        self.fill_theme_list()
+        self.status.set_text(f"Duplicated “{row.theme_name}” as “{name}”.")
+        for r in self.theme_list.get_children():
+            if r.theme_name == name:
+                self.theme_list.select_row(r)      # switch to the copy, ready to edit
+
+    def on_rename_theme(self, _button: Gtk.Button) -> None:
+        row = self.theme_list.get_selected_row()
+        if not row or row.builtin or row.theme_name == themes.CUSTOM:
+            return
+        old = row.theme_name
+        name = self._ask_name("Rename Theme", f"A new name for “{old}”:", old)
+        if name is None or name == old:
+            return
+        try:
+            themes.rename(old, name)
+        except themes.ThemeError as exc:
+            self.status.set_text(str(exc))
+            return
+        if self.base == old:
+            self.base = name
+        self.base_cache.pop(old, None)
+        if self.data["theme"] == old:
+            self.data["theme"] = name
+        if self.applied.get("theme") == old:
+            self.applied["theme"] = name
+        self.fill_theme_list()
+        self.refresh_custom_subtitle()
+        self.update_buttons()
+        self.status.set_text(f"Renamed “{old}” to “{name}”.")
 
     def on_delete_theme(self, _button: Gtk.Button) -> None:
         row = self.theme_list.get_selected_row()

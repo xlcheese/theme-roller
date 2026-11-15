@@ -185,6 +185,58 @@ def save(name: str, data: dict, overwrite: bool = False) -> Path:
     return f
 
 
+def check_new_name(name: str) -> str:
+    """A name a new or renamed theme can take (stripped), or ThemeError saying why not."""
+    name = name.strip()
+    if not name or name == CUSTOM:
+        raise ThemeError("give the theme a name (not \"Custom\")")
+    if len(name) > MAX_NAME:
+        raise ThemeError(f"a theme's name can be up to {MAX_NAME} characters ({len(name)} given)")
+    if any(n == name for n, _f, _b in list_themes()):
+        raise ThemeError(f"there's already a theme called '{name}'")
+    return name
+
+
+def copy_name(name: str) -> str:
+    """'<name> copy', 'copy 2', 'copy 3'... the first that's free, within MAX_NAME."""
+    taken = {n for n, _f, _b in list_themes()}
+    for i in range(1, 100):
+        suffix = " copy" if i == 1 else f" copy {i}"
+        candidate = name[:MAX_NAME - len(suffix)].rstrip() + suffix
+        if candidate not in taken:
+            return candidate
+    raise ThemeError("couldn't find a free name for the copy")
+
+
+def duplicate(name: str, new_name: str | None = None) -> str:
+    """Save a copy of a theme (built-in or yours) as one of your themes."""
+    new_name = check_new_name(new_name or copy_name(name))
+    save(new_name, load(name))
+    return new_name
+
+
+def rename(old: str, new: str) -> str:
+    """Rename one of your themes. Custom remembers its base by name, so that
+    follows the rename too."""
+    f, builtin = find(old)
+    if builtin:
+        raise ThemeError("built-in themes can't be renamed: duplicate it instead")
+    new = check_new_name(new)
+    doc = _read(f)
+    doc["name"] = new
+    target = user_dir() / f"{slug(new)}.json"
+    target.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    if target.resolve() != f.resolve():
+        f.unlink()
+    cf = custom_file()
+    if cf.exists():
+        data = json.loads(cf.read_text(encoding="utf-8"))
+        if data.get("based_on") == old:
+            data["based_on"] = new
+            cf.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    return new
+
+
 def delete(name: str) -> None:
     f, builtin = find(name)
     if builtin:
