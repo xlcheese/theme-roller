@@ -45,7 +45,7 @@ DEFAULTS: dict[str, Any] = {
         "scrollbars": {"custom": False, "mode": "overlay", "roundness": 100},
         "sliders": {"custom": False, "roundness": 100},
         "switches": {"custom": False, "roundness": 100},
-        "focus_ring": {"custom": False, "color": None, "width": 2},
+        "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
     },
     "integration": {"libadwaita_colors": True, "libadwaita_accent": True, "flatpak_access": False},
 }
@@ -103,6 +103,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "switches", "roundness"), "int", (0, 100)),
     (("details", "focus_ring", "custom"), "bool", None),
     (("details", "focus_ring", "color"), "color?", None),
+    (("details", "focus_ring", "style"), "choice", ("dashed", "dotted", "solid")),
     (("details", "focus_ring", "width"), "int", (0, 3)),
     (("integration", "libadwaita_colors"), "bool", None),
     (("integration", "libadwaita_accent"), "bool", None),

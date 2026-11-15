@@ -951,6 +951,22 @@ class RenderAndInstallTests(unittest.TestCase):
         errors, _w = styles.check({"name": "R", "edges": {"raised": {"recess": {"color": "black", "light": "nope"}}}})
         self.assertTrue(any("light" in e for e in errors))
 
+    def test_focus_ring(self):
+        st = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        t = tokens.build(s, st)
+        self.assertEqual((t["focus.style"], t["focus.width"]), ("dashed", "1"))   # Mint-Y's default
+        self.assertIn("0.25)", t["focus.ring"])
+        s["details"]["focus_ring"].update(custom=True, color="#3366CC")          # a colour only
+        t = tokens.build(s, st)
+        self.assertEqual((t["focus.style"], t["focus.width"], t["focus.ring"]),
+                         ("dashed", "1", "rgba(51, 102, 204, 1)"))                 # still dashed, 1px
+        s["details"]["focus_ring"].update(style="dotted", width=2)
+        t = tokens.build(s, st)
+        self.assertEqual((t["focus.style"], t["focus.width"]), ("dotted", "2"))
+        s["details"]["focus_ring"]["width"] = 0
+        self.assertEqual(tokens.build(s, st)["focus.style"], "none")              # width 0: off
+
     def test_button_color(self):
         base = styles.load(DEFAULT_STYLE)
         plain = tokens.build(defaults(), base)

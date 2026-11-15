@@ -57,7 +57,7 @@ LABELS = {
     "title_bar_height": "Title bar height", "border_width": "Border width",
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
     "button_style": "Button style", "button_roundness": "Button roundness", "button_glyphs": "Glyphs",
-    "mode": "Mode", "color": "Color", "width": "Width",
+    "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
 }
 GROUPS = {"panel_shape": "Panel shape", "menu_shape": "Menu shape", "tooltips": "Tooltips",
@@ -798,6 +798,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             return theme["border_strong"]
         if path[:2] == ("details", "tooltips"):
             return theme["menu_bg"] if name == "bg" else theme["text"]
+        if path[:2] == ("details", "focus_ring"):
+            return pal.mix(theme["bg"], theme["text"], 0.25)     # the default: text at 25%
         return theme["accent"]
 
     def update_buttons(self) -> None:
