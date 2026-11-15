@@ -213,7 +213,8 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
                        t[bt + "pressed_shadow"], t[bt + "pressed_g4_shadow"], ptext)
         backdrop = rect(t["wbp.button"], t["wbp.button"], t[bt + "border"], glyph=utext)
         put(KINDS, rest=rest, hover=hover, pressed=pressed, backdrop=backdrop)
-        put(["close"], hover=close_hover, pressed=close_pressed)
+        if style == "drawn":      # Classic's close hovers like the other two
+            put(["close"], hover=close_hover, pressed=close_pressed)
     elif style == "dots":
         grey = pal.mix(title, text, 0.25)
         ring = "rgba(0, 0, 0, 0.14)"
