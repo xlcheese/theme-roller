@@ -519,7 +519,8 @@ headerbar button.xl-drawn:active {{ border-color: {t['wbp.w.button.pressed_borde
   box-shadow: {t['wbp.w.button.pressed_shadow']}; }}
 label.xl-prev-tooltip {{ color: {t['tooltip.text']}; background-color: {t['tooltip.bg']};
   border: 1px solid {pal.mix(t['tooltip.bg'], t['tooltip.text'], 0.2)}; border-radius: {t['r2']}px;
-  padding: 4px 8px; }}
+  padding: 4px 8px; margin: 0 4px;
+  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.23); }}     /* the theme's tooltip shadow (Mint-Y base) */
 frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.border']};
   border-radius: {t['r2']}px {t['r2']}px 0 0; }}
 .xl-prev-terminal {{ font-family: monospace; color: {t['term.text']}; background-color: {t['term.bg']}; padding: 6px; }}
