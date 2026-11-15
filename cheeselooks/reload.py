@@ -80,6 +80,24 @@ def restore_panel_heights(raw: str) -> str | None:
     return f"panel height put back ({raw})"
 
 
+def restart_cinnamon() -> str:
+    """Restart Cinnamon (like Ctrl+Alt+Esc): reloads everything, including the
+    window borders, which Muffin otherwise only re-reads at the next login.
+    Windows stay open. X11 only (Cinnamon can't restart itself on Wayland)."""
+    if not shutil.which("gdbus"):
+        return "could not restart Cinnamon (gdbus not found): press Ctrl+Alt+Esc"
+    try:
+        result = subprocess.run(["gdbus", "call", "--session", "--dest", "org.Cinnamon",
+                                 "--object-path", "/org/Cinnamon",
+                                 "--method", "org.Cinnamon.RestartCinnamon", "false"],
+                                capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return "could not restart Cinnamon: press Ctrl+Alt+Esc"
+    if result.returncode != 0:
+        return "could not restart Cinnamon (not running, or on Wayland): press Ctrl+Alt+Esc"
+    return "restarted Cinnamon so the window borders reload"
+
+
 def overlay_scrollbars() -> bool | None:
     """Whether GTK apps use overlay (floating) scrollbars; None when unknown."""
     if not available():

@@ -145,7 +145,7 @@ def _restore_panel_height(last_good: Path) -> list[str]:
 
 
 def apply_to_desktop(data: dict, style: styles.Style, activate: bool = False,
-                     save: bool = True) -> list[str]:
+                     save: bool = True, restart: bool = False) -> list[str]:
     """Write the theme to ~/.themes, save the settings, update the libadwaita
     colours and reload the desktop: everything `cheeselooks apply` does.
     Returns the log lines. Used by the settings app's Apply button."""
@@ -169,6 +169,8 @@ def apply_to_desktop(data: dict, style: styles.Style, activate: bool = False,
         if line:
             log.append(line)
     log += reload.apply(tokens.THEME_NAME, layout, activate=activate, theme_dir=theme_dir)
+    if restart:
+        log.append(reload.restart_cinnamon())
     return log
 
 
@@ -207,6 +209,8 @@ def cmd_apply(args: argparse.Namespace) -> int:
                 print(f"  {line}")
         for line in reload.apply(tokens.THEME_NAME, layout, activate=args.activate, theme_dir=theme_dir):
             print(f"  {line}")
+        if getattr(args, "restart", False):
+            print(f"  {reload.restart_cinnamon()}")
     return 0
 
 
@@ -396,6 +400,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--style-defaults", action="store_true",
                    help="reset roundness, gradient, depth and panel/menu shape to the style's defaults")
     p.add_argument("--activate", action="store_true", help="also switch Cinnamon to this theme")
+    p.add_argument("--restart", action="store_true",
+                   help="restart Cinnamon afterwards (like Ctrl+Alt+Esc) so window borders reload too")
     p.add_argument("--no-reload", action="store_true", help="write files only")
     p.add_argument("--no-save", action="store_true", help="don't save the settings used")
     p.set_defaults(func=cmd_apply)
