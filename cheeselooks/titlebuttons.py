@@ -687,6 +687,103 @@ def _linked_css(t: dict[str, str], g: Geometry, fc: dict, gtk4: bool, bases: lis
     return out
 
 
+MUFFIN = ".ssd headerbar.default-decoration"     # Cinnamon's window borders (Muffin 6)
+
+
+def _muffin_css(style: str, t: dict[str, str], g: Geometry, fc: dict, glyphs: dict[str, str],
+                files: dict[str, str], shape: tuple, pseudos: dict, classes: dict,
+                side: str | None, cr: int) -> list[str]:
+    """Window borders. Cinnamon's Muffin (Mint 22) draws them from this GTK 3 CSS,
+    not from metacity-1: a header bar under window.ssd > decoration, one button
+    node it restyles per function (no siblings, so no :first-child), and only
+    that button's background and frame: never the image node inside. It lays the
+    buttons out itself, with a fixed 6px between them plus their margins, and
+    draws the icon theme's glyph in the button's colour on top (ours are a
+    background layer, the icon hidden by a clear colour).
+
+    So here: the title bar's height and side padding, every button's size and
+    spacing, and for styles whose face is on the image node in apps, the face
+    drawn on the button instead (as an SVG). tools/muffin-preview.py draws it."""
+    out = [f"/* window borders (Muffin) */"]
+    full = g.full_height
+    h = int(t["wb.height_inner"]) if full else g.h
+    border_px = 0 if (g.inner or style == "gargantuan") else 1
+    order = _layout_order(t["wb.button_layout"])
+    left_side = t["wb.button_layout"].startswith(("close", "minimize", "maximize")) and \
+        len(t["wb.button_layout"].split(":")[0].split(",")) >= len(order) / 2
+    # a 6px gap is built in: take it back with a margin on the side away from
+    # the window's edge (on the edge side it would move the outer button)
+    pull = g.gap - GTK3_BUTTON_SPACING
+    margin = f"0 {pull}px 0 0" if left_side else f"0 0 0 {pull}px"
+    edge = 0 if full else g.edge
+    out.append(f"{MUFFIN} {{\n  min-height: {t['wb.height_inner']}px;\n  padding: 0 {edge}px;\n  border-width: 0; }}")
+    btn = f"{MUFFIN} button.titlebutton"
+    every = [f"{btn}{p}" for ps in pseudos.values() for p in ps]
+    out.append(",\n".join(every) + f" {{\n  min-width: {g.w - 2 * border_px}px;\n  min-height: {h - 2 * border_px}px;\n"
+               f"  padding: 0;\n  margin: {margin};"
+               + ("\n  border-width: 1px;" if style == "linked" else "") + " }")
+    out.append(f"{btn} image {{\n  min-width: 0;\n  min-height: 0;\n  margin: 0;\n  padding: 0;\n  border: none; }}")
+
+    if style == "linked":
+        # one face per function, by its place in the group (as on the metacity
+        # borders): corners at the ends, one shared line between neighbours
+        r = fc[("button", "rest")].radius
+        for fn in ("minimize", "maximize", "close"):
+            pos = _joined(order, fn)
+            radius = {"first": f"{r}px 0 0 {r}px", "last": f"0 {r}px {r}px 0",
+                      "middle": "0", "only": f"{r}px"}[pos]
+            kind = fn
+            for state in STATES:
+                face = fc[(kind, state)]
+                sels = ",\n".join(f"{btn}.{fn}{p}" for p in pseudos[state])
+                decl = [f"border-radius: {radius};"]
+                if pos in ("first", "middle"):
+                    decl.append("border-right-width: 0;")
+                if face.shape == "rect":
+                    decl.append(f"box-shadow: {_group_shadow(face.shadow3, pos)};")
+                out.append(sels + " { " + " ".join(decl) + " }")
+    if not g.inner:
+        return out            # the face is on the button already (the app rules apply)
+
+    # the face on the button, as an SVG centred in it, under the glyph
+    gs = g.glyph or 16
+    def layers(face: Face, glyph_name: str | None) -> list[str]:
+        imgs, sizes, pos = [], [], []
+        if glyph_name and face.glyph:
+            c, _a = _split_color(face.glyph)
+            name = _name(glyph_name, c, str(gs))
+            files[name] = glyph_svg(glyph_name, face.glyph, gs)
+            imgs.append(f'url("assets/{name}")')
+            sizes.append(f"{gs}px {gs}px")
+            pos.append(f"{(g.w - gs) // 2}px {(h - gs) // 2}px")
+        if face.shape != "none":
+            name = _name("mface", face.shape, face.top, face.bottom,
+                         face.border and _split_color(face.border)[0], str(face.radius), str(g.fw),
+                         str(g.fh), *(str(v) for v in shape))
+            files[name] = face_svg(face, g.fw, g.fh, (None, 0), shape)
+            imgs.append(f'url("assets/{name}")')
+            sizes.append(f"{g.fw}px {g.fh}px")
+            pos.append(f"{(g.w - g.fw) // 2}px {(h - g.fh) // 2}px")
+        if not imgs:
+            return ["background-image: none;"]
+        return [f"background-image: {', '.join(imgs)};", f"background-size: {', '.join(sizes)};",
+                f"background-position: {', '.join(pos)};", "background-repeat: no-repeat;"]
+
+    for kind, cls in classes.items():
+        fn = {"close": "close", "minimize": "minimize", "maximize": "maximize"}.get(kind)
+        for state in STATES:
+            face = fc[(kind, state)]
+            sels = ",\n".join(f"{btn}{cls}{p}" for p in pseudos[state])
+            decl = ["border: none;", "border-radius: 0;", "box-shadow: none;", "background-color: transparent;"]
+            decl += layers(face, glyphs.get(fn) if glyphs and fn else None)
+            decl.append(f"color: {'transparent' if glyphs else (face.glyph or 'transparent')};")
+            out.append(sels + " {\n  " + "\n  ".join(decl) + " }")
+            if fn == "maximize" and glyphs and glyphs.get("unmaximize", "maximize") != glyphs["maximize"]:
+                sels = ",\n".join(f".maximized {btn}.maximize{p}" for p in pseudos[state])
+                out.append(sels + " {\n  " + "\n  ".join(layers(face, glyphs["unmaximize"])) + " }")
+    return out
+
+
 def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[str, str]]:
     """(css, asset files) for title buttons in GTK 3 header bars or GTK 4 window controls."""
     g = geometry(style, t)
@@ -888,6 +985,8 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
         win = "window" if gtk4 else ""
         sq = ", ".join(f"{win}.{s} {b}.close" for s in ("maximized", "tiled", "fullscreen") for b in bases)
         out.append(f"{sq} {{ border-radius: 0; }}")
+    if not gtk4:
+        out += _muffin_css(style, t, g, fc, glyphs, files, shape, pseudos, classes, side, cr)
     return "\n".join(out) + "\n", files
 
 

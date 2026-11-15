@@ -610,3 +610,23 @@ Agreed but not built yet. Delete each line once it's done.
 - **Apply** (header bar, at the outer edge opposite the window buttons) writes the theme to the desktop and switches to it if needed. A **Revert** button then appears next to it; it puts the previous desktop theme back (`cli.revert_desktop`), keeps the app's settings, and hides again. No auto-apply and no timed Keep/Revert dialog (decided: the preview already shows the result, and a dialog would be drawn in the new theme).
 - **Import & Export:** one `.xltheme` file (a zip): `theme.json` with the theme's name, the format and tool version and its settings, plus the style folder when the theme uses one of your own styles. Importing a newer format warns; name clashes get " (2)"; an existing style folder of yours is kept. Command line: `cheeselooks themes`, `apply --theme NAME`, `export-theme NAME [FILE]`, `import-theme FILE`.
 - Later: dark-tuned style variants (xl-Cheeselooks-Dark, xl-Classic-Dark, xl-Gummy-Dark, with their own `alpha_dark` values), and built-in themes reusing the old preset names.
+
+## Window borders on Mint 22 (Muffin 6)
+
+Cinnamon's window manager no longer reads `metacity-1/`: Muffin 6 draws window
+borders from the GTK 3 theme's CSS, through its own style contexts
+(`window.background.ssd > decoration > headerbar.titlebar.default-decoration >
+button.titlebutton.{close,maximize,minimize} > image`). It sizes the buttons
+from the button's min size, padding and border plus the image node's padding,
+border and margin; puts a fixed 6px between buttons plus their margins; draws
+only the button node's background and frame (never the image node); and draws
+the icon theme's `window-*-symbolic` glyph at 16px in the button's colour.
+
+So the GTK 3 title-button CSS has a Muffin block (`.ssd
+headerbar.default-decoration`, in `titlebuttons._muffin_css`): title bar height
+and side padding, button size, a margin that takes the 6px back, and, for
+styles whose face is on the image node in apps (Classic, Dots, Unpretentious,
+Claude, Less Gargantuan), the face drawn on the button as an SVG. Linked gets
+its corners per function (no siblings in Muffin's path). `metacity-1/` is still
+generated for Metacity and Marco. `tools/muffin-preview.py THEME OUT.png` draws
+a title bar the way Muffin does (rest, hover, pressed, unfocused).
