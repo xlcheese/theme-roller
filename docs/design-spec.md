@@ -510,6 +510,9 @@ xl-cheeselooks/
 
 ## 11. Credits and license
 - GPL-3.0, the same as Mint-Y and Mint-X.
+- **README and GitHub pitch: include this line** (xl_cheese's request), in a section on colours / the style tester:
+  > "Decent" is a floor, not a promise. On a truly clashing scheme the tool can keep things readable and usable, and it already warns about poor text contrast. But it can't make ugly colours pretty. That part stays the user's choice.
+- README notes to remember: Mint's Themes window doesn't refresh while open (reopen it to see the new name and thumbnail); the terminal follows the theme only when its profile uses system theme colours (GNOME Terminal's default on Mint).
 - Credits in the README and `index.theme`: Linux Mint (Mint-Y, Mint-X), the original Mint-X Cinnamon theme authors, and the GNOME Clearlooks / Color Chooser projects as inspiration.
 - Built-in style and preset names are original.
 
