@@ -426,10 +426,17 @@ class SettingsWindow(Gtk.ApplicationWindow):
         buttons = Gtk.Box(spacing=6)
         for label, cls in (("Button", None), ("Suggested", "suggested-action"), ("Delete", "destructive-action")):
             b = Gtk.Button(label=label)
+            b.set_tooltip_text(f"A tooltip on {label}")        # hover for the real thing
             if cls:
                 b.get_style_context().add_class(cls)
             buttons.pack_start(b, False, False, 0)
-        buttons.pack_start(Gtk.ToggleButton(label="Toggled", active=True), False, False, 0)
+        toggled = Gtk.ToggleButton(label="Toggled", active=True)
+        toggled.set_tooltip_text("A tooltip on Toggled")
+        buttons.pack_start(toggled, False, False, 0)
+        # a drawn tooltip, always visible, in the Details tab's tooltip colours
+        tip = Gtk.Label(label="Tooltip", valign=Gtk.Align.CENTER)
+        tip.get_style_context().add_class("xl-prev-tooltip")
+        buttons.pack_start(tip, False, False, 0)
         body.pack_start(buttons, False, False, 0)
         linked = Gtk.Box()
         linked.get_style_context().add_class("linked")
@@ -510,6 +517,9 @@ headerbar button.xl-drawn:hover {{ border-color: {t['wbp.w.button.hover_border']
 headerbar button.xl-drawn:active {{ border-color: {t['wbp.w.button.pressed_border']};
   background-color: {t['wbp.pressed']}; background-image: image({t['wbp.pressed']});
   box-shadow: {t['wbp.w.button.pressed_shadow']}; }}
+label.xl-prev-tooltip {{ color: {t['tooltip.text']}; background-color: {t['tooltip.bg']};
+  border: 1px solid {pal.mix(t['tooltip.bg'], t['tooltip.text'], 0.2)}; border-radius: {t['r2']}px;
+  padding: 4px 8px; }}
 frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.border']};
   border-radius: {t['r2']}px {t['r2']}px 0 0; }}
 .xl-prev-terminal {{ font-family: monospace; color: {t['term.text']}; background-color: {t['term.bg']}; padding: 6px; }}
