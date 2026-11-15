@@ -12,6 +12,8 @@ draw behind the glyph and in what colour the glyph is. Faces are "none", a
     flat                glyph only; the style's title button on hover
                         (xl-Cheeselooks-flat, the original look)
     drawn               the style's normal button at rest (xl-Cheeselooks)
+    linked              the same, joined into one group (shared borders, rounded
+                        outer ends, the recess / shadow round the whole group)
     classic             the style's own buttons, small and square
     dots                coloured dots; the glyph shows on hover
     gargantuan          wide, full-height buttons flush with the edge
@@ -32,6 +34,7 @@ from . import shape
 STYLES = {
     "flat": "xl-Cheeselooks Flat",
     "drawn": "xl-Cheeselooks",
+    "linked": "Linked",
     "classic": "Classic",
     "dots": "Dots",
     "gargantuan": "Gargantuan",
@@ -45,7 +48,7 @@ OLD_NAMES = {"theme": "flat", "wide": "gargantuan", "circles": "arrows"}
 # Each style's own roundness, as a percentage of fully round (the Button
 # roundness slider shows it until you move it). None: the theme's Roundness.
 DEFAULT_ROUNDNESS = {
-    "flat": None, "drawn": None, "classic": 25, "dots": 100, "gargantuan": 0,
+    "flat": None, "drawn": None, "linked": None, "classic": 25, "dots": 100, "gargantuan": 0,
     "gargantuan-circles": 100, "arrows": 100, "arrows-flat": 100, "claude": 60,
 }
 
@@ -63,6 +66,7 @@ STATES = ("rest", "hover", "pressed", "backdrop")
 EDGE_PAD = 6          # px from the frame edge to the first/last button (headerbar padding)
 GTK3_HEADER_PAD = 7   # Mint-Y's headerbar side padding (GTK 3)
 GTK4_HEADER_PAD = 6   # and GTK 4 / libadwaita
+GTK3_BUTTON_SPACING = 6   # GtkHeaderBar's spacing between its window buttons
 
 # Our own glyphs (16px box, drawn as 1.6px strokes), for styles that don't
 # use the theme's: arrows use chevrons, dots use small marks.
@@ -161,6 +165,8 @@ def geometry(style: str, t: dict[str, str]) -> Geometry:
         fw, fh = _even(ctl * 1.12), _even(ctl)
         return centred(fw + 6, fh + 6, fw, fh, 0)
     w = round(ctl * 1.12)
+    if style == "linked":
+        return centred(w, ctl, w, ctl, 0, inner=False)      # joined: no gap
     return centred(w, ctl, w, ctl, 2, inner=False)
 
 
@@ -203,7 +209,7 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
             for s, face in states.items():
                 f[(k, s)] = face
 
-    if style in ("drawn", "classic"):
+    if style in ("drawn", "linked", "classic"):
         # the style's own buttons (Classic: the same, smaller, in its own size)
         rest = rect(t["wbp.button_top"], t["wbp.button_bottom"], t[bt + "border"],
                     t[bt + "shadow"], t[bt + "g4_shadow"], text)
@@ -213,7 +219,7 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
                        t[bt + "pressed_shadow"], t[bt + "pressed_g4_shadow"], ptext)
         backdrop = rect(t["wbp.button"], t["wbp.button"], t[bt + "border"], glyph=utext)
         put(KINDS, rest=rest, hover=hover, pressed=pressed, backdrop=backdrop)
-        if style == "drawn":      # Classic's close hovers like the other two
+        if style in ("drawn", "linked"):      # Classic's close hovers like the other two
             put(["close"], hover=close_hover, pressed=close_pressed)
     elif style == "dots":
         grey = pal.mix(title, text, 0.25)
@@ -300,8 +306,17 @@ def _shape(t: dict[str, str]) -> tuple[str, float, float]:
             float(t.get("style.glass_return", 0.4)))
 
 
+def _rounded_rect(x0: float, y0: float, x1: float, y1: float, radii: tuple[float, float, float, float]) -> str:
+    """An SVG path for a rectangle with its own radius per corner (tl, tr, br, bl)."""
+    tl, tr, br, bl = radii
+    return (f"M{x0 + tl:g} {y0:g}H{x1 - tr:g}" + (f"A{tr:g} {tr:g} 0 0 1 {x1:g} {y0 + tr:g}" if tr else "")
+            + f"V{y1 - br:g}" + (f"A{br:g} {br:g} 0 0 1 {x1 - br:g} {y1:g}" if br else "")
+            + f"H{x0 + bl:g}" + (f"A{bl:g} {bl:g} 0 0 1 {x0:g} {y1 - bl:g}" if bl else "")
+            + f"V{y0 + tl:g}" + (f"A{tl:g} {tl:g} 0 0 1 {x0 + tl:g} {y0:g}" if tl else "") + "Z")
+
+
 def face_svg(face: Face, w: int, h: int, corner: tuple[str | None, int] = (None, 0),
-             shape: tuple[str, float, float] = ("smooth", 0.4, 0.4)) -> str:
+             shape: tuple[str, float, float] = ("smooth", 0.4, 0.4), joined: str | None = None) -> str:
     """The face as an SVG the size of the button (metacity centres it), with the
     style's gradient shape (smooth, split or glass), as the GTK buttons have."""
     stops = "".join(f'<stop offset="{o:g}" stop-color="{c}"/>'
@@ -321,6 +336,15 @@ def face_svg(face: Face, w: int, h: int, corner: tuple[str | None, int] = (None,
             x0, y0 = (w - d) / 2 + inset, (h - d) / 2 + inset
             parts.append(f'<rect x="{x0:g}" y="{y0:g}" width="{d - 2 * inset:g}" height="{d - 2 * inset:g}" '
                          f'rx="{max(0, face.radius - inset):g}" fill="url(#g)"{stroke}/>')
+    elif face.shape == "rect" and joined:
+        # Linked: rounded only at the group's outer ends; every button draws its
+        # left edge and only the last its right one, so neighbours share one line
+        inset = 0.5 if face.border else 0
+        r = face.radius
+        radii = {"first": (r, 0, 0, r), "last": (0, r, r, 0), "middle": (0, 0, 0, 0), "only": (r, r, r, r)}[joined]
+        open_right = joined in ("first", "middle")
+        x1 = w + 1 if open_right else w - inset          # past the edge: no right border line
+        parts.append(f'<path d="{_rounded_rect(inset, inset, x1, h - inset, radii)}" fill="url(#g)"{stroke}/>')
     elif face.shape == "rect":
         side, cr = corner
         inset = 0.5 if face.border else 0
@@ -351,6 +375,22 @@ METACITY_ICONS = {"close": "close", "maximize": "max", "unmaximize": "restore", 
 CENTER = 'x="(width-object_width)/2" y="(height-object_height)/2" width="object_width" height="object_height"'
 
 
+def _layout_order(layout: str) -> list[str]:
+    """The window buttons in screen order, e.g. ':minimize,maximize,close'."""
+    return [b for side in layout.split(":") for b in side.split(",") if b in ("minimize", "maximize", "close")]
+
+
+def _joined(order: list[str], fn: str) -> str:
+    """first / middle / last / only: a function's place in a Linked group."""
+    fn = "maximize" if fn == "unmaximize" else fn
+    if fn not in order:
+        return "only"
+    if len(order) == 1:
+        return "only"
+    i = order.index(fn)
+    return "first" if i == 0 else "last" if i == len(order) - 1 else "middle"
+
+
 def metacity(style: str, t: dict[str, str]) -> tuple[dict[str, str], dict[str, str]]:
     """(tokens, files): draw ops for every function x state, and the SVG files they use."""
     g = geometry(style, t)
@@ -361,13 +401,16 @@ def metacity(style: str, t: dict[str, str]) -> tuple[dict[str, str], dict[str, s
     files: dict[str, str] = {}
     tok: dict[str, str] = {}
 
-    def face_op(face: Face, corner_=(None, 0)) -> str:
+    order = _layout_order(t["wb.button_layout"])
+
+    def face_op(face: Face, corner_=(None, 0), fn: str = "") -> str:
         if face.shape == "none":
             return ""
+        joined = _joined(order, fn) if style == "linked" else None
         name = _name("face", face.shape, face.top, face.bottom, face.border and _split_color(face.border)[0],
                      str(face.radius), face.bar, corner_[0], str(corner_[1]), str(face.size),
-                     *(str(v) for v in shape))
-        files[name] = face_svg(face, g.fw, g.fh, corner_, shape)
+                     *(str(v) for v in shape), joined)
+        files[name] = face_svg(face, g.fw, g.fh, corner_, shape, joined)
         return f'\t<image filename="{name}" {CENTER}/>\n'
 
     def glyph_op(fn: str, color: str | None) -> str:
@@ -392,10 +435,10 @@ def metacity(style: str, t: dict[str, str]) -> tuple[dict[str, str], dict[str, s
                                 ("backdrop", "unfocused")):
             face = fc[(k, state)]
             c = corner if fn == "close" else (None, 0)
-            tok[f"wb.ops.{fn}_{op_state}"] = (face_op(face, c) + glyph_op(fn, face.glyph)) or "\t"
+            tok[f"wb.ops.{fn}_{op_state}"] = (face_op(face, c, fn) + glyph_op(fn, face.glyph)) or "\t"
             if fn == "close" and corner[0]:
                 # maximized and tiled windows have square corners
-                tok[f"wb.ops.{fn}_{op_state}_square"] = (face_op(face) + glyph_op(fn, face.glyph)) or "\t"
+                tok[f"wb.ops.{fn}_{op_state}_square"] = (face_op(face, (None, 0), fn) + glyph_op(fn, face.glyph)) or "\t"
             elif fn == "close":
                 tok[f"wb.ops.{fn}_{op_state}_square"] = tok[f"wb.ops.{fn}_{op_state}"]
     return tok, files
@@ -422,6 +465,78 @@ def _edge_rule(gtk4: bool, margin: str) -> str:
             f".titlebar box.right > button.titlebutton:last-child {{ margin-right: {margin}; }}\n"
             f"headerbar box.left > button.titlebutton:first-child,\n"
             f".titlebar box.left > button.titlebutton:first-child {{ margin-left: {margin}; }}")
+
+
+def _inset_only(shadow: str) -> str:
+    """The inset layers of a box-shadow list (outer ones go round a Linked group)."""
+    parts, depth, cur = [], 0, ""
+    for ch in shadow:
+        depth += ch == "("
+        depth -= ch == ")"
+        if ch == "," and depth == 0:
+            parts.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    parts.append(cur.strip())
+    inset = [x for x in parts if x.startswith("inset")]
+    return ", ".join(inset) if inset else "none"
+
+
+def _linked_css(t: dict[str, str], g: Geometry, fc: dict, gtk4: bool, bases: list[str],
+                pseudos: dict, classes: dict, h: int) -> list[str]:
+    """Linked: corners only at the group's two ends, one shared border between
+    neighbours (each button draws its left edge, the last its right one too),
+    the hovered button's colour on the edge it shares, and the recess / drop
+    shadow round the whole group on the box that holds the buttons."""
+    out = []
+    r = fc[("button", "rest")].radius
+    every = [p for ps in pseudos.values() for p in ps]
+
+    def rule(suffix: str, decl: str) -> str:
+        sels = [f"{b}{cls}{p}{suffix}" for b in bases for cls in classes.values() for p in every]
+        return ",\n".join(dict.fromkeys(sels)) + f" {{ {decl} }}"
+    first = [":first-child"] if gtk4 else [":first-child"]
+    out.append(rule("", "border-radius: 0;"))
+    for f in first:
+        out.append(rule(f, f"border-radius: {r}px 0 0 {r}px;"))
+    if not gtk4:
+        # GTK 3 puts a (hidden) separator before the first window button
+        sels = [f"{b.split(' ')[0]} separator + button.titlebutton{cls}{p}"
+                for b in bases for cls in classes.values() for p in every]
+        out.append(",\n".join(dict.fromkeys(sels)) + f" {{ border-radius: {r}px 0 0 {r}px; }}")
+    out.append(rule(":last-child", f"border-radius: 0 {r}px {r}px 0;"))
+    out.append(rule(":first-child:last-child", f"border-radius: {r}px;"))
+    out.append(rule(":not(:last-child)", "border-right-width: 0;"))
+    if not gtk4:
+        # GTK 3's header bar spaces its window buttons 6px apart (a box
+        # property, not CSS): pull every button left by that much
+        out.append(rule("", f"margin-left: -{GTK3_BUTTON_SPACING}px;"))
+    # the shared edge takes the hovered / pressed button's border colour
+    nxt = "button" if gtk4 else "button.titlebutton"
+    for kind, cls in classes.items():
+        for state, pseudo_list in (("hover", pseudos["hover"]), ("pressed", pseudos["pressed"])):
+            face = fc[(kind, state)]
+            if face.shape == "none" or not face.border:
+                continue
+            sels = [f"{b}{cls}{p} + {nxt}" + ("" if not gtk4 else ":not(.osd)") for b in bases for p in pseudo_list]
+            out.append(",\n".join(sels) + f" {{ border-left-color: {face.border}; }}")
+    # the group: outer layers (recess, drop shadow) on the box round the buttons,
+    # held to the buttons' height by margins
+    outer = t["wbp.w.button.g4_outer" if gtk4 else "wbp.w.button.outer"]
+    hi = int(t["wb.height_inner"])
+    mt = (hi - h) // 2
+    side = "start" if t["wb.button_layout"].startswith("close") else "end"
+    if gtk4:
+        box = f"headerbar windowcontrols.{side}"
+    else:
+        gside = "left" if side == "start" else "right"
+        box = f"headerbar box.{gside}, .titlebar box.{gside}"
+        out.append(f"headerbar box.{gside} > separator.titlebutton, .titlebar box.{gside} > separator.titlebutton "
+                   "{ min-width: 0; margin: 0; background: none; }")
+    out.append(f"{box} {{\n  border-radius: {r}px;\n  margin-top: {mt}px;\n  margin-bottom: {hi - h - mt}px;\n"
+               f"  box-shadow: {outer}; }}")
+    return out
 
 
 def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[str, str]]:
@@ -567,8 +682,12 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
             fn = {"close": "close", "minimize": "minimize", "maximize": "maximize"}.get(kind)
             layers = bg_layers(face, glyphs.get(fn) if glyphs and fn else None)
             shadow = (face.shadow4 if gtk4 else face.shadow3) if (drawn and face.shape == "rect") else "none"
+            if style == "linked":
+                shadow = _inset_only(shadow)
             decl = [f"border-radius: {radius};", f"border: 1px solid {border};", f"box-shadow: {shadow};",
                     f"background-color: {bg};"] + bg_decl(*layers)
+            if style == "linked":
+                decl = decl[1:]                    # corners: see the position rules below
             if ring:
                 decl[1] = "border: none;"
                 inner_ring = f"inset 0 0 0 1px {border}"
@@ -587,6 +706,8 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
             decl.append("transition-property: " + ("background-color, border-color;" if gtk4
                         else "background-color, background-image, border-color;"))
             out.append(selectors + " {\n  " + "\n  ".join(decl) + " }")
+    if style == "linked":
+        out += _linked_css(t, g, fc, gtk4, bases, pseudos, classes, h)
     if glyphs and "unmaximize" in glyphs and glyphs["unmaximize"] != glyphs["maximize"]:
         # a maximized window's maximize button restores: its own glyph
         win = "window.maximized" if gtk4 else ".maximized"
