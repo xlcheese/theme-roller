@@ -254,6 +254,11 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_colors(t, "wbp.", wb_pal)
     _add_gradients(t, "wbp.", wb_pal, amount)
     _add_widgets(t, "wbp.", style, wb_pal, depth, amount)
+    # the header bar's top highlight, on the title bar's own colour (Mint-Y's
+    # base worked it out from the window background: a pale line on a dark bar)
+    key = "highlight_dark" if pal.is_dark(wb_pal) else "highlight"
+    hl = style.title_bar.get(key, sty.TITLE_BAR_KEYS[key])
+    t["wb.highlight"] = f"inset 0 1px {pal.rgba('#FFFFFF', hl)}" if hl > 0 else "none"
     # the style's face shape, for title buttons drawn outside the CSS (SVG faces)
     t["style.gradient_shape"] = style.gradient_shape
     t["style.split_step"] = str(style.split_step)

@@ -67,6 +67,9 @@ PANEL_KEYS = ("color",)
 # border all round); color: the line / border color (default accent).
 NOTIFICATION_KINDS = ("line", "flat", "bordered")
 NOTIFICATION_KEYS = ("kind", "color")
+# [title_bar]: the 1px light line along the top of header bars, as white at
+# this alpha (0 = none); highlight_dark on dark title bars (light title text)
+TITLE_BAR_KEYS = {"highlight": 0.15, "highlight_dark": 0.08}
 # Settings a style can suggest in [defaults] (applied when the style is picked
 # and on a fresh install). Panel and menu values are optional: left out, the
 # panel and menus follow Global.
@@ -160,6 +163,7 @@ class Style:
     widgets: dict[str, dict[str, Any]] = field(default_factory=dict)
     panel: dict[str, Any] = field(default_factory=dict)
     notification: dict[str, Any] = field(default_factory=dict)
+    title_bar: dict[str, Any] = field(default_factory=dict)
     extra_css: str = ""
     warnings: list[str] = field(default_factory=list)
 
@@ -195,6 +199,7 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
         errors.append("'name' is required and must be text")
     for key in data:
         if key not in ("name", "author", "description", "defaults", "edges", "widgets", "panel", "notification",
+                       "title_bar",
                        "adapt_strength", "gradient_shape", "split_step", "glass_return"):
             warnings.append(f"unknown top-level key '{key}' is ignored")
 
@@ -239,6 +244,17 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                 errors.append(f"notification.kind must be one of {', '.join(NOTIFICATION_KINDS)} (got {v!r})")
             elif k == "color" and not _is_color_ref(v, names):
                 errors.append(f"notification.color must be a palette color name or #RRGGBB (got {v!r})")
+
+    title_bar = data.get("title_bar", {})
+    if not isinstance(title_bar, dict):
+        errors.append("'title_bar' must be a table")
+    else:
+        for k, v in title_bar.items():
+            if k not in TITLE_BAR_KEYS:
+                warnings.append(f"title_bar.{k} is not a known title bar setting and is ignored "
+                                f"(known: {', '.join(TITLE_BAR_KEYS)})")
+            elif isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 1:
+                errors.append(f"title_bar.{k} must be a number from 0 (none) to 1 (white)")
 
     defaults = data.get("defaults", {})
     if not isinstance(defaults, dict):
@@ -390,6 +406,7 @@ def load(path: Path) -> Style:
         widgets=copy.deepcopy(data.get("widgets", {})),
         panel=copy.deepcopy(data.get("panel", {})),
         notification=copy.deepcopy(data.get("notification", {})),
+        title_bar=copy.deepcopy(data.get("title_bar", {})),
         extra_css=extra.read_text(encoding="utf-8") if extra.exists() else "",
         warnings=warnings,
     )
