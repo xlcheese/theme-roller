@@ -32,6 +32,7 @@ from . import __version__, paths, settings, styles
 
 FORMAT = 1                 # theme file format; a newer one on import gets a warning
 CUSTOM = "Custom"
+MAX_NAME = 40              # characters in a theme's name (longer names don't fit the lists)
 EXTENSION = ".xltheme"
 
 
@@ -170,6 +171,8 @@ def save(name: str, data: dict, overwrite: bool = False) -> Path:
     name = name.strip()
     if not name or name == CUSTOM:
         raise ThemeError("give the theme a name (not \"Custom\")")
+    if len(name) > MAX_NAME:
+        raise ThemeError(f"a theme's name can be up to {MAX_NAME} characters ({len(name)} given)")
     for n, f, builtin in list_themes():
         if n == name and builtin:
             raise ThemeError(f"'{name}' is a built-in theme: choose another name")
@@ -241,6 +244,10 @@ def import_file(src: Path) -> tuple[str, list[str]]:
                         out.parent.mkdir(parents=True, exist_ok=True)
                         out.write_bytes(z.read(n))
     name = doc["name"]
+    if len(name) > MAX_NAME:
+        notes.append(f"The theme's name was longer than {MAX_NAME} characters: shortened to "
+                     f"'{name[:MAX_NAME].rstrip()}'.")
+        name = name[:MAX_NAME].rstrip()
     existing = {n for n, _f, _b in list_themes()}
     final = name
     i = 2

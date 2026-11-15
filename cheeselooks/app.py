@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import shutil
 import threading
 from pathlib import Path
@@ -33,7 +34,7 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
-from gi.repository import Gdk, GLib, Gtk  # noqa: E402
+from gi.repository import Gdk, GLib, Gtk, Pango  # noqa: E402
 
 from . import cli, flatpak, palette as pal, panelmarker, paths, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
@@ -69,6 +70,39 @@ SECTION_NOTES = {
 }
 GATES = {"separate_colors": True, "custom": True, "follow_global": False}  # value set when a sibling changes
 HIDDEN = set(GATES) | {"flatpak_access"}
+SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
+NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
+
+
+def _prefs_file() -> Path:
+    return paths.config_dir() / "app.json"
+
+
+def _load_prefs() -> dict:
+    try:
+        return json.loads(_prefs_file().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def _save_prefs(prefs: dict) -> None:
+    try:
+        _prefs_file().parent.mkdir(parents=True, exist_ok=True)
+        _prefs_file().write_text(json.dumps(prefs, indent=2) + "\n", encoding="utf-8")
+    except OSError:
+        pass
+
+
+def _natural(name: str) -> list:
+    """A-Z key: case-insensitive, with numbers in order ("Theme 2" before "Theme 10")."""
+    return [int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name.casefold())]
+
+
+def _sorted(items: list, order: str) -> list:
+    """items: (name, modified time, ...) tuples."""
+    if order in ("new", "old"):
+        return sorted(items, key=lambda it: (it[1], _natural(it[0])), reverse=(order == "new"))
+    return sorted(items, key=lambda it: _natural(it[0]), reverse=(order == "za"))
 CHOICE_LABELS = {"button_style": titlebuttons.STYLES}   # choices shown by name instead of id
 
 
@@ -113,6 +147,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.base_cache: dict[str, dict] = {}
         self.controls: dict[tuple[str, ...], tuple[Any, str]] = {}
         self.reset_btns: dict[str, Gtk.Button] = {}
+        self.prefs = _load_prefs()          # app choices: list sort orders
+        self.custom_sub: Gtk.Label | None = None
         self.cinnamon_panel_height: int | None = None   # read once, for the Panel height slider     # tooltips name the theme (see update_buttons)
         self.syncing = False
         self.pending = 0
@@ -264,7 +300,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def _theme_rows(self, grid: Gtk.Grid, row: int) -> int:
         head = Gtk.Label(xalign=0)
         head.set_markup("<b>Theme</b>")
-        grid.attach(head, 0, row, 2, 1)
+        grid.attach(head, 0, row, 1, 1)
+        grid.attach(self._sort_combo("theme_sort", self.fill_theme_list), 1, row, 1, 1)
         self.theme_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
         self.theme_list.connect("row-selected", self.on_theme_selected)
         scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=150,
@@ -288,8 +325,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def _row(self, title: str, subtitle: str = "", tag: str = "") -> Gtk.ListBoxRow:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin=8)
         top = Gtk.Box(spacing=8)
-        name = Gtk.Label(xalign=0)
+        name = Gtk.Label(xalign=0, ellipsize=Pango.EllipsizeMode.END, max_width_chars=NAME_CHARS)
         name.set_markup(f"<b>{GLib.markup_escape_text(title)}</b>")
+        if len(title) > NAME_CHARS:
+            name.set_tooltip_text(title)
         top.pack_start(name, False, False, 0)
         if tag:
             t = Gtk.Label(label=tag)
@@ -297,31 +336,80 @@ class SettingsWindow(Gtk.ApplicationWindow):
             top.pack_start(t, False, False, 0)
         box.pack_start(top, False, False, 0)
         if subtitle:
-            sub = Gtk.Label(label=subtitle, xalign=0, wrap=True)
+            sub = Gtk.Label(label=subtitle, xalign=0, wrap=True, max_width_chars=50)
             sub.get_style_context().add_class("dim-label")
             box.pack_start(sub, False, False, 0)
         r = Gtk.ListBoxRow()
         r.add(box)
+        r.subtitle_label = box.get_children()[-1] if subtitle else None
         return r
+
+    def _sort_combo(self, key: str, refill) -> Gtk.Widget:
+        """"Sort: A-Z" dropdown for a list; the choice is remembered."""
+        box = Gtk.Box(spacing=6, halign=Gtk.Align.END)
+        box.pack_start(Gtk.Label(label="Sort:"), False, False, 0)
+        combo = Gtk.ComboBoxText()
+        for sid, label in SORTS:
+            combo.append(sid, label)
+        combo.set_active_id(self.prefs.get(key, "az"))
+
+        def changed(c: Gtk.ComboBoxText) -> None:
+            self.prefs[key] = c.get_active_id()
+            _save_prefs(self.prefs)
+            refill()
+        combo.connect("changed", changed)
+        box.pack_start(combo, False, False, 0)
+        return box
 
     def fill_theme_list(self) -> None:
         self.syncing = True
         for r in self.theme_list.get_children():
             self.theme_list.remove(r)
-        for name, _f, builtin in themes.list_themes():
+        items = [(name, f.stat().st_mtime, f, builtin) for name, f, builtin in themes.list_themes()]
+        for name, _m, _f, builtin in _sorted(items, self.prefs.get("theme_sort", "az")):
             r = self._row(name, tag="" if builtin else "Your theme")
             r.theme_name, r.builtin = name, builtin
             self.theme_list.add(r)
-        r = self._row(themes.CUSTOM, "Your latest changes")
+        r = self._row(themes.CUSTOM, self._custom_subtitle())      # always last
         r.theme_name, r.builtin = themes.CUSTOM, False
+        self.custom_sub = r.subtitle_label
         self.theme_list.add(r)
         self.theme_list.show_all()
+        for r in self.theme_list.get_children():
+            if r.theme_name == self.data["theme"]:
+                self.theme_list.select_row(r)
         self.syncing = False
 
+    def _custom_subtitle(self) -> str:
+        base = themes.based_on()
+        return f"Your latest changes, based on {base}" if base else "Your latest changes"
+
+    def refresh_custom_subtitle(self) -> None:
+        if self.custom_sub is not None:
+            self.custom_sub.set_text(self._custom_subtitle())
+
     def _style_rows(self, grid: Gtk.Grid, row: int) -> int:
+        head = Gtk.Label(xalign=0)
+        head.set_markup("<b>Style</b>")
+        grid.attach(head, 0, row, 1, 1)
+        grid.attach(self._sort_combo("style_sort", self.fill_style_list), 1, row, 1, 1)
         self.style_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
+        self.style_list.connect("row-selected", self.on_style_selected)
+        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=150,
+                                      max_content_height=320, propagate_natural_height=True)
+        scroller.get_style_context().add_class("frame")
+        scroller.add(self.style_list)
+        grid.attach(scroller, 0, row + 1, 2, 1)
+        self.fill_style_list()
+        return row + 2
+
+    def fill_style_list(self) -> None:
+        """Every style (yours first if a name is in both), sorted as chosen."""
+        self.syncing = True
+        for r in self.style_list.get_children():
+            self.style_list.remove(r)
         builtin_dir = (paths.data_dir() / "styles").resolve()
-        seen = set()
+        seen, items = set(), []
         for base in paths.style_dirs():
             if not base.is_dir():
                 continue
@@ -334,16 +422,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
                     continue
                 seen.add(st.name)
                 yours = builtin_dir not in d.resolve().parents and d.resolve().parent != builtin_dir
-                r = self._row(st.name, st.description or "", "Your style" if yours else "")
-                r.style_name = st.name
-                self.style_list.add(r)
-        self.style_list.connect("row-selected", self.on_style_selected)
-        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=150,
-                                      max_content_height=320, propagate_natural_height=True)
-        scroller.get_style_context().add_class("frame")
-        scroller.add(self.style_list)
-        grid.attach(scroller, 0, row, 2, 1)
-        return row + 1
+                items.append((st.name, (d / "style.toml").stat().st_mtime, st, yours))
+        for name, _m, st, yours in _sorted(items, self.prefs.get("style_sort", "az")):
+            r = self._row(name, st.description or "", "Your style" if yours else "")
+            r.style_name = name
+            self.style_list.add(r)
+        self.style_list.show_all()
+        for r in self.style_list.get_children():
+            if r.style_name == self.data["style"]["name"]:
+                self.style_list.select_row(r)
+        self.syncing = False
 
     def _terminal_picks(self, grid: Gtk.Grid, row: int) -> int:
         combo = Gtk.ComboBoxText()
@@ -548,6 +636,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.status.set_text(f"Preview CSS problem: {exc.message}")
         if self.data["theme"] == themes.CUSTOM:
             themes.save_custom(self.data, self.base)
+            self.refresh_custom_subtitle()
         return False
 
     # ---------------------------------------------------------------- state
@@ -714,9 +803,31 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         area.add(Gtk.Label(label="Name your theme. It uses the style "
                                  f"“{self.data['style']['name']}” and all your current settings.",
                            xalign=0, wrap=True, max_width_chars=50))
-        entry = Gtk.Entry(activates_default=True, placeholder_text="My theme")
-        area.add(entry)
+        # a name box with a dropdown of your themes (pick one to save over it),
+        # filled in with the theme you started from: Save again keeps the name
+        combo = Gtk.ComboBoxText.new_with_entry()
+        for name, _f, builtin in themes.list_themes():
+            if not builtin:
+                combo.append_text(name)
+        entry = combo.get_child()
+        entry.set_activates_default(True)
+        entry.set_max_length(themes.MAX_NAME)
+        entry.set_placeholder_text("My theme")
+        start = self.base if self.data["theme"] == themes.CUSTOM else self.data["theme"]
+        try:
+            _f, builtin = themes.find(start)
+        except themes.ThemeError:
+            builtin = True
+        suggested = start if not builtin else f"{start} copy"
+        entry.set_text(suggested[:themes.MAX_NAME])
+        area.add(combo)
+        hint = Gtk.Label(label=f"Up to {themes.MAX_NAME} characters. Built-in themes can't be "
+                               "replaced; your own can.", xalign=0, wrap=True, max_width_chars=50)
+        hint.get_style_context().add_class("dim-label")
+        area.add(hint)
         dialog.show_all()
+        entry.grab_focus()
+        entry.select_region(0, -1)           # type to replace, or press Enter to keep the name
         while dialog.run() == Gtk.ResponseType.OK:
             name = entry.get_text().strip()
             try:

@@ -200,6 +200,9 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
 
     if not isinstance(data.get("name"), str) or not data["name"].strip():
         errors.append("'name' is required and must be text")
+    elif len(data["name"]) > 40:
+        warnings.append(f"'name' is {len(data['name'])} characters; up to 40 fit the settings app's "
+                        "Style list (longer names are cut off there)")
     for key in data:
         if key not in ("name", "author", "description", "defaults", "edges", "widgets", "panel", "notification",
                        "title_bar",
