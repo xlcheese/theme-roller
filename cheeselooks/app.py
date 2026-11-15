@@ -56,7 +56,7 @@ LABELS = {
     "title_bar": "Title bar", "title_text": "Title text", "border": "Border",
     "title_bar_height": "Title bar height", "border_width": "Border width",
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
-    "button_style": "Button style", "button_roundness": "Button roundness",
+    "button_style": "Button style", "button_roundness": "Button roundness", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
 }
@@ -254,6 +254,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
         return self._page(grid)
 
     def _control(self, path: tuple[str, ...], kind: str, extra: Any) -> Gtk.Widget:
+        if path[-1] == "button_glyphs":
+            return self._glyph_picker(path, extra)
         if kind in ("color", "color?"):
             box = Gtk.Box(spacing=10)
             button = Gtk.ColorButton(use_alpha=False, show_editor=True)   # straight to the editor
@@ -296,6 +298,44 @@ class SettingsWindow(Gtk.ApplicationWindow):
         combo.connect("changed", lambda c: c.get_active_id() and self.changed(path, c.get_active_id()))
         self.controls[path] = (combo, kind)
         return combo
+
+    def _glyph_picker(self, path: tuple[str, ...], sets: tuple[str, ...]) -> Gtk.Widget:
+        """Joined buttons, each showing a glyph set's minimize, maximize and close
+        glyphs (the icon theme's own for Icon Theme); the name is the tooltip."""
+        box = Gtk.Box(halign=Gtk.Align.START)
+        box.get_style_context().add_class("linked")
+        buttons, self.glyph_images = {}, {}
+        for gid in sets:
+            b = Gtk.ToggleButton()
+            b.set_tooltip_text(titlebuttons.GLYPH_SET_NAMES[gid])
+            row = Gtk.Box(spacing=3)
+            imgs = []
+            for fn in ("minimize", "maximize", "close"):
+                img = (Gtk.Image.new_from_icon_name(titlebuttons.ICON_NAMES[fn], Gtk.IconSize.MENU)
+                       if gid == "icons" else Gtk.Image())
+                row.pack_start(img, False, False, 0)
+                imgs.append((fn, img))
+            self.glyph_images[gid] = imgs
+            b.add(row)
+            b.connect("toggled", lambda btn, g=gid: btn.get_active() and self.changed(path, g))
+            box.pack_start(b, False, False, 0)
+            buttons[gid] = b
+        self.controls[path] = (buttons, "glyphs")
+        return box
+
+    def _draw_glyph_images(self, color: str) -> None:
+        """Our glyph sets in the text colour, for the picker (redrawn when it changes)."""
+        folder = paths.HOME / ".cache" / "xl-cheeselooks" / "glyphs"
+        folder.mkdir(parents=True, exist_ok=True)
+        for gid, imgs in getattr(self, "glyph_images", {}).items():
+            if gid == "icons":
+                continue
+            for fn, img in imgs:
+                f = folder / f"{gid}-{fn}-{color.lstrip('#')}.svg"
+                if not f.exists():
+                    f.write_text(titlebuttons.glyph_svg(titlebuttons.GLYPH_SETS[gid][fn], color, 16),
+                                 encoding="utf-8")
+                img.set_from_file(str(f))
 
     def _theme_rows(self, grid: Gtk.Grid, row: int) -> int:
         head = Gtk.Label(xalign=0)
@@ -706,6 +746,12 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                     widget.set_value(self._int_default(path) if value is None else value)
                 elif kind == "bool":
                     widget.set_active(value)
+                elif kind == "glyphs":
+                    wb = self.data["window_borders"]
+                    shown = titlebuttons.glyph_set(wb["button_style"], value)
+                    for gid, b in widget.items():
+                        b.set_active(gid == shown)
+                    self._draw_glyph_images(self.data["global"]["text"])
                 elif kind == "inline":
                     for choice, b in widget.items():
                         b.set_active(choice == value)

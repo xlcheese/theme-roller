@@ -18,8 +18,8 @@ draw behind the glyph and in what colour the glyph is. Faces are "none", a
     dots                coloured dots; the glyph shows on hover
     gargantuan          wide, full-height buttons flush with the edge
     gargantuan-circles  the same size, with a circle on hover
-    arrows              circles with chevron glyphs
-    arrows-flat         chevrons, a circle only on hover
+    unpretentious       plain circles (squares with less Button roundness)
+    unpretentious-flat  the same, a circle only on hover
     claude              soft squircle hover with a small accent bar
 """
 
@@ -39,17 +39,18 @@ STYLES = {
     "dots": "Dots",
     "gargantuan": "Gargantuan",
     "gargantuan-circles": "Less Gargantuan",
-    "arrows": "Arrows",
-    "arrows-flat": "Arrows Flat",
+    "unpretentious": "Unpretentious",
+    "unpretentious-flat": "Unpretentious Flat",
     "claude": "Claude",
 }
-OLD_NAMES = {"theme": "flat", "wide": "gargantuan", "circles": "arrows"}
+OLD_NAMES = {"theme": "flat", "wide": "gargantuan", "circles": "unpretentious",
+             "arrows": "unpretentious", "arrows-flat": "unpretentious-flat"}
 
 # Each style's own roundness, as a percentage of fully round (the Button
 # roundness slider shows it until you move it). None: the theme's Roundness.
 DEFAULT_ROUNDNESS = {
     "flat": None, "drawn": None, "linked": None, "classic": 25, "dots": 100, "gargantuan": 0,
-    "gargantuan-circles": 100, "arrows": 100, "arrows-flat": 100, "claude": 60,
+    "gargantuan-circles": 100, "unpretentious": 100, "unpretentious-flat": 100, "claude": 60,
 }
 
 
@@ -68,8 +69,12 @@ GTK3_HEADER_PAD = 7   # Mint-Y's headerbar side padding (GTK 3)
 GTK4_HEADER_PAD = 6   # and GTK 4 / libadwaita
 GTK3_BUTTON_SPACING = 6   # GtkHeaderBar's spacing between its window buttons
 
-# Our own glyphs (16px box, drawn as 1.6px strokes), for styles that don't
-# use the theme's: arrows use chevrons, dots use small marks.
+# Glyphs. Every set is ours (drawn as SVG at the size each style uses), so
+# apps, window borders and the settings app's picker always match, except
+# "icons", which takes the icon theme's (GTK draws those itself; window borders
+# get copies from the icon theme at Apply, falling back to "theme").
+#
+#   stroked glyphs: a path on a 16px box, 1.6px round strokes
 GLYPHS = {
     "chevron-down": "M4 6.2 8 10.2 12 6.2",
     "chevron-up": "M4 9.8 8 5.8 12 9.8",
@@ -77,21 +82,56 @@ GLYPHS = {
     "x": "M4.6 4.6 11.4 11.4M11.4 4.6 4.6 11.4",
     "minus": "M3.8 8H12.2",
     "plus": "M8 3.8V12.2M3.8 8H12.2",
-    # gargantuan: thin 1px lines on a 24px box (Windows-like), crisp at 100% scale
-    "thin-x": ("M7 7 17 17M17 7 7 17", 24, 1),
-    "thin-min": ("M6.5 12.5H17.5", 24, 1),
-    "thin-max": ("M7.5 7.5H16.5V16.5H7.5Z", 24, 1),
-    "thin-restore": ("M7.5 9.5H14.5V16.5H7.5ZM9.5 9.5V7.5H16.5V14.5H14.5", 24, 1),
 }
-# glyph per window function, for styles with their own glyphs
-CUSTOM_GLYPHS = {
-    "arrows": {"close": "x", "minimize": "chevron-down", "maximize": "chevron-up", "unmaximize": "diamond"},
-    "dots": {"close": "x", "minimize": "minus", "maximize": "plus", "unmaximize": "plus"},
+#   filled glyphs on a 16px box: Mint-Y's window button artwork (GPL-3+,
+#   Linux Mint), redrawn here as our own "theme" set
+FILLED = {
+    "mint-close": "M4.795 3.912l-.883.883.147.146L7.117 8 4.06 11.059l-.147.146.883.883.146-.147L8 8.883"
+                  "l3.059 3.058.146.147.883-.883-.147-.146L8.883 8l3.058-3.059.147-.146-.883-.883-.146.147"
+                  "L8 7.117 4.941 4.06z",
+    "mint-max": "M4 4v8h8V4zm1 1h6v6H5z",
+    "mint-min": "M4 10v1h8v-1z",
+    "mint-restore": "m3 5v8h8V5Zm1 1h6v6H4ZM5 3v1h7v7h1V3Z",
 }
-CUSTOM_GLYPHS["arrows-flat"] = CUSTOM_GLYPHS["arrows"]
-CUSTOM_GLYPHS["gargantuan"] = {"close": "thin-x", "minimize": "thin-min", "maximize": "thin-max",
-                               "unmaximize": "thin-restore"}
-CUSTOM_GLYPHS["gargantuan-circles"] = CUSTOM_GLYPHS["gargantuan"]
+GLYPH_SETS = {
+    "theme": {"close": "mint-close", "minimize": "mint-min", "maximize": "mint-max", "unmaximize": "mint-restore"},
+    "thin": {"close": "thin-x", "minimize": "thin-min", "maximize": "thin-max", "unmaximize": "thin-restore"},
+    "chevrons": {"close": "x", "minimize": "chevron-down", "maximize": "chevron-up", "unmaximize": "diamond"},
+    "marks": {"close": "x", "minimize": "minus", "maximize": "plus", "unmaximize": "plus"},
+}
+GLYPH_SET_NAMES = {"theme": "Theme", "thin": "Thin", "chevrons": "Chevrons", "marks": "Marks",
+                   "icons": "Icon Theme"}
+# each style's own set (the picker shows it until you choose another)
+STYLE_GLYPHS = {"dots": "marks", "gargantuan": "thin", "gargantuan-circles": "thin",
+                "unpretentious": "chevrons", "unpretentious-flat": "chevrons"}
+
+
+def glyph_set(style: str, chosen: str | None) -> str:
+    """The glyph set in use: yours, else the style's own."""
+    return chosen or STYLE_GLYPHS.get(style, "theme")
+
+
+def _glyphs(t: dict[str, str], style: str) -> dict[str, str]:
+    """function -> glyph name for our own sets; {} for the icon theme's."""
+    return GLYPH_SETS.get(glyph_set(style, t.get("wb.button_glyphs") or None), {})
+
+
+def _thin(name: str, size: int) -> str:
+    """Thin glyphs: 1px lines drawn for this size, on whole pixels (crisp)."""
+    p = size
+    if name == "thin-min":
+        a, m = round(p * 0.27) + 0.5, p // 2 + 0.5
+        return f"M{a:g} {m:g}H{p - a:g}"
+    if name == "thin-max":
+        c = round(p * 0.31) + 0.5
+        return f"M{c:g} {c:g}H{p - c:g}V{p - c:g}H{c:g}Z"
+    if name == "thin-restore":
+        c, o = round(p * 0.31) + 0.5, max(1, round(p / 12))
+        return (f"M{c:g} {c + o:g}H{p - c - o:g}V{p - c:g}H{c:g}Z"
+                f"M{c + o:g} {c + o:g}V{c:g}H{p - c:g}V{p - c - o:g}H{p - c - o:g}")
+    c = round(p * 0.29)
+    return f"M{c} {c} {p - c} {p - c}M{p - c} {c} {c} {p - c}"
+
 
 DOTS = {"close": ("#EF6A5F", "#E2554B"), "minimize": ("#F2C04F", "#E6AE33"),
         "maximize": ("#6BC46A", "#55B054")}
@@ -158,7 +198,7 @@ def geometry(style: str, t: dict[str, str]) -> Geometry:
         # smaller than the 16px icon inside it (a smaller face put the glyph off centre)
         d = 16
         return centred(d + 8, d + 8, d, d, 0, 12)
-    if style in ("arrows", "arrows-flat"):
+    if style in ("unpretentious", "unpretentious-flat"):
         d = _even(ctl)
         return centred(d + max(6, round(d * 0.3)), d + 6, d, d, 0, 16)
     if style == "claude":
@@ -248,8 +288,8 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
             cp = circle(acc_press, acc_fg, size=d)
         put(KINDS, rest=none(text), hover=hover, pressed=pressed, backdrop=none(utext))
         put(["close"], hover=ch, pressed=cp)
-    elif style in ("arrows", "arrows-flat"):
-        flat = style == "arrows-flat"
+    elif style in ("unpretentious", "unpretentious-flat"):
+        flat = style == "unpretentious-flat"
         rest = none(text) if flat else circle(pal.mix(title, text, 0.10), text)
         backdrop = none(utext) if flat else circle(pal.mix(unf, utext, 0.08), utext)
         put(KINDS, rest=rest, hover=circle(pal.mix(title, text, 0.18), text),
@@ -291,13 +331,60 @@ def _split_color(c: str) -> tuple[str, float]:
     return c, 1.0
 
 
-def glyph_svg(name: str, color: str) -> str:
+def glyph_svg(name: str, color: str, size: int = 16) -> str:
+    """A glyph in one colour. Filled and stroked glyphs are drawn on a 16px box
+    (scaled to the size by whoever shows them); thin ones at the size itself."""
     c, a = _split_color(color)
-    path, box, width = GLYPHS[name] if isinstance(GLYPHS[name], tuple) else (GLYPHS[name], 16, 1.6)
-    cap = "square" if box == 24 else "round"
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{box}" height="{box}" viewBox="0 0 {box} {box}">'
-            f'<path d="{path}" fill="none" stroke="{c}" stroke-opacity="{a:g}" stroke-width="{width:g}" '
-            f'stroke-linecap="{cap}" stroke-linejoin="miter"/></svg>')
+    if name in FILLED:
+        return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+                f'<path d="{FILLED[name]}" fill="{c}" fill-opacity="{a:g}"/></svg>')
+    if name.startswith("thin-"):
+        return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
+                f'viewBox="0 0 {size} {size}"><path d="{_thin(name, size)}" fill="none" stroke="{c}" '
+                f'stroke-opacity="{a:g}" stroke-width="1" stroke-linecap="square" stroke-linejoin="miter"/></svg>')
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+            f'<path d="{GLYPHS[name]}" fill="none" stroke="{c}" stroke-opacity="{a:g}" stroke-width="1.6" '
+            'stroke-linecap="round" stroke-linejoin="miter"/></svg>')
+
+
+ICON_NAMES = {"close": "window-close-symbolic", "minimize": "window-minimize-symbolic",
+              "maximize": "window-maximize-symbolic", "unmaximize": "window-restore-symbolic"}
+
+
+def icon_theme_glyph(fn: str, color: str) -> str | None:
+    """The icon theme's glyph for a window function as an SVG in one colour, for
+    Muffin's window borders (GTK draws icon theme glyphs itself); None if the
+    icon theme (or one it inherits) has no SVG for it."""
+    from . import reload       # gsettings: which icon theme
+    name = ICON_NAMES.get(fn)
+    theme = (reload.get("org.cinnamon.desktop.interface", "icon-theme") if reload.available() else None)
+    if not name or not theme:
+        return None
+    from pathlib import Path
+    roots = [Path.home() / ".icons", Path.home() / ".local/share/icons", Path("/usr/share/icons")]
+    seen, queue = set(), [theme]
+    while queue:
+        th = queue.pop(0)
+        if th in seen:
+            continue
+        seen.add(th)
+        for root in roots:
+            d = root / th
+            if not d.is_dir():
+                continue
+            hits = sorted(d.rglob(f"{name}.svg"), key=lambda f: ("scalable" not in str(f), "16" not in str(f)))
+            if hits:
+                svg = hits[0].read_text(encoding="utf-8", errors="replace")
+                c, _a = _split_color(color)
+                svg = re.sub(r"fill:\s*#[0-9a-fA-F]{3,6}", f"fill:{c}", svg)
+                svg = re.sub(r'fill="#[0-9a-fA-F]{3,6}"', f'fill="{c}"', svg)
+                return re.sub(r"<svg\b", f'<svg fill="{c}"', svg, count=1)
+            index = d / "index.theme"
+            if index.exists():
+                m = re.search(r"^Inherits\s*=\s*(.+)$", index.read_text(errors="replace"), re.M)
+                if m:
+                    queue += [x.strip() for x in m.group(1).split(",") if x.strip()]
+    return None
 
 
 def _shape(t: dict[str, str]) -> tuple[str, float, float]:
@@ -397,7 +484,8 @@ def metacity(style: str, t: dict[str, str]) -> tuple[dict[str, str], dict[str, s
     fc = faces(style, t)
     shape = _shape(t)
     corner = outer_corner(style, t["wb.button_layout"], t)
-    glyphs = CUSTOM_GLYPHS.get(style, {})
+    glyphs = _glyphs(t, style)
+    icons = glyph_set(style, t.get("wb.button_glyphs") or None) == "icons"
     files: dict[str, str] = {}
     tok: dict[str, str] = {}
 
@@ -416,13 +504,23 @@ def metacity(style: str, t: dict[str, str]) -> tuple[dict[str, str], dict[str, s
     def glyph_op(fn: str, color: str | None) -> str:
         if color is None:
             return ""
+        s = g.glyph or 16
         if fn in glyphs:
             c, _a = _split_color(color)
-            name = _name(glyphs[fn], c)
-            files[name] = glyph_svg(glyphs[fn], color)
-            s = g.glyph or 16
+            name = _name(glyphs[fn], c, str(s))
+            files[name] = glyph_svg(glyphs[fn], color, s)
             return (f'\t<image filename="{name}" x="(width-{s})/2" y="(height-{s})/2" '
                     f'width="{s}" height="{s}"/>\n')
+        if icons:        # the icon theme's glyph, copied in the right colour
+            svg = icon_theme_glyph(fn, color)
+            if svg is None and fn in GLYPH_SETS["theme"]:
+                svg = glyph_svg(GLYPH_SETS["theme"][fn], color, s)      # none there: ours
+            if svg is not None:
+                c, _a = _split_color(color)
+                name = _name("icon", fn, c, str(s))
+                files[name] = svg
+                return (f'\t<image filename="{name}" x="(width-{s})/2" y="(height-{s})/2" '
+                        f'width="{s}" height="{s}"/>\n')
         if g.glyph:      # the theme's glyph, scaled (gargantuan)
             s = g.glyph
             return (f'\t<image filename="{METACITY_ICONS[fn]}-icon.svg" colorize="{color}" '
@@ -544,7 +642,7 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
     g = geometry(style, t)
     fc = faces(style, t)
     shape = _shape(t)
-    glyphs = CUSTOM_GLYPHS.get(style, {})
+    glyphs = _glyphs(t, style)
     side, cr = outer_corner(style, t["wb.button_layout"], t)
     files: dict[str, str] = {}
     pad = GTK4_HEADER_PAD if gtk4 else GTK3_HEADER_PAD
@@ -608,6 +706,11 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
                    # it fades (with its own transition it lagged behind the face)
                    f"  transition: none; }}")
 
+    if not glyphs and g.glyph and g.glyph != 16:
+        # the icon theme's glyphs, at this style's glyph size
+        rule = f"-gtk-icon-size: {g.glyph}px;" if gtk4 else f"-gtk-icon-transform: scale({g.glyph / 16:g});"
+        out.append(f"{sel('', child)} {{ {rule} }}")
+
     # glyph offsets in whole pixels (a glyph on a half pixel is blurry)
     if g.inner:
         box_w, box_h = g.fw - 2, g.fh - 2
@@ -634,8 +737,8 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
         if glyph_slot:
             if glyph_name and face.glyph:
                 c, _a = _split_color(face.glyph)
-                name = _name(glyph_name, c)
-                files[name] = glyph_svg(glyph_name, face.glyph)
+                name = _name(glyph_name, c, str(gs))
+                files[name] = glyph_svg(glyph_name, face.glyph, gs)
                 layers.append(f'url("{assets}{name}")')
             else:
                 layers.append(clear)

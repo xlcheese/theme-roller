@@ -241,6 +241,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["wb.button_w"] = str(round(btn_h * 1.12))
     t["wb.button_layout"] = LAYOUTS[wb["button_layout"]]
     t["wb.button_style"] = wb["button_style"]
+    t["wb.button_glyphs"] = wb["button_glyphs"] or ""      # "" = the style's own set
     t["wb.button_roundness"] = str(titlebuttons.roundness(wb["button_style"], wb["button_roundness"],
                                                           g["roundness"]))
     t.update(metacity.tokens(t))

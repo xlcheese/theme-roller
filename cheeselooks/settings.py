@@ -37,6 +37,7 @@ DEFAULTS: dict[str, Any] = {
         "title_bar_height": 44, "border_width": 1, "title_gradient": 30,
         "button_layout": "right", "button_style": "flat",
         "button_roundness": None,   # None: the button style's own roundness
+        "button_glyphs": None,      # None: the button style's own glyph set
     },
     "terminal": {"separate_colors": False, "bg": None, "text": None},
     "details": {
@@ -84,6 +85,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("window_borders", "border_width"), "int", (0, 6)),
     (("window_borders", "title_gradient"), "int", (0, 100)),
     (("window_borders", "button_layout"), "choice", ("left", "right")),
+    (("window_borders", "button_glyphs"), "choice?", tuple(titlebuttons.GLYPH_SET_NAMES)),
     (("window_borders", "button_style"), "choice", tuple(titlebuttons.STYLES)),
     (("window_borders", "button_roundness"), "int?", (0, 100)),
     (("terminal", "separate_colors"), "bool", None),
@@ -164,7 +166,9 @@ def validate(data: dict) -> list[str]:
         elif kind == "bool":
             if not isinstance(value, bool):
                 problems.append(f"{name} must be true or false (got {value!r})")
-        elif kind == "choice":
+        elif kind in ("choice", "choice?"):
+            if value is None and kind == "choice?":
+                continue
             if value not in extra:
                 problems.append(f"{name} must be one of {', '.join(extra)} (got {value!r})")
     if not isinstance(data.get("theme"), str):

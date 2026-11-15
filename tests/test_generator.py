@@ -677,6 +677,31 @@ class RenderAndInstallTests(unittest.TestCase):
                             for url in _re.findall(r'url\("(assets/tb-[^"]+)"\)', css.read_text()):
                                 self.assertTrue((theme / folder / url).exists(), (name, folder, url))
 
+    def test_glyph_sets(self):
+        import re as _re
+        import xml.dom.minidom
+        from cheeselooks import titlebuttons
+        st = styles.load(DEFAULT_STYLE)
+        for style in ("drawn", "dots", "gargantuan", "classic"):
+            for glyphs in list(titlebuttons.GLYPH_SET_NAMES) + [None]:
+                s = defaults()
+                s["window_borders"].update(button_style=style, button_glyphs=glyphs)
+                with tempfile.TemporaryDirectory() as tmp:
+                    theme = Path(tmp) / "xl-Cheeselooks"
+                    install.install(REPO / "templates", tokens.build(s, st), theme, Path(tmp) / "good")
+                    meta = theme / "metacity-1"
+                    doc = xml.dom.minidom.parseString((meta / "metacity-theme-3.xml").read_text())
+                    for img in doc.getElementsByTagName("image"):
+                        self.assertTrue((meta / img.getAttribute("filename")).exists(), (style, glyphs))
+                    css = (theme / "gtk-3.0" / "xl.css").read_text()
+                    for url in _re.findall(r'url\("(assets/tb-[^"]+)"\)', css):
+                        self.assertTrue((theme / "gtk-3.0" / url).exists(), (style, glyphs, url))
+        self.assertEqual(titlebuttons.glyph_set("dots", None), "marks")       # the style's own
+        self.assertEqual(titlebuttons.glyph_set("dots", "thin"), "thin")      # yours wins
+        s = defaults()
+        s["window_borders"]["button_style"] = "arrows"                        # renamed
+        self.assertEqual(settings.from_dict(s)["window_borders"]["button_style"], "unpretentious")
+
     def test_old_button_style_names(self):
         s = defaults()
         s["window_borders"]["button_style"] = "theme"
