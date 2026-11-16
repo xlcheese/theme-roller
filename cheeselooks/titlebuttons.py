@@ -25,6 +25,7 @@ draw behind the glyph and in what colour the glyph is. Faces are "none", a
 
 from __future__ import annotations
 
+import hashlib
 import re
 from dataclasses import dataclass
 
@@ -408,6 +409,76 @@ def _shape(t: dict[str, str]) -> tuple[str, float, float]:
             float(t.get("style.glass_return", 0.4)))
 
 
+def _shadow_layers(shadow: str) -> list[tuple[bool, float, float, float, float, str]]:
+    """A CSS box-shadow list as (inset, x, y, blur, spread, colour) layers."""
+    parts, depth, cur = [], 0, ""
+    for ch in shadow:
+        depth += ch == "("
+        depth -= ch == ")"
+        if ch == "," and depth == 0:
+            parts.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    parts.append(cur.strip())
+    out = []
+    for layer in parts:
+        if not layer or layer == "none":
+            continue
+        inset = layer.startswith("inset ")
+        m = re.match(r"(?:inset )?(\S+) (\S+)(?: (\S+px|0))?(?: (\S+px|0))? (.+)$", layer)
+        if not m:
+            continue
+        num = [float(v[:-2]) if v and v.endswith("px") else float(v or 0) for v in m.groups()[:4]]
+        out.append((inset, *num, m.group(5)))
+    return out
+
+
+def shadowed_face_svg(face: Face, w: int, h: int, shadow: str,
+                      shape: tuple[str, float, float] = ("smooth", 0.4, 0.4)) -> tuple[str, int]:
+    """The face with its box-shadow layers drawn in (recess, drop shadow, inner
+    highlights), for Muffin, which draws a face only as a background image.
+    Returns the SVG and the padding round the face it needs for the shadows."""
+    layers = _shadow_layers(shadow) if face.shape == "rect" else []
+    pad = int(max([abs(x) + abs(y) + b + max(sp, 0) for ins, x, y, b, sp, _c in layers if not ins] or [0]) + 0.999)
+    W, H, r = w + 2 * pad, h + 2 * pad, face.radius
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">', "<defs>"]
+    body, n = [], 0
+
+    def blur_attr(b: float) -> str:
+        nonlocal n
+        if not b:
+            return ""
+        n += 1
+        parts.append(f'<filter id="b{n}" x="-50%" y="-50%" width="200%" height="200%">'
+                     f'<feGaussianBlur stdDeviation="{b / 2:g}"/></filter>')
+        return f' filter="url(#b{n})"'
+
+    def rect(x: float, y: float, rw: float, rh: float, rr: float) -> str:
+        return (f'x="{x:g}" y="{y:g}" width="{max(rw, 0):g}" height="{max(rh, 0):g}" '
+                f'rx="{max(rr, 0):g}"')
+    # CSS paints the first shadow on top: draw them last to first
+    outer = [l for l in layers if not l[0]][::-1]
+    inner = [l for l in layers if l[0]][::-1]
+    for _i, x, y, b, sp, c in outer:
+        cc, a = _split_color(c)
+        body.append(f'<rect {rect(pad + x - sp, pad + y - sp, w + 2 * sp, h + 2 * sp, r + sp)} '
+                    f'fill="{cc}" fill-opacity="{a:g}"{blur_attr(b)}/>')
+    body.append(f'<svg x="{pad}" y="{pad}" width="{w}" height="{h}">'
+                + face_svg(face, w, h, (None, 0), shape).split(">", 1)[1].rsplit("</svg>", 1)[0] + "</svg>")
+    if inner:
+        bw = 1 if face.border else 0
+        parts.append(f'<clipPath id="in"><rect {rect(pad + bw, pad + bw, w - 2 * bw, h - 2 * bw, r - bw)}/></clipPath>')
+        for _i, x, y, b, sp, c in inner:
+            cc, a = _split_color(c)
+            hole = (f"M{pad + bw + x + sp:g} {pad + bw + y + sp:g}h{w - 2 * bw - 2 * sp:g}"
+                    f"v{h - 2 * bw - 2 * sp:g}h{-(w - 2 * bw - 2 * sp):g}Z")
+            body.append(f'<path clip-path="url(#in)" fill-rule="evenodd" fill="{cc}" fill-opacity="{a:g}"'
+                        f'{blur_attr(b)} d="M-50 -50H{W + 50}V{H + 50}H-50Z{hole}"/>')
+    parts.append("</defs>")
+    return "".join(parts + body) + "</svg>", pad
+
+
 def _rounded_rect(x0: float, y0: float, x1: float, y1: float, radii: tuple[float, float, float, float]) -> str:
     """An SVG path for a rectangle with its own radius per corner (tl, tr, br, bl)."""
     tl, tr, br, bl = radii
@@ -771,13 +842,15 @@ def _muffin_css(style: str, t: dict[str, str], g: Geometry, fc: dict, glyphs: di
             sizes.append(f"{gs}px {gs}px")
             pos.append(f"{(g.w - gs) // 2}px {(h - gs) // 2}px")
         if face.shape != "none":
+            svg, pad = shadowed_face_svg(face, g.fw, g.fh, face.shadow3, shape)
             name = _name("mface", face.shape, face.top, face.bottom,
                          face.border and _split_color(face.border)[0], str(face.radius), str(g.fw),
-                         str(g.fh), *(str(v) for v in shape))
-            files[name] = face_svg(face, g.fw, g.fh, (None, 0), shape)
+                         str(g.fh), *(str(v) for v in shape),
+                         hashlib.sha1(face.shadow3.encode()).hexdigest()[:8])
+            files[name] = svg
             imgs.append(f'url("assets/{name}")')
-            sizes.append(f"{g.fw}px {g.fh}px")
-            pos.append(f"{(g.w - g.fw) // 2}px {(h - g.fh) // 2}px")
+            sizes.append(f"{g.fw + 2 * pad}px {g.fh + 2 * pad}px")
+            pos.append(f"{(g.w - g.fw) // 2 - pad}px {(h - g.fh) // 2 - pad}px")
         if not imgs:
             return ["background-image: none;"]
         return [f"background-image: {', '.join(imgs)};", f"background-size: {', '.join(sizes)};",

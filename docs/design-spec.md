@@ -626,7 +626,7 @@ So the GTK 3 title-button CSS has a Muffin block (`.ssd
 headerbar.default-decoration`, in `titlebuttons._muffin_css`): title bar height
 and side padding, button size, a margin that takes the 6px back, and, for
 styles whose face is on the image node in apps (Classic, Dots, Unpretentious,
-Claude, Less Gargantuan), the face drawn on the button as an SVG. Linked gets
+Claude, Less Gargantuan), the face drawn on the button as an SVG, with the face's box-shadow layers (recess, drop shadow, inner highlights) drawn into it (`shadowed_face_svg`). Linked gets
 its corners per function (no siblings in Muffin's path). `metacity-1/` is still
 generated for Metacity and Marco. `tools/muffin-preview.py THEME OUT.png` draws
 a title bar the way Muffin does (rest, hover, pressed, unfocused).
