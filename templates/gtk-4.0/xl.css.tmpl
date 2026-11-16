@@ -503,3 +503,8 @@ row.activatable:hover:not(:selected), row.activatable.has-open-popup:not(:select
 /* list text color: set here, or another theme's (e.g. black from a light
    system theme in the settings app's preview) shows through */
 list { color: {{text}}; }
+
+/* List column headers: flat strips, no drop shadow */
+columnview > header > button, treeview.view > header > button,
+columnview > header > button:hover, treeview.view > header > button:hover {
+  box-shadow: none; }

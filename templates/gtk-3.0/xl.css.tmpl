@@ -232,6 +232,12 @@ headerbar .linked:not(.vertical).path-bar > button:active + button,
 .nemo-window .linked.path-bar > button:backdrop:checked:not(:last-child) {
   box-shadow: {{w.linked.pressed_seam_shadow}}; }
 
+/* List column headers are buttons, but flat strips: no drop shadow (each
+   header's fell on the next one) */
+treeview.view header button, treeview.view header button:hover,
+treeview.view header button:active, treeview.view header button:checked {
+  box-shadow: none; }
+
 /* Buttons on colored backgrounds (info bars, selected rows, selection mode):
    keep the see-through look so their light text stays readable */
 infobar.info button, infobar.question button, infobar.warning button, infobar.error button,
