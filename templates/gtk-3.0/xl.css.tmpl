@@ -117,7 +117,8 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
 
 /* Nemo's path bar draws nothing of its own, so the group's outer layers
    (recess, drop shadow) go on its buttons by position, as on Linked title
-   buttons: the outer ends on the first and last, a share under each. */
+   buttons: the outer ends on the first and last, a share under each. Nemo
+   paints its folder buttons right to left, so their pieces lean left. */
 .nemo-window .path-bar { box-shadow: none; }
 .nemo-window .path-bar button { box-shadow: {{w.linked.middle_shadow}}; }
 .nemo-window .path-bar button:first-child { box-shadow: {{w.linked.first_shadow}}; }
@@ -133,6 +134,10 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
   box-shadow: {{w.linked.pressed_first_shadow}}; }
 .nemo-window .path-bar button:last-child:checked, .nemo-window .path-bar button:last-child:active {
   box-shadow: {{w.linked.pressed_last_shadow}}; }
+/* its ▶ scroll button is painted after everything else */
+.nemo-window .path-bar button.slider-button:last-child { box-shadow: {{w.linked.ltr_last_shadow}}; }
+.nemo-window .path-bar button.slider-button:last-child:hover { box-shadow: {{w.linked.hover_ltr_last_shadow}}; }
+.nemo-window .path-bar button.slider-button:last-child:active { box-shadow: {{w.linked.pressed_ltr_last_shadow}}; }
 
 /* Joined buttons share the edge between them (Mint-Y drops each button's right
    border; vertical groups drop the bottom one). When a button is hovered or

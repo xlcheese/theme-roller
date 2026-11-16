@@ -171,7 +171,10 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
         inset = t[f"w.linked.{state}inset_shadow"]
         both = ", ".join(x for x in (inset, t["w.linked.outer"]) if x and x != "none") or "none"
         for pos in ("first", "middle", "last", "only"):
-            t[f"w.linked.{state}{pos}_shadow"] = titlebuttons._group_shadow(both, pos)
+            # Nemo paints its folder buttons right to left (then its ◀ and ▶
+            # scroll buttons, ▶ last of all: it takes the left-to-right end)
+            t[f"w.linked.{state}{pos}_shadow"] = titlebuttons._group_shadow(both, pos, rtl_paint=True)
+        t[f"w.linked.{state}ltr_last_shadow"] = titlebuttons._group_shadow(both, "last")
     t["style.extra_css"] = style.extra_css
     _add_face_gradients(t, style)
     t["tabs.css"] = tabs.css(t)

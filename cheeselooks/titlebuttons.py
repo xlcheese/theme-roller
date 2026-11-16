@@ -707,7 +707,7 @@ def _inset_only(shadow: str) -> str:
     return ", ".join(inset) if inset else "none"
 
 
-def _group_shadow(shadow: str, pos: str) -> str:
+def _group_shadow(shadow: str, pos: str, rtl_paint: bool = False) -> str:
     """A Linked button's share of the group's outer layers (pos: first, middle,
     last, only), kept with its inner ones. The recess becomes strips: the dark
     one along the top of every button (and the left of the first), the light
@@ -763,6 +763,10 @@ def _group_shadow(shadow: str, pos: str) -> str:
             # end put shadow above the group).
             b = blur
             dx, ds = {"first": (b, 0), "middle": (b, 0), "last": (b / 2, -b / 2)}[pos]
+            if rtl_paint:
+                # painted right to left (GTK's path bar keeps its buttons
+                # deepest first): mirrored, shifted left, the first one shrunk
+                dx, ds = {"first": (-b / 2, -b / 2), "middle": (-b, 0), "last": (-b, 0)}[pos]
             out.append(f"{px(x + dx)} {px(y - ds)} {px(blur)} {px(spread + ds)} {color}")
     return ", ".join(out) if out else "none"
 
