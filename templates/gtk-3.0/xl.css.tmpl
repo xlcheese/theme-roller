@@ -59,6 +59,18 @@ button:backdrop, button:backdrop:hover {
   box-shadow: {{w.button.inset_shadow}}; }
 button:backdrop:active, button:backdrop:checked {
   box-shadow: {{w.button.pressed_inset_shadow}}; }
+/* ...and flat buttons (toolbars, header bars) stay flat */
+button.flat:backdrop, button.sidebar-button:backdrop,
+.primary-toolbar button:backdrop, headerbar button:backdrop, toolbar button:backdrop {
+  box-shadow: {{w.toolbar_button.inset_shadow}}; }
+button.flat:backdrop:hover, button.sidebar-button:backdrop:hover,
+.primary-toolbar button:backdrop:hover, headerbar button:backdrop:hover, toolbar button:backdrop:hover {
+  box-shadow: {{w.toolbar_button.hover_inset_shadow}}; }
+button.flat:backdrop:active, button.flat:backdrop:checked,
+.primary-toolbar button:backdrop:active, .primary-toolbar button:backdrop:checked,
+headerbar button:backdrop:active, headerbar button:backdrop:checked,
+toolbar button:backdrop:active, toolbar button:backdrop:checked {
+  box-shadow: {{w.toolbar_button.pressed_inset_shadow}}; }
 button:disabled {
   background-image: image({{alpha(button, 0.55)}});
   box-shadow: none; }
