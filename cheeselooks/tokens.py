@@ -165,6 +165,13 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["hover_in_ms"] = str(g["hover_in_ms"])
     t["hover_out_ms"] = str(g["hover_out_ms"])
     _add_widgets(t, "", style, theme, depth, amount)
+    # joined buttons whose container draws no CSS (Nemo's path bar): each
+    # button carries its share of the group's outer layers (recess, shadow)
+    for state in ("", "hover_", "pressed_"):
+        inset = t[f"w.linked.{state}inset_shadow"]
+        both = ", ".join(x for x in (inset, t["w.linked.outer"]) if x and x != "none") or "none"
+        for pos in ("first", "middle", "last", "only"):
+            t[f"w.linked.{state}{pos}_shadow"] = titlebuttons._group_shadow(both, pos)
     t["style.extra_css"] = style.extra_css
     _add_face_gradients(t, style)
     t["tabs.css"] = tabs.css(t)

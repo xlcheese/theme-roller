@@ -753,7 +753,8 @@ def _group_shadow(shadow: str, pos: str) -> str:
                 if pos == "first":
                     out.append(f"{px(x)} 0 0 {color}")
         else:                                                       # a drop shadow
-            out.append(f"{px(x)} {px(y)} {px(blur)} {px(spread - blur)} {color}")
+            # (moved down by as much, so its bottom edge stays where it was)
+            out.append(f"{px(x)} {px(y + blur)} {px(blur)} {px(spread - blur)} {color}")
     return ", ".join(out) if out else "none"
 
 
