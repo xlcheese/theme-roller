@@ -134,10 +134,14 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
   box-shadow: {{w.linked.pressed_first_shadow}}; }
 .nemo-window .path-bar button:last-child:checked, .nemo-window .path-bar button:last-child:active {
   box-shadow: {{w.linked.pressed_last_shadow}}; }
+/* unfocused windows: no shadow round the group (inner layers only) */
+.nemo-window .path-bar button:backdrop, .nemo-window .path-bar button:backdrop:checked {
+  box-shadow: {{w.linked.inset_shadow}}; }
 /* its ▶ scroll button is painted after everything else */
 .nemo-window .path-bar button.slider-button:last-child { box-shadow: {{w.linked.ltr_last_shadow}}; }
 .nemo-window .path-bar button.slider-button:last-child:hover { box-shadow: {{w.linked.hover_ltr_last_shadow}}; }
 .nemo-window .path-bar button.slider-button:last-child:active { box-shadow: {{w.linked.pressed_ltr_last_shadow}}; }
+.nemo-window .path-bar button.slider-button:backdrop { box-shadow: {{w.linked.inset_shadow}}; }
 
 /* Joined buttons share the edge between them (Mint-Y drops each button's right
    border; vertical groups drop the bottom one). When a button is hovered or

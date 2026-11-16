@@ -707,7 +707,17 @@ def _inset_only(shadow: str) -> str:
     return ", ".join(inset) if inset else "none"
 
 
-def _group_shadow(shadow: str, pos: str, rtl_paint: bool = False) -> str:
+def _lean(pos: str, rtl_paint: bool = False) -> tuple[int, int]:
+    """Which way a joined button's shadow piece reaches at its left and right
+    joins, in blurs: +1 toward a right neighbour painted after it, -1 toward a
+    left neighbour painted after it, 0 at the group's ends."""
+    if rtl_paint:
+        return {"first": (0, -1), "middle": (-1, -1), "last": (-1, 0), "only": (0, 0)}[pos]
+    return {"first": (0, 1), "middle": (1, 1), "last": (1, 0), "only": (0, 0)}[pos]
+
+
+def _group_shadow(shadow: str, pos: str, rtl_paint: bool = False,
+                  lean: tuple[int, int] | None = None) -> str:
     """A Linked button's share of the group's outer layers (pos: first, middle,
     last, only), kept with its inner ones. The recess becomes strips: the dark
     one along the top of every button (and the left of the first), the light
@@ -761,13 +771,21 @@ def _group_shadow(shadow: str, pos: str, rtl_paint: bool = False) -> str:
             # (shrunk by half the blur, moved to keep its bottom edge in place);
             # the first starts at the left end (growing it to reach past the
             # end put shadow above the group).
+            # The piece spans [left + jl*blur, right + jr*blur]: at a join it
+            # reaches into the neighbour painted later (which covers it) and
+            # stops a blur short of one painted earlier (so its soft edge
+            # ends at that button). Growing at a group end would push shadow
+            # above the group, so an end next to a reaching join leans too.
+            jl, jr = lean or _lean(pos, rtl_paint)
+            if (jl, jr) == (0, 1):
+                jl = 1
+            elif (jl, jr) == (-1, 0):
+                jr = -1
             b = blur
-            dx, ds = {"first": (b, 0), "middle": (b, 0), "last": (b / 2, -b / 2)}[pos]
-            if rtl_paint:
-                # painted right to left (GTK's path bar keeps its buttons
-                # deepest first): mirrored, shifted left, the first one shrunk
-                dx, ds = {"first": (-b / 2, -b / 2), "middle": (-b, 0), "last": (-b, 0)}[pos]
-            out.append(f"{px(x + dx)} {px(y - ds)} {px(blur)} {px(spread + ds)} {color}")
+            dx, ds = (jl + jr) * b / 2, (jr - jl) * b / 2
+            # keep the bottom edge in place (or the top, if the piece grows)
+            dy = -ds if ds <= 0 else ds
+            out.append(f"{px(x + dx)} {px(y + dy)} {px(blur)} {px(spread + ds)} {color}")
     return ", ".join(out) if out else "none"
 
 
@@ -868,6 +886,15 @@ def _muffin_css(style: str, t: dict[str, str], g: Geometry, fc: dict, glyphs: di
         # one face per function, by its place in the group (as on the metacity
         # borders): corners at the ends, one shared line between neighbours
         r = fc[("button", "rest")].radius
+        painted = {"close": 0, "maximize": 1, "minimize": 2}     # Muffin's paint order
+
+        def lean(fn: str) -> tuple[int, int]:
+            if fn not in order:
+                return (0, 0)
+            i = order.index(fn)
+            jl = 0 if i == 0 else (1 if painted[order[i - 1]] < painted[fn] else -1)
+            jr = 0 if i == len(order) - 1 else (1 if painted[order[i + 1]] > painted[fn] else -1)
+            return jl, jr
         for fn in ("minimize", "maximize", "close"):
             pos = _joined(order, fn)
             radius = {"first": f"{r}px 0 0 {r}px", "last": f"0 {r}px {r}px 0",
@@ -879,7 +906,7 @@ def _muffin_css(style: str, t: dict[str, str], g: Geometry, fc: dict, glyphs: di
                 decl = [f"border-radius: {radius};"]
                 decl.append(f"border-right-width: {0 if pos in ('first', 'middle') else 1}px;")
                 if face.shape == "rect":
-                    decl.append(f"box-shadow: {_group_shadow(face.shadow3, pos)};")
+                    decl.append(f"box-shadow: {_group_shadow(face.shadow3, pos, lean=lean(fn))};")
                 out.append(sels + " { " + " ".join(decl) + " }")
     if not g.inner:
         return out            # the face is on the button already (the app rules apply)
