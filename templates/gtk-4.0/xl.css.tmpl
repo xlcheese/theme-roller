@@ -264,6 +264,25 @@ headerbar button:not(.osd):active, headerbar button:not(.osd):checked {
   background-color: {{wbp.pressed}};
   background-image: linear-gradient(to bottom, {{wbp.pressed_bottom}}, {{wbp.pressed_top}});
   box-shadow: {{wbp.w.toolbar_button.pressed_g4_shadow}}; }
+/* their text and symbolic icons in the title bar's text colour */
+headerbar button:not(.osd), headerbar button:not(.osd):hover,
+headerbar button:not(.osd):active, headerbar button:not(.osd):checked {
+  color: {{wbp.text}}; }
+headerbar button:not(.osd):backdrop {
+  color: {{wb.unfocused_text}}; }
+/* joined groups (view switchers) in the title bar's button faces */
+headerbar .linked > button:not(.osd) {
+  border-color: {{wbp.w.linked.border}};
+  background-color: {{wbp.button}};
+  background-image: {{wbp.button_grad}}; }
+headerbar .linked > button:not(.osd):hover {
+  border-color: {{wbp.w.linked.hover_border}};
+  background-color: {{wbp.w.linked.hover_color}};
+  background-image: {{wbp.w.linked.hover_grad}}; }
+headerbar .linked > button:not(.osd):active, headerbar .linked > button:not(.osd):checked {
+  border-color: {{wbp.w.linked.pressed_border}};
+  background-color: {{wbp.pressed}};
+  background-image: linear-gradient(to bottom, {{wbp.pressed_bottom}}, {{wbp.pressed_top}}); }
 
 /* Menubar and toolbars: flat, same color as the bottom of the title bar */
 menubar, .toolbar:not(.osd), actionbar > revealer > box {

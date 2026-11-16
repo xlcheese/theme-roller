@@ -353,6 +353,7 @@ Borderless, with soft shadows. Suggested buttons cast a shadow **tinted with the
 - **Title text:** `text`, or a user color.
 - **Border color and width:** color follows `border_strong` (the darker border), or a user color; width 0–6 px, default 1. Visual only, since Muffin keeps its own invisible resize area.
 - **Title bar height:** 30–56 px, default 44.
+- **Headerbar widgets on a title bar of its own colours** take the title bar's palette (`wbp.*`), not the window's: headerbar buttons' text and symbolic icons in its text colour (`wbp.text`, `wb.unfocused_text` when unfocused), and joined groups such as view switchers in its button faces (`wbp.button`, `wbp.w.linked.*`), GTK 3 and 4. (With the theme's own title bar colours `wbp` is the theme, so nothing changes.)
 - **Window roundness** (`window_roundness`, 0–100, unset = follow Global's Roundness): the window's top corners (title bars, header bars, GTK 3 and 4 client-side windows, Muffin's borders, Gargantuan's corner close button). Token `wb.r`, worked out as `r2` is (1.4 × the control radius, at most 14px); `r2` itself stays Global's, for popovers, tooltips and cards.
 - **Title bar gradient:** its own slider, 0–100, default 30.
 - **Reset to Global colors:** a button on this tab (and on Panel & Menu and Terminal) that copies the Global colors back in while the switch stays on, so you can keep the theme's colors and change just one thing.

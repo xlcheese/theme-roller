@@ -378,6 +378,31 @@ headerbar button:active, headerbar button:checked {
   background-color: {{wbp.pressed}};
   background-image: linear-gradient(to bottom, {{wbp.pressed_bottom}}, {{wbp.pressed_top}});
   box-shadow: {{wbp.w.toolbar_button.pressed_shadow}}; }
+/* their text and symbolic icons in the title bar's text colour (dark icons
+   on a dark title bar otherwise), dimmed in unfocused windows */
+headerbar button, headerbar button:hover, headerbar button:active, headerbar button:checked {
+  color: {{wbp.text}}; }
+headerbar button:backdrop, headerbar button:backdrop:hover, headerbar button:backdrop:checked {
+  color: {{wb.unfocused_text}}; }
+/* joined groups (view switchers) in the title bar's button faces */
+headerbar .linked > button {
+  color: {{wbp.text}};
+  border-color: {{wbp.w.linked.border}};
+  background-color: {{wbp.button}};
+  background-image: {{wbp.button_grad}}; }
+headerbar .linked > button:hover {
+  border-color: {{wbp.w.linked.hover_border}};
+  background-color: {{wbp.w.linked.hover_color}};
+  background-image: {{wbp.w.linked.hover_grad}}; }
+headerbar .linked > button:active, headerbar .linked > button:checked {
+  border-color: {{wbp.w.linked.pressed_border}};
+  background-color: {{wbp.pressed}};
+  background-image: linear-gradient(to bottom, {{wbp.pressed_bottom}}, {{wbp.pressed_top}}); }
+headerbar .linked > button:backdrop {
+  color: {{wb.unfocused_text}};
+  background-image: image({{wbp.button}}); }
+headerbar .linked > button:backdrop:checked {
+  background-image: image({{wbp.pressed}}); }
 
 /* Menubar and toolbar: flat, same color as the bottom of the title bar */
 menubar, .menubar, .primary-toolbar, toolbar.primary-toolbar,
