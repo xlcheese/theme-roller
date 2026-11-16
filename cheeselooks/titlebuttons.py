@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from . import palette as pal
 from . import shape
@@ -263,14 +263,30 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
                 f[(k, s)] = face
 
     if style in ("drawn", "linked", "classic"):
-        # the style's own buttons (Classic: the same, smaller, in its own size)
-        rest = rect(t["wbp.button_top"], t["wbp.button_bottom"], t[bt + "border"],
-                    t[bt + "shadow"], t[bt + "g4_shadow"], text)
-        hover = rect(t[bt + "hover_top"], t[bt + "hover_bottom"], t[bt + "hover_border"],
-                     t[bt + "hover_shadow"], t[bt + "hover_g4_shadow"], ptext)
-        pressed = rect(t["wbp.pressed"], t["wbp.pressed"], t[bt + "pressed_border"],
-                       t[bt + "pressed_shadow"], t[bt + "pressed_g4_shadow"], ptext)
-        backdrop = rect(t["wbp.button"], t["wbp.button"], t[bt + "border"], glyph=utext)
+        # the style's own buttons (Classic: the same, smaller, in its own size);
+        # a style's [title_buttons] colours replace the faces, borders and glyphs
+        own = lambda key: t.get(f"tbtn.{key}", "")    # noqa: E731
+        border = own("border") or t[bt + "border"]
+        hover_border = own("hover_border") or t[bt + "hover_border"]
+        if own("color"):
+            rest = rect(own("color_top"), own("color_bottom"), border,
+                        t[bt + "shadow"], t[bt + "g4_shadow"], own("color_fg"))
+            backdrop = rect(own("color"), own("color"), border,
+                            glyph=pal.mix(own("color_fg"), own("color"), 0.45))
+        else:
+            rest = rect(t["wbp.button_top"], t["wbp.button_bottom"], border,
+                        t[bt + "shadow"], t[bt + "g4_shadow"], own("glyph") or text)
+            backdrop = rect(t["wbp.button"], t["wbp.button"], border, glyph=utext)
+        hc = own("hover_color")
+        hover = rect(own("hover_color_top") if hc else t[bt + "hover_top"],
+                     own("hover_color_bottom") if hc else t[bt + "hover_bottom"], hover_border,
+                     t[bt + "hover_shadow"], t[bt + "hover_g4_shadow"],
+                     own("hover_color_fg") if hc else (own("glyph") or ptext))
+        pc = own("pressed_color")
+        pressed = rect(pc or t["wbp.pressed"], pc or t["wbp.pressed"],
+                       own("hover_border") or own("border") or t[bt + "pressed_border"],
+                       t[bt + "pressed_shadow"], t[bt + "pressed_g4_shadow"],
+                       own("pressed_color_fg") if pc else (own("glyph") or ptext))
         put(KINDS, rest=rest, hover=hover, pressed=pressed, backdrop=backdrop)
         if style in ("drawn", "linked"):      # Classic's close hovers like the other two
             put(["close"], hover=close_hover, pressed=close_pressed)
@@ -322,7 +338,31 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
     else:  # flat
         put(KINDS, rest=none(text), hover=style_hover, pressed=style_pressed, backdrop=none(utext))
         put(["close"], hover=close_hover, pressed=close_pressed)
+    if style != "dots":         # the dots' hover colours are their own (close stays red)
+        _close_hover(f, t)
     return f
+
+
+def _close_hover(f: dict, t: dict[str, str]) -> None:
+    """[title_buttons] close_hover: "hover" gives close the other buttons' hover
+    and pressed faces; a colour gives it a face of that colour (in the style's
+    own shape: rect, circle, with or without the claude bar)."""
+    ch = t.get("tbtn.close_hover", "accent")
+    if ch == "accent" or not ch:
+        return
+    for state in ("hover", "pressed"):
+        face = f[("close", state)]
+        if ch == "hover":
+            f[("close", state)] = f[("minimize", state)]
+            continue
+        if face.shape == "none":
+            continue
+        top, bottom = ((t["tbtn.close_hover_top"], t["tbtn.close_hover_bottom"]) if state == "hover"
+                       else (t["tbtn.close_pressed"],) * 2)
+        f[("close", state)] = replace(face, top=top, bottom=bottom,
+                                      border=(pal.darker(bottom, 0.15) if face.border else None),
+                                      glyph=t["tbtn.close_hover_fg"],
+                                      bar=(face.bar and pal.darker(bottom, 0.25)))
 
 
 def outer_corner(style: str, layout: str, t: dict[str, str]) -> tuple[str | None, int]:

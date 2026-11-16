@@ -73,6 +73,14 @@ TITLE_BAR_KEYS = {"highlight": 0.15, "highlight_dark": 0.08,
                   # the title bar's own gradient shape (smooth unless set; the
                   # style's gradient_shape doesn't apply to title bars)
                   "gradient_shape": "smooth", "split_step": 0.4, "glass_return": 0.4}
+# [title_buttons]: the window buttons' colours. color / hover_color /
+# pressed_color / border / hover_border / glyph are for the button styles that
+# draw the style's own button (xl-Cheeselooks, Linked, Classic); close_hover is
+# for every button style: "accent" (default), "hover" (as the other buttons) or
+# a colour. Colours are read against the theme's palette (the window's colours,
+# not the title bar's), so "button" is the theme's usual button face.
+TITLE_BUTTON_KEYS = ("color", "hover_color", "pressed_color", "border", "hover_border", "glyph",
+                     "close_hover")
 # Settings a style can suggest in [defaults] (applied when the style is picked
 # and on a fresh install). Panel and menu values are optional: left out, the
 # panel and menus follow Global.
@@ -167,6 +175,7 @@ class Style:
     panel: dict[str, Any] = field(default_factory=dict)
     notification: dict[str, Any] = field(default_factory=dict)
     title_bar: dict[str, Any] = field(default_factory=dict)
+    title_buttons: dict[str, Any] = field(default_factory=dict)
     extra_css: str = ""
     warnings: list[str] = field(default_factory=list)
 
@@ -205,7 +214,7 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                         "Style list (longer names are cut off there)")
     for key in data:
         if key not in ("name", "author", "description", "defaults", "edges", "widgets", "panel", "notification",
-                       "title_bar",
+                       "title_bar", "title_buttons",
                        "adapt_strength", "gradient_shape", "split_step", "glass_return"):
             warnings.append(f"unknown top-level key '{key}' is ignored")
 
@@ -264,6 +273,21 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                     errors.append(f"title_bar.gradient_shape must be one of {', '.join(pal.GRADIENT_SHAPES)}")
             elif isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 1:
                 errors.append(f"title_bar.{k} must be a number from 0 to 1")
+
+    title_buttons = data.get("title_buttons", {})
+    if not isinstance(title_buttons, dict):
+        errors.append("'title_buttons' must be a table")
+    else:
+        for k, v in title_buttons.items():
+            if k not in TITLE_BUTTON_KEYS:
+                warnings.append(f"title_buttons.{k} is not a known title button setting and is ignored "
+                                f"(known: {', '.join(TITLE_BUTTON_KEYS)})")
+            elif k == "close_hover" and v in ("accent", "hover"):
+                continue
+            elif not _is_color_ref(v, names) or v in ("none", "transparent"):
+                errors.append(f"title_buttons.{k} must be a palette color name, #RRGGBB or an expression "
+                              + ("(or \"accent\" / \"hover\") " if k == "close_hover" else "")
+                              + f"(got {v!r})")
 
     defaults = data.get("defaults", {})
     if not isinstance(defaults, dict):
@@ -416,6 +440,7 @@ def load(path: Path) -> Style:
         panel=copy.deepcopy(data.get("panel", {})),
         notification=copy.deepcopy(data.get("notification", {})),
         title_bar=copy.deepcopy(data.get("title_bar", {})),
+        title_buttons=copy.deepcopy(data.get("title_buttons", {})),
         extra_css=extra.read_text(encoding="utf-8") if extra.exists() else "",
         warnings=warnings,
     )

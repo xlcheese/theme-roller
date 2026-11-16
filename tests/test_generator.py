@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, flatpak, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens
+from cheeselooks import cli, flatpak, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -992,6 +992,30 @@ class RenderAndInstallTests(unittest.TestCase):
         self.assertIn("border-top: 4px solid", tokens.build(s, base)["notification.css"])   # default: line
         errors, _w = styles.check({"name": "N", "notification": {"kind": "wavy"}})
         self.assertTrue(any("notification.kind" in e for e in errors))
+
+    def test_title_button_colors(self):
+        base = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        s["window_borders"].update(separate_colors=True, title_bar="#5B7FB5", title_text="#FFFFFF",
+                                   button_style="drawn")
+        plain = tokens.build(s, base)
+        self.assertEqual(plain["tbtn.color"], "")
+        grey = styles.Style(**{**base.__dict__, "title_buttons": {"color": "#C0C0C0", "close_hover": "hover"}})
+        t = tokens.build(s, grey)
+        self.assertEqual(t["tbtn.color"], "#C0C0C0")
+        self.assertTrue(t["tbtn.hover_color"] and t["tbtn.pressed_color"])     # follow the face
+        f = titlebuttons.faces("drawn", t)
+        self.assertEqual(f[("minimize", "rest")].glyph, t["tbtn.color_fg"])
+        self.assertLess(palette.luminance(f[("minimize", "rest")].glyph), 0.2)  # dark glyph on grey, not white
+        self.assertEqual(f[("close", "hover")], f[("minimize", "hover")])      # close hovers like the others
+        red = styles.Style(**{**base.__dict__, "title_buttons": {"close_hover": "#CC3333"}})
+        t = tokens.build(s, red)
+        for style in ("drawn", "flat", "unpretentious", "claude"):
+            self.assertEqual(titlebuttons.faces(style, t)[("close", "hover")].top,
+                             t["tbtn.close_hover_top"], style)
+        errors, warns = styles.check({"name": "N", "title_buttons": {"color": "nope", "shine": 1}})
+        self.assertTrue(any("title_buttons.color" in e for e in errors))
+        self.assertTrue(any("title_buttons.shine" in w for w in warns))
 
     def test_include(self):
         with tempfile.TemporaryDirectory() as tmp:

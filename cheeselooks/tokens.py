@@ -260,6 +260,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     key = "highlight_dark" if pal.is_dark(wb_pal) else "highlight"
     hl = style.title_bar.get(key, sty.TITLE_BAR_KEYS[key])
     t["wb.highlight"] = f"inset 0 1px {pal.rgba('#FFFFFF', hl)}" if hl > 0 else "none"
+    _title_button_colors(t, style, theme, amount)
     # the style's face shape, for title buttons drawn outside the CSS (SVG faces)
     t["style.gradient_shape"] = style.gradient_shape
     t["style.split_step"] = str(style.split_step)
@@ -319,6 +320,44 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
     return t
+
+
+def _title_button_colors(t: dict[str, str], style: sty.Style, theme: dict[str, str], amount: float) -> None:
+    """[title_buttons]: the window buttons' own colours (tbtn.*; "" = unset), read
+    against the theme's palette. Each face gets a gradient pair and a glyph
+    colour that reads on it (your glyph, else the better of the title text and
+    the theme's text)."""
+    tb = style.title_buttons
+
+    def ev(key: str) -> str:
+        v = tb.get(key)
+        if not v:
+            return ""
+        return theme[v] if v in theme else (v if pal.is_hex(v) else render.evaluate(v, theme))
+    glyph = ev("glyph")
+    candidates = (t["wb.text"], theme["text"], theme["accent_fg"])
+    base = ev("color")
+    # with only a face colour, hover and pressed follow it (as the palette's own
+    # button hover and pressed face follow the button)
+    defaults = {"hover_color": render.evaluate(f"lift({base}, 0.06)", theme) if base else "",
+                "pressed_color": pal.darker(base, 0.12) if base else ""}
+    for key in ("color", "hover_color", "pressed_color"):
+        c = ev(key) or defaults.get(key, "")
+        t[f"tbtn.{key}"] = c
+        if c:
+            top, bottom = pal.gradient(c, amount) if key != "pressed_color" else (c, c)
+            t[f"tbtn.{key}_top"], t[f"tbtn.{key}_bottom"] = top, bottom
+            t[f"tbtn.{key}_fg"] = glyph or max(candidates, key=lambda x: pal.contrast(x, c))
+    t["tbtn.border"] = ev("border")
+    t["tbtn.hover_border"] = ev("hover_border") or t["tbtn.border"]
+    t["tbtn.glyph"] = glyph
+    ch = tb.get("close_hover", "accent")
+    t["tbtn.close_hover"] = ch if ch in ("accent", "hover") else ev("close_hover")
+    if t["tbtn.close_hover"] not in ("accent", "hover"):
+        c = t["tbtn.close_hover"]
+        t["tbtn.close_hover_top"], t["tbtn.close_hover_bottom"] = pal.gradient(c, amount)
+        t["tbtn.close_hover_fg"] = max(candidates, key=lambda x: pal.contrast(x, c))
+        t["tbtn.close_pressed"] = pal.darker(c, 0.12)
 
 
 def _title_gradient(t: dict[str, str], style: sty.Style) -> None:
