@@ -82,10 +82,14 @@ toolbar button:active, toolbar button:checked {
   box-shadow: {{w.toolbar_button.pressed_shadow}}; }
 
 /* Joined groups: the layers outside a button (recess ring, drop shadow) go
-   round the whole group, on the box that holds the buttons. (Spin buttons are
-   fields: they take them from the entry's edge.) */
+   round the whole group. Side by side, each button carries its share (see
+   below): a box round them drew the shadow away from the buttons wherever GTK
+   made the box taller than they are (header bars, toolbars). Vertical groups
+   keep it on the box. (Spin buttons are fields: they take them from the
+   entry's edge.) */
 .linked {
-  border-radius: {{r}}px;
+  border-radius: {{r}}px; }
+.linked.vertical {
   box-shadow: {{w.linked.outer}}; }
 
 /* Grouped (linked) buttons: inside edges only. Drop shadows would overlap the
@@ -114,6 +118,22 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
   border-color: {{w.linked.pressed_border}};
   background-image: linear-gradient(to bottom, {{pressed_bottom}}, {{pressed_top}});
   box-shadow: {{w.linked.pressed_inset_shadow}}; }
+
+/* Joined buttons side by side: each carries its share of the group's
+   outer layers, by position (GTK boxes paint left to right, so each
+   piece leans right, under the next button). */
+.linked:not(.vertical) > button { box-shadow: {{w.linked.ltr_middle_shadow}}; }
+.linked:not(.vertical) > button:first-child { box-shadow: {{w.linked.ltr_first_shadow}}; }
+.linked:not(.vertical) > button:last-child { box-shadow: {{w.linked.ltr_last_shadow}}; }
+.linked:not(.vertical) > button:first-child:last-child { box-shadow: {{w.linked.ltr_only_shadow}}; }
+.linked:not(.vertical) > button:hover { box-shadow: {{w.linked.ltr_hover_middle_shadow}}; }
+.linked:not(.vertical) > button:first-child:hover { box-shadow: {{w.linked.ltr_hover_first_shadow}}; }
+.linked:not(.vertical) > button:last-child:hover { box-shadow: {{w.linked.ltr_hover_last_shadow}}; }
+.linked:not(.vertical) > button:first-child:last-child:hover { box-shadow: {{w.linked.ltr_hover_only_shadow}}; }
+.linked:not(.vertical) > button:active, .linked:not(.vertical) > button:checked { box-shadow: {{w.linked.ltr_pressed_middle_shadow}}; }
+.linked:not(.vertical) > button:first-child:active, .linked:not(.vertical) > button:first-child:checked { box-shadow: {{w.linked.ltr_pressed_first_shadow}}; }
+.linked:not(.vertical) > button:last-child:active, .linked:not(.vertical) > button:last-child:checked { box-shadow: {{w.linked.ltr_pressed_last_shadow}}; }
+.linked:not(.vertical) > button:first-child:last-child:active, .linked:not(.vertical) > button:first-child:last-child:checked { box-shadow: {{w.linked.ltr_pressed_only_shadow}}; }
 
 /* Nemo's path bar draws nothing of its own, so the group's outer layers
    (recess, drop shadow) go on its buttons by position, as on Linked title
