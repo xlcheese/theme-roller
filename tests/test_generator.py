@@ -993,6 +993,17 @@ class RenderAndInstallTests(unittest.TestCase):
         errors, _w = styles.check({"name": "N", "notification": {"kind": "wavy"}})
         self.assertTrue(any("notification.kind" in e for e in errors))
 
+    def test_window_roundness(self):
+        st = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        t = tokens.build(s, st)
+        self.assertEqual(t["wb.r"], t["r2"])                       # unset: follows Global
+        s["window_borders"]["window_roundness"] = 0
+        t = tokens.build(s, st)
+        self.assertEqual(t["wb.r"], "0")
+        s["window_borders"]["window_roundness"] = 100
+        self.assertEqual(tokens.build(s, st)["wb.r"], str(shape.WINDOW_RADIUS_MAX))
+
     def test_title_button_colors(self):
         base = styles.load(DEFAULT_STYLE)
         s = defaults()

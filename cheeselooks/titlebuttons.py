@@ -371,7 +371,7 @@ def outer_corner(style: str, layout: str, t: dict[str, str]) -> tuple[str | None
     if style != "gargantuan":
         return None, 0
     side = "right" if layout.endswith("close") else "left"
-    return side, max(0, int(t["r2"]) - int(t["wb.border_width"]))
+    return side, max(0, int(t["wb.r"]) - int(t["wb.border_width"]))
 
 
 # ------------------------------------------------------------------ SVG (metacity)

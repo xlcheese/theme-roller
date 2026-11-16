@@ -54,7 +54,7 @@ LABELS = {
     "label_weight": "Label weight", "panel_opacity": "Panel opacity", "menu_opacity": "Menu opacity",
     "notification_opacity": "Notification opacity", "panel_height": "Panel height",
     "title_bar": "Title bar", "title_text": "Title text", "border": "Border",
-    "title_bar_height": "Title bar height", "border_width": "Border width",
+    "title_bar_height": "Title bar height", "border_width": "Border width", "window_roundness": "Window roundness",
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
     "button_style": "Button style", "button_roundness": "Button roundness", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
@@ -676,7 +676,7 @@ label.xl-prev-tooltip {{ color: {t['tooltip.text']}; background-color: {t['toolt
   padding: 4px 8px; margin: 0 4px;
   box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.23); }}     /* the theme's tooltip shadow (Mint-Y base) */
 frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.border']};
-  border-radius: {t['r2']}px {t['r2']}px 0 0; }}
+  border-radius: {t['wb.r']}px {t['wb.r']}px 0 0; }}
 .xl-prev-terminal {{ font-family: monospace; color: {t['term.text']}; background-color: {t['term.bg']}; padding: 6px; }}
 """
 
@@ -798,6 +798,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if path[-1] == "button_roundness":
             wb = self.data["window_borders"]
             return titlebuttons.roundness(wb["button_style"], None, self.data["global"]["roundness"])
+        if path[-1] == "window_roundness":
+            return int(self.data["global"]["roundness"])
         if path[-1] == "panel_height":
             if self.cinnamon_panel_height is None:
                 self.cinnamon_panel_height = reload.panel_height(DEFAULT_PANEL_HEIGHT)

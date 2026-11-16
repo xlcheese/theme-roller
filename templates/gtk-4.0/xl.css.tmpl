@@ -232,13 +232,14 @@ headerbar:backdrop, .titlebar:not(headerbar):backdrop {
   background-image: image({{wb.unfocused}}); }
 window.csd > .titlebar, window.csd > headerbar,
 window.csd > .titlebar:backdrop, window.csd > headerbar:backdrop {
-  border-radius: {{r2}}px {{r2}}px 0 0; }
+  border-radius: {{wb.r}}px {{wb.r}}px 0 0; }
 window.maximized > .titlebar, window.tiled > .titlebar, window.fullscreen > .titlebar,
 window.maximized > headerbar, window.tiled > headerbar, window.fullscreen > headerbar {
   border-radius: 0; }
 /* the window's outline and shadow: as GTK 3 windows and the window borders
    have them (GTK 4 and libadwaita drew a darker or lighter outline of their own) */
 window.csd {
+  border-radius: {{wb.r}}px {{wb.r}}px 0 0;
   outline: none;
   box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.35), 0 0 0 {{wb.border_width}}px {{wb.border}}; }
 window.csd:backdrop {

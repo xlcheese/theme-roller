@@ -260,6 +260,9 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["wb.button_glyphs"] = wb["button_glyphs"] or ""      # "" = the style's own set
     t["wb.button_roundness"] = str(titlebuttons.roundness(wb["button_style"], wb["button_roundness"],
                                                           g["roundness"]))
+    # the window's corners: your Window roundness, else Global's (as r2)
+    wr = wb.get("window_roundness")
+    t["wb.r"] = (str(shape.window_radius(shape.radius(wr, ctl))) if wr is not None else t["r2"])
     t.update(metacity.tokens(t))
     # Title buttons and headerbar buttons sit on the title bar. With the title
     # bar's own colours, their faces come from a palette built on those (wbp.*),

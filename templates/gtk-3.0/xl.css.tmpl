@@ -350,13 +350,13 @@ headerbar.default-decoration, .titlebar.default-decoration {
   min-height: {{wb.button_h}}px; }
 window.csd > .titlebar, window.csd > headerbar,
 window.csd > .titlebar:backdrop, window.csd > headerbar:backdrop {
-  border-radius: {{r2}}px {{r2}}px 0 0; }
+  border-radius: {{wb.r}}px {{wb.r}}px 0 0; }
 .maximized .titlebar, .tiled .titlebar, .fullscreen .titlebar,
 .maximized headerbar, .tiled headerbar, .fullscreen headerbar {
   border-radius: 0; }
 
 decoration, window.csd decoration {
-  border-radius: {{r2}}px {{r2}}px 0 0;
+  border-radius: {{wb.r}}px {{wb.r}}px 0 0;
   box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.35), 0 0 0 {{wb.border_width}}px {{wb.border}}; }
 decoration:backdrop, window.csd decoration:backdrop {
   box-shadow: 0 3px 9px 1px transparent, 0 2px 6px 2px rgba(0, 0, 0, 0.2), 0 0 0 {{wb.border_width}}px {{wb.border}}; }

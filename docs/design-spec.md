@@ -75,7 +75,7 @@ It brings back an idea from GNOME 2's Clearlooks and the GNOME Color Chooser, re
                "panel_shape": { "follow_global": true, "roundness": 15, "gradient": 10 },
                "menu_shape":  { "follow_global": true, "roundness": 15, "gradient": 10 } },
   "window_borders": { "separate_colors": false, "title_bar": null, "title_text": null, "border": null,
-                      "title_bar_height": 44, "border_width": 1, "title_gradient": 30,
+                      "title_bar_height": 44, "border_width": 1, "title_gradient": 30, "window_roundness": None,
                       "button_layout": "right", "button_style": "flat", "button_roundness": null },
   "terminal": { "separate_colors": false, "bg": null, "text": null },
   "details": {
@@ -353,6 +353,7 @@ Borderless, with soft shadows. Suggested buttons cast a shadow **tinted with the
 - **Title text:** `text`, or a user color.
 - **Border color and width:** color follows `border_strong` (the darker border), or a user color; width 0–6 px, default 1. Visual only, since Muffin keeps its own invisible resize area.
 - **Title bar height:** 30–56 px, default 44.
+- **Window roundness** (`window_roundness`, 0–100, unset = follow Global's Roundness): the window's top corners (title bars, header bars, GTK 3 and 4 client-side windows, Muffin's borders, Gargantuan's corner close button). Token `wb.r`, worked out as `r2` is (1.4 × the control radius, at most 14px); `r2` itself stays Global's, for popovers, tooltips and cards.
 - **Title bar gradient:** its own slider, 0–100, default 30.
 - **Reset to Global colors:** a button on this tab (and on Panel & Menu and Terminal) that copies the Global colors back in while the switch stays on, so you can keep the theme's colors and change just one thing.
 - **Named colors for any window border theme:** the GTK theme defines `wm_bg`, `wm_bg_unfocused`, `wm_title`, `wm_border` and the other `wm_*` colors from these settings. Window border themes such as Mint-Y's read them, so even Mint-Y's title bars match. `apply` refreshes the window border theme so Muffin picks the colors up.

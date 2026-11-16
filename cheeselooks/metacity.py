@@ -59,7 +59,7 @@ def border_ops(color: str, width: int, radius: int, sides: str = "tlrb") -> str:
 
 def tokens(t: dict[str, str]) -> dict[str, str]:
     """Window-border tokens for the metacity template (needs the wb.*, r and r2 tokens)."""
-    bw, radius = int(t["wb.border_width"]), int(t["r2"])
+    bw, radius = int(t["wb.border_width"]), int(t["wb.r"])
     unfocused_border = pal.mix(t["wb.border"], t["wb.unfocused"], 0.3)
     out = {
         "wb.radius": str(radius),
