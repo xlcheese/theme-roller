@@ -135,6 +135,11 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
 .linked:not(.vertical) > button:last-child:active, .linked:not(.vertical) > button:last-child:checked { box-shadow: {{w.linked.ltr_pressed_last_shadow}}; }
 .linked:not(.vertical) > button:first-child:last-child:active, .linked:not(.vertical) > button:first-child:last-child:checked { box-shadow: {{w.linked.ltr_pressed_only_shadow}}; }
 
+/* their faces fade, their shadows switch at once: GTK 3 garbles a shadow
+   that animates between pieces of different shapes */
+.linked:not(.vertical) > button, .nemo-window .path-bar button {
+  transition-property: color, background-color, background-image, border-color; }
+
 /* Nemo's path bar draws nothing of its own, so the group's outer layers
    (recess, drop shadow) go on its buttons by position, as on Linked title
    buttons: the outer ends on the first and last, a share under each. Nemo
@@ -218,9 +223,13 @@ headerbar .linked:not(.vertical).path-bar > button:active + button,
    Nemo paints its buttons right to left, so a 1px outer shadow on the
    hovered or pressed button lands on top of the next button's left border. */
 .nemo-window .linked.path-bar > button:hover:not(:last-child) {
-  box-shadow: {{w.linked.hover_seam_shadow}}; }
+  box-shadow: {{w.linked.hover_seam_shadow}}, {{w.linked.rtl_outer_hover_middle}}; }
 .nemo-window .linked.path-bar > button:checked:not(:last-child),
 .nemo-window .linked.path-bar > button:active:not(:last-child) {
+  box-shadow: {{w.linked.pressed_seam_shadow}}, {{w.linked.rtl_outer_pressed_middle}}; }
+.nemo-window .linked.path-bar > button:backdrop:hover:not(:last-child) {
+  box-shadow: {{w.linked.hover_seam_shadow}}; }
+.nemo-window .linked.path-bar > button:backdrop:checked:not(:last-child) {
   box-shadow: {{w.linked.pressed_seam_shadow}}; }
 
 /* Buttons on colored backgrounds (info bars, selected rows, selection mode):

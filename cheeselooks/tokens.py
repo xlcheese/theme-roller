@@ -175,6 +175,9 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
             # scroll buttons, ▶ last of all: it takes the left-to-right end)
             t[f"w.linked.{state}{pos}_shadow"] = titlebuttons._group_shadow(both, pos, rtl_paint=True)
         t[f"w.linked.{state}ltr_last_shadow"] = titlebuttons._group_shadow(both, "last")
+        # outer layers only, for Nemo's shared-edge rules (they add their own)
+        t[f"w.linked.rtl_outer_{state}middle"] = titlebuttons._group_shadow(t["w.linked.outer"], "middle",
+                                                                            rtl_paint=True)
         # every other joined group: GTK boxes paint left to right
         for pos in ("first", "middle", "last", "only"):
             t[f"w.linked.ltr_{state}{pos}_shadow"] = titlebuttons._group_shadow(both, pos)
