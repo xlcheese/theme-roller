@@ -711,8 +711,8 @@ def _group_shadow(shadow: str, pos: str) -> str:
     """A Linked button's share of the group's outer layers (pos: first, middle,
     last, only), kept with its inner ones. The recess becomes strips: the dark
     one along the top of every button (and the left of the first), the light
-    one along the bottom (and the right of the last). A drop shadow is pulled in
-    at the sides by its blur, so it doesn't spill onto the next button."""
+    one along the bottom (and the right of the last). A drop shadow is shifted
+    so the pieces meet under the group (see below)."""
     parts, depth, cur = [], 0, ""
     for ch in shadow:
         depth += ch == "("
@@ -753,8 +753,17 @@ def _group_shadow(shadow: str, pos: str) -> str:
                 if pos == "first":
                     out.append(f"{px(x)} 0 0 {color}")
         else:                                                       # a drop shadow
-            # (moved down by as much, so its bottom edge stays where it was)
-            out.append(f"{px(x)} {px(y + blur)} {px(blur)} {px(spread - blur)} {color}")
+            # Buttons are painted left to right, so each piece is shifted right
+            # by its blur: it never reaches back onto the button before it
+            # (the next button's face covers what falls under it), and the
+            # pieces of neighbours meet edge to edge, adding up to one shadow
+            # under the whole group. The last stops at the group's right end
+            # (shrunk by half the blur, moved to keep its bottom edge in place);
+            # the first starts at the left end (growing it to reach past the
+            # end put shadow above the group).
+            b = blur
+            dx, ds = {"first": (b, 0), "middle": (b, 0), "last": (b / 2, -b / 2)}[pos]
+            out.append(f"{px(x + dx)} {px(y - ds)} {px(blur)} {px(spread + ds)} {color}")
     return ", ".join(out) if out else "none"
 
 
