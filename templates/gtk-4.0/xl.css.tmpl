@@ -236,6 +236,19 @@ window.csd > .titlebar:backdrop, window.csd > headerbar:backdrop {
 window.maximized > .titlebar, window.tiled > .titlebar, window.fullscreen > .titlebar,
 window.maximized > headerbar, window.tiled > headerbar, window.fullscreen > headerbar {
   border-radius: 0; }
+/* the window's outline and shadow: as GTK 3 windows and the window borders
+   have them (GTK 4 and libadwaita drew a darker or lighter outline of their own) */
+window.csd {
+  outline: none;
+  box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.35), 0 0 0 {{wb.border_width}}px {{wb.border}}; }
+window.csd:backdrop {
+  box-shadow: 0 3px 9px 1px transparent, 0 2px 6px 2px rgba(0, 0, 0, 0.2), 0 0 0 {{wb.border_width}}px {{wb.border}}; }
+window.csd.tiled, window.csd.tiled-top, window.csd.tiled-left, window.csd.tiled-right, window.csd.tiled-bottom,
+window.csd.tiled:backdrop, window.csd.tiled-top:backdrop, window.csd.tiled-left:backdrop,
+window.csd.tiled-right:backdrop, window.csd.tiled-bottom:backdrop {
+  box-shadow: 0 0 0 {{wb.border_width}}px {{wb.border}}, 0 0 0 20px transparent; }
+window.csd.maximized, window.csd.fullscreen, window.csd.maximized:backdrop, window.csd.fullscreen:backdrop {
+  box-shadow: none; }
 
 {{titlebuttons4.css}}
 /* Other headerbar buttons: on the title bar, so their hover and pressed faces

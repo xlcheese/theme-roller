@@ -630,3 +630,11 @@ Claude, Less Gargantuan), the face drawn on the button as an SVG. Linked gets
 its corners per function (no siblings in Muffin's path). `metacity-1/` is still
 generated for Metacity and Marco. `tools/muffin-preview.py THEME OUT.png` draws
 a title bar the way Muffin does (rest, hover, pressed, unfocused).
+
+Spacing between window buttons: each style's own gap plus 6px (GTK 3's header
+bar spacing), the same in GTK 3 and GTK 4 apps and on Muffin's borders, except
+Linked, Classic and Gargantuan (`titlebuttons.TIGHT`), whose buttons touch or
+sit 4px apart. Gargantuan buttons in apps are at least 46px tall: GTK centres
+window buttons in a header bar, and Mint-Y's 6px margins on its other buttons
+hold it at 46px, so a shorter button left a strip above. GTK 4 windows take the
+same outline and shadow as GTK 3 ones (`window.csd` in gtk-4.0/xl.css).

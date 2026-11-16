@@ -68,6 +68,18 @@ EDGE_PAD = 6          # px from the frame edge to the first/last button (headerb
 GTK3_HEADER_PAD = 7   # Mint-Y's headerbar side padding (GTK 3)
 GTK4_HEADER_PAD = 6   # and GTK 4 / libadwaita
 GTK3_BUTTON_SPACING = 6   # GtkHeaderBar's spacing between its window buttons
+# A GTK 3 header bar's own content (a 34px button with Mint-Y's 6px margins):
+# headerbars are never shorter, so Gargantuan buttons are at least this tall
+HEADERBAR_CONTENT = 46
+# Styles whose buttons touch (or sit 4px apart, as Clearlooks): no extra space
+# between them. The others get 6px more, as GTK 3 header bars space them, in
+# apps of both toolkits and on the window borders alike.
+TIGHT = ("linked", "classic", "gargantuan")
+
+
+def spacing(style: str) -> int:
+    """Extra space between window buttons, on top of the style's own gap."""
+    return 0 if style in TIGHT else GTK3_BUTTON_SPACING
 
 # Glyphs. Every set is ours (drawn as SVG at the size each style uses), so
 # apps, window borders and the settings app's picker always match, except
@@ -713,10 +725,13 @@ def _muffin_css(style: str, t: dict[str, str], g: Geometry, fc: dict, glyphs: di
         len(t["wb.button_layout"].split(":")[0].split(",")) >= len(order) / 2
     # a 6px gap is built in: take it back with a margin on the side away from
     # the window's edge (on the edge side it would move the outer button)
-    pull = g.gap - GTK3_BUTTON_SPACING
+    pull = g.gap + spacing(style) - GTK3_BUTTON_SPACING
     margin = f"0 {pull}px 0 0" if left_side else f"0 0 0 {pull}px"
     edge = 0 if full else g.edge
     out.append(f"{MUFFIN} {{\n  min-height: {t['wb.height_inner']}px;\n  padding: 0 {edge}px;\n  border-width: 0; }}")
+    # the title's height counts only through its margins: pulled in, so the
+    # title bar keeps your height with a large title font (the text stays centred)
+    out.append(f"{MUFFIN} label.title {{ margin-top: -12px; margin-bottom: -12px; }}")
     btn = f"{MUFFIN} button.titlebutton"
     every = [f"{btn}{p}" for ps in pseudos.values() for p in ps]
     out.append(",\n".join(every) + f" {{\n  min-width: {g.w - 2 * border_px}px;\n  min-height: {h - 2 * border_px}px;\n"
@@ -737,8 +752,7 @@ def _muffin_css(style: str, t: dict[str, str], g: Geometry, fc: dict, glyphs: di
                 face = fc[(kind, state)]
                 sels = ",\n".join(f"{btn}.{fn}{p}" for p in pseudos[state])
                 decl = [f"border-radius: {radius};"]
-                if pos in ("first", "middle"):
-                    decl.append("border-right-width: 0;")
+                decl.append(f"border-right-width: {0 if pos in ('first', 'middle') else 1}px;")
                 if face.shape == "rect":
                     decl.append(f"box-shadow: {_group_shadow(face.shadow3, pos)};")
                 out.append(sels + " { " + " ".join(decl) + " }")
@@ -806,7 +820,7 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
 
     out = [f"/* Title buttons: {STYLES[style]} (cheeselooks/titlebuttons.py) */"]
     if gtk4:
-        out.append("windowcontrols { border-spacing: 0; }")
+        out.append(f"windowcontrols {{ border-spacing: {spacing(style)}px; }}")
     pseudos = {"rest": [""], "backdrop": [":backdrop"], "hover": [":hover", ":hover:backdrop"],
                "pressed": [":active", ":active:backdrop", ":checked"]}
     classes = {"button": "", "minimize": ".minimize", "maximize": ".maximize", "close": ".close"}
@@ -818,7 +832,9 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
     # The button: the click area. Inner styles draw nothing on it; their face is
     # drawn on the icon node inside, so the area can be larger than the face.
     if g.full_height:
-        h = int(t["wb.height_inner"])
+        # filling the title bar: but GTK centres window buttons in a header bar,
+        # which its other buttons hold at 46px at least (a strip showed above)
+        h = max(int(t["wb.height_inner"]), HEADERBAR_CONTENT)
         margin = "0"
     else:
         h, margin = g.h, f"0 {g.gap // 2}px"
@@ -964,10 +980,9 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
             out.append(selectors + " {\n  " + "\n  ".join(decl) + " }")
     if style == "linked":
         out += _linked_css(t, g, fc, gtk4, bases, pseudos, classes, h)
-    if not gtk4:
+    if not gtk4 and not spacing(style):
         # GTK 3's header bar adds 6px between window buttons (a box property,
-        # not CSS): cancel it for every style, so GTK 3 apps space their title
-        # buttons as Muffin's window borders and GTK 4 apps do
+        # not CSS): cancel it where buttons touch or sit closer
         out.append(",\n".join(f"{b} + button.titlebutton" for b in bases)
                    + f" {{ margin-left: {g.gap // 2 - GTK3_BUTTON_SPACING}px; }}")
     if glyphs and "unmaximize" in glyphs and glyphs["unmaximize"] != glyphs["maximize"]:
