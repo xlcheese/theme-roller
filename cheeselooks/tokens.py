@@ -179,8 +179,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
         t[f"w.linked.rtl_outer_{state}middle"] = titlebuttons._group_shadow(t["w.linked.outer"], "middle",
                                                                             rtl_paint=True)
         # every other joined group: GTK boxes paint left to right
-        for pos in ("first", "middle", "last", "only"):
-            t[f"w.linked.ltr_{state}{pos}_shadow"] = titlebuttons._group_shadow(both, pos)
+        _linked_ltr(t, "w.", state)
     t["style.extra_css"] = style.extra_css
     _add_face_gradients(t, style)
     t["tabs.css"] = tabs.css(t)
@@ -274,6 +273,8 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_colors(t, "wbp.", wb_pal)
     _add_gradients(t, "wbp.", wb_pal, amount)
     _add_widgets(t, "wbp.", style, wb_pal, depth, amount)
+    for state in ("", "hover_", "pressed_"):
+        _linked_ltr(t, "wbp.w.", state)
     # the header bar's top highlight, on the title bar's own colour (Mint-Y's
     # base worked it out from the window background: a pale line on a dark bar)
     key = "highlight_dark" if pal.is_dark(wb_pal) else "highlight"
@@ -339,6 +340,15 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
     return t
+
+
+def _linked_ltr(t: dict[str, str], prefix: str, state: str) -> None:
+    """A joined group's share per button (GTK boxes paint left to right), from
+    the window's palette ("w.") or the title bar's ("wbp.w.", header bars)."""
+    inset = t[f"{prefix}linked.{state}inset_shadow"]
+    both = ", ".join(x for x in (inset, t[f"{prefix}linked.outer"]) if x and x != "none") or "none"
+    for pos in ("first", "middle", "last", "only"):
+        t[f"{prefix}linked.ltr_{state}{pos}_shadow"] = titlebuttons._group_shadow(both, pos)
 
 
 def _title_button_colors(t: dict[str, str], style: sty.Style, theme: dict[str, str], amount: float) -> None:

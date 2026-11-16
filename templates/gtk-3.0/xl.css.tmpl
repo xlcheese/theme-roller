@@ -415,6 +415,41 @@ headerbar .linked > button:backdrop {
   background-image: image({{wbp.button}}); }
 headerbar .linked > button:backdrop:checked {
   background-image: image({{wbp.pressed}}); }
+/* ...their shading and the group's shadow worked out on the title bar too
+   (the style's _dark alphas on a dark bar), and their text over Mint-Y's
+   view-switcher colours */
+headerbar .linked:not(.vertical) > button { box-shadow: {{wbp.w.linked.ltr_middle_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child { box-shadow: {{wbp.w.linked.ltr_first_shadow}}; }
+headerbar .linked:not(.vertical) > button:last-child { box-shadow: {{wbp.w.linked.ltr_last_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:last-child { box-shadow: {{wbp.w.linked.ltr_only_shadow}}; }
+headerbar .linked:not(.vertical) > button:hover { box-shadow: {{wbp.w.linked.ltr_hover_middle_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:hover { box-shadow: {{wbp.w.linked.ltr_hover_first_shadow}}; }
+headerbar .linked:not(.vertical) > button:last-child:hover { box-shadow: {{wbp.w.linked.ltr_hover_last_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:last-child:hover { box-shadow: {{wbp.w.linked.ltr_hover_only_shadow}}; }
+headerbar .linked:not(.vertical) > button:active, headerbar .linked:not(.vertical) > button:checked { box-shadow: {{wbp.w.linked.ltr_pressed_middle_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:active, headerbar .linked:not(.vertical) > button:first-child:checked { box-shadow: {{wbp.w.linked.ltr_pressed_first_shadow}}; }
+headerbar .linked:not(.vertical) > button:last-child:active, headerbar .linked:not(.vertical) > button:last-child:checked { box-shadow: {{wbp.w.linked.ltr_pressed_last_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:last-child:active, headerbar .linked:not(.vertical) > button:first-child:last-child:checked { box-shadow: {{wbp.w.linked.ltr_pressed_only_shadow}}; }
+headerbar .linked:not(.vertical) > button:backdrop,
+headerbar .linked:not(.vertical) > button:first-child:backdrop,
+headerbar .linked:not(.vertical) > button:last-child:backdrop,
+headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop {
+  box-shadow: {{wbp.w.linked.inset_shadow}}; }
+headerbar .linked:not(.vertical) > button:backdrop:checked,
+headerbar .linked:not(.vertical) > button:backdrop:active,
+headerbar .linked:not(.vertical) > button:first-child:backdrop:checked,
+headerbar .linked:not(.vertical) > button:first-child:backdrop:active,
+headerbar .linked:not(.vertical) > button:last-child:backdrop:checked,
+headerbar .linked:not(.vertical) > button:last-child:backdrop:active,
+headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop:checked,
+headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop:active {
+  box-shadow: {{wbp.w.linked.pressed_inset_shadow}}; }
+headerbar .linked:not(.vertical) > button, headerbar .linked:not(.vertical) > button:hover, headerbar .linked:not(.vertical) > button:active, headerbar .linked:not(.vertical) > button:checked,
+headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:hover, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:active, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:checked {
+  color: {{wbp.text}};
+  outline-color: {{alpha(wbp.text, 0.3)}}; }
+headerbar .linked:not(.vertical) > button:backdrop, headerbar .linked:not(.vertical) > button:backdrop:checked, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:backdrop, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:backdrop:checked {
+  color: {{wb.unfocused_text}}; }
 
 /* Menubar and toolbar: flat, same color as the bottom of the title bar */
 menubar, .menubar, .primary-toolbar, toolbar.primary-toolbar,
