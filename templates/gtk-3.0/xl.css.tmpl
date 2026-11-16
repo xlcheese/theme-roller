@@ -53,6 +53,12 @@ button:active, button:checked, button:hover:checked {
   background-color: {{pressed}};
   background-image: linear-gradient(to bottom, {{pressed_bottom}}, {{pressed_top}});
   box-shadow: {{w.button.pressed_shadow}}; }
+/* Unfocused windows: no layers outside buttons (drop shadow, recess), as on
+   title buttons; their inner layers stay */
+button:backdrop, button:backdrop:hover {
+  box-shadow: {{w.button.inset_shadow}}; }
+button:backdrop:active, button:backdrop:checked {
+  box-shadow: {{w.button.pressed_inset_shadow}}; }
 button:disabled {
   background-image: image({{alpha(button, 0.55)}});
   box-shadow: none; }
@@ -135,38 +141,53 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
 .linked:not(.vertical) > button:last-child:active, .linked:not(.vertical) > button:last-child:checked { box-shadow: {{w.linked.ltr_pressed_last_shadow}}; }
 .linked:not(.vertical) > button:first-child:last-child:active, .linked:not(.vertical) > button:first-child:last-child:checked { box-shadow: {{w.linked.ltr_pressed_only_shadow}}; }
 
+.linked:not(.vertical) > button:backdrop,
+.linked:not(.vertical) > button:first-child:backdrop,
+.linked:not(.vertical) > button:last-child:backdrop,
+.linked:not(.vertical) > button:first-child:last-child:backdrop {
+  box-shadow: {{w.linked.inset_shadow}}; }
+.linked:not(.vertical) > button:backdrop:checked,
+.linked:not(.vertical) > button:backdrop:active,
+.linked:not(.vertical) > button:first-child:backdrop:checked,
+.linked:not(.vertical) > button:first-child:backdrop:active,
+.linked:not(.vertical) > button:last-child:backdrop:checked,
+.linked:not(.vertical) > button:last-child:backdrop:active,
+.linked:not(.vertical) > button:first-child:last-child:backdrop:checked,
+.linked:not(.vertical) > button:first-child:last-child:backdrop:active {
+  box-shadow: {{w.linked.pressed_inset_shadow}}; }
+
 /* their faces fade, their shadows switch at once: GTK 3 garbles a shadow
    that animates between pieces of different shapes */
-.linked:not(.vertical) > button, .nemo-window .path-bar button {
+.linked:not(.vertical) > button, .path-bar.linked > button {
   transition-property: color, background-color, background-image, border-color; }
 
-/* Nemo's path bar draws nothing of its own, so the group's outer layers
+/* Path bars (Nemo's, and GTK's own in file dialogs) draw nothing of their own, so the group's outer layers
    (recess, drop shadow) go on its buttons by position, as on Linked title
-   buttons: the outer ends on the first and last, a share under each. Nemo
-   paints its folder buttons right to left, so their pieces lean left. */
+   buttons: the outer ends on the first and last, a share under each. Both
+   paint their folder buttons right to left, so their pieces lean left. */
 .nemo-window .path-bar { box-shadow: none; }
-.nemo-window .path-bar button { box-shadow: {{w.linked.middle_shadow}}; }
-.nemo-window .path-bar button:first-child { box-shadow: {{w.linked.first_shadow}}; }
-.nemo-window .path-bar button:last-child { box-shadow: {{w.linked.last_shadow}}; }
-.nemo-window .path-bar button:first-child:last-child { box-shadow: {{w.linked.only_shadow}}; }
-.nemo-window .path-bar button:hover { box-shadow: {{w.linked.hover_middle_shadow}}; }
-.nemo-window .path-bar button:first-child:hover { box-shadow: {{w.linked.hover_first_shadow}}; }
-.nemo-window .path-bar button:last-child:hover { box-shadow: {{w.linked.hover_last_shadow}}; }
-.nemo-window .path-bar button:first-child:last-child:hover { box-shadow: {{w.linked.hover_only_shadow}}; }
-.nemo-window .path-bar button:checked, .nemo-window .path-bar button:active {
+.path-bar.linked > button { box-shadow: {{w.linked.middle_shadow}}; }
+.path-bar.linked > button:first-child { box-shadow: {{w.linked.first_shadow}}; }
+.path-bar.linked > button:last-child { box-shadow: {{w.linked.last_shadow}}; }
+.path-bar.linked > button:first-child:last-child { box-shadow: {{w.linked.only_shadow}}; }
+.path-bar.linked > button:hover { box-shadow: {{w.linked.hover_middle_shadow}}; }
+.path-bar.linked > button:first-child:hover { box-shadow: {{w.linked.hover_first_shadow}}; }
+.path-bar.linked > button:last-child:hover { box-shadow: {{w.linked.hover_last_shadow}}; }
+.path-bar.linked > button:first-child:last-child:hover { box-shadow: {{w.linked.hover_only_shadow}}; }
+.path-bar.linked > button:checked, .path-bar.linked > button:active {
   box-shadow: {{w.linked.pressed_middle_shadow}}; }
-.nemo-window .path-bar button:first-child:checked, .nemo-window .path-bar button:first-child:active {
+.path-bar.linked > button:first-child:checked, .path-bar.linked > button:first-child:active {
   box-shadow: {{w.linked.pressed_first_shadow}}; }
-.nemo-window .path-bar button:last-child:checked, .nemo-window .path-bar button:last-child:active {
+.path-bar.linked > button:last-child:checked, .path-bar.linked > button:last-child:active {
   box-shadow: {{w.linked.pressed_last_shadow}}; }
 /* unfocused windows: no shadow round the group (inner layers only) */
-.nemo-window .path-bar button:backdrop, .nemo-window .path-bar button:backdrop:checked {
+.path-bar.linked > button:backdrop, .path-bar.linked > button:backdrop:checked {
   box-shadow: {{w.linked.inset_shadow}}; }
 /* its ▶ scroll button is painted after everything else */
-.nemo-window .path-bar button.slider-button:last-child { box-shadow: {{w.linked.ltr_last_shadow}}; }
-.nemo-window .path-bar button.slider-button:last-child:hover { box-shadow: {{w.linked.hover_ltr_last_shadow}}; }
-.nemo-window .path-bar button.slider-button:last-child:active { box-shadow: {{w.linked.pressed_ltr_last_shadow}}; }
-.nemo-window .path-bar button.slider-button:backdrop { box-shadow: {{w.linked.inset_shadow}}; }
+.path-bar.linked > button.slider-button:last-child { box-shadow: {{w.linked.ltr_last_shadow}}; }
+.path-bar.linked > button.slider-button:last-child:hover { box-shadow: {{w.linked.hover_ltr_last_shadow}}; }
+.path-bar.linked > button.slider-button:last-child:active { box-shadow: {{w.linked.pressed_ltr_last_shadow}}; }
+.path-bar.linked > button.slider-button:backdrop { box-shadow: {{w.linked.inset_shadow}}; }
 
 /* Joined buttons share the edge between them (Mint-Y drops each button's right
    border; vertical groups drop the bottom one). When a button is hovered or
@@ -231,6 +252,13 @@ headerbar .linked:not(.vertical).path-bar > button:active + button,
   box-shadow: {{w.linked.hover_seam_shadow}}; }
 .nemo-window .linked.path-bar > button:backdrop:checked:not(:last-child) {
   box-shadow: {{w.linked.pressed_seam_shadow}}; }
+
+/* Unfocused windows: accent and delete buttons lose their outer layers too */
+button.suggested-action:backdrop, headerbar button.suggested-action:backdrop,
+.primary-toolbar button.suggested-action:backdrop {
+  box-shadow: {{w.suggested.inset_shadow}}; }
+button.destructive-action:backdrop, headerbar button.destructive-action:backdrop {
+  box-shadow: {{w.destructive.inset_shadow}}; }
 
 /* List column headers are buttons, but flat strips: no drop shadow (each
    header's fell on the next one) */
