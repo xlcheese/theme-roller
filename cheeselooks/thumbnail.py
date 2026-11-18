@@ -3,10 +3,9 @@ recoloured toward the theme's accent.
 
 data/thumbnails/comet.png is the master (120x35, made by
 tools/make_thumbnail.py from xl_cheese's artwork). At Apply each pixel's hue
-moves into a band round the accent's: the rainbow's order kept, its range
-narrowed, lightness, saturation and transparency as painted. So a blue theme
-gets a blue, violet and teal comet, and each xl-Cheeselooks theme in Mint's
-list shows its own colours.
+is pulled most of the way to the accent's (KEEP of its distance kept, so the
+comet keeps a little variety); lightness, saturation and transparency as
+painted. So each xl-Cheeselooks theme in Mint's list shows its own colours.
 
 Uses GdkPixbuf (part of every Mint desktop). Without it the master is used as
 it is, rainbow and all.
@@ -22,14 +21,15 @@ from . import paths
 
 MASTER = Path("data") / "thumbnails" / "comet.png"
 PARTS = ("gtk-3.0", "cinnamon", "metacity-1")      # the theme's parts Mint shows a thumbnail for
-SPREAD = 0.32        # the share of the colour wheel the comet keeps round the accent
-RAINBOW_MIDDLE = 0.62  # the master's hues are centred here (blue-violet)
+KEEP = 0.12          # how much of each colour's distance from the accent it keeps (0: all the accent)
 
 
 def recolour_pixel(r: int, g: int, b: int, accent_hue: float) -> tuple[int, int, int]:
     h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
-    d = ((h - RAINBOW_MIDDLE + 0.5) % 1) - 0.5        # -0.5..0.5 round the rainbow's middle
-    rr, gg, bb = colorsys.hls_to_rgb((accent_hue + d * SPREAD) % 1, l, s)
+    # each hue pulled most of the way to the accent's: colours near the accent
+    # barely move, far ones keep a hint of themselves (the comet's variety)
+    d = ((h - accent_hue + 0.5) % 1) - 0.5
+    rr, gg, bb = colorsys.hls_to_rgb((accent_hue + d * KEEP) % 1, l, s)
     return round(rr * 255), round(gg * 255), round(bb * 255)
 
 

@@ -353,6 +353,11 @@ button.suggested-action:backdrop, headerbar button.suggested-action:backdrop,
 button.destructive-action:backdrop, headerbar button.destructive-action:backdrop {
   box-shadow: {{bd.w.destructive.shadow}}; }
 
+/* Pictures framed inside buttons: Cinnamon settings' theme pickers frame each
+   theme's thumbnail (its icon and pointer pickers don't); no border, so the
+   thumbnail sits on the button like the others */
+button > box > frame > border { border: none; box-shadow: none; }
+
 /* List column headers are buttons, but flat strips: no drop shadow (each
    header's fell on the next one) */
 treeview.view header button, treeview.view header button:hover,
