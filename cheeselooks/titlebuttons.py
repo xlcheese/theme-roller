@@ -920,6 +920,18 @@ def _muffin_css(style: str, t: dict[str, str], g: Geometry, fc: dict, glyphs: di
                     decl.append(f"box-shadow: {_group_shadow(face.shadow3, pos, lean=lean(fn))};")
                 out.append(sels + " { " + " ".join(decl) + " }")
     if not g.inner:
+        if full and glyphs:
+            # Gargantuan: the app rules place the glyph for a header bar's height
+            # (at least 46px); Muffin's buttons are the title bar's, so re-centre
+            gs = g.glyph or 16
+            pos = [f"{(g.w - 2 * border_px - gs) // 2}px {(h - 2 * border_px - gs) // 2}px"]
+            if any(f.bar for f in fc.values()):
+                pos.append(f"{(g.w - 10) // 2}px {h // 2 + 6}px")
+            if any(f.shape != "none" and f.top != f.bottom for f in fc.values()):
+                pos.append("0 0")
+            sels = [f"{btn}{cls}{p}" for cls in classes.values() for ps in pseudos.values() for p in ps]
+            sels += [f".maximized {btn}.maximize{p}" for ps in pseudos.values() for p in ps]
+            out.append(",\n".join(sels) + f" {{ background-position: {', '.join(pos)}; }}")
         return out            # the face is on the button already (the app rules apply)
 
     # the face on the button, as an SVG centred in it, under the glyph
