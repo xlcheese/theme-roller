@@ -629,10 +629,14 @@ class SettingsWindow(Gtk.ApplicationWindow):
         notebook = Gtk.Notebook()
         for name in ("General", "Colors", "Advanced"):
             lb = Gtk.ListBox()
-            for text in ("First row", "Selected row", "Third row"):
+            for text in ("First row", "Selected row", "Third row", "Fourth row", "Fifth row",
+                         "Sixth row", "Seventh row", "Eighth row"):
                 lb.add(Gtk.Label(label=text, xalign=0, margin=6))
             lb.select_row(lb.get_row_at_index(1))
-            notebook.append_page(lb, Gtk.Label(label=name))
+            # a few rows more than fit, so the scrollbar shows (Details: Scrollbars)
+            rows = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=104)
+            rows.add(lb)
+            notebook.append_page(rows, Gtk.Label(label=name))
         body.pack_start(notebook, False, False, 0)
         term = Gtk.Label(label="user@mint:~$ ls\nDesktop  Documents  Music", xalign=0, margin=6)
         term.get_style_context().add_class("xl-prev-terminal")
@@ -765,6 +769,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             # shadow after switching back) or didn't re-measure resized title
             # buttons (Gargantuan's could vanish until the window was reopened)
             Gtk.StyleContext.reset_widgets(Gdk.Screen.get_default())
+            self._scrollbar_mode(t["scrollbar.mode"] == "overlay")
             self.queue_resize()
         except GLib.Error as exc:
             self.status.set_text(f"Preview CSS problem: {exc.message}")
@@ -772,6 +777,17 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             themes.save_custom(self.data, self.base)
             self.refresh_custom_subtitle()
         return False
+
+    def _scrollbar_mode(self, overlay: bool) -> None:
+        """Overlay or classic scrollbars in every scrolled window here, as the
+        Scrollbars mode sets them on the desktop (GTK takes overlay scrolling
+        from each scrolled window, not from CSS)."""
+        def walk(widget: Gtk.Widget) -> None:
+            if isinstance(widget, Gtk.ScrolledWindow):
+                widget.set_overlay_scrolling(overlay)
+            if isinstance(widget, Gtk.Container):
+                widget.foreach(walk)
+        walk(self)
 
     # ---------------------------------------------------------------- state
     def base_settings(self) -> dict:
