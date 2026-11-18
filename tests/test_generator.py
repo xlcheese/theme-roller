@@ -1018,6 +1018,16 @@ class RenderAndInstallTests(unittest.TestCase):
                     errors.append(str(exc))
                 self.assertEqual(errors, [], f"depth {depth}, unfocused {unfocused}")
 
+    def test_menu_category_colour(self):
+        base = styles.load(DEFAULT_STYLE)
+        t = tokens.build(defaults(), base)
+        self.assertEqual(t["menu.category"], palette.mix(t["menu.menu_bg"], t["menu.text"], 0.123))  # Mint-Y's grey
+        accent = styles.Style(**{**base.__dict__, "panel": {**base.panel, "menu_category": "accent"}})
+        t = tokens.build(defaults(), accent)
+        self.assertEqual((t["menu.category"], t["menu.category_fg"]), (t["menu.accent"], t["menu.accent_fg"]))
+        errors, _w = styles.check({"name": "N", "panel": {"menu_category": "accent"}})
+        self.assertEqual(errors, [])
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"

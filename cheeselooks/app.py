@@ -828,9 +828,9 @@ class SettingsWindow(Gtk.ApplicationWindow):
 .xl-prev-mitem {{ padding: 4px 10px; min-width: 96px; border-radius: {t['menu.item_r']}px; }}
 .xl-prev-mitem.hover {{ background-color: {t['menu.menu_hover']};
   background-image: linear-gradient(to bottom, {t['menu.menu_hover_top']}, {t['menu.menu_hover_bottom']}); }}
-.xl-prev-mitem.selected {{ color: {t['menu.w.menu_item.selected_fg']}; background-color: {t['menu.w.menu_item.selected_color']};
-  background-image: linear-gradient(to bottom, {t['menu.w.menu_item.selected_top']}, {t['menu.w.menu_item.selected_bottom']}); }}
-.xl-prev-mitem.selected label, label.xl-prev-mitem.selected {{ color: {t['menu.w.menu_item.selected_fg']}; }}
+.xl-prev-mitem.selected {{ color: {t['menu.category_fg']}; background-color: {t['menu.category']};
+  background-image: linear-gradient(to bottom, {t['menu.category_top']}, {t['menu.category_bottom']}); }}
+.xl-prev-mitem.selected label, label.xl-prev-mitem.selected {{ color: {t['menu.category_fg']}; }}
 button.xl-prev-pb {{ min-height: {max(14, int(t['panel.height']) - 14)}px; padding: 0 {t[pb + 'padding']}px; margin-right: {t[pb + 'spacing']}px;
   border: 1px solid {t[pb + 'border']}; border-radius: {t['panel.r']}px;
   background-color: {t[pb + 'color']};

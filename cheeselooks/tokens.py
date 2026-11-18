@@ -231,6 +231,15 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_colors(t, "menu.", mcolors)
     _add_gradients(t, "menu.", mcolors, m_grad / 100)
     _add_widgets(t, "menu.", style, mcolors, depth, m_grad / 100)
+    # the main menu's selected category: [panel] menu_category (older styles:
+    # menu_item's selected_color), else Mint-Y's grey
+    mi = sty.resolved_widgets(style).get("menu_item", {})
+    cat_expr = style.panel.get("menu_category") or mi.get("selected_color") or "mix(menu_bg, text, 0.123)"
+    cat = sty._resolve_color(cat_expr, mcolors)
+    t["menu.category"] = cat
+    t["menu.category_top"], t["menu.category_bottom"] = pal.gradient(cat, m_grad / 100)
+    t["menu.category_fg"] = (mcolors["accent_fg"] if cat == mcolors["accent"] else
+                             max((mcolors["text"], mcolors["accent_fg"]), key=lambda c: pal.contrast(c, cat)))
     m_r = shape.radius(m_round, ctl)
     t["menu.r"] = str(m_r)
     t["menu.r2"] = str(shape.window_radius(m_r))

@@ -61,7 +61,10 @@ SPACING_RANGE = (0, 12)   # px between window-list buttons
 TAB_KINDS = ("boxed", "open", "pills", "claude")
 # [panel]: the panel's own colors (opacity is a user setting; a style suggests
 # it with [defaults] panel_opacity)
-PANEL_KEYS = ("color",)
+PANEL_KEYS = ("color",
+              # the Cinnamon main menu's selected category (default Mint-Y's grey,
+              # mix(menu_bg, text, 0.123); "accent" for an accent selection)
+              "menu_category")
 # [notification]: Cinnamon's notification popups. kind: "line" (an accent line
 # along the top, Mint-Y's look), "flat" (no accent) or "bordered" (a thin
 # border all round); color: the line / border color (default accent).
@@ -137,10 +140,8 @@ BUILTIN_WIDGETS: dict[str, dict[str, Any]] = {
     "combo": {"like": "button"},
     # tabs take their look from the buttons (see tabs.py); a style only picks the shape
     "tab": {"like": "toolbar_button", "tab_kind": "boxed", "active_marker": "none"},
-    # selected_color: the Cinnamon main menu's selected category (Mint-Y's grey;
-    # "accent" for an accent selection)
     "menu_item": {"edge": "flat", "hover_edge": "flat", "pressed_edge": "flat", "focus_edge": "flat",
-                  "hover_color": "menu_hover", "selected_color": "mix(menu_bg, text, 0.123)"},
+                  "hover_color": "menu_hover"},
     "menubar_item": {"like": "menu_item", "hover_color": "menubar_hover"},
     # panel window-list buttons, launchers and applets; "selected" is the
     # focused window's button

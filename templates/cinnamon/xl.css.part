@@ -225,13 +225,13 @@
   background-gradient-end: {{menu.menu_hover_bottom}};
   transition-duration: {{hover_in_ms}}; }
 .menu-category-button-selected, .menu-category-button-selected:hover {
-  color: {{menu.w.menu_item.selected_fg}};
+  color: {{menu.category_fg}};
   border-radius: {{menu.item_r}}px;
-  background-color: {{menu.w.menu_item.selected_color}};
+  background-color: {{menu.category}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.w.menu_item.selected_top}};
-  background-gradient-end: {{menu.w.menu_item.selected_bottom}}; }
-.menu-category-button-selected .menu-category-button-label { color: {{menu.w.menu_item.selected_fg}}; }
+  background-gradient-start: {{menu.category_top}};
+  background-gradient-end: {{menu.category_bottom}}; }
+.menu-category-button-selected .menu-category-button-label { color: {{menu.category_fg}}; }
 
 /* Cinnamon 6.4's main menu (appmenu-* classes): the same as above */
 .appmenu-category-button, .appmenu-category-button-selected, .appmenu-category-button-greyed,
@@ -246,12 +246,12 @@
   background-gradient-end: {{menu.menu_hover_bottom}};
   transition-duration: {{hover_in_ms}}; }
 .appmenu-category-button-selected, .appmenu-category-button-selected:hover {
-  color: {{menu.w.menu_item.selected_fg}};
-  background-color: {{menu.w.menu_item.selected_color}};
+  color: {{menu.category_fg}};
+  background-color: {{menu.category}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.w.menu_item.selected_top}};
-  background-gradient-end: {{menu.w.menu_item.selected_bottom}}; }
-.appmenu-category-button-selected .appmenu-category-button-label { color: {{menu.w.menu_item.selected_fg}}; }
+  background-gradient-start: {{menu.category_top}};
+  background-gradient-end: {{menu.category_bottom}}; }
+.appmenu-category-button-selected .appmenu-category-button-label { color: {{menu.category_fg}}; }
 
 #menu-search-entry {
   border-radius: {{menu.r}}px;
