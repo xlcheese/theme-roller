@@ -1018,6 +1018,20 @@ class RenderAndInstallTests(unittest.TestCase):
                     errors.append(str(exc))
                 self.assertEqual(errors, [], f"depth {depth}, unfocused {unfocused}")
 
+    def test_thumbnail_follows_the_accent(self):
+        from cheeselooks import thumbnail
+        blue, orange = thumbnail.render("#3A6FD8"), thumbnail.render("#FA8562")
+        if blue is None:
+            self.skipTest("no GdkPixbuf")
+        self.assertNotEqual(blue, orange)
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "theme"
+            s = defaults()
+            s["global"]["accent"] = "#3A6FD8"
+            install.build(REPO / "templates", tokens.build(s, styles.load(DEFAULT_STYLE)), out)
+            for part in thumbnail.PARTS:
+                self.assertEqual((out / part / "thumbnail.png").read_bytes(), blue)
+
     def test_starter_style_sheet(self):
         """The starter style sheet is valid as shipped, and with every option
         switched on (except the "instead of" alternatives)."""

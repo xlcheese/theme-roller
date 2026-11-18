@@ -11,7 +11,7 @@ import json
 import shutil
 from pathlib import Path
 
-from . import render
+from . import render, thumbnail
 
 REQUIRED_FILES = ("index.theme",)
 
@@ -33,6 +33,9 @@ def build(template_dir: Path, tokens: dict[str, str], out_dir: Path) -> list[Pat
         raise InstallError(f"{out_dir} already exists")
     out_dir.mkdir(parents=True)
     written = render.render_tree(template_dir, out_dir, tokens)
+    if tokens.get("accent"):
+        # Mint's Themes settings thumbnail: the comet in the theme's colours
+        thumbnail.write(out_dir, tokens["accent"])
     for name in REQUIRED_FILES:
         if not (out_dir / name).is_file():
             raise InstallError(f"generated theme is missing {name}")
