@@ -34,7 +34,8 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
-from gi.repository import Gdk, GLib, Gtk, Pango  # noqa: E402
+gi.require_version("GdkPixbuf", "2.0")
+from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, Pango  # noqa: E402
 
 from . import cli, flatpak, palette as pal, panelmarker, paths, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
 from . import shape  # noqa: E402
@@ -47,6 +48,36 @@ TABS = [  # (settings section, tab title)
     ("global", "Global"), ("style", "Style"), ("panel", "Panel & Menu"),
     ("window_borders", "Window Borders"), ("terminal", "Terminal"),
     ("details", "Details"), ("integration", "Integration"), ("share", "Import & Export"),
+    ("docs", "Documentation"), ("about", "About"),
+]
+REPO_URL = "https://github.com/xlcheese/xl-cheeselooks"
+DOCS_URL = REPO_URL + "/tree/HEAD/docs"     # HEAD: the default branch
+# Documentation tab: short notes on each part of the app (the full docs are online)
+DOC_NOTES = [
+    ("Themes and styles",
+     "A <b>theme</b> is your colours and settings: everything on these tabs. A <b>style</b> is how "
+     "widgets are drawn: their edges, hovers, tabs and panel buttons. Any theme can use any style "
+     "(Style tab). Changes show in the preview; nothing changes on the desktop until <b>Apply</b>, "
+     "and <b>Revert</b> puts the previous theme back."),
+    ("Global",
+     "Accent, background and text colours, and the shape of everything: Size (control height), "
+     "Roundness, Gradient and how hovers fade. <b>Save Theme…</b> keeps your changes under a name."),
+    ("Style",
+     "Pick a style, and set its Depth (how strong its edges and shadows are) and Unfocused depth "
+     "(how much of that unfocused windows keep)."),
+    ("Panel &amp; Menu",
+     "The Cinnamon panel and menus: their own colours, label weight, and the panel's and menu's "
+     "height, roundness, gradient and opacity. Left alone, they follow Global."),
+    ("Window Borders",
+     "Title bars and the window buttons: colours, height, border, roundness, and one of several "
+     "button styles with its roundness, spacing and glyphs."),
+    ("Details",
+     "Tooltips, scrollbars (overlay or classic, roundness, width), sliders, switches and the focus ring."),
+    ("Your own style",
+     "A style is one style.toml file, in ~/.local/share/xl-cheeselooks/styles/&lt;name&gt;/. "
+     "<b>Create a starter style…</b> below makes one with every option listed: the essentials are on, "
+     "the rest are switched off with a #, each with a short note. Edit it, then pick it on the Style "
+     "tab, or check it with <tt>cheeselooks check-style &lt;folder&gt;</tt>."),
 ]
 LABELS = {
     "accent": "Accent", "bg": "Background", "text": "Text", "size": "Size",
@@ -224,6 +255,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
         row = 0
         if section == "share":
             return self._page(self._share_tab(grid))
+        if section == "about":
+            return self._page(self._about_tab(grid))
+        if section == "docs":
+            return self._page(self._docs_tab(grid))
         if section == "global":
             row = self._theme_rows(grid, row)
         if section == "style":
@@ -271,7 +306,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             note.get_style_context().add_class("dim-label")
             grid.attach(note, 0, row + 1, 2, 1)
             row += 2
-        if section != "integration":   # two switches, and Flatpak access is a change to the system
+        if section not in ("integration", "about", "docs"):   # integration: Flatpak access is a system change
             box = Gtk.Box(spacing=8, halign=Gtk.Align.START, margin_top=14)
             reset = Gtk.Button(label=f"Reset {dict(TABS)[section]}")
             reset.connect("clicked", lambda _b, s=section: self.reset_section(s))
@@ -560,6 +595,75 @@ class SettingsWindow(Gtk.ApplicationWindow):
         grid.attach(box, 1, row, 1, 1)
         grid.attach(note, 1, row + 1, 1, 1)
         return row + 2
+
+    def _about_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
+        from . import __version__
+        icon = paths.data_dir() / "data" / "icons" / "xl-cheeselooks-256.png"
+        if icon.exists():
+            pix = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon), 112, 112, True)
+            grid.attach(Gtk.Image.new_from_pixbuf(pix), 0, 0, 1, 1)
+        head = Gtk.Label(xalign=0, valign=Gtk.Align.CENTER)
+        head.set_markup(f"<span size='x-large' weight='bold'>xl-Cheeselooks</span>\n"
+                        f"Version {GLib.markup_escape_text(__version__)}")
+        grid.attach(head, 1, 0, 1, 1)
+        text = Gtk.Label(xalign=0, wrap=True, max_width_chars=60, margin_top=8)
+        text.set_markup("A theme maker for Linux Mint's Cinnamon desktop: your colours and shapes, "
+                        "drawn by a style, for GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon "
+                        "panel and menus, and the window borders.\n\n"
+                        "By xl_cheese. Free software under the GNU General Public License, "
+                        "version 3 or later.")
+        grid.attach(text, 0, 1, 2, 1)
+        link = Gtk.LinkButton(uri=REPO_URL, label="xl-Cheeselooks on GitHub", halign=Gtk.Align.START)
+        grid.attach(link, 0, 2, 2, 1)
+        return grid
+
+    def _docs_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
+        row = 0
+        for title, body in DOC_NOTES:
+            head = Gtk.Label(xalign=0, margin_top=0 if row == 0 else 6)
+            head.set_markup(f"<b>{title}</b>")
+            grid.attach(head, 0, row, 1, 1)
+            text = Gtk.Label(xalign=0, wrap=True, max_width_chars=64)
+            text.set_markup(body)
+            grid.attach(text, 0, row + 1, 1, 1)
+            row += 2
+        box = Gtk.Box(spacing=8, margin_top=12, halign=Gtk.Align.START)
+        starter = Gtk.Button(label="Create a starter style…")
+        starter.connect("clicked", self.on_starter_style)
+        box.pack_start(starter, False, False, 0)
+        box.pack_start(Gtk.LinkButton(uri=DOCS_URL, label="Full documentation (online)"), False, False, 0)
+        grid.attach(box, 0, row, 1, 1)
+        return grid
+
+    def on_starter_style(self, _button: Gtk.Button) -> None:
+        """A new style of yours from the starter style sheet, then picked."""
+        def check(name: str) -> str:
+            name = name.strip()
+            if not name:
+                raise themes.ThemeError("the style needs a name")
+            if len(name) > themes.MAX_NAME:
+                raise themes.ThemeError(f"names can be up to {themes.MAX_NAME} characters")
+            if "/" in name or name.startswith("."):
+                raise themes.ThemeError("names can't contain / or start with a dot")
+            try:
+                styles.find(name, paths.style_dirs())
+            except styles.StyleError:
+                return name
+            raise themes.ThemeError(f"there's already a style called {name}")
+        name = self._ask_name("Create Style", "A new style of yours, from the starter style sheet. "
+                              "Its name:", "My Style", check)
+        if not name:
+            return
+        folder = paths.style_dirs()[0] / name
+        folder.mkdir(parents=True, exist_ok=True)
+        template = (paths.data_dir() / "data" / "style-template.toml").read_text(encoding="utf-8")
+        (folder / "style.toml").write_text(template.replace("{{name}}", name), encoding="utf-8")
+        self.fill_style_list()
+        self.status.set_text(f"Created {folder / 'style.toml'}. Edit it, then pick it on the Style tab.")
+        try:
+            Gtk.show_uri_on_window(self, folder.as_uri(), Gdk.CURRENT_TIME)   # opens the folder
+        except GLib.Error:
+            pass
 
     def _share_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
         text = Gtk.Label(xalign=0, wrap=True, max_width_chars=60)
@@ -1018,7 +1122,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             break
         dialog.destroy()
 
-    def _ask_name(self, title: str, text: str, name: str) -> str | None:
+    def _ask_name(self, title: str, text: str, name: str, check=themes.check_new_name) -> str | None:
         """A small dialog with a name box (filled in and selected); None if cancelled.
         Problems with the name show in the dialog, which stays open."""
         dialog = Gtk.Dialog(title=title, transient_for=self, modal=True)
@@ -1039,7 +1143,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         result = None
         while dialog.run() == Gtk.ResponseType.OK:
             try:
-                result = themes.check_new_name(entry.get_text())
+                result = check(entry.get_text())
                 break
             except themes.ThemeError as exc:
                 msg = str(exc)

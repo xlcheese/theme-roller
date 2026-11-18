@@ -1018,6 +1018,22 @@ class RenderAndInstallTests(unittest.TestCase):
                     errors.append(str(exc))
                 self.assertEqual(errors, [], f"depth {depth}, unfocused {unfocused}")
 
+    def test_starter_style_sheet(self):
+        """The starter style sheet is valid as shipped, and with every option
+        switched on (except the "instead of" alternatives)."""
+        import re
+        text = (REPO / "data" / "style-template.toml").read_text().replace("{{name}}", "Starter")
+        on = "\n".join(l[1:] if re.match(r"^#(\[|[a-z_]+\s*=)", l) and "instead of" not in l else l
+                       for l in text.split("\n"))
+        for body in (text, on):
+            with tempfile.TemporaryDirectory() as tmp:
+                d = Path(tmp) / "Starter"
+                d.mkdir()
+                (d / "style.toml").write_text(body)
+                st = styles.load(d)
+                self.assertEqual(st.name, "Starter")
+                tokens.build(defaults(), st)
+
     def test_unfocused_depth(self):
         st = styles.load(DEFAULT_STYLE)
         s = defaults()
