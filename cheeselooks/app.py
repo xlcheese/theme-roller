@@ -37,6 +37,7 @@ gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk, Pango  # noqa: E402
 
 from . import cli, flatpak, palette as pal, panelmarker, paths, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
+from . import shape  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
 
 APP_TITLE = "xl-Cheeselooks"
@@ -282,11 +283,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
             return box
         if kind in ("int", "int?"):    # int?: None shows the default (button roundness: the style's)
             lo, hi = extra
-            scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, lo, hi, 1)
+            step = 2 if path == ("global", "size") else 1      # Size: even heights only
+            scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, lo, hi, step)
             scale.set_digits(0)
             scale.set_hexpand(True)
             scale.set_size_request(260, -1)
-            scale.connect("value-changed", lambda s: self.changed(path, int(round(s.get_value()))))
+            if step == 2:
+                scale.set_round_digits(0)
+                scale.add_mark(shape.SIZE_DEFAULT, Gtk.PositionType.BOTTOM, None)
+            scale.connect("value-changed", lambda s, st=step: self.changed(
+                path, int(round(s.get_value() / st)) * st))
             self.controls[path] = (scale, kind)
             return scale
         if kind == "bool":

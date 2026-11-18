@@ -20,7 +20,7 @@ DEFAULTS: dict[str, Any] = {
     "theme": "xl-Cheeselooks",     # the theme these settings came from, or "Custom"
     "global": {
         "accent": "#FA8562", "bg": "#F5F5F5", "text": "#303030",
-        "size": "normal", "roundness": 15, "gradient": 10,
+        "size": shape.SIZE_DEFAULT, "roundness": 15, "gradient": 10,
         "hover_in_ms": 50, "hover_out_ms": 125, "hover_strength": 50,
     },
     "style": {"name": "xl-Cheeselooks", "depth": 50,
@@ -59,7 +59,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("global", "accent"), "color", None),
     (("global", "bg"), "color", None),
     (("global", "text"), "color", None),
-    (("global", "size"), "choice", tuple(shape.SIZES)),
+    (("global", "size"), "int", shape.SIZE_RANGE),
     (("global", "roundness"), "int", (0, 100)),
     (("global", "gradient"), "int", (0, 100)),
     (("global", "hover_in_ms"), "int", (0, 200)),
@@ -192,6 +192,10 @@ def from_dict(data: dict) -> dict:
     merged = _deep_merge(DEFAULTS, data or {})
     wb = merged.get("window_borders")
     g = merged.get("global")
+    if isinstance(g, dict) and isinstance(g.get("size"), str) and g["size"] in shape.OLD_SIZES:
+        g["size"] = shape.OLD_SIZES[g["size"]]           # Compact / Normal / Large before the slider
+    if isinstance(g, dict) and isinstance(g.get("size"), (int, float)) and not isinstance(g["size"], bool):
+        g["size"] = shape.size_value(g["size"])           # even heights only
     if isinstance(g, dict):          # hover ranges narrowed (0-300 / 0-800 before)
         for key, hi in (("hover_in_ms", 200), ("hover_out_ms", 400)):
             if isinstance(g.get(key), (int, float)) and not isinstance(g.get(key), bool):

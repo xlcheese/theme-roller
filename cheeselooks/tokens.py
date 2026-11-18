@@ -203,7 +203,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     ps, ms = p["panel_shape"], p["menu_shape"]
     p_round, p_grad = (g["roundness"], g["gradient"]) if ps["follow_global"] else (ps["roundness"], ps["gradient"])
     m_round, m_grad = (g["roundness"], g["gradient"]) if ms["follow_global"] else (ms["roundness"], ms["gradient"])
-    ctl = shape.SIZES[g["size"]][0]
+    ctl = shape.size_value(g["size"])
 
     if style.panel.get("color"):
         # the style's panel color; its gradient and opacity are added as usual
