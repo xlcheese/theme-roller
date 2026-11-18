@@ -55,21 +55,21 @@ DOCS_URL = REPO_URL + "/tree/HEAD/docs"     # HEAD: the default branch
 # Documentation tab: short notes on each part of the app (the full docs are online)
 DOC_NOTES = [
     ("Themes and styles",
-     "A <b>theme</b> is your colours and settings: everything on these tabs. A <b>style</b> is how "
+     "A <b>theme</b> is your colors and settings: everything on these tabs. A <b>style</b> is how "
      "widgets are drawn: their edges, hovers, tabs and panel buttons. Any theme can use any style "
      "(Style tab). Changes show in the preview; nothing changes on the desktop until <b>Apply</b>, "
      "and <b>Revert</b> puts the previous theme back."),
     ("Global",
-     "Accent, background and text colours, and the shape of everything: Size (control height), "
+     "Accent, background and text colors, and the shape of everything: Size (control height), "
      "Roundness, Gradient and how hovers fade. <b>Save Theme…</b> keeps your changes under a name."),
     ("Style",
      "Pick a style, and set its Depth (how strong its edges and shadows are) and Unfocused depth "
      "(how much of that unfocused windows keep)."),
     ("Panel &amp; Menu",
-     "The Cinnamon panel and menus: their own colours, label weight, and the panel's and menu's "
+     "The Cinnamon panel and menus: their own colors, label weight, and the panel's and menu's "
      "height, roundness, gradient and opacity. Left alone, they follow Global."),
     ("Window Borders",
-     "Title bars and the window buttons: colours, height, border, roundness, and one of several "
+     "Title bars and the window buttons: colors, height, border, roundness, and one of several "
      "button styles with its roundness, spacing and glyphs."),
     ("Details",
      "Tooltips, scrollbars (overlay or classic, roundness, width), sliders, switches and the focus ring."),
@@ -597,24 +597,36 @@ class SettingsWindow(Gtk.ApplicationWindow):
         return row + 2
 
     def _about_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
+        """As the About boxes of xl_cheese's other apps: centred, name, version,
+        what it does, the website, copyright and licence."""
         from . import __version__
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, hexpand=True,
+                      halign=Gtk.Align.CENTER, margin_top=12)
         icon = paths.data_dir() / "data" / "icons" / "xl-cheeselooks-256.png"
         if icon.exists():
-            pix = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon), 112, 112, True)
-            grid.attach(Gtk.Image.new_from_pixbuf(pix), 0, 0, 1, 1)
-        head = Gtk.Label(xalign=0, valign=Gtk.Align.CENTER)
-        head.set_markup(f"<span size='x-large' weight='bold'>xl-Cheeselooks</span>\n"
-                        f"Version {GLib.markup_escape_text(__version__)}")
-        grid.attach(head, 1, 0, 1, 1)
-        text = Gtk.Label(xalign=0, wrap=True, max_width_chars=60, margin_top=8)
-        text.set_markup("A theme maker for Linux Mint's Cinnamon desktop: your colours and shapes, "
-                        "drawn by a style, for GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon "
-                        "panel and menus, and the window borders.\n\n"
-                        "By xl_cheese. Free software under the GNU General Public License, "
-                        "version 3 or later.")
-        grid.attach(text, 0, 1, 2, 1)
-        link = Gtk.LinkButton(uri=REPO_URL, label="xl-Cheeselooks on GitHub", halign=Gtk.Align.START)
-        grid.attach(link, 0, 2, 2, 1)
+            pix = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon), 128, 128, True)
+            box.pack_start(Gtk.Image.new_from_pixbuf(pix), False, False, 0)
+
+        def line(markup: str, dim: bool = False, top: int = 0) -> None:
+            label = Gtk.Label(justify=Gtk.Justification.CENTER, wrap=True, max_width_chars=60,
+                              margin_top=top)
+            label.set_markup(markup)
+            if dim:
+                label.get_style_context().add_class("dim-label")
+            box.pack_start(label, False, False, 0)
+        line("<span size='large' weight='bold'>xl-Cheeselooks</span>")
+        line(GLib.markup_escape_text(__version__))
+        line("A theme maker for Linux Mint and the Cinnamon desktop: your colors and shapes, drawn by "
+             "a style, for GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon panel and menus, and "
+             "the window borders.")
+        box.pack_start(Gtk.LinkButton(uri=REPO_URL, label="Website", halign=Gtk.Align.CENTER),
+                       False, False, 0)
+        line("<small>Copyright © 2026 Wesley Hayslip\n"
+             "Developed with the help of Claude, an AI assistant by Anthropic</small>")
+        line("<small>This program comes with absolutely no warranty.\n"
+             "See the <a href='https://www.gnu.org/licenses/gpl-3.0.html'>GNU General Public License, "
+             "version 3 or later</a> for details.</small>", top=4)
+        grid.attach(box, 0, 0, 1, 1)
         return grid
 
     def _docs_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
@@ -1019,7 +1031,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 b.set_tooltip_text(f"Put every tab back to {self.base}. Your latest changes stay in Custom.")
             elif section == "global":
                 b.set_tooltip_text(f"Put Global back to {self.base}. Other tabs keep what you set there, "
-                                   "but colours on “Follow theme” and shapes that follow Global change with it.")
+                                   "but colors on “Follow theme” and shapes that follow Global change with it.")
             else:
                 b.set_tooltip_text(f"Put {dict(TABS)[section]} back to {self.base} (other tabs stay as they are)")
         self.apply_btn.set_sensitive(not _same(self.data, self.applied) or self.data["theme"] != self.applied["theme"])

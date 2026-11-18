@@ -248,7 +248,7 @@ def cmd_revert(args: argparse.Namespace) -> int:
             for line in _libadwaita(data, tokens.build(data, style)):
                 print(f"  {line}")
         except styles.StyleError as exc:
-            _err(f"libadwaita colours left as they were: {exc}")
+            _err(f"libadwaita colors left as they were: {exc}")
     if not args.no_reload:
         for line in reload.apply(tokens.THEME_NAME, theme_dir=paths.theme_dir()):
             print(f"  {line}")
@@ -292,7 +292,7 @@ def cmd_flatpak(args: argparse.Namespace) -> int:
             print("Flatpak apps can already see the theme.")
             return 0
         print("This gives every Flatpak app read-only access to your themes folder and")
-        print("your GTK 4 colours, so they can use xl-Cheeselooks. It runs:\n")
+        print("your GTK 4 colors, so they can use xl-Cheeselooks. It runs:\n")
         print(f"  {command}\n")
         if not args.yes and input("Go ahead? [y/N] ").strip().lower() not in ("y", "yes"):
             print("Nothing changed.")

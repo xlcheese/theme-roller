@@ -1,21 +1,21 @@
 # {{name}}: a starter style sheet for xl-Cheeselooks.
 #
 # A style sets how widgets are drawn: their edges (border, highlight, shade,
-# shadow...), hover colours, tabs and the panel's buttons. Colours, roundness and
+# shadow...), hover colors, tabs and the panel's buttons. Colors, roundness and
 # sizes come from the theme (the settings app), so one style works with any
-# colours.
+# colors.
 #
 # The lines without a # are the essentials, and work as they are. Everything
 # else is here too, switched off with a #: remove the # to use a line.
 # After saving, pick the style on the Style tab (it reloads), or check it with:
 #     cheeselooks check-style <this folder>
 #
-# Colours, everywhere a colour goes, can be:
+# Colors, everywhere a color goes, can be:
 #   a palette name     bg, base, text, accent, button, button_hover, header,
 #                      border, border_strong, border_hover, pressed, menu_bg,
 #                      menu_hover, menubar_hover, sidebar, accent_hover,
 #                      accent_press, accent_fg ...
-#   a hex colour       "#C0C0C0"
+#   a hex color       "#C0C0C0"
 #   an expression      "darker(bg, 0.25)", "lighter(button, 0.1)",
 #                      "mix(border_strong, accent, 0.3)", "alpha(text, 0.5)",
 #                      "lift(header, 0.7)"  (a hover that also works on dark
@@ -153,11 +153,11 @@ menubar_item   = { hover_color = "menubar_hover" }
 # The panel, notifications, title bars and window buttons
 # ---------------------------------------------------------------------------
 #[panel]
-#color = "darker(bg, 0.14)"          # the panel's own colour
+#color = "darker(bg, 0.14)"          # the panel's own color
 
 #[notification]
 #kind  = "line"                      # "line" (an accent line on top), "flat" or "bordered"
-#color = "accent"                    # the line or border colour
+#color = "accent"                    # the line or border color
 
 #[title_bar]
 #highlight      = 0.15               # the light line along the top of header bars (0 = none)
@@ -166,7 +166,7 @@ menubar_item   = { hover_color = "menubar_hover" }
 #split_step     = 0.4
 #glass_return   = 0.4
 
-# The window buttons' own colours (xl-Cheeselooks, Linked and Classic buttons);
+# The window buttons' own colors (xl-Cheeselooks, Linked and Classic buttons);
 # close_hover works with every button style.
 #[title_buttons]
 #color         = "button"            # resting face, e.g. light grey buttons on a dark title bar
@@ -175,4 +175,4 @@ menubar_item   = { hover_color = "menubar_hover" }
 #border        = "border_strong"
 #hover_border  = "border_hover"
 #glyph         = "text"              # left out: picked to read on each face
-#close_hover   = "accent"            # "accent", "hover" (as the other buttons) or a colour
+#close_hover   = "accent"            # "accent", "hover" (as the other buttons) or a color

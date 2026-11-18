@@ -231,7 +231,7 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
         warnings.append("split_step only matters with gradient_shape = \"split\" or \"glass\"")
     ret = data.get("glass_return", 0.4)
     if isinstance(ret, bool) or not isinstance(ret, (int, float)) or not 0 <= ret <= 1:
-        errors.append("glass_return must be a number from 0 (no return) to 1 (back to the top colour)")
+        errors.append("glass_return must be a number from 0 (no return) to 1 (back to the top color)")
     elif "glass_return" in data and shape != "glass":
         warnings.append("glass_return only matters with gradient_shape = \"glass\"")
 
