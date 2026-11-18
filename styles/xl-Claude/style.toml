@@ -31,14 +31,14 @@ panel_gradient = 6
 # shadow you feel more than see
 [edges.raised]
 border    = "mix(border_strong, bg, 0.2)"
-highlight = { y = 1, blur = 0, color = "white", alpha = 0.55 }
+highlight = { y = 1, blur = 0, color = "white", alpha = 0.55, alpha_dark = 0.18 }
 shade     = { y = -1, blur = 0, color = "black", alpha = 0.04 }
 shadow    = { y = 1, blur = 2, color = "black", alpha = 0.04, alpha_dark = 0.25 }
 
 # Hover: the same, with the border warmed toward the accent
 [edges.raised_hover]
 border    = "mix(border_hover, accent, 0.25)"
-highlight = { y = 1, blur = 0, color = "white", alpha = 0.6 }
+highlight = { y = 1, blur = 0, color = "white", alpha = 0.6, alpha_dark = 0.2 }
 shade     = { y = -1, blur = 0, color = "black", alpha = 0.04 }
 shadow    = { y = 1, blur = 3, color = "black", alpha = 0.06, alpha_dark = 0.3 }
 
@@ -58,7 +58,7 @@ border = "none"
 # face colour, so the chip has no outline, just a top light
 [edges.panel_rest]
 border    = "lighter(bg, 0.35)"
-highlight = { y = 1, blur = 0, color = "white", alpha = 0.5 }
+highlight = { y = 1, blur = 0, color = "white", alpha = 0.5, alpha_dark = 0.17 }
 
 [edges.panel_hover]
 border = "mix(border_hover, accent, 0.3)"
