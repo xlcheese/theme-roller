@@ -90,11 +90,11 @@ popover.background label.separator, label.separator {
 
 assistant .sidebar {
   background-color: {{base}};
-  border-top: 1px solid {{mix(bg, text, 0.234)}}; }
+  border-top: 1px solid {{dividers}}; }
   assistant .sidebar:dir(ltr) {
-    border-right: 1px solid {{mix(bg, text, 0.234)}}; }
+    border-right: 1px solid {{dividers}}; }
   assistant .sidebar:dir(rtl) {
-    border-left: 1px solid {{mix(bg, text, 0.234)}}; }
+    border-left: 1px solid {{dividers}}; }
 
 assistant.csd .sidebar {
   border-top-style: none; }
@@ -258,7 +258,7 @@ button {
   padding: 5px 8px;
   color: {{alpha(text, 0.87)}};
   outline-color: {{alpha(text, 0.17)}};
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   background-color: {{mix(bg, base, 0.2)}}; }
   button separator {
     margin: 4px 1px; }
@@ -507,12 +507,12 @@ button {
 .inline-toolbar toolbutton > button {
   color: {{alpha(text, 0.87)}};
   outline-color: {{alpha(text, 0.17)}};
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   background-color: {{mix(bg, base, 0.5)}}; }
   .inline-toolbar toolbutton > button:hover {
     color: {{alpha(text, 0.87)}};
     outline-color: {{alpha(text, 0.17)}};
-    border-color: {{mix(bg, text, 0.234)}};
+    border-color: {{dividers}};
     background-color: {{base}}; }
   .inline-toolbar toolbutton > button:active, .inline-toolbar toolbutton > button:checked {
     color: {{alpha(text, 0.87)}};
@@ -680,7 +680,7 @@ spinbutton {
   spinbutton:not(.vertical) > button + button,
   spinbutton:not(.vertical) > button:hover:not(:active),
   spinbutton:not(.vertical) > button:hover + button {
-    box-shadow: inset 1px 0 {{mix(bg, text, 0.234)}}; }
+    box-shadow: inset 1px 0 {{dividers}}; }
   spinbutton:not(.vertical) > button:disabled + button:not(:disabled):not(:active):not(:checked):not(:hover),
   spinbutton:not(.vertical) > button:not(:disabled):not(:active):not(:checked):not(:hover) + button:disabled {
     box-shadow: inset 1px 0 {{alpha(mix(bg, text, 0.234), 0.5)}}; }
@@ -771,12 +771,12 @@ toolbar, .inline-toolbar {
   box-shadow: none;
   border-width: 0 0 1px 0;
   border-style: solid;
-  border-image: linear-gradient(to bottom, {{mix(bg, text, 0.066)}}, {{mix(bg, text, 0.218)}}) 1 0 1 0; }
+  border-image: linear-gradient(to bottom, {{mix(bg, text, 0.066)}}, {{dividers}}) 1 0 1 0; }
 
 .inline-toolbar {
   background-color: {{mix(bg, text, 0.041)}};
   border-style: solid;
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   border-width: 0 1px 1px;
   padding: 3px;
   border-radius: 0  0 {{r}}px {{r}}px; }
@@ -784,13 +784,13 @@ toolbar, .inline-toolbar {
 searchbar {
   background-color: {{bg}};
   border-style: solid;
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   border-width: 0 0 1px;
   padding: 3px; }
 
 actionbar {
   padding: 6px;
-  border-top: 1px solid {{mix(bg, text, 0.234)}};
+  border-top: 1px solid {{dividers}};
   background-color: {{mix(bg, text, 0.041)}}; }
 
 headerbar,
@@ -1440,7 +1440,7 @@ treeview.view {
     color: {{alpha(text, 0.87)}};
     background-color: {{mix(bg, text, 0.142)}};
     border-radius: {{r}}px;
-    border: 1px solid {{mix(bg, text, 0.234)}}; }
+    border: 1px solid {{dividers}}; }
     treeview.view.trough:selected, treeview.view.trough:selected:focus {
       color: {{accent_fg}};
       background-color: {{alpha(text, 0.2)}};
@@ -1454,7 +1454,7 @@ treeview.view {
     background-image: none;
     border-style: none solid solid none;
     border-radius: 0;
-    border-color: {{mix(bg, text, 0.234)}}; }
+    border-color: {{dividers}}; }
     treeview.view header button:active, treeview.view header button:hover {
       background-color: {{mix(bg, base, 0.5)}}; }
     treeview.view header button:active:hover {
@@ -1505,7 +1505,7 @@ menu,
   padding: 0;
   border-radius: 0;
   background-color: {{base}};
-  border: 1px solid {{mix(bg, text, 0.234)}}; }
+  border: 1px solid {{dividers}}; }
   .csd menu, .csd .menu {
     padding: 4px 0px;
     border-radius: {{r}}px;
@@ -1630,7 +1630,7 @@ cursor-handle {
 notebook {
   padding: 0; }
   notebook.frame {
-    border: 1px solid {{mix(bg, text, 0.234)}}; }
+    border: 1px solid {{dividers}}; }
     notebook.frame > header {
       margin: -1px; }
       notebook.frame > header.top {
@@ -1654,13 +1654,13 @@ notebook {
     background-color: {{bg}};
     /* button in headers */ }
     notebook > header.top {
-      box-shadow: inset 0 -1px {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset 0 -1px {{dividers}}; }
     notebook > header.bottom {
-      box-shadow: inset 0 1px {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset 0 1px {{dividers}}; }
     notebook > header.right {
-      box-shadow: inset 1px 0 {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset 1px 0 {{dividers}}; }
     notebook > header.left {
-      box-shadow: inset -1px 0 {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset -1px 0 {{dividers}}; }
     notebook > header.top {
       padding-bottom: 0; }
       notebook > header.top > tabs > tab {
@@ -1734,24 +1734,24 @@ notebook {
       notebook > header > tabs > arrow:disabled {
         color: {{alpha(text, 0.12)}}; }
     notebook > header.top > tabs > tab:hover:not(:checked) {
-      box-shadow: inset 0 -1px {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset 0 -1px {{dividers}}; }
     notebook > header.bottom > tabs > tab:hover:not(:checked) {
-      box-shadow: inset 0 1px {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset 0 1px {{dividers}}; }
     notebook > header.left > tabs > tab:hover:not(:checked) {
-      box-shadow: inset -1px 0 {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset -1px 0 {{dividers}}; }
     notebook > header.right > tabs > tab:hover:not(:checked) {
-      box-shadow: inset 1px 0 {{mix(bg, text, 0.234)}}; }
+      box-shadow: inset 1px 0 {{dividers}}; }
     notebook > header > tabs > tab {
       color: {{alpha(text, 0.42)}};
       background-color: transparent; }
       notebook > header > tabs > tab:hover:not(:checked) {
         color: {{alpha(text, 0.645)}};
         background-color: {{alpha(base, 0.5)}};
-        border-color: {{mix(bg, text, 0.234)}}; }
+        border-color: {{dividers}}; }
       notebook > header > tabs > tab:checked {
         color: {{alpha(text, 0.87)}};
         background-color: {{base}};
-        border-color: {{mix(bg, text, 0.234)}}; }
+        border-color: {{dividers}}; }
       notebook > header > tabs > tab button.flat {
         min-height: 22px;
         min-width: 16px;
@@ -1771,13 +1771,13 @@ scrollbar {
     -GtkScrollbar-has-backward-stepper: false;
     -GtkScrollbar-has-forward-stepper: false; }
   scrollbar.top {
-    border-bottom: 1px solid {{mix(bg, text, 0.234)}}; }
+    border-bottom: 1px solid {{dividers}}; }
   scrollbar.bottom {
-    border-top: 1px solid {{mix(bg, text, 0.234)}}; }
+    border-top: 1px solid {{dividers}}; }
   scrollbar.left {
-    border-right: 1px solid {{mix(bg, text, 0.234)}}; }
+    border-right: 1px solid {{dividers}}; }
   scrollbar.right {
-    border-left: 1px solid {{mix(bg, text, 0.234)}}; }
+    border-left: 1px solid {{dividers}}; }
   scrollbar button {
     border: none; }
   scrollbar slider {
@@ -2150,7 +2150,7 @@ scale {
     outline-offset: 2px;
     -gtk-outline-radius: 4.5px;
     border-radius: {{r}}px;
-    background-color: {{mix(bg, text, 0.234)}}; }
+    background-color: {{dividers}}; }
     scale trough:disabled {
       background-color: {{alpha(mix(bg, text, 0.234), 0.55)}}; }
     .osd scale trough {
@@ -2234,7 +2234,7 @@ progressbar {
     row:selected progressbar progress, infobar progressbar progress {
       background-color: {{base}}; }
   progressbar trough {
-    border: 1px solid {{mix(bg, text, 0.234)}};
+    border: 1px solid {{dividers}};
     border-radius: {{r}}px;
     background-color: {{base}}; }
     row:selected progressbar trough, infobar progressbar trough {
@@ -2258,7 +2258,7 @@ levelbar trough {
   border: none;
   padding: 3px;
   border-radius: {{r}}px;
-  background-color: {{mix(bg, text, 0.234)}}; }
+  background-color: {{dividers}}; }
 
 levelbar.horizontal.discrete block {
   margin: 0 1px; }
@@ -2292,7 +2292,7 @@ frame > border,
   margin: 0;
   padding: 0;
   border-radius: 0;
-  border: 1px solid {{mix(bg, text, 0.234)}}; }
+  border: 1px solid {{dividers}}; }
 
 frame.flat > border,
 frame > border.flat,
@@ -2376,19 +2376,19 @@ scrolledwindow undershoot.right {
 
 scrolledwindow junction {
   border-color: transparent;
-  border-image: linear-gradient(to bottom, {{mix(bg, text, 0.234)}} 1px, transparent 1px) 0 0 0 1/0 1px stretch;
+  border-image: linear-gradient(to bottom, {{dividers}} 1px, transparent 1px) 0 0 0 1/0 1px stretch;
   background-color: {{mix(bg, base, 0.7)}}; }
   scrolledwindow junction:dir(rtl) {
     border-image-slice: 0 1 0 0; }
 
 separator {
-  background-color: {{alpha(text, 0.1)}};
+  background-color: {{separator_divider}};
   min-width: 1px;
   min-height: 1px; }
 
 list {
   background-color: {{base}};
-  border-color: {{mix(bg, text, 0.234)}}; }
+  border-color: {{dividers}}; }
   list row {
     padding: 2px; }
 
@@ -2459,7 +2459,7 @@ expander arrow {
 
 calendar {
   color: {{alpha(text, 0.87)}};
-  border: 1px solid {{mix(bg, text, 0.234)}};
+  border: 1px solid {{dividers}};
   border-radius: {{r}}px;
   padding: 2px; }
   calendar:selected {
@@ -2515,7 +2515,7 @@ calendar {
 
 filechooser #pathbarbox {
   background-color: {{mix(bg, text, 0.066)}};
-  border-bottom: 1px solid {{mix(bg, text, 0.234)}}; }
+  border-bottom: 1px solid {{dividers}}; }
 
 filechooser .search-bar {
   background-color: {{mix(bg, text, 0.066)}}; }
@@ -2531,10 +2531,10 @@ filechooserbutton:drop(active) {
   border-style: none;
   background-color: {{mix(bg, base, 0.5)}}; }
   stacksidebar.sidebar:dir(ltr) list, stacksidebar.sidebar.left list, stacksidebar.sidebar.left:dir(rtl) list, .sidebar:dir(ltr), .sidebar.left {
-    border-right: 1px solid {{mix(bg, text, 0.234)}};
+    border-right: 1px solid {{dividers}};
     border-left-style: none; }
   stacksidebar.sidebar:dir(rtl) list, stacksidebar.sidebar.right list, .sidebar:dir(rtl), .sidebar.right {
-    border-left: 1px solid {{mix(bg, text, 0.234)}};
+    border-left: 1px solid {{dividers}};
     border-right-style: none; }
   .sidebar list {
     background-color: {{base}}; }
@@ -2617,7 +2617,7 @@ paned > separator {
   -gtk-icon-source: none;
   border-style: none;
   background-color: transparent;
-  background-image: linear-gradient(to bottom, {{mix(bg, text, 0.234)}}, {{mix(bg, text, 0.234)}});
+  background-image: linear-gradient(to bottom, {{dividers}}, {{dividers}});
   background-size: 1px 1px; }
   paned > separator:selected {
     background-image: linear-gradient(to bottom, {{accent}}, {{accent}}); }
@@ -2786,12 +2786,12 @@ colorswatch#add-color-button {
   border-width: 1px;
   color: {{alpha(text, 0.87)}};
   outline-color: {{alpha(text, 0.17)}};
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   background-color: {{mix(bg, base, 0.5)}}; }
   colorswatch#add-color-button:hover {
     color: {{alpha(text, 0.87)}};
     outline-color: {{alpha(text, 0.17)}};
-    border-color: {{mix(bg, text, 0.234)}};
+    border-color: {{dividers}};
     background-color: {{base}}; }
   colorswatch#add-color-button overlay {
     border-color: transparent;
@@ -2815,7 +2815,7 @@ colorchooser .popover.osd {
 .scale-popup button:hover {
   color: {{alpha(text, 0.87)}};
   outline-color: {{alpha(text, 0.17)}};
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   background-color: {{base}}; }
 
 .touch-selection,
@@ -2848,7 +2848,7 @@ button.circular-button,
   padding: 3px 6px 4px 6px;
   color: {{alpha(text, 0.87)}};
   background-color: {{base}};
-  border: 1px solid {{mix(bg, text, 0.234)}};
+  border: 1px solid {{dividers}};
   border-radius: {{r}}px;
   box-shadow: inset 0px -2px 0px rgba(0, 0, 0, 0.05); }
 
@@ -3035,7 +3035,7 @@ PantheonTerminalPantheonTerminalWindow .notebook tab.reorderable-page.top.active
 PantheonTerminalPantheonTerminalWindow .notebook tab.top:active,
 PantheonTerminalPantheonTerminalWindow .notebook tab.top.active-page,
 PantheonTerminalPantheonTerminalWindow .notebook tab.top.active-page:hover {
-  box-shadow: inset 0 1px {{mix(bg, text, 0.234)}}, inset 0 -1px {{mix(bg, text, 0.234)}}, inset 1px 0 {{mix(bg, text, 0.234)}}, inset -1px 0 {{mix(bg, text, 0.234)}}; }
+  box-shadow: inset 0 1px {{dividers}}, inset 0 -1px {{dividers}}, inset 1px 0 {{dividers}}, inset -1px 0 {{dividers}}; }
 
 TerminalWindow .notebook tab.reorderable-page.top, TerminalWindow .notebook tab.top,
 PantheonTerminalPantheonTerminalWindow .notebook tab.reorderable-page.top,
@@ -3045,7 +3045,7 @@ PantheonTerminalPantheonTerminalWindow .notebook tab.top {
 
 TerminalWindow .notebook.header.top,
 PantheonTerminalPantheonTerminalWindow .notebook.header.top {
-  box-shadow: inset 0 1px {{mix(bg, text, 0.284)}}, inset 0 -1px {{mix(bg, text, 0.234)}}; }
+  box-shadow: inset 0 1px {{mix(bg, text, 0.284)}}, inset 0 -1px {{dividers}}; }
 
 GtkHTML {
   background-color: {{base}};
@@ -3074,7 +3074,7 @@ TerminalWindow .notebook tab .button {
   color: {{alpha(mix(bg, text, 0.731), 0.915)}}; }
   TerminalWindow .notebook tab .button:hover {
     color: {{alpha(text, 0.87)}};
-    border-color: {{mix(bg, text, 0.234)}};
+    border-color: {{dividers}};
     background-color: {{mix(bg, base, 0.5)}}; }
 
 TerminalWindow .notebook .active-page .button:hover, TerminalWindow .notebook .prelight-page .button:hover {
@@ -3111,7 +3111,7 @@ vte-terminal {
     color: {{lighter(select, 0.72)}}; }
 
 .nautilus-window paned > separator {
-  background-image: linear-gradient(to bottom, {{mix(bg, text, 0.234)}}, {{mix(bg, text, 0.234)}}); }
+  background-image: linear-gradient(to bottom, {{dividers}}, {{dividers}}); }
   .nautilus-window paned > separator:dir(ltr) {
     margin-left: -1px; }
   .nautilus-window paned > separator:dir(rtl) {
@@ -3190,7 +3190,7 @@ filechooser.maximized placessidebar.sidebar {
   background-color: {{mix(bg, text, 0.015)}}; }
 
 filechooser placessidebar > viewport.frame {
-  border: 1px solid {{mix(bg, text, 0.234)}};
+  border: 1px solid {{dividers}};
   border-width: 1px 0 0 0; }
 
 NautilusQueryEditor .search-bar.toolbar {
@@ -3218,7 +3218,7 @@ NautilusQueryEditor .search-bar.toolbar {
     border-color: {{mix(bg, text, 0.168)}}; }
 
 NautilusListView .view, NautilusListView iconview {
-  border-bottom: 1px solid {{mix(bg, text, 0.234)}}; }
+  border-bottom: 1px solid {{dividers}}; }
 
 .nemo-window {
   /* This is to keep the separator next to the sidebar dark so we don't see a gap
@@ -3255,7 +3255,7 @@ NautilusListView .view, NautilusListView iconview {
         .nemo-window .sidebar .view.expander:hover, .nemo-window .sidebar iconview.expander:hover, .nemo-window .sidebar row.expander:hover {
           color: {{alpha(text, 0.87)}}; }
   .nemo-window grid > paned > separator {
-    background-image: linear-gradient(to bottom, {{mix(bg, text, 0.234)}}, {{mix(bg, text, 0.234)}}); }
+    background-image: linear-gradient(to bottom, {{dividers}}, {{dividers}}); }
   .nemo-window widget .toolbar .image-button, .nemo-window widget .toolbar headerbar button.titlebutton, headerbar .nemo-window widget .toolbar button.titlebutton,
   .nemo-window widget .toolbar .titlebar button.titlebutton,
   .titlebar .nemo-window widget .toolbar button.titlebutton {
@@ -3279,7 +3279,7 @@ NautilusListView .view, NautilusListView iconview {
     border-width: 1px 0 0 0; }
   .caja-navigation-window .caja-side-pane .view > box, .caja-navigation-window .caja-side-pane iconview > box,
   .caja-navigation-window .caja-side-pane viewport.frame {
-    border: 1px solid {{mix(bg, text, 0.234)}};
+    border: 1px solid {{dividers}};
     border-width: 1px 0 0 0; }
 
 .caja-desktop .entry,
@@ -3290,10 +3290,10 @@ NautilusListView .view, NautilusListView iconview {
   color: {{mix(bg, text, 0.284)}}; }
 
 .gedit-side-panel-paned > separator {
-  background-image: linear-gradient(to bottom, {{mix(bg, text, 0.234)}}, {{mix(bg, text, 0.234)}}); }
+  background-image: linear-gradient(to bottom, {{dividers}}, {{dividers}}); }
 
 .gedit-bottom-panel-paned > separator {
-  background-image: linear-gradient(to bottom, {{mix(bg, text, 0.234)}}, {{mix(bg, text, 0.234)}}); }
+  background-image: linear-gradient(to bottom, {{dividers}}, {{dividers}}); }
 
 .open-document-selector-treeview.view, iconview.open-document-selector-treeview {
   padding: 3px 6px 3px 6px;
@@ -3355,12 +3355,12 @@ NautilusListView .view, NautilusListView iconview {
       color: {{accent_fg}}; }
 
 .gedit-document-panel-dragged-row {
-  border: 1px solid {{mix(bg, text, 0.234)}};
+  border: 1px solid {{dividers}};
   background-color: gainsboro;
   color: {{alpha(text, 0.87)}}; }
 
 .gedit-side-panel-paned statusbar {
-  border-top: 1px solid {{mix(bg, text, 0.234)}};
+  border-top: 1px solid {{dividers}};
   background-color: {{bg}}; }
 
 .gedit-search-entry-occurrences-tag {
@@ -3380,7 +3380,7 @@ NautilusListView .view, NautilusListView iconview {
 .xed-window .xed-goto-line-box, .gedit-search-slider {
   background-color: {{mix(bg, base, 0.5)}};
   padding: 6px;
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   border-radius: 0 0 {{r}}px {{r}}px;
   border-width: 0 1px 1px 1px;
   border-style: solid; }
@@ -3416,11 +3416,11 @@ layouttab {
   background-color: {{base}}; }
 
 layout {
-  border: 1px solid {{mix(bg, text, 0.234)}};
+  border: 1px solid {{dividers}};
   -PnlDockBin-handle-size: 1; }
 
 eggsearchbar box.search-bar {
-  border-bottom: 1px solid {{mix(bg, text, 0.234)}}; }
+  border-bottom: 1px solid {{dividers}}; }
 
 pillbox {
   color: {{accent_fg}};
@@ -3432,7 +3432,7 @@ pillbox {
 docktabstrip {
   padding: 0 6px;
   background-color: {{bg}};
-  border-bottom: 1px solid {{mix(bg, text, 0.234)}}; }
+  border-bottom: 1px solid {{dividers}}; }
   docktabstrip docktab {
     min-height: 28px;
     border: solid transparent;
@@ -3442,15 +3442,15 @@ docktabstrip {
     docktabstrip docktab:checked label, docktabstrip docktab:hover label {
       opacity: 1; }
     docktabstrip docktab:checked {
-      border-color: {{mix(bg, text, 0.234)}};
+      border-color: {{dividers}};
       background-color: {{base}}; }
 
 dockbin {
-  border: 1px solid {{mix(bg, text, 0.234)}};
+  border: 1px solid {{dividers}};
   -PnlDockBin-handle-size: 1; }
 
 dockpaned {
-  border: 1px solid {{mix(bg, text, 0.234)}}; }
+  border: 1px solid {{dividers}}; }
 
 dockoverlayedge {
   background-color: {{bg}}; }
@@ -3481,8 +3481,8 @@ popover.popover-selector {
 
 entry.search.preferences-search {
   border: none;
-  border-right: 1px solid {{mix(bg, text, 0.234)}};
-  border-bottom: 1px solid {{mix(bg, text, 0.234)}};
+  border-right: 1px solid {{dividers}};
+  border-bottom: 1px solid {{dividers}};
   border-radius: 0; }
 
 preferences stacksidebar.sidebar list {
@@ -3493,7 +3493,7 @@ preferences stacksidebar.sidebar list separator {
 
 devhelppanel entry:focus,
 symboltreepanel entry:focus {
-  border-color: {{mix(bg, text, 0.234)}}; }
+  border-color: {{dividers}}; }
 
 button.run-arrow-button {
   min-width: 12px; }
@@ -3773,7 +3773,7 @@ SwitchboardCategoryView .view:selected:focus {
 .cs-header {
   padding: 6px;
   background-color: {{mix(bg, text, 0.025)}};
-  border-bottom: 1px solid {{mix(bg, text, 0.234)}}; }
+  border-bottom: 1px solid {{dividers}}; }
 
 .xed-window .xed-panel.side notebook tab.top {
   padding: 8px 12px; }
@@ -3785,7 +3785,7 @@ SwitchboardCategoryView .view:selected:focus {
   padding: 2px 4px; }
 
 .xed-window .xed-searchbar {
-  border: 0px solid {{mix(bg, text, 0.234)}};
+  border: 0px solid {{dividers}};
   border-top-width: 1px; }
 
 .xed-window statusbar widget border {
@@ -3849,12 +3849,12 @@ EvWindow .content-view .view:focus:selected {
 #content_frame button {
   color: {{alpha(text, 0.87)}};
   outline-color: {{alpha(text, 0.17)}};
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   background-color: {{mix(bg, base, 0.5)}}; }
   #content_frame button:hover {
     color: {{alpha(text, 0.87)}};
     outline-color: {{alpha(text, 0.17)}};
-    border-color: {{mix(bg, text, 0.234)}};
+    border-color: {{dividers}};
     background-color: {{base}}; }
   #content_frame button:active, #content_frame button:checked {
     color: {{alpha(text, 0.87)}};
@@ -3877,7 +3877,7 @@ EvWindow .content-view .view:focus:selected {
   border-bottom-right-radius: {{r}}px;
   border: solid {{alpha(text, 0.1)}};
   border-width: 0 1px 1px 1px;
-  box-shadow: inset 0 1px {{mix(bg, text, 0.234)}}; }
+  box-shadow: inset 0 1px {{dividers}}; }
 
 #buttonbox_frame button {
   color: {{mix(bg, text, 0.132)}};
@@ -3961,7 +3961,7 @@ window.background.lightdm button.flat.option-button {
     border-color: {{alpha(mix(bg, text, 0.234), 0.2)}};
     background-color: {{alpha(text, 0.5)}}; }
   window.background.lightdm button.flat.option-button:active {
-    border-color: {{mix(bg, text, 0.234)}};
+    border-color: {{dividers}};
     background-color: {{accent}};
     color: {{accent_fg}}; }
 
@@ -4013,8 +4013,8 @@ window.background.lightdm .lightdm-combo {
 @define-color theme_unfocused_text_color {{text}};
 @define-color theme_unfocused_bg_color {{bg}};
 @define-color theme_unfocused_base_color {{accent_fg}};
-@define-color borders {{mix(bg, text, 0.234)}};
-@define-color unfocused_borders {{mix(bg, text, 0.234)}};
+@define-color borders {{dividers}};
+@define-color unfocused_borders {{dividers}};
 @define-color warning_color #f27835;
 @define-color error_color #FC4138;
 @define-color success_color #73d216;
@@ -4122,7 +4122,7 @@ list.content > row:not(.expander):not(:active):hover.activatable:not(:selected),
 
 list.content > row,
 list.content > row list > row {
-  border-color: {{mix(bg, text, 0.234)}};
+  border-color: {{dividers}};
   border-style: solid;
   transition: 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 

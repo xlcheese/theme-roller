@@ -1044,6 +1044,22 @@ class RenderAndInstallTests(unittest.TestCase):
         acc = imagecolors.accent(found)
         self.assertGreater(palette.to_rgb(acc)[2], palette.to_rgb(acc)[0])
 
+    def test_dividers(self):
+        base = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        s["global"].update(bg="#2C2C2C", text="#E6E6E6")
+        t = tokens.build(s, base)
+        self.assertGreater(palette.luminance(t["dividers"]), palette.luminance("#2C2C2C"))   # default: lighter
+        dark = styles.Style(**{**base.__dict__, "dividers": "darker(bg, 0.35)"})
+        t = tokens.build(s, dark)
+        self.assertLess(palette.luminance(t["dividers"]), palette.luminance("#2C2C2C"))      # the style's: darker
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "theme"
+            install.build(REPO / "templates", t, out)
+            css = (out / "gtk-3.0" / "base.css").read_text()
+        self.assertIn(t["dividers"], css)
+        self.assertEqual(styles.check({"name": "N", "dividers": "nope"})[0][0][:8], "dividers")
+
     def test_menu_category_colour(self):
         base = styles.load(DEFAULT_STYLE)
         plain = styles.Style(**{**base.__dict__, "panel": {}})           # a style that doesn't set it

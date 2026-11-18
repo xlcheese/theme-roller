@@ -180,6 +180,7 @@ class Style:
     notification: dict[str, Any] = field(default_factory=dict)
     title_bar: dict[str, Any] = field(default_factory=dict)
     title_buttons: dict[str, Any] = field(default_factory=dict)
+    dividers: str = ""                 # the lines between sections ("" = as Mint-Y: mixed toward the text)
     extra_css: str = ""
     warnings: list[str] = field(default_factory=list)
 
@@ -218,7 +219,7 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                         "Style list (longer names are cut off there)")
     for key in data:
         if key not in ("name", "author", "description", "defaults", "edges", "widgets", "panel", "notification",
-                       "title_bar", "title_buttons",
+                       "title_bar", "title_buttons", "dividers",
                        "adapt_strength", "gradient_shape", "split_step", "glass_return"):
             warnings.append(f"unknown top-level key '{key}' is ignored")
 
@@ -277,6 +278,9 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                     errors.append(f"title_bar.gradient_shape must be one of {', '.join(pal.GRADIENT_SHAPES)}")
             elif isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 1:
                 errors.append(f"title_bar.{k} must be a number from 0 to 1")
+
+    if "dividers" in data and not _is_color_ref(data["dividers"], names):
+        errors.append(f"dividers must be a palette color name, #RRGGBB or an expression (got {data['dividers']!r})")
 
     title_buttons = data.get("title_buttons", {})
     if not isinstance(title_buttons, dict):
@@ -445,6 +449,7 @@ def load(path: Path) -> Style:
         notification=copy.deepcopy(data.get("notification", {})),
         title_bar=copy.deepcopy(data.get("title_bar", {})),
         title_buttons=copy.deepcopy(data.get("title_buttons", {})),
+        dividers=data.get("dividers", "") or "",
         extra_css=extra.read_text(encoding="utf-8") if extra.exists() else "",
         warnings=warnings,
     )

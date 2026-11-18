@@ -160,7 +160,14 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # Hover strength (Mint-Y's is a fixed 3%)
     t["row_hover"] = pal.rgba(theme["text"], 0.075 * hover)
     # the frame round a notebook's pages (Mint-Y's), which the tabs join
-    t["frame"] = pal.mix(theme["bg"], theme["text"], 0.234)
+    # dividers, the lines between sections (frames, panes, toolbars, lists,
+    # statusbars, tab frames, sidebars, separators): the style's `dividers`,
+    # else mixed toward the text (Mint-Y's way: lighter than the background on
+    # dark themes; Mint-Y Dark's own are darker)
+    t["dividers"] = (sty._resolve_color(style.dividers, theme) if style.dividers
+                     else pal.mix(theme["bg"], theme["text"], 0.234))
+    t["frame"] = t["dividers"]
+    t["separator_divider"] = t["dividers"] if style.dividers else pal.rgba(theme["text"], 0.1)
     _add_gradients(t, "", theme, amount)
     for k, v in shape.shape_tokens(g["size"], g["roundness"]).items():
         t[k] = str(v)

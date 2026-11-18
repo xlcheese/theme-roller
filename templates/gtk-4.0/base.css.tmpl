@@ -114,11 +114,11 @@ entry > text > placeholder, label.separator {
 
 window.assistant .sidebar {
   background-color: {{base}};
-  border-top: 1px solid {{mix(bg, text, 0.23)}}; }
+  border-top: 1px solid {{dividers}}; }
   window.assistant .sidebar:dir(ltr) {
-    border-right: 1px solid {{mix(bg, text, 0.23)}}; }
+    border-right: 1px solid {{dividers}}; }
   window.assistant .sidebar:dir(rtl) {
-    border-left: 1px solid {{mix(bg, text, 0.23)}}; }
+    border-left: 1px solid {{dividers}}; }
 
 window.assistant.csd .sidebar {
   border-top-style: none; }
@@ -353,7 +353,7 @@ button {
   border-radius: {{r}}px;
   padding: 5px 8px;
   color: {{alpha(text, 0.87)}};
-  border-color: {{mix(bg, text, 0.23)}};
+  border-color: {{dividers}};
   background-color: {{base}}; }
   popover.background.touch-selection button, popover.background.magnifier button,
   button {
@@ -366,7 +366,7 @@ button {
   popover.background.touch-selection button:hover, popover.background.magnifier button:hover,
   button:hover {
     color: {{alpha(text, 0.87)}};
-    border-color: {{mix(bg, text, 0.23)}};
+    border-color: {{dividers}};
     background-color: {{base}};
     -gtk-icon-filter: brightness(1.2); }
   popover.background.touch-selection button.keyboard-activating, popover.background.magnifier button.keyboard-activating, popover.background.touch-selection button:active, popover.background.magnifier button:active, popover.background.touch-selection button:checked, popover.background.magnifier button:checked,
@@ -387,7 +387,7 @@ button {
   popover.background.touch-selection button:disabled, popover.background.magnifier button:disabled,
   button:disabled {
     color: {{alpha(text, 0.42)}};
-    border-color: {{alpha(mix(bg, text, 0.23), 0.55)}};
+    border-color: {{alpha(dividers, 0.55)}};
     background-color: {{alpha(base, 0.55)}};
     -gtk-icon-filter: opacity(0.5); }
     popover.background.touch-selection button:disabled label, popover.background.magnifier button:disabled label,
@@ -429,7 +429,7 @@ button {
     .toolbar :not(.linked) > combobox > box > button:hover, popover.background.touch-selection button.flat:hover, popover.background.magnifier button.flat:hover,
     button.flat:hover {
       color: {{alpha(text, 0.87)}};
-      border-color: {{mix(bg, text, 0.23)}};
+      border-color: {{dividers}};
       background-color: {{base}};
       transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
       transition-duration: 350ms; }
@@ -628,7 +628,7 @@ button.suggested-action {
   popover.background.touch-selection button.suggested-action:disabled, popover.background.magnifier button.suggested-action:disabled,
   button.suggested-action:disabled {
     color: {{alpha(text, 0.42)}};
-    border-color: {{alpha(mix(bg, text, 0.23), 0.55)}};
+    border-color: {{alpha(dividers, 0.55)}};
     background-color: {{alpha(base, 0.55)}}; }
     
     button.suggested-action:disabled label {
@@ -676,7 +676,7 @@ button.destructive-action {
   popover.background.touch-selection button.destructive-action:disabled, popover.background.magnifier button.destructive-action:disabled,
   button.destructive-action:disabled {
     color: {{alpha(text, 0.42)}};
-    border-color: {{alpha(mix(bg, text, 0.23), 0.55)}};
+    border-color: {{alpha(dividers, 0.55)}};
     background-color: {{alpha(base, 0.55)}}; }
     
     button.destructive-action:disabled label {
@@ -833,7 +833,7 @@ list > row button.image-button:not(.flat):hover,
 list > row windowcontrols button:not(.flat):hover,
 windowcontrols list > row button:not(.flat):hover {
   color: {{alpha(text, 0.87)}};
-  border-color: {{mix(bg, text, 0.23)}};
+  border-color: {{dividers}};
   background-color: {{base}}; }
 
 popover.menu box.circular-buttons button.circular.image-button.model:active, popover.menu box.circular-buttons windowcontrols button.circular.model:active, windowcontrols popover.menu box.circular-buttons button.circular.model:active, popover.menu box.circular-buttons button.circular.image-button.model:checked, popover.menu box.circular-buttons windowcontrols button.circular.model:checked, windowcontrols popover.menu box.circular-buttons button.circular.model:checked,
@@ -918,7 +918,7 @@ spinbutton {
   spinbutton:not(.vertical) > button + button,
   spinbutton:not(.vertical) > button:hover:not(:active),
   spinbutton:not(.vertical) > button:hover + button {
-    box-shadow: inset 1px 0 {{mix(bg, text, 0.23)}}; }
+    box-shadow: inset 1px 0 {{dividers}}; }
   spinbutton:not(.vertical) > button:disabled + button:not(:disabled):not(:active):not(:checked):not(:hover),
   spinbutton:not(.vertical) > button:not(:disabled):not(:active):not(:checked):not(:hover) + button:disabled {
     box-shadow: inset 1px 0 {{alpha(mix(bg, text, 0.23), 0.5)}}; }
@@ -995,7 +995,7 @@ combobox popover {
   dropdown popover .dropdown-searchbar,
   combobox popover .dropdown-searchbar {
     padding: 6px;
-    border-bottom: 1px solid {{mix(bg, text, 0.23)}}; }
+    border-bottom: 1px solid {{dividers}}; }
 
 searchbar > revealer > box, .toolbar {
   padding: 4px;
@@ -1531,7 +1531,7 @@ treeview.view {
     color: {{alpha(text, 0.87)}};
     background-color: {{mix(bg, text, 0.155)}};
     border-radius: {{r}}px;
-    border: 1px solid {{mix(bg, text, 0.23)}}; }
+    border: 1px solid {{dividers}}; }
     columnview.view.trough:selected, columnview.view.trough:selected:focus,
     treeview.view.trough:selected,
     treeview.view.trough:selected:focus {
@@ -1548,7 +1548,7 @@ treeview.view {
     background-image: none;
     border-style: none solid solid none;
     border-radius: 0;
-    border-color: {{mix(bg, text, 0.23)}}; }
+    border-color: {{dividers}}; }
     columnview.view > header > button:active, columnview.view > header > button:hover,
     treeview.view > header > button:active,
     treeview.view > header > button:hover {
@@ -1628,7 +1628,7 @@ popover.menu {
     padding: 0 8px; }
     popover.menu box.inline-buttons button.image-button.model, popover.menu box.inline-buttons windowcontrols button.model, windowcontrols popover.menu box.inline-buttons button.model {
       color: {{alpha(text, 0.87)}};
-      border-color: {{mix(bg, text, 0.23)}};
+      border-color: {{dividers}};
       background-color: {{base}}; }
       popover.menu box.inline-buttons button.image-button.model, popover.menu box.inline-buttons windowcontrols button.model, windowcontrols popover.menu box.inline-buttons button.model, popover.menu box.inline-buttons button.image-button.model:dir(ltr) {
         margin-left: 6px; }
@@ -1636,7 +1636,7 @@ popover.menu {
         margin-right: 6px; }
       popover.menu box.inline-buttons button.image-button.model:focus, popover.menu box.inline-buttons windowcontrols button.model:focus, windowcontrols popover.menu box.inline-buttons button.model:focus {
         color: {{alpha(text, 0.87)}};
-        border-color: {{mix(bg, text, 0.23)}};
+        border-color: {{dividers}};
         background-color: {{base}}; }
       popover.menu box.inline-buttons button.image-button.model:active, popover.menu box.inline-buttons windowcontrols button.model:active, windowcontrols popover.menu box.inline-buttons button.model:active {
         color: {{alpha(text, 0.87)}};
@@ -1648,7 +1648,7 @@ popover.menu {
       padding: 11px; }
       popover.menu box.circular-buttons button.circular.image-button.model:focus, popover.menu box.circular-buttons windowcontrols button.circular.model:focus, windowcontrols popover.menu box.circular-buttons button.circular.model:focus {
         color: {{alpha(text, 0.87)}};
-        border-color: {{mix(bg, text, 0.23)}};
+        border-color: {{dividers}};
         background-color: {{base}}; }
       popover.menu box.circular-buttons button.circular.image-button.model:active, popover.menu box.circular-buttons windowcontrols button.circular.model:active, windowcontrols popover.menu box.circular-buttons button.circular.model:active {
         color: {{alpha(text, 0.87)}};
@@ -1708,7 +1708,7 @@ menubar {
 notebook {
   padding: 0; }
   notebook.frame {
-    border: 1px solid {{mix(bg, text, 0.23)}}; }
+    border: 1px solid {{dividers}}; }
     notebook.frame > header {
       margin: -1px; }
       notebook.frame > header.top {
@@ -1732,13 +1732,13 @@ notebook {
     background-color: {{bg}};
     /* button in headers */ }
     notebook > header.top {
-      box-shadow: inset 0 -1px {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset 0 -1px {{dividers}}; }
     notebook > header.bottom {
-      box-shadow: inset 0 1px {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset 0 1px {{dividers}}; }
     notebook > header.right {
-      box-shadow: inset 1px 0 {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset 1px 0 {{dividers}}; }
     notebook > header.left {
-      box-shadow: inset -1px 0 {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset -1px 0 {{dividers}}; }
     notebook > header.top {
       padding-bottom: 0; }
       notebook > header.top > tabs > tab {
@@ -1812,24 +1812,24 @@ notebook {
       notebook > header > tabs > arrow:disabled {
         color: {{alpha(text, 0.12)}}; }
     notebook > header.top > tabs > tab:hover:not(:checked) {
-      box-shadow: inset 0 -1px {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset 0 -1px {{dividers}}; }
     notebook > header.bottom > tabs > tab:hover:not(:checked) {
-      box-shadow: inset 0 1px {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset 0 1px {{dividers}}; }
     notebook > header.left > tabs > tab:hover:not(:checked) {
-      box-shadow: inset -1px 0 {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset -1px 0 {{dividers}}; }
     notebook > header.right > tabs > tab:hover:not(:checked) {
-      box-shadow: inset 1px 0 {{mix(bg, text, 0.23)}}; }
+      box-shadow: inset 1px 0 {{dividers}}; }
     notebook > header > tabs > tab {
       color: {{alpha(text, 0.42)}};
       background-color: transparent; }
       notebook > header > tabs > tab:hover:not(:checked) {
         color: {{alpha(text, 0.645)}};
         background-color: {{alpha(base, 0.5)}};
-        border-color: {{mix(bg, text, 0.23)}}; }
+        border-color: {{dividers}}; }
       notebook > header > tabs > tab:checked {
         color: {{alpha(text, 0.87)}};
         background-color: {{base}};
-        border-color: {{mix(bg, text, 0.23)}}; }
+        border-color: {{dividers}}; }
       notebook > header > tabs > tab button.flat {
         min-height: 22px;
         min-width: 16px;
@@ -1846,13 +1846,13 @@ scrollbar {
   background-color: {{mix(bg, base, 0.571)}};
   transition: 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94); }
   scrollbar.top {
-    border-bottom: 1px solid {{mix(bg, text, 0.23)}}; }
+    border-bottom: 1px solid {{dividers}}; }
   scrollbar.bottom {
-    border-top: 1px solid {{mix(bg, text, 0.23)}}; }
+    border-top: 1px solid {{dividers}}; }
   scrollbar.left {
-    border-right: 1px solid {{mix(bg, text, 0.23)}}; }
+    border-right: 1px solid {{dividers}}; }
   scrollbar.right {
-    border-left: 1px solid {{mix(bg, text, 0.23)}}; }
+    border-left: 1px solid {{dividers}}; }
   scrollbar button {
     border: none; }
   scrollbar slider {
@@ -2157,9 +2157,9 @@ radio {
 progressbar > trough, scale > trough > fill, scale > trough {
   border: none;
   border-radius: {{r}}px;
-  background-color: {{mix(bg, text, 0.23)}}; }
+  background-color: {{dividers}}; }
   progressbar > trough:disabled, scale > trough > fill:disabled, scale > trough:disabled {
-    background-color: {{alpha(mix(bg, text, 0.23), 0.55)}}; }
+    background-color: {{alpha(dividers, 0.55)}}; }
   modelbutton:hover progressbar > trough, modelbutton:hover scale > trough > fill, modelbutton:hover scale > trough, row:selected progressbar > trough, row:selected scale > trough > fill, row:selected scale > trough, infobar progressbar > trough, infobar scale > trough > fill, infobar scale > trough {
     background-color: {{alpha(text, 0.2)}}; }
     modelbutton:hover progressbar > trough:disabled, modelbutton:hover scale > trough > fill:disabled, modelbutton:hover scale > trough:disabled, row:selected progressbar > trough:disabled, row:selected scale > trough > fill:disabled, row:selected scale > trough:disabled, infobar progressbar > trough:disabled, infobar scale > trough > fill:disabled, infobar scale > trough:disabled {
@@ -2326,7 +2326,7 @@ levelbar > trough {
   border: none;
   padding: 3px;
   border-radius: {{r}}px;
-  background-color: {{mix(bg, text, 0.23)}}; }
+  background-color: {{dividers}}; }
 
 levelbar > trough > block:not(.empty) {
   border: 1px solid {{accent}};
@@ -2357,14 +2357,14 @@ window.dialog.print drawing {
   window.dialog.print drawing paper {
     background: {{base}};
     color: #5c616c;
-    border: 1px solid {{mix(bg, text, 0.23)}}; }
+    border: 1px solid {{dividers}}; }
 
 window.dialog.print .dialog-action-box {
   margin: 12px; }
 
 frame,
 .frame {
-  border: 1px solid {{mix(bg, text, 0.23)}}; }
+  border: 1px solid {{dividers}}; }
 
 frame {
   border-radius: 0; }
@@ -2373,7 +2373,7 @@ frame {
 
 actionbar > revealer > box {
   padding: 5px;
-  border-top: 1px solid {{mix(bg, text, 0.23)}};
+  border-top: 1px solid {{dividers}};
   background-color: {{mix(bg, text, 0.035)}}; }
   actionbar > revealer > box, actionbar > revealer > box > box.start, actionbar > revealer > box > box.end {
     border-spacing: 6px; }
@@ -2415,12 +2415,12 @@ scrolledwindow > overshoot.right {
   box-shadow: none; }
 
 scrolledwindow > junction {
-  background: {{mix(bg, text, 0.23)}}, linear-gradient(to bottom, transparent 1px, {{mix(bg, base, 0.571)}} 1px), linear-gradient(to right, transparent 1px, {{mix(bg, base, 0.571)}} 1px); }
+  background: {{dividers}}, linear-gradient(to bottom, transparent 1px, {{mix(bg, base, 0.571)}} 1px), linear-gradient(to right, transparent 1px, {{mix(bg, base, 0.571)}} 1px); }
   scrolledwindow > junction:dir(rtl) {
-    background: {{mix(bg, text, 0.23)}}, linear-gradient(to bottom, transparent 1px, {{mix(bg, base, 0.571)}} 1px), linear-gradient(to left, transparent 1px, {{mix(bg, base, 0.571)}} 1px); }
+    background: {{dividers}}, linear-gradient(to bottom, transparent 1px, {{mix(bg, base, 0.571)}} 1px), linear-gradient(to left, transparent 1px, {{mix(bg, base, 0.571)}} 1px); }
 
 separator {
-  background-color: {{alpha(text, 0.1)}};
+  background-color: {{separator_divider}};
   min-width: 1px;
   min-height: 1px; }
 
@@ -2428,7 +2428,7 @@ listview,
 list {
   color: {{text}};
   background-color: {{base}};
-  border-color: {{mix(bg, text, 0.23)}}; }
+  border-color: {{dividers}}; }
   listview > row,
   list > row {
     padding: 2px; }
@@ -2574,7 +2574,7 @@ expander-widget:not(decoration):not(window):drop(active) {
 
 calendar {
   color: {{alpha(text, 0.87)}};
-  border: 1px solid {{mix(bg, text, 0.23)}};
+  border: 1px solid {{dividers}};
   border-radius: {{r}}px;
   padding: 2px; }
   calendar > header {
@@ -2648,11 +2648,11 @@ window.dialog.message.csd .dialog-action-area button {
     border-bottom-right-radius: {{r}}px; }
 
 filechooser .dialog-action-box {
-  border-top: 1px solid {{mix(bg, text, 0.23)}}; }
+  border-top: 1px solid {{dividers}}; }
 
 filechooser #pathbarbox {
   background-color: {{mix(bg, text, 0.06)}};
-  border-bottom: 1px solid {{mix(bg, text, 0.23)}}; }
+  border-bottom: 1px solid {{dividers}}; }
 
 filechooserbutton > button > box {
   border-spacing: 6px; }
@@ -2665,10 +2665,10 @@ filechooserbutton:drop(active) {
   border-style: none;
   background-color: {{base}}; }
   .sidebar:not(separator):dir(ltr), .sidebar:not(separator).left, .sidebar:not(separator).left:dir(rtl) {
-    border-right: 1px solid {{mix(bg, text, 0.23)}};
+    border-right: 1px solid {{dividers}};
     border-left-style: none; }
   .sidebar:not(separator):dir(rtl), .sidebar:not(separator).right {
-    border-left: 1px solid {{mix(bg, text, 0.23)}};
+    border-left: 1px solid {{dividers}};
     border-right-style: none; }
   .sidebar listview.view,
   .sidebar list {
@@ -2702,7 +2702,7 @@ stacksidebar row {
     background-color: {{darker(accent, 0.1)}}; }
 
 separator.sidebar {
-  background-color: {{mix(bg, text, 0.23)}}; }
+  background-color: {{dividers}}; }
   .titlebar separator.sidebar {
     background-color: {{mix(bg, text, 0.295)}};
     margin: 0; }
@@ -2788,7 +2788,7 @@ paned > separator {
   -gtk-icon-source: none;
   border-style: none;
   background-color: transparent;
-  background-image: linear-gradient(to bottom, {{mix(bg, text, 0.23)}}, {{mix(bg, text, 0.23)}});
+  background-image: linear-gradient(to bottom, {{dividers}}, {{dividers}});
   background-size: 1px 1px; }
   paned > separator:selected {
     background-image: linear-gradient(to bottom, {{accent}}, {{accent}}); }
@@ -2955,11 +2955,11 @@ colorswatch#add-color-button {
   border-style: solid;
   border-width: 1px;
   color: {{alpha(text, 0.87)}};
-  border-color: {{mix(bg, text, 0.23)}};
+  border-color: {{dividers}};
   background-color: {{base}}; }
   colorswatch#add-color-button:hover {
     color: {{alpha(text, 0.87)}};
-    border-color: {{mix(bg, text, 0.23)}};
+    border-color: {{dividers}};
     background-color: {{base}}; }
   colorswatch#add-color-button overlay {
     border-color: transparent;
@@ -2991,7 +2991,7 @@ colorchooser .popover.osd {
 
 .scale-popup button:hover {
   color: {{alpha(text, 0.87)}};
-  border-color: {{mix(bg, text, 0.23)}};
+  border-color: {{dividers}};
   background-color: {{base}}; }
 
 window {
@@ -3107,12 +3107,12 @@ popover.emoji-picker > contents {
 .emoji-searchbar {
   padding: 5px;
   border-spacing: 6px;
-  border-bottom: 1px solid {{mix(bg, text, 0.23)}}; }
+  border-bottom: 1px solid {{dividers}}; }
 
 .emoji-toolbar {
   padding: 5px;
   border-spacing: 6px;
-  border-top: 1px solid {{mix(bg, text, 0.23)}}; }
+  border-top: 1px solid {{dividers}}; }
 
 button.emoji-section:active, button.emoji-section:checked {
   border-color: transparent; }
@@ -3181,8 +3181,8 @@ menubutton arrow {
 @define-color theme_unfocused_text_color {{text}};
 @define-color theme_unfocused_bg_color {{bg}};
 @define-color theme_unfocused_base_color {{accent_fg}};
-@define-color borders {{mix(bg, text, 0.23)}};
-@define-color unfocused_borders {{mix(bg, text, 0.23)}};
+@define-color borders {{dividers}};
+@define-color unfocused_borders {{dividers}};
 @define-color warning_color #F27835;
 @define-color error_color #FC4138;
 @define-color success_color #73D216;
@@ -3194,7 +3194,7 @@ menubutton arrow {
 @define-color wm_bg_unfocused {{mix(bg, text, 0.025)}};
 @define-color wm_highlight {{mix(bg, text, 0.05)}};
 @define-color wm_border {{mix(bg, text, 0.295)}};
-@define-color wm_border_unfocused {{mix(bg, text, 0.23)}};
+@define-color wm_border_unfocused {{dividers}};
 @define-color wm_shadow alpha({{darker(text, 1)}}, 0.35);
 @define-color wm_button_close_bg {{accent}};
 @define-color wm_button_close_hover_bg {{lighter(accent, 0.249)}};

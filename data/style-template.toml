@@ -32,6 +32,12 @@ description = "My own style."
 # on, so one line looks alike on light and dark buttons (0 = not at all).
 #adapt_strength = 0.6
 
+# Dividers: the lines between sections (frames, panes, toolbars, lists,
+# statusbars, tab frames, sidebars, separators). Left out, they're mixed toward
+# the text (lighter than the background on dark themes); "darker(bg, 0.35)"
+# draws them darker, as Mint-Y Dark does.
+#dividers = "darker(bg, 0.35)"
+
 # Button faces: "smooth" (top to bottom), "split" (glossy, a step at the
 # middle, as Clearlooks Gummy) or "glass" (light reflected from below).
 #gradient_shape = "smooth"
