@@ -315,6 +315,8 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     else:
         mode = "classic" if overlay_scrollbars is False else "overlay"
     sb_width = 6 if mode == "overlay" else 10
+    if sb["custom"] and sb.get("width") is not None:     # yours, in either mode
+        sb_width = sb["width"]
     t["scrollbar.mode"] = mode
     t["scrollbar.width"] = str(sb_width)
     sb_round = sb["roundness"] if sb["custom"] else 100

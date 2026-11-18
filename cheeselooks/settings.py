@@ -45,7 +45,8 @@ DEFAULTS: dict[str, Any] = {
     "terminal": {"separate_colors": False, "bg": None, "text": None},
     "details": {
         "tooltips": {"custom": False, "bg": None, "text": None},
-        "scrollbars": {"custom": False, "mode": "overlay", "roundness": 100},
+        "scrollbars": {"custom": False, "mode": "overlay", "roundness": 100,
+                       "width": None},   # None: 6 overlay (expanded), 10 classic
         "sliders": {"custom": False, "roundness": 100},
         "switches": {"custom": False, "roundness": 100},
         "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
@@ -103,6 +104,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "scrollbars", "custom"), "bool", None),
     (("details", "scrollbars", "mode"), "choice", ("overlay", "classic")),
     (("details", "scrollbars", "roundness"), "int", (0, 100)),
+    (("details", "scrollbars", "width"), "int?", (6, 16)),
     (("details", "sliders", "custom"), "bool", None),
     (("details", "sliders", "roundness"), "int", (0, 100)),
     (("details", "switches", "custom"), "bool", None),

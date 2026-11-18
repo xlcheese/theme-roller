@@ -802,6 +802,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if path[-1] == "button_roundness":
             wb = self.data["window_borders"]
             return titlebuttons.roundness(wb["button_style"], None, self.data["global"]["roundness"])
+        if path[:2] == ("details", "scrollbars") and path[-1] == "width":
+            return 6 if self.data["details"]["scrollbars"]["mode"] == "overlay" else 10
         if path[-1] == "button_spacing":
             return titlebuttons.spacing(self.data["window_borders"]["button_style"])
         if path[-1] == "window_roundness":

@@ -1030,6 +1030,16 @@ class RenderAndInstallTests(unittest.TestCase):
         out = settings.apply_style_defaults(defaults(), {"unfocused_depth": 40})
         self.assertEqual(out["style"]["unfocused_depth"], 40)
 
+    def test_scrollbar_width(self):
+        st = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        s["details"]["scrollbars"].update(custom=True, mode="classic")
+        self.assertEqual(tokens.build(s, st)["scrollbar.width"], "10")        # unset: the mode's own
+        s["details"]["scrollbars"]["width"] = 14
+        self.assertEqual(tokens.build(s, st)["scrollbar.width"], "14")
+        s["details"]["scrollbars"]["mode"] = "overlay"                         # either mode
+        self.assertEqual(tokens.build(s, st)["scrollbar.width"], "14")
+
     def test_button_spacing(self):
         self.assertEqual(titlebuttons.spacing("drawn"), 6)
         self.assertEqual(titlebuttons.spacing("gargantuan-circles"), 0)
