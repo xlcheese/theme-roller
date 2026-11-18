@@ -1030,6 +1030,23 @@ class RenderAndInstallTests(unittest.TestCase):
         out = settings.apply_style_defaults(defaults(), {"unfocused_depth": 40})
         self.assertEqual(out["style"]["unfocused_depth"], 40)
 
+    def test_menu_style(self):
+        s = defaults()
+        s["global"].update(roundness=40, gradient=60)
+        s["panel"]["menu_shape"] = {"follow_global": False, "roundness": 0, "item_roundness": 100}
+        st = styles.load(DEFAULT_STYLE)
+        t = tokens.build(s, st)
+        self.assertEqual(t["menu.r"], "0")                                   # the menu itself
+        self.assertEqual(t["menu.item_r"], str(shape.radius(100, 30)))       # the main menu's items
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "theme"
+            install.build(REPO / "templates", t, out)
+            css = (out / "cinnamon" / "cinnamon.css").read_text()
+        self.assertIn(f".popup-menu-item {{\n  border-radius: {t['r']}px;", css)  # other menus: Global
+        self.assertIn(f".menu-application-button, .menu-category-button, .menu-category-button-greyed {{\n  border-radius: {t['menu.item_r']}px;", css)
+        self.assertEqual(t["menu.w.menu_item.hover_top"], tokens.build(s, st)["menu.w.menu_item.hover_top"])
+        self.assertEqual(settings.apply_style_defaults(defaults(), {"menu_roundness": 50})["panel"]["menu_shape"]["item_roundness"], 50)
+
     def test_scrollbar_width(self):
         st = styles.load(DEFAULT_STYLE)
         s = defaults()

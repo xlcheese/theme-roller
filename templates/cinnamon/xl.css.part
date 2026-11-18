@@ -186,8 +186,10 @@
 .popup-sub-menu {
   background-color: {{alpha(mix(menu.menu_bg, menu.text, 0.04), 0.6)}}; }
 
+/* menu items: Global roundness (right-click and applet menus); the main
+   menu's own items take Menu-item roundness (below) */
 .popup-menu-item {
-  border-radius: {{menu.r}}px;
+  border-radius: {{r}}px;
   transition-duration: {{hover_out_ms}}; }
 .popup-menu-item:active {
   color: {{menu.w.menu_item.hover_fg}};
@@ -202,7 +204,7 @@
   background-color: {{menu.fav_bg}};
   border-radius: {{menu.r2}}px; }
 .menu-favorites-button {
-  border-radius: {{menu.r}}px;
+  border-radius: {{menu.item_r}}px;
   transition-duration: {{hover_out_ms}}; }
 .menu-favorites-button:hover {
   background-color: {{menu.fav_hover}};
@@ -212,11 +214,11 @@
   transition-duration: {{hover_in_ms}}; }
 
 .menu-application-button, .menu-category-button, .menu-category-button-greyed {
-  border-radius: {{menu.r}}px;
+  border-radius: {{menu.item_r}}px;
   transition-duration: {{hover_out_ms}}; }
 .menu-application-button-selected, .menu-category-button:hover {
   color: {{menu.text}};
-  border-radius: {{menu.r}}px;
+  border-radius: {{menu.item_r}}px;
   background-color: {{menu.menu_hover}};
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.menu_hover_top}};
@@ -224,7 +226,7 @@
   transition-duration: {{hover_in_ms}}; }
 .menu-category-button-selected, .menu-category-button-selected:hover {
   color: {{menu.accent_fg}};
-  border-radius: {{menu.r}}px;
+  border-radius: {{menu.item_r}}px;
   background-color: {{menu.select}};
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.select_top}};

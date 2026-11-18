@@ -87,7 +87,8 @@ TITLE_BUTTON_KEYS = ("color", "hover_color", "pressed_color", "border", "hover_b
 DEFAULT_KEYS: dict[str, Any] = {
     "roundness": (0, 100), "gradient": (0, 100), "depth": (0, 100), "unfocused_depth": (0, 100),
     "panel_roundness": (0, 100), "panel_gradient": (0, 100),
-    "menu_roundness": (0, 100), "menu_gradient": (0, 100),
+    "menu_roundness": (0, 100), "menu_item_roundness": (0, 100),
+    "menu_gradient": (0, 100),          # ignored: menus follow Global's gradient
     "panel_opacity": (30, 100), "menu_opacity": (30, 100), "notification_opacity": (30, 100),
     "panel_label_weight": None,
 }

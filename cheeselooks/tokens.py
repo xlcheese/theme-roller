@@ -202,7 +202,11 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
         pcolors = theme
     ps, ms = p["panel_shape"], p["menu_shape"]
     p_round, p_grad = (g["roundness"], g["gradient"]) if ps["follow_global"] else (ps["roundness"], ps["gradient"])
-    m_round, m_grad = (g["roundness"], g["gradient"]) if ms["follow_global"] else (ms["roundness"], ms["gradient"])
+    # menus: Menu roundness for the menu itself, Menu-item roundness for the main
+    # menu's items (other menus' items follow Global), Global's gradient
+    m_round = g["roundness"] if ms["follow_global"] else ms["roundness"]
+    m_item_round = g["roundness"] if ms["follow_global"] else ms.get("item_roundness", ms["roundness"])
+    m_grad = g["gradient"]
     ctl = shape.size_value(g["size"])
 
     if style.panel.get("color"):
@@ -230,6 +234,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     m_r = shape.radius(m_round, ctl)
     t["menu.r"] = str(m_r)
     t["menu.r2"] = str(shape.window_radius(m_r))
+    t["menu.item_r"] = str(shape.radius(m_item_round, ctl))         # the main menu's items
     t["menu.opacity"] = f"{p['menu_opacity'] / 100:g}"
     # notification popups: the style's kind of accent, your opacity
     t["notification.opacity"] = f"{p['notification_opacity'] / 100:g}"

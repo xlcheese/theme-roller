@@ -52,8 +52,9 @@ LABELS = {
     "accent": "Accent", "bg": "Background", "text": "Text", "size": "Size",
     "roundness": "Roundness", "gradient": "Gradient", "hover_in_ms": "Hover in (ms)",
     "hover_out_ms": "Hover out (ms)", "hover_strength": "Hover strength", "depth": "Depth", "unfocused_depth": "Unfocused depth",
-    "label_weight": "Label weight", "panel_opacity": "Panel opacity", "menu_opacity": "Menu opacity",
-    "notification_opacity": "Notification opacity", "panel_height": "Panel height",
+    "label_weight": "Label weight", "panel_opacity": "Opacity", "menu_opacity": "Opacity",
+    "notification_opacity": "Notification opacity", "panel_height": "Height",
+    "item_roundness": "Menu-item roundness",
     "title_bar": "Title bar", "title_text": "Title text", "border": "Border",
     "title_bar_height": "Title bar height", "border_width": "Border width", "window_roundness": "Window roundness",
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
@@ -61,9 +62,19 @@ LABELS = {
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
 }
-GROUPS = {"panel_shape": "Panel shape", "menu_shape": "Menu shape", "tooltips": "Tooltips",
+GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
           "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
           "focus_ring": "Focus ring"}
+# Panel & Menu: the order shown, and the heading each setting sits under
+# (Height and Opacity are kept outside the shape groups in the settings file,
+# so changing them doesn't stop the shapes following Global)
+PANEL_LAYOUT = [
+    (("panel", "label_weight"), None), (("panel", "notification_opacity"), None),
+    (("panel", "panel_height"), "panel_shape"), (("panel", "panel_shape", "roundness"), "panel_shape"),
+    (("panel", "panel_shape", "gradient"), "panel_shape"), (("panel", "panel_opacity"), "panel_shape"),
+    (("panel", "menu_shape", "roundness"), "menu_shape"),
+    (("panel", "menu_shape", "item_roundness"), "menu_shape"), (("panel", "menu_opacity"), "menu_shape"),
+]
 SECTION_NOTES = {
     "panel": "Colors left on “Follow theme” use the Global colors.",
     "window_borders": "Colors left on “Follow theme” come from the Global colors.",
@@ -225,11 +236,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
             grid.attach(note, 0, row, 2, 1)
             row += 1
         group = None
-        for path, kind, extra in settings._RULES:
-            if path[0] != section or path[-1] in HIDDEN:
-                continue
-            if len(path) == 3 and path[1] != group:
-                group = path[1]
+        rules = [r for r in settings._RULES if r[0][0] == section and r[0][-1] not in HIDDEN]
+        heading = {}
+        if section == "panel":
+            order = [p for p, _g in PANEL_LAYOUT]
+            heading = dict(PANEL_LAYOUT)
+            rules.sort(key=lambda r: order.index(r[0]) if r[0] in order else -1)   # colors first
+        for path, kind, extra in rules:
+            under = heading.get(path, path[1] if len(path) == 3 else None)
+            if under and under != group:
+                group = under
                 head = Gtk.Label(xalign=0, margin_top=8)
                 head.set_markup(f"<b>{GLib.markup_escape_text(GROUPS.get(group, group))}</b>")
                 grid.attach(head, 0, row, 2, 1)
@@ -624,8 +640,39 @@ class SettingsWindow(Gtk.ApplicationWindow):
         win.pack_start(body, False, False, 0)
         frame.add(win)
         outer.pack_start(frame, False, False, 0)
+        # Cinnamon's main menu, open above its panel button (Menu style)
+        menu = Gtk.Box(spacing=6, halign=Gtk.Align.START, margin_start=4)
+        menu.get_style_context().add_class("xl-prev-menu")
+        favs = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        favs.get_style_context().add_class("xl-prev-favs")
+        for icon in ("web-browser-symbolic", "folder-symbolic", "utilities-terminal-symbolic"):
+            fb = Gtk.Label()
+            fb.set_markup("●")
+            fb.get_style_context().add_class("xl-prev-fav")
+            favs.pack_start(fb, False, False, 0)
+        menu.pack_start(favs, False, False, 0)
+        for column in (("Favorites", "Accessories", "Graphics"), ("Calculator", "Files", "Terminal")):
+            col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+            for name in column:
+                item = Gtk.Label(label=name, xalign=0)
+                item.get_style_context().add_class("xl-prev-mitem")
+                if name == "Favorites":
+                    item.get_style_context().add_class("selected")
+                if name == "Files":
+                    item.get_style_context().add_class("hover")
+                col.pack_start(item, False, False, 0)
+            menu.pack_start(col, False, False, 0)
+        caption = Gtk.Label(label="Panel and menu (drawn preview)", xalign=0)
+        caption.get_style_context().add_class("dim-label")
+        outer.pack_start(caption, False, False, 0)
+        desk = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)     # the menu sits on the panel
+        desk.pack_start(menu, False, False, 0)
+        outer.pack_start(desk, False, False, 0)
         panel = Gtk.Box(spacing=2)
         panel.get_style_context().add_class("xl-prev-panel")
+        mbtn = Gtk.ToggleButton(label="Menu")
+        mbtn.get_style_context().add_class("xl-prev-pb")
+        panel.pack_start(mbtn, False, False, 0)
         for i, name in enumerate(("Terminal", "Files", "Browser")):
             b = Gtk.ToggleButton(label=name)
             b.get_style_context().add_class("xl-prev-pb")
@@ -633,10 +680,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 b.get_style_context().add_class("focused")
             panel.pack_start(b, False, False, 0)
         panel.pack_end(Gtk.Label(label="12:00", margin_end=8), False, False, 0)
-        caption = Gtk.Label(label="Panel (drawn preview)", xalign=0)
-        caption.get_style_context().add_class("dim-label")
-        outer.pack_start(caption, False, False, 0)
-        outer.pack_start(panel, False, False, 0)
+        desk.pack_start(panel, False, False, 0)
         scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER)
         scroller.add(outer)
         return scroller
@@ -655,6 +699,17 @@ class SettingsWindow(Gtk.ApplicationWindow):
   rgba({t['panel.panel_bottom_rgb']}, {t['panel.opacity']}));
   border-top: 1px solid {t['panel.border']}; padding: 3px 4px; color: {t['panel.text']}; }}
 .xl-prev-panel label {{ color: {t['panel.text']}; font-weight: {t['panel.label_weight']}; }}
+.xl-prev-menu {{ color: {t['menu.text']}; background-color: rgba({t['menu.menu_bg_rgb']}, {t['menu.opacity']});
+  border: 1px solid {pal.rgba(t['menu.border'], 0.9)}; border-radius: {t['menu.r2']}px {t['menu.r2']}px 0 0;
+  border-bottom-width: 0; padding: 8px; }}
+.xl-prev-menu label {{ color: {t['menu.text']}; }}
+.xl-prev-favs {{ background-color: {t['menu.fav_bg']}; border-radius: {t['menu.r2']}px; padding: 4px; }}
+.xl-prev-fav {{ min-width: 22px; min-height: 22px; color: {pal.rgba(t['menu.text'], 0.55)}; }}
+.xl-prev-mitem {{ padding: 4px 10px; min-width: 96px; border-radius: {t['menu.item_r']}px; }}
+.xl-prev-mitem.hover {{ background-color: {t['menu.menu_hover']};
+  background-image: linear-gradient(to bottom, {t['menu.menu_hover_top']}, {t['menu.menu_hover_bottom']}); }}
+.xl-prev-mitem.selected {{ color: {t['menu.accent_fg']}; background-color: {t['menu.select']};
+  background-image: linear-gradient(to bottom, {t['menu.select_top']}, {t['menu.select_bottom']}); }}
 button.xl-prev-pb {{ min-height: {max(14, int(t['panel.height']) - 14)}px; padding: 0 {t[pb + 'padding']}px; margin-right: {t[pb + 'spacing']}px;
   border: 1px solid {t[pb + 'border']}; border-radius: {t['panel.r']}px;
   background-color: {t[pb + 'color']};

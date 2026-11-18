@@ -31,7 +31,8 @@ DEFAULTS: dict[str, Any] = {
         "panel_opacity": 70, "menu_opacity": 94, "notification_opacity": 94,
         "panel_height": None,   # None: leave Cinnamon's panel height as it is
         "panel_shape": {"follow_global": True, "roundness": 15, "gradient": 10},
-        "menu_shape": {"follow_global": True, "roundness": 15, "gradient": 10},
+        # menus follow Global's gradient; item_roundness: Cinnamon's main menu's items
+        "menu_shape": {"follow_global": True, "roundness": 15, "item_roundness": 15},
     },
     "window_borders": {
         "separate_colors": False, "title_bar": None, "title_text": None, "border": None,
@@ -81,7 +82,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("panel", "panel_shape", "gradient"), "int", (0, 100)),
     (("panel", "menu_shape", "follow_global"), "bool", None),
     (("panel", "menu_shape", "roundness"), "int", (0, 100)),
-    (("panel", "menu_shape", "gradient"), "int", (0, 100)),
+    (("panel", "menu_shape", "item_roundness"), "int", (0, 100)),
     (("window_borders", "separate_colors"), "bool", None),
     (("window_borders", "title_bar"), "color?", None),
     (("window_borders", "title_text"), "color?", None),
@@ -239,15 +240,20 @@ def apply_style_defaults(settings: dict, defaults: dict) -> dict:
     for key in ("depth", "unfocused_depth"):
         if key in defaults:
             out["style"][key] = defaults[key]
-    for area in ("panel", "menu"):
-        shape = p[f"{area}_shape"]
-        r, gr = defaults.get(f"{area}_roundness"), defaults.get(f"{area}_gradient")
-        if r is None and gr is None:
-            shape.update(follow_global=True, roundness=g["roundness"], gradient=g["gradient"])
-        else:
-            shape.update(follow_global=False,
-                         roundness=g["roundness"] if r is None else r,
-                         gradient=g["gradient"] if gr is None else gr)
+    ps = p["panel_shape"]
+    r, gr = defaults.get("panel_roundness"), defaults.get("panel_gradient")
+    if r is None and gr is None:
+        ps.update(follow_global=True, roundness=g["roundness"], gradient=g["gradient"])
+    else:
+        ps.update(follow_global=False, roundness=g["roundness"] if r is None else r,
+                  gradient=g["gradient"] if gr is None else gr)
+    ms = p["menu_shape"]          # menus follow Global's gradient (menu_gradient is ignored)
+    r, ir = defaults.get("menu_roundness"), defaults.get("menu_item_roundness")
+    if r is None and ir is None:
+        ms.update(follow_global=True, roundness=g["roundness"], item_roundness=g["roundness"])
+    else:
+        ms.update(follow_global=False, roundness=g["roundness"] if r is None else r,
+                  item_roundness=(r if r is not None else g["roundness"]) if ir is None else ir)
     for key in ("panel_opacity", "menu_opacity", "notification_opacity"):
         if key in defaults:
             p[key] = defaults[key]
