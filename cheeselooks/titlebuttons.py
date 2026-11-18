@@ -1011,7 +1011,8 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
     if g.full_height:
         # filling the title bar: but GTK centres window buttons in a header bar,
         # which its other buttons hold at 46px at least (a strip showed above)
-        h = max(int(t["wb.height_inner"]), HEADERBAR_CONTENT)
+        # (its buttons grow with Size: 34px plus Mint-Y's 6px margins at Size 30)
+        h = max(int(t["wb.height_inner"]), HEADERBAR_CONTENT + int(t["ctl"]) - 30)
         margin = "0"
     else:
         h, margin = g.h, f"0 {g.gap // 2}px"
