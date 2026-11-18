@@ -23,7 +23,8 @@ DEFAULTS: dict[str, Any] = {
         "size": "normal", "roundness": 15, "gradient": 10,
         "hover_in_ms": 50, "hover_out_ms": 125, "hover_strength": 50,
     },
-    "style": {"name": "xl-Cheeselooks", "depth": 50},
+    "style": {"name": "xl-Cheeselooks", "depth": 50,
+              "unfocused_depth": 70},   # % of the button layers kept in unfocused windows
     "panel": {
         "separate_colors": False, "accent": None, "bg": None, "text": None,
         "label_weight": "bold",
@@ -63,6 +64,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("global", "hover_out_ms"), "int", (0, 800)),
     (("global", "hover_strength"), "int", (0, 100)),
     (("style", "depth"), "int", (0, 100)),
+    (("style", "unfocused_depth"), "int", (0, 100)),
     (("panel", "separate_colors"), "bool", None),
     (("panel", "accent"), "color?", None),
     (("panel", "bg"), "color?", None),
@@ -221,8 +223,9 @@ def apply_style_defaults(settings: dict, defaults: dict) -> dict:
     for key in ("roundness", "gradient"):
         if key in defaults:
             g[key] = defaults[key]
-    if "depth" in defaults:
-        out["style"]["depth"] = defaults["depth"]
+    for key in ("depth", "unfocused_depth"):
+        if key in defaults:
+            out["style"][key] = defaults[key]
     for area in ("panel", "menu"):
         shape = p[f"{area}_shape"]
         r, gr = defaults.get(f"{area}_roundness"), defaults.get(f"{area}_gradient")

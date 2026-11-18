@@ -87,6 +87,25 @@ def rgba(color: str, alpha: float) -> str:
 # Gradients (spec section 4)
 # --------------------------------------------------------------------------
 
+def scale_shadow(shadow: str, factor: float) -> str:
+    """A CSS box-shadow list with every colour's alpha times factor (0: none)."""
+    import re
+    if not shadow or shadow.strip() == "none":
+        return shadow
+    if factor <= 0:
+        return "none"
+
+    def rgba(m: re.Match) -> str:
+        r, g, b, a = m.group(1), m.group(2), m.group(3), float(m.group(4))
+        return f"rgba({r}, {g}, {b}, {round(a * factor, 3):g})"
+
+    def hexc(m: re.Match) -> str:
+        r, g, b = to_rgb("#" + m.group(1))
+        return f"rgba({r}, {g}, {b}, {round(factor, 3):g})"
+    out = re.sub(r"rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)", rgba, shadow)
+    return re.sub(r"#([0-9A-Fa-f]{6})\b", hexc, out)
+
+
 def gradient(color: str, amount: float) -> tuple[str, str]:
     """One soft top-to-bottom shade, skewed darker so tops don't wash out.
 

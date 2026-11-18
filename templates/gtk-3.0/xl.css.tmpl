@@ -53,24 +53,26 @@ button:active, button:checked, button:hover:checked {
   background-color: {{pressed}};
   background-image: linear-gradient(to bottom, {{pressed_bottom}}, {{pressed_top}});
   box-shadow: {{w.button.pressed_shadow}}; }
-/* Unfocused windows: no layers outside buttons (drop shadow, recess), as on
-   title buttons; their inner layers stay */
-button:backdrop, button:backdrop:hover {
-  box-shadow: {{w.button.inset_shadow}}; }
+/* Unfocused windows: every button layer (highlight, shade, recess, drop
+   shadow) at the Unfocused depth (bd.* tokens: the alphas scaled) */
+button:backdrop {
+  box-shadow: {{bd.w.button.shadow}}; }
+button:backdrop:hover {
+  box-shadow: {{bd.w.button.hover_shadow}}; }
 button:backdrop:active, button:backdrop:checked {
-  box-shadow: {{w.button.pressed_inset_shadow}}; }
+  box-shadow: {{bd.w.button.pressed_shadow}}; }
 /* ...and flat buttons (toolbars, header bars) stay flat */
 button.flat:backdrop, button.sidebar-button:backdrop,
 .primary-toolbar button:backdrop, headerbar button:backdrop, toolbar button:backdrop {
-  box-shadow: {{w.toolbar_button.inset_shadow}}; }
+  box-shadow: {{bd.w.toolbar_button.shadow}}; }
 button.flat:backdrop:hover, button.sidebar-button:backdrop:hover,
 .primary-toolbar button:backdrop:hover, headerbar button:backdrop:hover, toolbar button:backdrop:hover {
-  box-shadow: {{w.toolbar_button.hover_inset_shadow}}; }
+  box-shadow: {{bd.w.toolbar_button.hover_shadow}}; }
 button.flat:backdrop:active, button.flat:backdrop:checked,
 .primary-toolbar button:backdrop:active, .primary-toolbar button:backdrop:checked,
 headerbar button:backdrop:active, headerbar button:backdrop:checked,
 toolbar button:backdrop:active, toolbar button:backdrop:checked {
-  box-shadow: {{w.toolbar_button.pressed_inset_shadow}}; }
+  box-shadow: {{bd.w.toolbar_button.pressed_shadow}}; }
 button:disabled {
   background-image: image({{alpha(button, 0.55)}});
   box-shadow: none; }
@@ -153,20 +155,14 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
 .linked:not(.vertical) > button:last-child:active, .linked:not(.vertical) > button:last-child:checked { box-shadow: {{w.linked.ltr_pressed_last_shadow}}; }
 .linked:not(.vertical) > button:first-child:last-child:active, .linked:not(.vertical) > button:first-child:last-child:checked { box-shadow: {{w.linked.ltr_pressed_only_shadow}}; }
 
-.linked:not(.vertical) > button:backdrop,
-.linked:not(.vertical) > button:first-child:backdrop,
-.linked:not(.vertical) > button:last-child:backdrop,
-.linked:not(.vertical) > button:first-child:last-child:backdrop {
-  box-shadow: {{w.linked.inset_shadow}}; }
-.linked:not(.vertical) > button:backdrop:checked,
-.linked:not(.vertical) > button:backdrop:active,
-.linked:not(.vertical) > button:first-child:backdrop:checked,
-.linked:not(.vertical) > button:first-child:backdrop:active,
-.linked:not(.vertical) > button:last-child:backdrop:checked,
-.linked:not(.vertical) > button:last-child:backdrop:active,
-.linked:not(.vertical) > button:first-child:last-child:backdrop:checked,
-.linked:not(.vertical) > button:first-child:last-child:backdrop:active {
-  box-shadow: {{w.linked.pressed_inset_shadow}}; }
+.linked:not(.vertical) > button:backdrop { box-shadow: {{bd.w.linked.ltr_middle_shadow}}; }
+.linked:not(.vertical) > button:backdrop:checked, .linked:not(.vertical) > button:backdrop:active { box-shadow: {{bd.w.linked.ltr_pressed_middle_shadow}}; }
+.linked:not(.vertical) > button:first-child:backdrop { box-shadow: {{bd.w.linked.ltr_first_shadow}}; }
+.linked:not(.vertical) > button:first-child:backdrop:checked, .linked:not(.vertical) > button:first-child:backdrop:active { box-shadow: {{bd.w.linked.ltr_pressed_first_shadow}}; }
+.linked:not(.vertical) > button:last-child:backdrop { box-shadow: {{bd.w.linked.ltr_last_shadow}}; }
+.linked:not(.vertical) > button:last-child:backdrop:checked, .linked:not(.vertical) > button:last-child:backdrop:active { box-shadow: {{bd.w.linked.ltr_pressed_last_shadow}}; }
+.linked:not(.vertical) > button:first-child:last-child:backdrop { box-shadow: {{bd.w.linked.ltr_only_shadow}}; }
+.linked:not(.vertical) > button:first-child:last-child:backdrop:checked, .linked:not(.vertical) > button:first-child:last-child:backdrop:active { box-shadow: {{bd.w.linked.ltr_pressed_only_shadow}}; }
 
 /* their faces fade, their shadows switch at once: GTK 3 garbles a shadow
    that animates between pieces of different shapes */
@@ -192,14 +188,20 @@ toolbar .linked > button:checked, .path-bar button:checked, .path-bar button:act
   box-shadow: {{w.linked.pressed_first_shadow}}; }
 .path-bar.linked > button:last-child:checked, .path-bar.linked > button:last-child:active {
   box-shadow: {{w.linked.pressed_last_shadow}}; }
-/* unfocused windows: no shadow round the group (inner layers only) */
-.path-bar.linked > button:backdrop, .path-bar.linked > button:backdrop:checked {
-  box-shadow: {{w.linked.inset_shadow}}; }
+/* unfocused windows: the same pieces at the Unfocused depth */
+.path-bar.linked > button:backdrop { box-shadow: {{bd.w.linked.middle_shadow}}; }
+.path-bar.linked > button:backdrop:checked, .path-bar.linked > button:backdrop:active { box-shadow: {{bd.w.linked.pressed_middle_shadow}}; }
+.path-bar.linked > button:first-child:backdrop { box-shadow: {{bd.w.linked.first_shadow}}; }
+.path-bar.linked > button:first-child:backdrop:checked, .path-bar.linked > button:first-child:backdrop:active { box-shadow: {{bd.w.linked.pressed_first_shadow}}; }
+.path-bar.linked > button:last-child:backdrop { box-shadow: {{bd.w.linked.last_shadow}}; }
+.path-bar.linked > button:last-child:backdrop:checked, .path-bar.linked > button:last-child:backdrop:active { box-shadow: {{bd.w.linked.pressed_last_shadow}}; }
+.path-bar.linked > button:first-child:last-child:backdrop { box-shadow: {{bd.w.linked.only_shadow}}; }
+.path-bar.linked > button:first-child:last-child:backdrop:checked, .path-bar.linked > button:first-child:last-child:backdrop:active { box-shadow: {{bd.w.linked.pressed_only_shadow}}; }
 /* its ▶ scroll button is painted after everything else */
 .path-bar.linked > button.slider-button:last-child { box-shadow: {{w.linked.ltr_last_shadow}}; }
 .path-bar.linked > button.slider-button:last-child:hover { box-shadow: {{w.linked.hover_ltr_last_shadow}}; }
 .path-bar.linked > button.slider-button:last-child:active { box-shadow: {{w.linked.pressed_ltr_last_shadow}}; }
-.path-bar.linked > button.slider-button:backdrop { box-shadow: {{w.linked.inset_shadow}}; }
+.path-bar.linked > button.slider-button:last-child:backdrop { box-shadow: {{bd.w.linked.ltr_last_shadow}}; }
 
 /* Joined buttons share the edge between them (Mint-Y drops each button's right
    border; vertical groups drop the bottom one). When a button is hovered or
@@ -292,20 +294,14 @@ headerbar .linked:not(.vertical) > button:active, headerbar .linked:not(.vertica
 headerbar .linked:not(.vertical) > button:first-child:active, headerbar .linked:not(.vertical) > button:first-child:checked { box-shadow: {{wbp.w.linked.ltr_pressed_first_shadow}}; }
 headerbar .linked:not(.vertical) > button:last-child:active, headerbar .linked:not(.vertical) > button:last-child:checked { box-shadow: {{wbp.w.linked.ltr_pressed_last_shadow}}; }
 headerbar .linked:not(.vertical) > button:first-child:last-child:active, headerbar .linked:not(.vertical) > button:first-child:last-child:checked { box-shadow: {{wbp.w.linked.ltr_pressed_only_shadow}}; }
-headerbar .linked:not(.vertical) > button:backdrop,
-headerbar .linked:not(.vertical) > button:first-child:backdrop,
-headerbar .linked:not(.vertical) > button:last-child:backdrop,
-headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop {
-  box-shadow: {{wbp.w.linked.inset_shadow}}; }
-headerbar .linked:not(.vertical) > button:backdrop:checked,
-headerbar .linked:not(.vertical) > button:backdrop:active,
-headerbar .linked:not(.vertical) > button:first-child:backdrop:checked,
-headerbar .linked:not(.vertical) > button:first-child:backdrop:active,
-headerbar .linked:not(.vertical) > button:last-child:backdrop:checked,
-headerbar .linked:not(.vertical) > button:last-child:backdrop:active,
-headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop:checked,
-headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop:active {
-  box-shadow: {{wbp.w.linked.pressed_inset_shadow}}; }
+headerbar .linked:not(.vertical) > button:backdrop { box-shadow: {{bd.wbp.w.linked.ltr_middle_shadow}}; }
+headerbar .linked:not(.vertical) > button:backdrop:checked, headerbar .linked:not(.vertical) > button:backdrop:active { box-shadow: {{bd.wbp.w.linked.ltr_pressed_middle_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:backdrop { box-shadow: {{bd.wbp.w.linked.ltr_first_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:backdrop:checked, headerbar .linked:not(.vertical) > button:first-child:backdrop:active { box-shadow: {{bd.wbp.w.linked.ltr_pressed_first_shadow}}; }
+headerbar .linked:not(.vertical) > button:last-child:backdrop { box-shadow: {{bd.wbp.w.linked.ltr_last_shadow}}; }
+headerbar .linked:not(.vertical) > button:last-child:backdrop:checked, headerbar .linked:not(.vertical) > button:last-child:backdrop:active { box-shadow: {{bd.wbp.w.linked.ltr_pressed_last_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop { box-shadow: {{bd.wbp.w.linked.ltr_only_shadow}}; }
+headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop:checked, headerbar .linked:not(.vertical) > button:first-child:last-child:backdrop:active { box-shadow: {{bd.wbp.w.linked.ltr_pressed_only_shadow}}; }
 headerbar .linked:not(.vertical) > button, headerbar .linked:not(.vertical) > button:hover, headerbar .linked:not(.vertical) > button:active, headerbar .linked:not(.vertical) > button:checked,
 headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:hover, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:active, headerbar .linked:not(.vertical):not(.path-bar).stack-switcher > button:checked {
   color: {{wbp.text}};
@@ -346,16 +342,16 @@ headerbar .linked:not(.vertical) > button:checked + button, headerbar .linked:no
 .nemo-window .linked.path-bar > button:active:not(:last-child) {
   box-shadow: {{w.linked.pressed_seam_shadow}}, {{w.linked.rtl_outer_pressed_middle}}; }
 .nemo-window .linked.path-bar > button:backdrop:hover:not(:last-child) {
-  box-shadow: {{w.linked.hover_seam_shadow}}; }
+  box-shadow: {{w.linked.hover_seam_shadow}}, {{bd.w.linked.rtl_outer_hover_middle}}; }
 .nemo-window .linked.path-bar > button:backdrop:checked:not(:last-child) {
-  box-shadow: {{w.linked.pressed_seam_shadow}}; }
+  box-shadow: {{w.linked.pressed_seam_shadow}}, {{bd.w.linked.rtl_outer_pressed_middle}}; }
 
-/* Unfocused windows: accent and delete buttons lose their outer layers too */
+/* Unfocused windows: accent and delete buttons at the Unfocused depth too */
 button.suggested-action:backdrop, headerbar button.suggested-action:backdrop,
 .primary-toolbar button.suggested-action:backdrop {
-  box-shadow: {{w.suggested.inset_shadow}}; }
+  box-shadow: {{bd.w.suggested.shadow}}; }
 button.destructive-action:backdrop, headerbar button.destructive-action:backdrop {
-  box-shadow: {{w.destructive.inset_shadow}}; }
+  box-shadow: {{bd.w.destructive.shadow}}; }
 
 /* List column headers are buttons, but flat strips: no drop shadow (each
    header's fell on the next one) */

@@ -137,6 +137,8 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     """overlay_scrollbars: Mint's own switch, used when Details doesn't choose a mode."""
     g = settings["global"]
     depth = settings["style"]["depth"]
+    # unfocused windows draw button layers at this fraction of their strength
+    unfocused_depth = settings["style"].get("unfocused_depth", 70) / 100
     amount = g["gradient"] / 100
     # Calibrated so the slider's center (50) is xl_cheese's chosen look, which was
     # 40 on the original scale: h = value / 50 x 0.8.
@@ -256,6 +258,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["wb.button_w"] = str(round(btn_h * 1.12))
     t["wb.button_layout"] = LAYOUTS[wb["button_layout"]]
     t["wb.button_style"] = wb["button_style"]
+    t["unfocused_depth"] = f"{unfocused_depth:g}"
     t["wb.button_glyphs"] = wb["button_glyphs"] or ""      # "" = the style's own set
     t["wb.button_roundness"] = str(titlebuttons.roundness(wb["button_style"], wb["button_roundness"],
                                                           g["roundness"]))
@@ -339,6 +342,10 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["adw.accent_name"] = nearest_adw_accent(theme["accent"])
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
+    # every shadow at the unfocused strength, for :backdrop rules (bd.<token>)
+    for k in [k for k in t if ("shadow" in k or "outer" in k)
+              and not k.startswith("bd.")]:
+        t["bd." + k] = pal.scale_shadow(t[k], unfocused_depth)
     return t
 
 

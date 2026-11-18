@@ -993,6 +993,18 @@ class RenderAndInstallTests(unittest.TestCase):
         errors, _w = styles.check({"name": "N", "notification": {"kind": "wavy"}})
         self.assertTrue(any("notification.kind" in e for e in errors))
 
+    def test_unfocused_depth(self):
+        st = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        self.assertEqual(s["style"]["unfocused_depth"], 70)
+        t = tokens.build(s, st)
+        self.assertEqual(palette.scale_shadow("0 1px 2px rgba(0, 0, 0, 0.5)", 0.7), "0 1px 2px rgba(0, 0, 0, 0.35)")
+        self.assertEqual(t["bd.w.button.shadow"], palette.scale_shadow(t["w.button.shadow"], 0.7))
+        s["style"]["unfocused_depth"] = 0
+        self.assertEqual(tokens.build(s, st)["bd.w.button.shadow"], "none")
+        out = settings.apply_style_defaults(defaults(), {"unfocused_depth": 40})
+        self.assertEqual(out["style"]["unfocused_depth"], 40)
+
     def test_window_roundness(self):
         st = styles.load(DEFAULT_STYLE)
         s = defaults()

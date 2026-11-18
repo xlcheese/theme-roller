@@ -50,7 +50,7 @@ TABS = [  # (settings section, tab title)
 LABELS = {
     "accent": "Accent", "bg": "Background", "text": "Text", "size": "Size",
     "roundness": "Roundness", "gradient": "Gradient", "hover_in_ms": "Hover in (ms)",
-    "hover_out_ms": "Hover out (ms)", "hover_strength": "Hover strength", "depth": "Depth",
+    "hover_out_ms": "Hover out (ms)", "hover_strength": "Hover strength", "depth": "Depth", "unfocused_depth": "Unfocused depth",
     "label_weight": "Label weight", "panel_opacity": "Panel opacity", "menu_opacity": "Menu opacity",
     "notification_opacity": "Notification opacity", "panel_height": "Panel height",
     "title_bar": "Title bar", "title_text": "Title text", "border": "Border",

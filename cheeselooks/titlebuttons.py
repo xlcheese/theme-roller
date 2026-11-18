@@ -268,15 +268,18 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
         own = lambda key: t.get(f"tbtn.{key}", "")    # noqa: E731
         border = own("border") or t[bt + "border"]
         hover_border = own("hover_border") or t[bt + "hover_border"]
+        # unfocused: flat face, the same layers at the Unfocused depth
+        ud = float(t.get("unfocused_depth", "0.7"))
+        bd3, bd4 = pal.scale_shadow(t[bt + "shadow"], ud), pal.scale_shadow(t[bt + "g4_shadow"], ud)
         if own("color"):
             rest = rect(own("color_top"), own("color_bottom"), border,
                         t[bt + "shadow"], t[bt + "g4_shadow"], own("color_fg"))
-            backdrop = rect(own("color"), own("color"), border,
+            backdrop = rect(own("color"), own("color"), border, bd3, bd4,
                             glyph=pal.mix(own("color_fg"), own("color"), 0.45))
         else:
             rest = rect(t["wbp.button_top"], t["wbp.button_bottom"], border,
                         t[bt + "shadow"], t[bt + "g4_shadow"], own("glyph") or text)
-            backdrop = rect(t["wbp.button"], t["wbp.button"], border, glyph=utext)
+            backdrop = rect(t["wbp.button"], t["wbp.button"], border, bd3, bd4, glyph=utext)
         hc = own("hover_color")
         hover = rect(own("hover_color_top") if hc else t[bt + "hover_top"],
                      own("hover_color_bottom") if hc else t[bt + "hover_bottom"], hover_border,
