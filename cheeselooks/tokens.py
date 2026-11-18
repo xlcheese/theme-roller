@@ -350,11 +350,37 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["adw.accent_name"] = nearest_adw_accent(theme["accent"])
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
+    t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"])
     # every shadow at the unfocused strength, for :backdrop rules (bd.<token>)
     for k in [k for k in t if ("shadow" in k or "outer" in k)
               and not k.startswith("bd.")]:
         t["bd." + k] = pal.scale_shadow(t[k], unfocused_depth)
     return t
+
+
+# Global Roundness at or below this: menu items and sidebar rows are square and
+# full width (sidebars with divider lines, as Mint-Y); above it, rounded, with a
+# little space at the sides so a rounded hover doesn't touch the menu's edges.
+SQUARE_LISTS_AT = 30
+
+
+def _lists_css(roundness: float, r: int, line: str) -> tuple[str, str]:
+    """GTK 3 and GTK 4 rules for menu items (not Cinnamon's) and sidebar rows."""
+    if roundness <= SQUARE_LISTS_AT:
+        g3 = ("menu menuitem, .menu menuitem { margin: 0; border-radius: 0; }\n"
+              "stacksidebar.sidebar row, stacksidebar.sidebar row:hover, stacksidebar.sidebar row:selected,\n"
+              "stacksidebar row, stacksidebar row:hover, stacksidebar row:selected {\n"
+              "  margin: 0; border-radius: 0; box-shadow: inset 0 -1px " + line + "; }")
+        g4 = ("popover.menu > contents { padding-left: 0; padding-right: 0; }\n"
+              "popover.menu modelbutton { margin: 0; border-radius: 0; }\n"
+              "stacksidebar.sidebar row, stacksidebar.sidebar row:hover, stacksidebar.sidebar row:selected,\n"
+              "stacksidebar row, stacksidebar row:hover, stacksidebar row:selected {\n"
+              "  margin: 0; border-radius: 0; box-shadow: inset 0 -1px " + line + "; }")
+    else:
+        g3 = f"menu menuitem, .menu menuitem {{ margin: 0 2px; border-radius: {r}px; }}"
+        g4 = f"popover.menu modelbutton {{ margin: 0 2px; border-radius: {r}px; }}"
+    note = "/* Menu items and sidebar rows: square below Roundness " + str(SQUARE_LISTS_AT + 1) + " (tokens._lists_css) */\n"
+    return note + g3 + "\n", note + g4 + "\n"
 
 
 def _linked_ltr(t: dict[str, str], prefix: str, state: str) -> None:
