@@ -1145,7 +1145,19 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 GLib.idle_add(self.applied_failed, f"Apply failed: {exc}")
         threading.Thread(target=work, daemon=True).start()
 
+    def _come_back(self) -> None:
+        """Back to the front after Apply or Revert: reloading the desktop (and a
+        Cinnamon restart) can minimise this window or send it behind others.
+        Twice: once the theme has reloaded, again after a restart settles."""
+        def present() -> bool:
+            self.deiconify()
+            self.present()
+            return False
+        GLib.timeout_add(600, present)
+        GLib.timeout_add(3000, present)
+
     def applied_ok(self, data: dict, log: list[str]) -> bool:
+        self._come_back()
         self.applied = data
         self.status.set_text(f"“{data['theme']}” is on the desktop. Revert puts the previous theme back.")
         self.revert_btn.set_sensitive(True)
@@ -1171,6 +1183,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         threading.Thread(target=work, daemon=True).start()
 
     def reverted(self, restored: dict | None, log: list[str]) -> bool:
+        self._come_back()
         if restored:
             self.applied = restored
         self.revert_btn.hide()
