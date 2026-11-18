@@ -1018,6 +1018,17 @@ class RenderAndInstallTests(unittest.TestCase):
                     errors.append(str(exc))
                 self.assertEqual(errors, [], f"depth {depth}, unfocused {unfocused}")
 
+    def test_unreadable_style_is_named(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp) / "b-mine"
+            d.mkdir()
+            (d / "style.toml").write_text('name = "Mine"\n[edges.sunken]\nrecess = { color = "black", alpha = }\n')
+            with self.assertRaises(styles.StyleError) as ctx:
+                styles.find("Mine", [Path(tmp)])
+            text = " ".join(ctx.exception.problems)
+            self.assertIn("can't be read", text)
+            self.assertIn("line 3", text)
+
     def test_thumbnail_follows_the_accent(self):
         from cheeselooks import thumbnail
         blue, orange = thumbnail.render("#3A6FD8"), thumbnail.render("#FA8562")

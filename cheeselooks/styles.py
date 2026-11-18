@@ -455,6 +455,7 @@ def find(name: str, search_dirs: list[Path]) -> Style:
     without a usable name: a copy left in a folder called "xl-Cheeselooks" but
     renamed inside to "xl-Cheeselooks-mine" must not stand in for xl-Cheeselooks."""
     fallback: Path | None = None
+    broken: list[str] = []          # style files that can't be read: say so, not just "not found"
     for base in search_dirs:
         if not base.is_dir():
             continue
@@ -464,15 +465,19 @@ def find(name: str, search_dirs: list[Path]) -> Style:
                 continue
             try:
                 data = tomllib.loads(toml_path.read_text(encoding="utf-8"))
-            except tomllib.TOMLDecodeError:
+            except tomllib.TOMLDecodeError as exc:
                 data = {}
+                broken.append(f"{toml_path}: {exc}")
             if data.get("name") == name:
                 return load(sub)
             if fallback is None and sub.name == name and not isinstance(data.get("name"), str):
                 fallback = sub
     if fallback is not None:
         return load(fallback)
-    raise StyleError([f"style '{name}' not found in: {', '.join(str(d) for d in search_dirs)}"])
+    problems = [f"style '{name}' not found in: {', '.join(str(d) for d in search_dirs)}"]
+    if broken:
+        problems += [f"this style file can't be read (a typo?), so its name is unknown: {b}" for b in broken]
+    raise StyleError(problems)
 
 
 # --------------------------------------------------------------------------
