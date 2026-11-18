@@ -649,6 +649,12 @@ window buttons in a header bar, and Mint-Y's 6px margins on its other buttons
 hold it at 46px, so a shorter button left a strip above. GTK 4 windows take the
 same outline and shadow as GTK 3 ones (`window.csd` in gtk-4.0/xl.css).
 
+## Shipped themes and the torture test
+
+Built-in themes (`data/themes/NN-*.json`, listed in file-name order, so two-digit numbers): xl-Cheeselooks (the default), xl-Classic, xl-Gummy, Claude, Claude Dark, xl-Cheeselooks Dark, xl-Classic Dark, xl-Gummy Dark, then the novelties xl-Vintage (OS/2 Warp: hard square bevels, grey buttons on an indigo title bar, its own style) and xl-Organ Harvest (the xl-Cheeselooks style in amber and teal with Gargantuan buttons). The light ones are xl_cheese's own tuning; the shipped style sheets have every white layer given an `alpha_dark` and every recess a `light_alpha_dark` (so they don't glare on dark title bars), hovers in `lift()`, and no switched-off layers.
+
+`tools/torture_test.py [STYLE_DIR ...]` builds each style (all built-ins by default) against its own shipped theme, a dark theme and a colored title bar; runs GTK's parser on each GTK 3 CSS; checks key pairs read (text on bg and base, accent text on the accent, title text on the title bar, text on title-bar buttons, menu and panel text); and draws a contact sheet of a sample window in each (`--out`, default torture.png).
+
 ## Distant roadmap
 
 - **Blur behind the panel and menus** (from the wallpaper), as BlurCinnamon does (github.com/klangman/BlurCinnamon): an effect, not theming (Cinnamon's St CSS has no backdrop blur), so the app would apply it quietly when panel or menu opacity is lowered, making lower opacities usable. Needs research into how BlurCinnamon applies its effect and whether we can bundle or drive it.

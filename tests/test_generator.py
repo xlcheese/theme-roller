@@ -989,7 +989,8 @@ class RenderAndInstallTests(unittest.TestCase):
             t = tokens.build(s, st)
             self.assertIn(want, t["notification.css"])
             self.assertEqual(t["notification.opacity"], "0.8")
-        self.assertIn("border-top: 4px solid", tokens.build(s, base)["notification.css"])   # default: line
+        plain = styles.Style(**{**base.__dict__, "notification": {}})    # a style that doesn't set it
+        self.assertIn("border-top: 4px solid", tokens.build(s, plain)["notification.css"])  # default: line
         errors, _w = styles.check({"name": "N", "notification": {"kind": "wavy"}})
         self.assertTrue(any("notification.kind" in e for e in errors))
 
@@ -1045,7 +1046,8 @@ class RenderAndInstallTests(unittest.TestCase):
 
     def test_menu_category_colour(self):
         base = styles.load(DEFAULT_STYLE)
-        t = tokens.build(defaults(), base)
+        plain = styles.Style(**{**base.__dict__, "panel": {}})           # a style that doesn't set it
+        t = tokens.build(defaults(), plain)
         self.assertEqual(t["menu.category"], palette.mix(t["menu.menu_bg"], t["menu.text"], 0.123))  # Mint-Y's grey
         accent = styles.Style(**{**base.__dict__, "panel": {**base.panel, "menu_category": "accent"}})
         t = tokens.build(defaults(), accent)
