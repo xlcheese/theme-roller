@@ -48,7 +48,7 @@ WIDGET_KEYS = {
     "pressed_color",
 }
 # keys only some widgets use so far (others accept them but ignore them)
-WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button",),
+WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item"),
                     "pressed_color": ("scrollbar",),
                     "selected_border": ("panel_button",), "padding": ("panel_button",),
                     "spacing": ("panel_button",),
@@ -137,8 +137,10 @@ BUILTIN_WIDGETS: dict[str, dict[str, Any]] = {
     "combo": {"like": "button"},
     # tabs take their look from the buttons (see tabs.py); a style only picks the shape
     "tab": {"like": "toolbar_button", "tab_kind": "boxed", "active_marker": "none"},
+    # selected_color: the Cinnamon main menu's selected category (Mint-Y's grey;
+    # "accent" for an accent selection)
     "menu_item": {"edge": "flat", "hover_edge": "flat", "pressed_edge": "flat", "focus_edge": "flat",
-                  "hover_color": "menu_hover"},
+                  "hover_color": "menu_hover", "selected_color": "mix(menu_bg, text, 0.123)"},
     "menubar_item": {"like": "menu_item", "hover_color": "menubar_hover"},
     # panel window-list buttons, launchers and applets; "selected" is the
     # focused window's button
