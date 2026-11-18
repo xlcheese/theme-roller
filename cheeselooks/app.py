@@ -37,7 +37,7 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, Pango  # noqa: E402
 
-from . import cli, flatpak, palette as pal, panelmarker, paths, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
+from . import cli, flatpak, imagecolors, palette as pal, panelmarker, paths, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
 from . import shape  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
 
@@ -289,6 +289,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
             grid.attach(label, 0, row, 1, 1)
             grid.attach(self._control(path, kind, extra), 1, row, 1, 1)
             row += 1
+            if path == ("global", "text"):
+                row = self._image_colors_row(grid, row)
         if section == "integration":
             row = self._flatpak_row(grid, row)
             restart = Gtk.CheckButton(label="Restart Cinnamon after Apply", margin_top=8,
@@ -595,6 +597,75 @@ class SettingsWindow(Gtk.ApplicationWindow):
         grid.attach(box, 1, row, 1, 1)
         grid.attach(note, 1, row + 1, 1, 1)
         return row + 2
+
+    def _image_colors_row(self, grid: Gtk.Grid, row: int) -> int:
+        """Colors from a picture: the wallpaper or any image. Its main colors
+        show as swatches, the best one becomes the accent; any swatch can be
+        clicked instead. Background and text stay as they are."""
+        label = Gtk.Label(label="Colors from", xalign=0)
+        grid.attach(label, 0, row, 1, 1)
+        box = Gtk.Box(spacing=6)
+        wall = Gtk.Button(label="Wallpaper")
+        wall.set_tooltip_text("Take an accent from your desktop wallpaper")
+        wall.connect("clicked", lambda _b: self._colors_from(imagecolors.wallpaper()))
+        pick = Gtk.Button(label="Image…")
+        pick.set_tooltip_text("Take an accent from any picture")
+        pick.connect("clicked", self.on_pick_image)
+        box.pack_start(wall, False, False, 0)
+        box.pack_start(pick, False, False, 0)
+        self.image_swatches = Gtk.Box(spacing=3, margin_start=6)
+        self.image_swatches.get_style_context().add_class("linked")
+        box.pack_start(self.image_swatches, False, False, 0)
+        grid.attach(box, 1, row, 1, 1)
+        return row + 1
+
+    def on_pick_image(self, _button: Gtk.Button) -> None:
+        chooser = Gtk.FileChooserNative.new("Take colors from a picture", self, Gtk.FileChooserAction.OPEN,
+                                            "Use", "Cancel")
+        images = Gtk.FileFilter()
+        images.set_name("Pictures")
+        images.add_pixbuf_formats()
+        chooser.add_filter(images)
+        pictures = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES)
+        if pictures:
+            chooser.set_current_folder(pictures)
+        if chooser.run() == Gtk.ResponseType.ACCEPT:
+            self._colors_from(Path(chooser.get_filename()))
+        chooser.destroy()
+
+    def _colors_from(self, path: Path | None) -> None:
+        if path is None:
+            self.status.set_text("Couldn't find your wallpaper (Cinnamon's background setting has no picture).")
+            return
+        try:
+            found = imagecolors.colors(path)
+        except GLib.Error as exc:
+            self.status.set_text(f"Couldn't read {path.name}: {exc.message}")
+            return
+        for child in self.image_swatches.get_children():
+            self.image_swatches.remove(child)
+        for color in found:
+            b = Gtk.Button()
+            b.set_tooltip_text(f"Use {color} as the accent")
+            swatch = Gtk.DrawingArea()
+            swatch.set_size_request(22, 16)
+            rgba = Gdk.RGBA()
+            rgba.parse(color)
+            swatch.connect("draw", lambda _w, cr, c=rgba: (Gdk.cairo_set_source_rgba(cr, c), cr.paint()))
+            b.add(swatch)
+            b.connect("clicked", lambda _b, c=color: self._use_accent(c))
+            self.image_swatches.pack_start(b, False, False, 0)
+        self.image_swatches.show_all()
+        best = imagecolors.accent(found)
+        if best:
+            self._use_accent(best)
+            self.status.set_text(f"Accent {best} from {path.name}. Click a swatch to use another of its colors.")
+        else:
+            self.status.set_text(f"{path.name} has no colors vivid enough for an accent.")
+
+    def _use_accent(self, color: str) -> None:
+        self.changed(("global", "accent"), color)
+        self.sync_controls()          # the Accent button shows the new color
 
     def _about_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
         """As the About boxes of xl_cheese's other apps: centred, name, version,

@@ -1018,6 +1018,31 @@ class RenderAndInstallTests(unittest.TestCase):
                     errors.append(str(exc))
                 self.assertEqual(errors, [], f"depth {depth}, unfocused {unfocused}")
 
+    def test_colors_from_a_picture(self):
+        try:
+            import gi
+            gi.require_version("GdkPixbuf", "2.0")
+            from gi.repository import GdkPixbuf
+        except (ImportError, ValueError):
+            self.skipTest("no GdkPixbuf")
+        from cheeselooks import imagecolors
+        # a mostly grey picture with a band of deep blue: the blue is the accent
+        w, h = 40, 40
+        data = bytearray()
+        for y in range(h):
+            for x in range(w):
+                data += bytes((40, 90, 200)) if 15 <= y < 25 else bytes((128, 128, 128))
+        pix = GdkPixbuf.Pixbuf.new_from_data(bytes(data), GdkPixbuf.Colorspace.RGB, False, 8, w, h, w * 3)
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "p.png"
+            pix.savev(str(f), "png", [], [])
+            found = imagecolors.colors(f)
+        self.assertGreaterEqual(len(found), 2)
+        r, g, b = palette.to_rgb(found[0])
+        self.assertGreater(b, r + 60)                       # the blue comes first, before the grey
+        acc = imagecolors.accent(found)
+        self.assertGreater(palette.to_rgb(acc)[2], palette.to_rgb(acc)[0])
+
     def test_menu_category_colour(self):
         base = styles.load(DEFAULT_STYLE)
         t = tokens.build(defaults(), base)
