@@ -56,7 +56,7 @@ LABELS = {
     "title_bar": "Title bar", "title_text": "Title text", "border": "Border",
     "title_bar_height": "Title bar height", "border_width": "Border width", "window_roundness": "Window roundness",
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
-    "button_style": "Button style", "button_roundness": "Button roundness", "button_glyphs": "Glyphs",
+    "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
 }
@@ -727,6 +727,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if path == ("window_borders", "button_style"):
             # a new style starts at its own roundness
             self.data["window_borders"]["button_roundness"] = None
+            self.data["window_borders"]["button_spacing"] = None
         parent = _get(self.data, path[:-1])
         for gate, on in GATES.items():       # changing a setting turns its hidden switch on
             if gate in parent and path[-1] != gate:
@@ -768,6 +769,9 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                     widget.set_value(value)
                 elif kind == "int?":   # None shows the default in use
                     widget.set_value(self._int_default(path) if value is None else value)
+                    if path[-1] == "button_spacing":     # these styles' buttons touch
+                        widget.set_sensitive(self.data["window_borders"]["button_style"]
+                                             not in titlebuttons.SPACING_LOCKED)
                 elif kind == "bool":
                     widget.set_active(value)
                 elif kind == "glyphs":
@@ -798,6 +802,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if path[-1] == "button_roundness":
             wb = self.data["window_borders"]
             return titlebuttons.roundness(wb["button_style"], None, self.data["global"]["roundness"])
+        if path[-1] == "button_spacing":
+            return titlebuttons.spacing(self.data["window_borders"]["button_style"])
         if path[-1] == "window_roundness":
             return int(self.data["global"]["roundness"])
         if path[-1] == "panel_height":

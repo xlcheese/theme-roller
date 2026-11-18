@@ -355,6 +355,7 @@ Borderless, with soft shadows. Suggested buttons cast a shadow **tinted with the
 - **Title bar height:** 30–56 px, default 44.
 - **Headerbar widgets on a title bar of its own colours** take the title bar's palette (`wbp.*`), not the window's: headerbar buttons' text and symbolic icons in its text colour (`wbp.text`, `wb.unfocused_text` when unfocused), and joined groups such as view switchers in its button faces (`wbp.button`, `wbp.w.linked.*`), GTK 3 and 4. (With the theme's own title bar colours `wbp` is the theme, so nothing changes.)
 - *(done)* **Unfocused depth** (Style tab, `style.unfocused_depth`, 0–100, default 70; a style suggests it with `unfocused_depth` in `[defaults]`): unfocused windows draw every button layer (highlight, shade, recess, drop shadow) at that percentage of its strength, instead of dropping the outer ones: plain, flat, accent and delete buttons, joined groups and view switchers, path bars, and title buttons (flat face, the rest edge's layers faded; Muffin too). 0 = flat, 100 = as focused. Tokens `bd.<token>` for every shadow token (`palette.scale_shadow`: each colour's alpha × the depth). GTK 3; GTK 4 apps keep their full layers for now.
+- **Button spacing** (`button_spacing`, 0–12 px, unset = the button style's own): extra space between the window buttons on top of the style's own gap, the same in GTK 3 apps (a margin on each following button turns the header bar's 6px into it), GTK 4 apps (`windowcontrols` border-spacing) and Muffin (a margin taking its fixed 6px back). Defaults: 6 (GTK 3's own), 0 for Classic (4px apart as Clearlooks) and Less Gargantuan; locked at 0 for Gargantuan and xl-Cheeselooks Linked, whose buttons are made to touch (the slider is greyed out). Picking another button style resets it. `titlebuttons.spacing`.
 - **Window roundness** (`window_roundness`, 0–100, unset = follow Global's Roundness): the window's top corners (title bars, header bars, GTK 3 and 4 client-side windows, Muffin's borders, Gargantuan's corner close button). Token `wb.r`, worked out as `r2` is (1.4 × the control radius, at most 14px); `r2` itself stays Global's, for popovers, tooltips and cards.
 - **Title bar gradient:** its own slider, 0–100, default 30.
 - **Reset to Global colors:** a button on this tab (and on Panel & Menu and Terminal) that copies the Global colors back in while the switch stays on, so you can keep the theme's colors and change just one thing.
@@ -635,10 +636,8 @@ its corners per function (no siblings in Muffin's path). `metacity-1/` is still
 generated for Metacity and Marco. `tools/muffin-preview.py THEME OUT.png` draws
 a title bar the way Muffin does (rest, hover, pressed, unfocused).
 
-Spacing between window buttons: each style's own gap plus 6px (GTK 3's header
-bar spacing), the same in GTK 3 and GTK 4 apps and on Muffin's borders, except
-Linked, Classic and Gargantuan (`titlebuttons.TIGHT`), whose buttons touch or
-sit 4px apart. Gargantuan buttons in apps are at least 46px tall: GTK centres
+Spacing between window buttons: each style's own gap plus Button spacing (see
+Window Borders), the same in GTK 3 and GTK 4 apps and on Muffin's borders. Gargantuan buttons in apps are at least 46px tall: GTK centres
 window buttons in a header bar, and Mint-Y's 6px margins on its other buttons
 hold it at 46px, so a shorter button left a strip above. GTK 4 windows take the
 same outline and shadow as GTK 3 ones (`window.csd` in gtk-4.0/xl.css).

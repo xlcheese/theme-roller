@@ -39,6 +39,7 @@ DEFAULTS: dict[str, Any] = {
         "window_roundness": None,   # None: follows Global roundness
         "button_layout": "right", "button_style": "flat",
         "button_roundness": None,   # None: the button style's own roundness
+        "button_spacing": None,     # None: the button style's own spacing (px)
         "button_glyphs": None,      # None: the button style's own glyph set
     },
     "terminal": {"separate_colors": False, "bg": None, "text": None},
@@ -92,6 +93,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("window_borders", "button_glyphs"), "choice?", tuple(titlebuttons.GLYPH_SET_NAMES)),
     (("window_borders", "button_style"), "choice", tuple(titlebuttons.STYLES)),
     (("window_borders", "button_roundness"), "int?", (0, 100)),
+    (("window_borders", "button_spacing"), "int?", titlebuttons.SPACING_RANGE),
     (("terminal", "separate_colors"), "bool", None),
     (("terminal", "bg"), "color?", None),
     (("terminal", "text"), "color?", None),

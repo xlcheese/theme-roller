@@ -1030,6 +1030,17 @@ class RenderAndInstallTests(unittest.TestCase):
         out = settings.apply_style_defaults(defaults(), {"unfocused_depth": 40})
         self.assertEqual(out["style"]["unfocused_depth"], 40)
 
+    def test_button_spacing(self):
+        self.assertEqual(titlebuttons.spacing("drawn"), 6)
+        self.assertEqual(titlebuttons.spacing("gargantuan-circles"), 0)
+        self.assertEqual(titlebuttons.spacing("drawn", {"wb.button_spacing": "2"}), 2)
+        for locked in titlebuttons.SPACING_LOCKED:             # made to touch
+            self.assertEqual(titlebuttons.spacing(locked, {"wb.button_spacing": "8"}), 0)
+        s = defaults()
+        s["window_borders"].update(button_style="drawn", button_spacing=2)
+        t = tokens.build(s, styles.load(DEFAULT_STYLE))
+        self.assertIn("windowcontrols { border-spacing: 2px; }", t["titlebuttons4.css"])
+
     def test_window_roundness(self):
         st = styles.load(DEFAULT_STYLE)
         s = defaults()
