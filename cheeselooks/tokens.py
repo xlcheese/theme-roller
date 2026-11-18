@@ -180,6 +180,11 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
         # outer layers only, for Nemo's shared-edge rules (they add their own)
         t[f"w.linked.rtl_outer_{state}middle"] = titlebuttons._group_shadow(t["w.linked.outer"], "middle",
                                                                             rtl_paint=True)
+        if state:
+            # Nemo's shared edge (its seam) plus the group's piece, as one list
+            # (a seam or a piece can be "none", e.g. at Depth 0)
+            parts = [t[f"w.linked.{state}seam_shadow"], t[f"w.linked.rtl_outer_{state}middle"]]
+            t[f"w.linked.nemo_{state}seam_shadow"] = ", ".join(x for x in parts if x and x != "none") or "none"
         # every other joined group: GTK boxes paint left to right
         _linked_ltr(t, "w.", state)
     t["style.extra_css"] = style.extra_css

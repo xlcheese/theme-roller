@@ -337,14 +337,14 @@ headerbar .linked:not(.vertical) > button:checked + button, headerbar .linked:no
    Nemo paints its buttons right to left, so a 1px outer shadow on the
    hovered or pressed button lands on top of the next button's left border. */
 .nemo-window .linked.path-bar > button:hover:not(:last-child) {
-  box-shadow: {{w.linked.hover_seam_shadow}}, {{w.linked.rtl_outer_hover_middle}}; }
+  box-shadow: {{w.linked.nemo_hover_seam_shadow}}; }
 .nemo-window .linked.path-bar > button:checked:not(:last-child),
 .nemo-window .linked.path-bar > button:active:not(:last-child) {
-  box-shadow: {{w.linked.pressed_seam_shadow}}, {{w.linked.rtl_outer_pressed_middle}}; }
+  box-shadow: {{w.linked.nemo_pressed_seam_shadow}}; }
 .nemo-window .linked.path-bar > button:backdrop:hover:not(:last-child) {
-  box-shadow: {{w.linked.hover_seam_shadow}}, {{bd.w.linked.rtl_outer_hover_middle}}; }
+  box-shadow: {{bd.w.linked.nemo_hover_seam_shadow}}; }
 .nemo-window .linked.path-bar > button:backdrop:checked:not(:last-child) {
-  box-shadow: {{w.linked.pressed_seam_shadow}}, {{bd.w.linked.rtl_outer_pressed_middle}}; }
+  box-shadow: {{bd.w.linked.nemo_pressed_seam_shadow}}; }
 
 /* Unfocused windows: accent and delete buttons at the Unfocused depth too */
 button.suggested-action:backdrop, headerbar button.suggested-action:backdrop,

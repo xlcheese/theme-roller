@@ -60,8 +60,8 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("global", "size"), "choice", tuple(shape.SIZES)),
     (("global", "roundness"), "int", (0, 100)),
     (("global", "gradient"), "int", (0, 100)),
-    (("global", "hover_in_ms"), "int", (0, 300)),
-    (("global", "hover_out_ms"), "int", (0, 800)),
+    (("global", "hover_in_ms"), "int", (0, 200)),
+    (("global", "hover_out_ms"), "int", (0, 400)),
     (("global", "hover_strength"), "int", (0, 100)),
     (("style", "depth"), "int", (0, 100)),
     (("style", "unfocused_depth"), "int", (0, 100)),
@@ -187,6 +187,11 @@ def from_dict(data: dict) -> dict:
     """Merge user data over defaults and validate. Raises SettingsError."""
     merged = _deep_merge(DEFAULTS, data or {})
     wb = merged.get("window_borders")
+    g = merged.get("global")
+    if isinstance(g, dict):          # hover ranges narrowed (0-300 / 0-800 before)
+        for key, hi in (("hover_in_ms", 200), ("hover_out_ms", 400)):
+            if isinstance(g.get(key), (int, float)) and not isinstance(g.get(key), bool):
+                g[key] = max(0, min(hi, g[key]))
     if isinstance(wb, dict) and wb.get("button_style") in titlebuttons.OLD_NAMES:
         wb["button_style"] = titlebuttons.OLD_NAMES[wb["button_style"]]     # names before v1
     if isinstance(wb, dict) and wb.get("button_glyphs") == "theme":

@@ -993,6 +993,31 @@ class RenderAndInstallTests(unittest.TestCase):
         errors, _w = styles.check({"name": "N", "notification": {"kind": "wavy"}})
         self.assertTrue(any("notification.kind" in e for e in errors))
 
+    def test_gtk3_css_parses_at_extremes(self):
+        """GTK's own parser accepts the CSS at Depth 0 and 100 (a shadow list
+        joined with a "none" once broke the preview at Depth 0)."""
+        try:
+            import gi
+            gi.require_version("Gtk", "3.0")
+            from gi.repository import Gtk
+        except (ImportError, ValueError):
+            self.skipTest("no GTK 3")
+        for depth, unfocused in ((0, 0), (100, 100), (50, 70)):
+            s = defaults()
+            s["style"].update(depth=depth, unfocused_depth=unfocused)
+            with tempfile.TemporaryDirectory() as tmp:
+                out = Path(tmp) / "theme"
+                install.build(REPO / "templates", tokens.build(s, styles.load(DEFAULT_STYLE)), out)
+                errors = []
+                prov = Gtk.CssProvider()
+                prov.connect("parsing-error", lambda _p, sec, err: errors.append(
+                    f"{sec.get_file().get_basename() if sec.get_file() else ''}:{sec.get_start_line() + 1}: {err.message}"))
+                try:
+                    prov.load_from_path(str(out / "gtk-3.0" / "gtk.css"))
+                except Exception as exc:       # GLib raises on the first error too
+                    errors.append(str(exc))
+                self.assertEqual(errors, [], f"depth {depth}, unfocused {unfocused}")
+
     def test_unfocused_depth(self):
         st = styles.load(DEFAULT_STYLE)
         s = defaults()
