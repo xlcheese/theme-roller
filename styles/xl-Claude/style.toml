@@ -80,3 +80,8 @@ scrollbar      = { color = "mix(bg, text, 0.35)", hover_color = "mix(bg, accent,
 
 [panel]
 color = "darker(bg, 0.07)"
+# the main menu: the warm tint of every other menu's hover, and a stronger one
+# on the selected category
+menu_hover    = "mix(menu_bg, accent, 0.14)"
+menu_hover_fg = "text"
+menu_category = "mix(menu_bg, accent, 0.28)"
