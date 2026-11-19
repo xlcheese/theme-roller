@@ -52,6 +52,7 @@ TABS = [  # (settings section, tab title)
 ]
 REPO_URL = "https://github.com/xlcheese/xl-cheeselooks"
 DOCS_URL = REPO_URL + "/tree/HEAD/docs"     # HEAD: the default branch
+TIP_URL = "https://www.paypal.com/donate/?hosted_button_id=SDDYDENKXPCWN"   # About: a tip for the author ("" hides it)
 # Documentation tab: short notes on each part of the app (the full docs are online)
 DOC_NOTES = [
     ("Themes and styles",
@@ -692,6 +693,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
              "the window borders.")
         box.pack_start(Gtk.LinkButton(uri=REPO_URL, label="Website", halign=Gtk.Align.CENTER),
                        False, False, 0)
+        if TIP_URL:
+            line("<small>Enjoying xl-Cheeselooks? It's free and always will be.</small>", dim=True, top=2)
+            box.pack_start(Gtk.LinkButton(uri=TIP_URL, label="Leave a tip ☕", halign=Gtk.Align.CENTER),
+                           False, False, 0)
         line("<small>Copyright © 2026 Wesley Hayslip\n"
              "Developed with the help of Claude, an AI assistant by Anthropic</small>")
         line("<small>This program comes with absolutely no warranty.\n"
