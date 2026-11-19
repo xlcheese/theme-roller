@@ -440,6 +440,10 @@ headerbar, .titlebar:not(headerbar) {
   background-color: {{wb.title}};
   background-image: {{wb.title_grad}};
   box-shadow: {{wb.highlight}}; }     /* top highlight: [title_bar] highlight in the style */
+/* ...also where Mint-Y's base sets it for windows that draw their own title
+   bar (a more specific rule than the one above) */
+.csd headerbar, .csd .titlebar:not(headerbar) {
+  border-color: {{wb.line}}; }
 headerbar:backdrop, .titlebar:not(headerbar):backdrop {
   color: {{wb.unfocused_text}};
   background-color: {{wb.unfocused}};
