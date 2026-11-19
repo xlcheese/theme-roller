@@ -131,7 +131,9 @@ close_button   = { like = "title_button", hover_color = "accent" }
 entry          = { edge = "sunken", focus_edge = "focus" }
 combo          = { like = "button" }
 #button        = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "button_hover", color = "darker(button, 0.03)" }   # instead of the button line above: a resting face of your own
-#destructive   = { like = "button", hover_color = "lift(destructive, 0.2)" }
+#destructive   = { like = "button", hover_color = "lift(destructive, 0.2)", border = "darker(destructive, 0.4)" }   # border left out: a step darker than the face
+# On dark styles, accent and delete buttons read best with a dark rim, e.g.
+# suggested border = "darker(accent, 0.4)" (it also borders the close button's accent hover).
 #linked        = { like = "button", hover_edge = "linked_hover", hover_color = "lift(button, 0.7)" }
 #check         = { edge = "sunken", focus_edge = "focus" }
 #switch        = { like = "check" }

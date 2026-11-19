@@ -422,6 +422,11 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
     t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"])
+    # the destructive button's border: the style's own (destructive = { border = ... }),
+    # else a step darker than its face, as Mint-Y
+    d_border = style.widgets.get("destructive", {}).get("border")
+    t["destructive_border"] = (sty._resolve_color(d_border, theme) if d_border
+                               else pal.darker(theme["destructive"], 0.14))
     # Cinnamon's right-click and applet menus follow the same rule: square and
     # edge to edge up to Roundness 30, rounded and inset from the sides above
     if g["roundness"] <= SQUARE_LISTS_AT:

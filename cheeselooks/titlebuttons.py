@@ -259,9 +259,13 @@ def faces(style: str, t: dict[str, str]) -> dict[tuple[str, str], Face]:
                        t[tb + "hover_shadow"], t[tb + "hover_g4_shadow"], ptext)
     style_pressed = rect(t["wbp.pressed"], t["wbp.pressed"], t[tb + "pressed_border"],
                          t[tb + "pressed_shadow"], t[tb + "pressed_g4_shadow"], ptext)
-    close_hover = rect(t[cb + "hover_top"], t[cb + "hover_bottom"], acc_press,
+    # the accent close face takes the style's suggested-button border (an accent
+    # face's rim: on dark styles a darker one, the accent's own shade read as a
+    # light edge there), on the title bar's palette
+    sug = "wbp.w.suggested."
+    close_hover = rect(t[cb + "hover_top"], t[cb + "hover_bottom"], t[sug + "hover_border"],
                        t[cb + "hover_shadow"], t[cb + "hover_g4_shadow"], acc_fg)
-    close_pressed = rect(acc_press, acc_press, acc_press, glyph=acc_fg)
+    close_pressed = rect(acc_press, acc_press, t[sug + "pressed_border"], glyph=acc_fg)
 
     f: dict[tuple[str, str], Face] = {}
 
