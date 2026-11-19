@@ -34,7 +34,11 @@ _EDGE = {"top": ("0", "{n}px"), "bottom": ("0", "-{n}px"), "left": ("{n}px", "0"
 _RADII = {"top": "{r}px {r}px 0 0", "bottom": "0 0 {r}px {r}px", "left": "{r}px 0 0 {r}px", "right": "0 {r}px {r}px 0"}
 
 
-def _marker(kind: str, pos: str, accent: str) -> str:
+GLOW_ALPHA = {False: 0.35, True: 0.6}   # the glow's accent fade: light, dark themes (a
+                                         # faint fade barely showed on a dark tab)
+
+
+def _marker(kind: str, pos: str, accent: str, dark: bool = False) -> str:
     if kind == "none":
         return ""
     width = 2 if kind == "line" else 1          # glow: a 1px edge line, the fade does the rest
@@ -44,7 +48,7 @@ def _marker(kind: str, pos: str, accent: str) -> str:
         return line
     # glow: the line, plus a soft accent fade kept on the same edge
     gx, gy = (v.format(n=width + 8) for v in _EDGE[pos])
-    return f"{line}, inset {gx} {gy} 8px -8px {pal.rgba(accent, 0.35)}"
+    return f"{line}, inset {gx} {gy} 8px -8px {pal.rgba(accent, GLOW_ALPHA[dark])}"
 
 
 def _join(*shadows: str) -> str:
@@ -209,7 +213,7 @@ def css(t: dict[str, str], gtk4: bool = False) -> str:
     # selected tab
     accent = t["accent"]
     for pos in POSITIONS:
-        m = _marker(marker, pos, accent)
+        m = _marker(marker, pos, accent, pal.luminance(t["base"]) < 0.25)
         if kind == "pills":
             body = (f"  color: {t['text']};\n  border-color: {t['w.button.border']};\n"
                     f"  background-color: {t['button']};\n"
@@ -231,7 +235,7 @@ def adw_css(t: dict[str, str]) -> str:
     style's tab look. Boxed and open tabs sit on the page like notebook tabs;
     pills float in the strip. GTK 4 shadows (blur doubled, solid colours)."""
     kind = t.get("w.tab.tab_kind", "boxed")
-    marker = _marker(t.get("w.tab.active_marker", "none"), "top", t["accent"])
+    marker = _marker(t.get("w.tab.active_marker", "none"), "top", t["accent"], pal.luminance(t["base"]) < 0.25)
     r = t["r"]
     border = t["w.button.border"]
     hover = (f"  color: {t['w.tab.hover_fg']};\n  background-color: {t['w.tab.hover_color']};\n"
