@@ -247,6 +247,23 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["menu.category_top"], t["menu.category_bottom"] = pal.gradient(cat, m_grad / 100)
     t["menu.category_fg"] = (mcolors["accent_fg"] if cat == mcolors["accent"] else
                              max((mcolors["text"], mcolors["accent_fg"]), key=lambda c: pal.contrast(c, cat)))
+    # the main menu's hover: [panel] menu_hover / menu_hover_fg, else a step
+    # toward the text (the favorites column steps from its own background)
+    if style.panel.get("menu_hover"):
+        mh = sty._resolve_color(style.panel["menu_hover"], mcolors)
+        fav_h = mh
+    else:
+        mh, fav_h = mcolors["menu_hover"], mcolors["fav_hover"]
+    if style.panel.get("menu_hover_fg"):
+        mh_fg = sty._resolve_color(style.panel["menu_hover_fg"], mcolors)
+    elif style.panel.get("menu_hover"):
+        mh_fg = (mcolors["accent_fg"] if mh == mcolors["accent"] else
+                 max((mcolors["text"], mcolors["accent_fg"]), key=lambda c: pal.contrast(c, mh)))
+    else:
+        mh_fg = mcolors["text"]
+    t["menu.main_hover"], t["menu.main_hover_fg"], t["menu.fav_main_hover"] = mh, mh_fg, fav_h
+    t["menu.main_hover_top"], t["menu.main_hover_bottom"] = pal.gradient(mh, m_grad / 100)
+    t["menu.fav_main_hover_top"], t["menu.fav_main_hover_bottom"] = pal.gradient(fav_h, m_grad / 100)
     m_r = shape.radius(m_round, ctl)
     t["menu.r"] = str(m_r)
     t["menu.r2"] = str(shape.window_radius(m_r))

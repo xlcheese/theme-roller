@@ -161,6 +161,9 @@ menubar_item   = { hover_color = "menubar_hover" }
 #[panel]                             # Cinnamon only
 #color         = "darker(bg, 0.14)"  # the panel's own color
 #menu_category = "accent"            # the main menu's selected category (default: a light grey)
+#menu_hover    = "lift(menu_bg, 0.7)"  # the main menu's hover: apps, categories, favorites (default: a step
+                                      # toward the text, set by Hover strength)
+#menu_hover_fg = "text"              # its text (left out: picked to read on menu_hover)
 
 #[notification]
 #kind  = "line"                      # "line" (an accent line on top), "flat" or "bordered"

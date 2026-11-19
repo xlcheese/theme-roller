@@ -1071,6 +1071,21 @@ class RenderAndInstallTests(unittest.TestCase):
         errors, _w = styles.check({"name": "N", "panel": {"menu_category": "accent"}})
         self.assertEqual(errors, [])
 
+    def test_menu_hover_colour(self):
+        base = styles.load(DEFAULT_STYLE)
+        plain = styles.Style(**{**base.__dict__, "panel": {}})           # a style that doesn't set it
+        t = tokens.build(defaults(), plain)
+        self.assertEqual((t["menu.main_hover"], t["menu.main_hover_fg"]), (t["menu.menu_hover"], t["menu.text"]))
+        self.assertEqual(t["menu.fav_main_hover"], t["menu.fav_hover"])
+        accent = styles.Style(**{**base.__dict__, "panel": {"menu_hover": "accent"}})
+        t = tokens.build(defaults(), accent)
+        self.assertEqual((t["menu.main_hover"], t["menu.main_hover_fg"], t["menu.fav_main_hover"]),
+                         (t["menu.accent"], t["menu.accent_fg"], t["menu.accent"]))
+        own = styles.Style(**{**base.__dict__, "panel": {"menu_hover": "#DDEEFF", "menu_hover_fg": "#112233"}})
+        self.assertEqual(tokens.build(defaults(), own)["menu.main_hover_fg"], "#112233")
+        errors, _w = styles.check({"name": "N", "panel": {"menu_hover": "accent", "menu_hover_fg": "accent_fg"}})
+        self.assertEqual(errors, [])
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"

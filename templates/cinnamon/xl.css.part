@@ -207,22 +207,22 @@
   border-radius: {{menu.item_r}}px;
   transition-duration: {{hover_out_ms}}; }
 .menu-favorites-button:hover {
-  background-color: {{menu.fav_hover}};
+  background-color: {{menu.fav_main_hover}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.fav_hover_top}};
-  background-gradient-end: {{menu.fav_hover_bottom}};
+  background-gradient-start: {{menu.fav_main_hover_top}};
+  background-gradient-end: {{menu.fav_main_hover_bottom}};
   transition-duration: {{hover_in_ms}}; }
 
 .menu-application-button, .menu-category-button, .menu-category-button-greyed {
   border-radius: {{menu.item_r}}px;
   transition-duration: {{hover_out_ms}}; }
 .menu-application-button-selected, .menu-category-button:hover {
-  color: {{menu.text}};
+  color: {{menu.main_hover_fg}};
   border-radius: {{menu.item_r}}px;
-  background-color: {{menu.menu_hover}};
+  background-color: {{menu.main_hover}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.menu_hover_top}};
-  background-gradient-end: {{menu.menu_hover_bottom}};
+  background-gradient-start: {{menu.main_hover_top}};
+  background-gradient-end: {{menu.main_hover_bottom}};
   transition-duration: {{hover_in_ms}}; }
 .menu-category-button-selected, .menu-category-button-selected:hover {
   color: {{menu.category_fg}};
@@ -232,6 +232,8 @@
   background-gradient-start: {{menu.category_top}};
   background-gradient-end: {{menu.category_bottom}}; }
 .menu-category-button-selected .menu-category-button-label { color: {{menu.category_fg}}; }
+.menu-application-button-selected .menu-application-button-label,
+.menu-category-button:hover .menu-category-button-label { color: {{menu.main_hover_fg}}; }
 
 /* Cinnamon 6.4's main menu (appmenu-* classes): the same as above */
 .appmenu-category-button, .appmenu-category-button-selected, .appmenu-category-button-greyed,
@@ -239,11 +241,11 @@
   border-radius: {{menu.item_r}}px;
   transition-duration: {{hover_out_ms}}; }
 .appmenu-category-button:hover, .appmenu-application-button-selected, .appmenu-sidebar-button:hover {
-  color: {{menu.text}};
-  background-color: {{menu.menu_hover}};
+  color: {{menu.main_hover_fg}};
+  background-color: {{menu.main_hover}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.menu_hover_top}};
-  background-gradient-end: {{menu.menu_hover_bottom}};
+  background-gradient-start: {{menu.main_hover_top}};
+  background-gradient-end: {{menu.main_hover_bottom}};
   transition-duration: {{hover_in_ms}}; }
 .appmenu-category-button-selected, .appmenu-category-button-selected:hover {
   color: {{menu.category_fg}};
@@ -252,6 +254,8 @@
   background-gradient-start: {{menu.category_top}};
   background-gradient-end: {{menu.category_bottom}}; }
 .appmenu-category-button-selected .appmenu-category-button-label { color: {{menu.category_fg}}; }
+.appmenu-application-button-selected .appmenu-application-button-label,
+.appmenu-category-button:hover .appmenu-category-button-label { color: {{menu.main_hover_fg}}; }
 
 #menu-search-entry {
   border-radius: {{menu.r}}px;
