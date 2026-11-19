@@ -112,7 +112,7 @@ SECTION_NOTES = {
     "terminal": "Left on “Follow theme”, the terminal uses the theme's content colors.",
 }
 GATES = {"separate_colors": True, "custom": True, "follow_global": False}  # value set when a sibling changes
-HIDDEN = set(GATES) | {"flatpak_access"}
+HIDDEN = set(GATES) | {"flatpak_access"} | ({"round_bottom"} if not tokens.ROUND_BOTTOM_READY else set())
 SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 

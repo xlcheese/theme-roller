@@ -294,9 +294,10 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["wb.r"] = (str(shape.window_radius(shape.radius(wr, ctl))) if wr is not None else t["r2"])
     # the bottom corners: rounded only where the toolkit can (GTK 4 trims a
     # window's contents to its shape; GTK 3 rounds a window's own background)
-    t["wb.r_bottom"] = t["wb.r"] if wb.get("round_bottom") else "0"
-    t["wb.bottom3.css"] = _round_bottom(t["wb.r"], 3) if wb.get("round_bottom") else ""
-    t["wb.bottom4.css"] = _round_bottom(t["wb.r"], 4) if wb.get("round_bottom") else ""
+    rb = ROUND_BOTTOM_READY and wb.get("round_bottom")
+    t["wb.r_bottom"] = t["wb.r"] if rb else "0"
+    t["wb.bottom3.css"] = _round_bottom(t["wb.r"], 3) if rb else ""
+    t["wb.bottom4.css"] = _round_bottom(t["wb.r"], 4) if rb else ""
     t.update(metacity.tokens(t))
     # Title buttons and headerbar buttons sit on the title bar. With the title
     # bar's own colours, their faces come from a palette built on those (wbp.*),
@@ -392,6 +393,11 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
 # little space at the sides so a rounded hover doesn't touch the menu's edges.
 SQUARE_LISTS_AT = 30
 
+
+# Round bottom corners is on the back burner (docs/design-spec.md, roadmap):
+# the switch is hidden in the settings app and a saved "on" is ignored, so
+# nobody is left with it stuck on. True brings both back.
+ROUND_BOTTOM_READY = False
 
 # Pieces that paint their own background into a window's bottom corners, by
 # toolkit: (selector, corners). A sidebar is rounded with the scroller, viewport

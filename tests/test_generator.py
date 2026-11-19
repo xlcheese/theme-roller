@@ -1174,6 +1174,12 @@ class RenderAndInstallTests(unittest.TestCase):
         self.assertEqual(tokens.build(s, st)["wb.r"], str(shape.WINDOW_RADIUS_MAX))
 
     def test_round_bottom_corners(self):
+        s = defaults()
+        s["window_borders"].update(window_roundness=50, round_bottom=True)
+        if not tokens.ROUND_BOTTOM_READY:                         # on the back burner: ignored
+            self.assertEqual(tokens.build(s, styles.load(DEFAULT_STYLE))["wb.r_bottom"], "0")
+        ready, tokens.ROUND_BOTTOM_READY = tokens.ROUND_BOTTOM_READY, True
+        self.addCleanup(setattr, tokens, "ROUND_BOTTOM_READY", ready)
         st = styles.load(DEFAULT_STYLE)
         s = defaults()
         s["window_borders"]["window_roundness"] = 50
