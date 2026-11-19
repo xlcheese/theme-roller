@@ -422,6 +422,13 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
     t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"])
+    # Cinnamon's right-click and applet menus follow the same rule: square and
+    # edge to edge up to Roundness 30, rounded and inset from the sides above
+    if g["roundness"] <= SQUARE_LISTS_AT:
+        t["popup_items.css"] = (".popup-menu-item { border-radius: 0; }")
+    else:
+        t["popup_items.css"] = (".popup-menu-content { padding-left: 6px; padding-right: 6px; }\n"
+                                f".popup-menu-item {{ border-radius: {t['r']}px; }}")
     # every shadow at the unfocused strength, for :backdrop rules (bd.<token>)
     for k in [k for k in t if ("shadow" in k or "outer" in k)
               and not k.startswith("bd.")]:

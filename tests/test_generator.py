@@ -1169,7 +1169,11 @@ class RenderAndInstallTests(unittest.TestCase):
             out = Path(tmp) / "theme"
             install.build(REPO / "templates", t, out)
             css = (out / "cinnamon" / "cinnamon.css").read_text()
-        self.assertIn(f".popup-menu-item {{\n  border-radius: {t['r']}px;", css)  # other menus: Global
+        # other menus: Global roundness, inset from the sides above 30...
+        self.assertIn(f".popup-menu-item {{ border-radius: {t['r']}px; }}", css)
+        self.assertIn(".popup-menu-content { padding-left: 6px; padding-right: 6px; }", css)
+        s["global"]["roundness"] = 30                                        # ...square, edge to edge, up to it
+        self.assertEqual(tokens.build(s, st)["popup_items.css"], ".popup-menu-item { border-radius: 0; }")
         self.assertIn(f".menu-application-button, .menu-category-button, .menu-category-button-greyed {{\n  border-radius: {t['menu.item_r']}px;", css)
         self.assertEqual(t["menu.w.menu_item.hover_top"], tokens.build(s, st)["menu.w.menu_item.hover_top"])
         self.assertEqual(settings.apply_style_defaults(defaults(), {"menu_roundness": 50})["panel"]["menu_shape"]["item_roundness"], 50)

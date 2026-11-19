@@ -186,11 +186,13 @@
 .popup-sub-menu {
   background-color: {{alpha(mix(menu.menu_bg, menu.text, 0.04), 0.6)}}; }
 
-/* menu items: Global roundness (right-click and applet menus); the main
-   menu's own items take Menu-item roundness (below) */
+/* menu items (right-click and applet menus): as GTK's, square and edge to
+   edge up to Roundness 30, rounded at Global roundness and inset from the
+   sides above (tokens.py); the main menu's own items take Menu-item roundness
+   (below), and its content keeps no padding (.appmenu-background) */
 .popup-menu-item {
-  border-radius: {{r}}px;
   transition-duration: {{hover_out_ms}}; }
+{{popup_items.css}}
 .popup-menu-item:active {
   color: {{menu.w.menu_item.hover_fg}};
   background-color: {{menu.w.menu_item.hover_color}};
