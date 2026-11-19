@@ -129,6 +129,30 @@ def set_adw_accent(name: str) -> str | None:
     return f"GNOME accent colour set to {name} (nearest to your accent)"
 
 
+def _make_swap(theme_dir, theme_name: str):
+    """A link beside the theme, under a hidden name, to switch to while
+    reloading. None if it can't be made (then Mint-Y is used, as before)."""
+    from pathlib import Path
+    theme_dir = Path(theme_dir)
+    swap = theme_dir.parent / f".{theme_name}-reloading"
+    try:
+        _remove_swap(swap)                # a leftover from an interrupted Apply
+        if not theme_dir.is_dir():
+            return None
+        swap.symlink_to(theme_dir.name)   # relative: beside the theme
+        return swap
+    except OSError:
+        return None
+
+
+def _remove_swap(swap) -> None:
+    try:
+        if swap.is_symlink() or swap.exists():
+            swap.unlink()
+    except OSError:
+        pass
+
+
 def apply(theme_name: str, button_layout: str | None = None, activate: bool = False,
           pause: float = 0.3, theme_dir=None) -> list[str]:
     """Reload (and optionally switch to) the theme. Returns what was done, for the log."""
@@ -139,7 +163,13 @@ def apply(theme_name: str, button_layout: str | None = None, activate: bool = Fa
         if set_value(*LAYOUT_KEY, button_layout):
             log.append(f"button layout set to {button_layout}")
     refresh_wm = False
+    # Reloading means switching away and back (the same name doesn't reload).
+    # Away to Mint-Y flashed Mint-Y for a moment; away to a short-lived link to
+    # our own theme under another name shows the new theme throughout.
+    swap = _make_swap(theme_dir, theme_name) if theme_dir is not None else None
     for schema, key, fallback, part in THEME_KEYS:
+        if swap is not None:
+            fallback = swap.name
         if theme_dir is not None and not (theme_dir / part).is_dir():
             log.append(f"{schema} {key}: this version of the theme has no {part}/ yet, left alone")
             continue
@@ -160,6 +190,9 @@ def apply(theme_name: str, button_layout: str | None = None, activate: bool = Fa
         else:
             log.append(f"{schema} {key} is '{current}', not {theme_name}: left alone "
                        f"(use --activate to switch)")
+    if swap is not None:
+        time.sleep(pause)                 # let everything settle on our own name again
+        _remove_swap(swap)
     # Window border themes (ours or Mint-Y's) read their colors from the GTK
     # theme, but only when they load. Nudge the current one so it picks up the
     # new colors, unless it was already reloaded above.

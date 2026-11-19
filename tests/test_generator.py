@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, flatpak, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, flatpak, reload, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -1103,6 +1103,21 @@ class RenderAndInstallTests(unittest.TestCase):
         s["global"]["accent"] = "#FA8562"                          # coral on blue: its own edges
         t = tokens.build(s, st)
         self.assertEqual(t["wbp.sug.border"], t["wbp.w.suggested.border"])
+
+    def test_reload_swap_link(self):
+        # Apply reloads by switching to a hidden link to our own theme and back
+        # (Mint-Y flashed before): made beside the theme, removed after
+        with tempfile.TemporaryDirectory() as tmp:
+            theme = Path(tmp) / "xl-Cheeselooks"
+            (theme / "gtk-3.0").mkdir(parents=True)
+            swap = reload._make_swap(theme, "xl-Cheeselooks")
+            self.assertEqual(swap.name, ".xl-Cheeselooks-reloading")
+            self.assertTrue((swap / "gtk-3.0").is_dir())             # the same theme, another name
+            self.assertEqual(reload._make_swap(theme, "xl-Cheeselooks"), swap)   # a leftover is replaced
+            reload._remove_swap(swap)
+            self.assertFalse(swap.is_symlink() or swap.exists())
+            self.assertTrue(theme.is_dir())                          # the theme itself untouched
+            self.assertIsNone(reload._make_swap(Path(tmp) / "missing", "missing"))
 
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:

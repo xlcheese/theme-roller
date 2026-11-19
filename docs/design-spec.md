@@ -59,7 +59,7 @@ It brings back an idea from GNOME 2's Clearlooks and the GNOME Color Chooser, re
   - `org.cinnamon.desktop.interface gtk-theme` (GTK apps)
   - `org.cinnamon.desktop.wm.preferences theme` (window borders)
 
-  The user sees one short flicker. Running GTK 3 apps restyle themselves, while some apps (Firefox, Electron apps) only partly refresh until they're restarted.
+  "Away" is a short-lived hidden link beside the theme, `.xl-Cheeselooks-reloading` → `xl-Cheeselooks` (`reload._make_swap`), so the desktop shows the new theme under both names and doesn't flash Mint-Y (it did before, asked by xl_cheese); the link is removed once everything is back on the real name, and Mint-Y is the fallback if it can't be made. The user sees at most a short redraw. Running GTK 3 apps restyle themselves, while some apps (Firefox, Electron apps) only partly refresh until they're restarted.
 
 ### Settings model (defaults)
 
