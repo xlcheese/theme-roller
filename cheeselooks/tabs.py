@@ -197,6 +197,14 @@ def css(t: dict[str, str], gtk4: bool = False) -> str:
                        f"  border-{side}-style: solid;\n  border-{side}-width: 1px;\n"
                        f"  border-{side}-color: {t['frame']}; }}")      # the page's frame line
     out.append(f"{all_pos(':hover:not(:checked)')} {{\n{hover} }}")
+    if kind == "boxed":
+        # hovered too, the edge facing the page stays the page's frame line (the
+        # darker hover border along it read as a shade)
+        for pos in POSITIONS:
+            side = inner[pos]
+            out.append(f"{sel(pos, ':hover:not(:checked)')}"
+                       f"{',' + chr(10) + 'notebook > header > tabs > tab:hover:not(:checked)' if pos == 'top' else ''} {{\n"
+                       f"  border-{side}-color: {t['frame']}; }}")
     if kind != "pills":
         # boxed and open tabs are joined to the page: no highlight or shade on
         # the edge that faces it (e.g. no bottom shade on top tabs)
