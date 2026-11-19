@@ -346,6 +346,15 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["wb.line"] = (sty._resolve_color(style.dividers, wb_pal) if style.dividers else t["wb.border"])
     for state in ("", "hover_", "pressed_"):
         _linked_ltr(t, "wbp.w.", state)
+    # The suggested button on a header bar: its border and edge layers. When the
+    # accent is close to the title bar's colour (xl-Classic Dark: a blue bar, a
+    # blue accent), the accent's own darker border barely shows on the bar and
+    # the button looked washed out beside the others: it takes the title-bar
+    # buttons' border and edges then, keeping its accent face.
+    near = _near_colour(g["accent"], title)
+    src = "wbp.w.button." if near else "wbp.w.suggested."
+    for k in ("border", "hover_border", "pressed_border", "shadow", "hover_shadow", "pressed_shadow"):
+        t["wbp.sug." + k] = t[src + k]
     # the header bar's top highlight, on the title bar's own colour (Mint-Y's
     # base worked it out from the window background: a pale line on a dark bar)
     key = "highlight_dark" if pal.is_dark(wb_pal) else "highlight"
@@ -447,6 +456,24 @@ _BOTTOM_PIECES = {
 }
 _SQUARE_STATES = {3: ("maximized", "tiled", "fullscreen"),
                   4: ("maximized", "fullscreen", "tiled", "tiled-left", "tiled-right", "tiled-bottom")}
+
+
+# a header bar's suggested button takes the title-bar buttons' border and
+# edges when the accent is near the title bar's colour: the same hue (within
+# NEAR_HUE degrees, both coloured) and not far in lightness (contrast below
+# NEAR_CONTRAST), or nearly the same colour whatever the hue
+NEAR_HUE, NEAR_CONTRAST = 20, 2.0
+
+
+def _near_colour(a: str, b: str) -> bool:
+    import colorsys
+    c = pal.contrast(a, b)
+    if c < 1.15:
+        return True
+    ha, _la, sa = colorsys.rgb_to_hls(*(v / 255 for v in pal.to_rgb(a)))
+    hb, _lb, sb = colorsys.rgb_to_hls(*(v / 255 for v in pal.to_rgb(b)))
+    dh = abs(((ha - hb + 0.5) % 1) - 0.5) * 360
+    return sa > 0.15 and sb > 0.15 and dh < NEAR_HUE and c < NEAR_CONTRAST
 
 
 def _shift(color: str, frm: str, to: str) -> str:

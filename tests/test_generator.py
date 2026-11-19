@@ -1092,6 +1092,18 @@ class RenderAndInstallTests(unittest.TestCase):
                                                           "menu_fav_hover": "accent"}})
         self.assertEqual(errors, [])
 
+    def test_suggested_near_title_bar(self):
+        st = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        s["global"]["accent"] = "#7A9CCF"                         # xl-Classic Dark: a blue accent...
+        s["window_borders"].update(separate_colors=True, title_bar="#5178B2", title_text="#FFFFFF")
+        t = tokens.build(s, st)                                    # ...on a blue title bar
+        self.assertEqual(t["wbp.sug.border"], t["wbp.w.button.border"])
+        self.assertIn("bd.wbp.sug.shadow", t)
+        s["global"]["accent"] = "#FA8562"                          # coral on blue: its own edges
+        t = tokens.build(s, st)
+        self.assertEqual(t["wbp.sug.border"], t["wbp.w.suggested.border"])
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"

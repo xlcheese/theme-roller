@@ -415,14 +415,16 @@ button.destructive-action:active, headerbar button.destructive-action:active {
    palette, as the other title-bar buttons' do, so a pale-on-light edge tuned
    for the window doesn't show up on a dark or coloured title bar */
 headerbar button.suggested-action {
-  border-color: {{wbp.w.suggested.border}};
-  box-shadow: {{wbp.w.suggested.shadow}}; }
+  border-color: {{wbp.sug.border}};
+  box-shadow: {{wbp.sug.shadow}}; }
 headerbar button.suggested-action:hover {
-  border-color: {{wbp.w.suggested.hover_border}};
-  box-shadow: {{wbp.w.suggested.hover_shadow}}; }
+  border-color: {{wbp.sug.hover_border}};
+  box-shadow: {{wbp.sug.hover_shadow}}; }
 headerbar button.suggested-action:active {
-  border-color: {{wbp.w.suggested.pressed_border}};
-  box-shadow: {{wbp.w.suggested.pressed_shadow}}; }
+  border-color: {{wbp.sug.pressed_border}};
+  box-shadow: {{wbp.sug.pressed_shadow}}; }
+headerbar button.suggested-action:backdrop {
+  box-shadow: {{bd.wbp.sug.shadow}}; }
 headerbar button.destructive-action {
   box-shadow: {{wbp.w.destructive.shadow}}; }
 headerbar button.destructive-action:hover {
