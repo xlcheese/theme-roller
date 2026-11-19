@@ -38,6 +38,7 @@ DEFAULTS: dict[str, Any] = {
         "separate_colors": False, "title_bar": None, "title_text": None, "border": None,
         "title_bar_height": 44, "border_width": 1, "title_gradient": 30,
         "window_roundness": None,   # None: follows Global roundness
+        "round_bottom": False,      # round the bottom corners too (GTK 4; GTK 3 header bar windows)
         "button_layout": "right", "button_style": "flat",
         "button_roundness": None,   # None: the button style's own roundness
         "button_spacing": None,     # None: the button style's own spacing (px)
@@ -90,6 +91,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("window_borders", "title_bar_height"), "int", (30, 56)),
     (("window_borders", "border_width"), "int", (0, 6)),
     (("window_borders", "window_roundness"), "int?", (0, 100)),
+    (("window_borders", "round_bottom"), "bool", None),
     (("window_borders", "title_gradient"), "int", (0, 100)),
     (("window_borders", "button_layout"), "choice", ("left", "right")),
     (("window_borders", "button_glyphs"), "choice?", tuple(titlebuttons.GLYPH_SET_NAMES)),

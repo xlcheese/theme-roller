@@ -292,6 +292,9 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # the window's corners: your Window roundness, else Global's (as r2)
     wr = wb.get("window_roundness")
     t["wb.r"] = (str(shape.window_radius(shape.radius(wr, ctl))) if wr is not None else t["r2"])
+    # the bottom corners: rounded only where the toolkit can (GTK 4 trims a
+    # window's contents to its shape; GTK 3 rounds a window's own background)
+    t["wb.r_bottom"] = t["wb.r"] if wb.get("round_bottom") else "0"
     t.update(metacity.tokens(t))
     # Title buttons and headerbar buttons sit on the title bar. With the title
     # bar's own colours, their faces come from a palette built on those (wbp.*),

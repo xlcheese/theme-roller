@@ -243,7 +243,9 @@ window.maximized > headerbar, window.tiled > headerbar, window.fullscreen > head
 /* the window's outline and shadow: as GTK 3 windows and the window borders
    have them (GTK 4 and libadwaita drew a darker or lighter outline of their own) */
 window.csd {
-  border-radius: {{wb.r}}px {{wb.r}}px 0 0;
+  /* GTK 4 trims a window's contents to its shape: the bottom corners round
+     cleanly when Round bottom corners is on */
+  border-radius: {{wb.r}}px {{wb.r}}px {{wb.r_bottom}}px {{wb.r_bottom}}px;
   outline: none;
   box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.35), 0 0 0 {{wb.border_width}}px {{wb.border}}; }
 window.csd:backdrop {

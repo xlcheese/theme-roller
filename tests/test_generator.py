@@ -1173,6 +1173,23 @@ class RenderAndInstallTests(unittest.TestCase):
         s["window_borders"]["window_roundness"] = 100
         self.assertEqual(tokens.build(s, st)["wb.r"], str(shape.WINDOW_RADIUS_MAX))
 
+    def test_round_bottom_corners(self):
+        st = styles.load(DEFAULT_STYLE)
+        s = defaults()
+        s["window_borders"]["window_roundness"] = 50
+        t = tokens.build(s, st)
+        self.assertEqual(t["wb.r_bottom"], "0")                    # off by default: square
+        s["window_borders"]["round_bottom"] = True
+        t = tokens.build(s, st)
+        self.assertEqual(t["wb.r_bottom"], t["wb.r"])
+        with tempfile.TemporaryDirectory() as tmp:
+            install.build(REPO / "templates", t, Path(tmp) / "theme")
+            css4 = (Path(tmp) / "theme" / "gtk-4.0" / "xl.css").read_text()
+            css3 = (Path(tmp) / "theme" / "gtk-3.0" / "xl.css").read_text()
+        r = t["wb.r"]
+        self.assertIn(f"border-radius: {r}px {r}px {r}px {r}px;", css4)
+        self.assertIn(f"border-bottom-left-radius: {r}px;", css3)
+
     def test_title_button_colors(self):
         base = styles.load(DEFAULT_STYLE)
         s = defaults()

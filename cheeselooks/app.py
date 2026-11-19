@@ -87,7 +87,7 @@ LABELS = {
     "notification_opacity": "Notification opacity", "panel_height": "Height",
     "item_roundness": "Menu-item roundness",
     "title_bar": "Title bar", "title_text": "Title text", "border": "Border",
-    "title_bar_height": "Title bar height", "border_width": "Border width", "window_roundness": "Window roundness",
+    "title_bar_height": "Title bar height", "border_width": "Border width", "window_roundness": "Window roundness", "round_bottom": "Round bottom corners",
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",

@@ -465,6 +465,19 @@ decoration:backdrop, window.csd decoration:backdrop {
 .maximized decoration, .tiled decoration, .fullscreen decoration {
   border-radius: 0;
   box-shadow: none; }
+/* Round bottom corners (Window Borders): windows that draw their own title
+   bar only. Muffin's frames stay square at the bottom: the app's contents
+   inside them are square, and only the compositor could trim them. GTK 3
+   doesn't trim a window's contents either, so something drawn right at the
+   bottom edge can still show a square corner. */
+window.csd decoration {
+  border-radius: {{wb.r}}px {{wb.r}}px {{wb.r_bottom}}px {{wb.r_bottom}}px; }
+window.background.csd {
+  border-bottom-left-radius: {{wb.r_bottom}}px;
+  border-bottom-right-radius: {{wb.r_bottom}}px; }
+window.csd.maximized decoration, window.csd.tiled decoration, window.csd.fullscreen decoration,
+window.background.csd.maximized, window.background.csd.tiled, window.background.csd.fullscreen {
+  border-radius: 0; }
 
 {{titlebuttons.css}}
 /* Other headerbar buttons: on the title bar, so their hover and pressed faces
