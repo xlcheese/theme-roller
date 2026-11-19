@@ -25,6 +25,9 @@ from __future__ import annotations
 from . import palette as pal
 
 POSITIONS = ("top", "bottom", "left", "right")
+TAB_PAD = 2          # Mint-Y's padding round a tab's label (outer side)
+HEADER_PAD = 2       # Mint-Y's padding round the tab strip, given to the tabs instead
+STRIP_DARKER = {False: 0.05, True: 0.2}   # the strip behind rounded tabs (light, dark themes)
 # marker offset on the outer edge, as "x y"
 _EDGE = {"top": ("0", "{n}px"), "bottom": ("0", "-{n}px"), "left": ("{n}px", "0"), "right": ("-{n}px", "0")}
 # corner radii: rounded on the outer side only
@@ -154,6 +157,21 @@ def css(t: dict[str, str], gtk4: bool = False) -> str:
                    "  border-radius: 0;\n  background-color: transparent; }")
         out.append(f"{all_pos()} {{\n  margin: 0 1px;\n  border: 1px solid transparent;\n  border-radius: {r}px; }}")
     else:
+        # the tabs fill the strip out to its outer edge (no gap between them and
+        # a toolbar above, the strip's padding added to the tabs instead), and
+        # rounded tabs sit in a slightly darker strip, so their corners read
+        # (darker than every tab: unselected boxed ones are in the toolbar color, the
+        # selected one in the page color, darker than the background on dark themes)
+        under = min(t["bg"], t["header"], t["base"], key=pal.luminance)   # and the selected tab (base)
+        dark = pal.luminance(t["bg"]) < 0.25
+        strip = pal.darker(under, STRIP_DARKER[dark]) if float(r) > 0 else t["bg"]
+        for pos in POSITIONS:
+            out.append(f"notebook > header.{pos} {{\n  padding-{pos}: 0;\n  background-color: {strip}; }}\n"
+                       f"{sel(pos)} {{\n  padding-{pos}: {TAB_PAD + HEADER_PAD}px; }}")
+        # Nemo's tabs sit right under its toolbar, whose bottom line then
+        # serves as their top edge (two lines side by side looked busy)
+        out.append(f".nemo-window notebook > header.top > tabs > tab {{\n"
+                   f"  border-top-width: 0;\n  padding-top: {TAB_PAD + HEADER_PAD + 1}px; }}")
         for pos in POSITIONS:
             radii = _RADII[pos].format(r=t["r2"] if kind == "claude" else r)
             out.append(f"{sel(pos)}{', ' + 'notebook > header > tabs > tab' if pos == 'top' else ''} {{\n"
