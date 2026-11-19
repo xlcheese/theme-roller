@@ -243,8 +243,9 @@ window.maximized > headerbar, window.tiled > headerbar, window.fullscreen > head
 /* the window's outline and shadow: as GTK 3 windows and the window borders
    have them (GTK 4 and libadwaita drew a darker or lighter outline of their own) */
 window.csd {
-  /* GTK 4 trims a window's contents to its shape: the bottom corners round
-     cleanly when Round bottom corners is on */
+  /* Round bottom corners: the window's own background. GTK 4 doesn't trim
+     the contents to it either: pieces painting into a bottom corner get
+     rounded below (wb.bottom4.css) */
   border-radius: {{wb.r}}px {{wb.r}}px {{wb.r_bottom}}px {{wb.r_bottom}}px;
   outline: none;
   box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.35), 0 0 0 {{wb.border_width}}px {{wb.border}}; }
@@ -256,6 +257,10 @@ window.csd.tiled-right:backdrop, window.csd.tiled-bottom:backdrop {
   box-shadow: 0 0 0 {{wb.border_width}}px {{wb.border}}, 0 0 0 20px transparent; }
 window.csd.maximized, window.csd.fullscreen, window.csd.maximized:backdrop, window.csd.fullscreen:backdrop {
   box-shadow: none; }
+window.csd.maximized, window.csd.fullscreen, window.csd.tiled, window.csd.tiled-top,
+window.csd.tiled-left, window.csd.tiled-right, window.csd.tiled-bottom {
+  border-radius: 0; }
+{{wb.bottom4.css}}
 
 {{titlebuttons4.css}}
 /* Other headerbar buttons: on the title bar, so their hover and pressed faces

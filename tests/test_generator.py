@@ -1189,6 +1189,11 @@ class RenderAndInstallTests(unittest.TestCase):
         r = t["wb.r"]
         self.assertIn(f"border-radius: {r}px {r}px {r}px {r}px;", css4)
         self.assertIn(f"border-bottom-left-radius: {r}px;", css3)
+        self.assertIn("window.csd evview", css3)
+        self.assertIn("window.csd actionbar > revealer > box", css4)
+        self.assertNotIn("treeview", t["wb.bottom3.css"])           # Nemo's sidebar rows
+        s["window_borders"]["round_bottom"] = False
+        self.assertEqual(tokens.build(s, st)["wb.bottom3.css"], "")
 
     def test_title_button_colors(self):
         base = styles.load(DEFAULT_STYLE)

@@ -295,7 +295,8 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # the bottom corners: rounded only where the toolkit can (GTK 4 trims a
     # window's contents to its shape; GTK 3 rounds a window's own background)
     t["wb.r_bottom"] = t["wb.r"] if wb.get("round_bottom") else "0"
-    t["wb.bottom3.css"] = _round_bottom_gtk3(t["wb.r"]) if wb.get("round_bottom") else ""
+    t["wb.bottom3.css"] = _round_bottom(t["wb.r"], 3) if wb.get("round_bottom") else ""
+    t["wb.bottom4.css"] = _round_bottom(t["wb.r"], 4) if wb.get("round_bottom") else ""
     t.update(metacity.tokens(t))
     # Title buttons and headerbar buttons sit on the title bar. With the title
     # bar's own colours, their faces come from a palette built on those (wbp.*),
@@ -392,21 +393,39 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
 SQUARE_LISTS_AT = 30
 
 
-def _round_bottom_gtk3(r: str) -> str:
-    """GTK 3 doesn't trim a window's contents to its rounded corners, so the
-    pieces that paint their own background down the window's side would square
-    the corner again: sidebars (and the list, view or scroller inside one) round
-    their outer bottom corner too. Emitted only with Round bottom corners on, so
-    the switch off leaves every other radius alone."""
-    parts = ("{s}", "{s} scrolledwindow", "{s} viewport", "{s} list", "{s} .view", "{s} treeview")
-    sides = ((".sidebar:dir(ltr)", "left"), (".sidebar.left", "left"), ("placessidebar:dir(ltr)", "left"),
-             (".sidebar:dir(rtl)", "right"), (".sidebar.right", "right"), ("placessidebar:dir(rtl)", "right"))
+# Pieces that paint their own background into a window's bottom corners, by
+# toolkit: (selector, corners). A sidebar is rounded with the scroller, viewport
+# and list inside it (each paints); a tree view isn't (it draws every row with
+# its own style, so its rows would round too: Nemo's sidebar).
+_SIDEBAR_PARTS = ("{s}", "{s} scrolledwindow", "{s} viewport", "{s} list")
+_SIDEBARS = {
+    "left": (".sidebar:dir(ltr)", ".sidebar.left", "placessidebar:dir(ltr)", ".navigation-sidebar:dir(ltr)"),
+    "right": (".sidebar:dir(rtl)", ".sidebar.right", "placessidebar:dir(rtl)", ".navigation-sidebar:dir(rtl)"),
+}
+_BOTTOM_PIECES = {
+    3: ("actionbar",                        # GtkActionBar (Drawing, dialogs)
+        "evview"),                          # Xreader's page view
+    4: ("actionbar > revealer > box",),
+}
+_SQUARE_STATES = {3: ("maximized", "tiled", "fullscreen"),
+                  4: ("maximized", "fullscreen", "tiled", "tiled-left", "tiled-right", "tiled-bottom")}
+
+
+def _round_bottom(r: str, gtk: int) -> str:
+    """Neither GTK 3 nor a plain GTK 4 window trims its contents to its
+    rounded corners, so the pieces that paint their own background into a
+    bottom corner would square it again: they round that corner too. Emitted
+    only with Round bottom corners on, so the switch off leaves every other
+    radius alone."""
+    corners = {side: [p.format(s=s) for s in sels for p in _SIDEBAR_PARTS] for side, sels in _SIDEBARS.items()}
+    for piece in _BOTTOM_PIECES[gtk]:
+        corners["left"].append(piece)
+        corners["right"].append(piece)
     out = []
-    for side in ("left", "right"):
-        sel = ",\n".join(f"window.csd {p.format(s=s)}" for s, sd in sides if sd == side for p in parts)
-        out.append(f"{sel} {{\n  border-bottom-{side}-radius: {r}px; }}")
-    sq = ",\n".join(f"window.csd.{m} {p.format(s=s)}" for m in ("maximized", "tiled", "fullscreen")
-                    for s, _sd in sides for p in parts)
+    for side, sels in corners.items():
+        out.append(",\n".join(f"window.csd {x}" for x in sels) + f" {{\n  border-bottom-{side}-radius: {r}px; }}")
+    every = dict.fromkeys(corners["left"] + corners["right"])
+    sq = ",\n".join(f"window.csd.{m} {x}" for m in _SQUARE_STATES[gtk] for x in every)
     out.append(f"{sq} {{\n  border-bottom-left-radius: 0; border-bottom-right-radius: 0; }}")
     return "\n".join(out)
 
