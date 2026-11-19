@@ -7,7 +7,11 @@
 #   - hover lifts toward the text colour and warms the border toward the
 #     terracotta; menus hover with a warm terracotta tint;
 #   - fields sink into a darker well; the panel is a shade darker than windows,
-#     with soft chips and a terracotta line under the focused window.
+#     with soft chips and a terracotta line under the focused window;
+#   - terracotta and red buttons get a dark rim like the others (their own
+#     lighter shade read as a glowing edge); the lines between sections stay
+#     light (ink ones vanished against the dark pages);
+#   - the main menu hovers with the same warm tint as every other menu.
 #
 # Made to go with the Claude Dark theme. Alpha values are written for Depth 50;
 # alpha_dark is what dark colours use, alpha is a fallback if you pair this
@@ -74,8 +78,9 @@ highlight = { y = 1, blur = 0, color = "white", alpha = 0.30, alpha_dark = 0.07 
 
 [widgets]
 button         = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "lift(button, 0.12)" }
-suggested      = { like = "button", border = "accent_press", hover_color = "accent_hover" }
-destructive    = { like = "button", border = "darker(destructive, 0.3)" }
+# terracotta and red buttons: a dark rim (also the close button's terracotta hover)
+suggested      = { like = "button", border = "darker(accent, 0.45)", hover_color = "accent_hover" }
+destructive    = { like = "button", hover_color = "destructive", border = "darker(destructive, 0.45)" }
 toolbar_button = { edge = "flat", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "lift(header, 0.10)" }
 title_button   = { like = "toolbar_button" }
 close_button   = { like = "title_button", hover_color = "accent" }
@@ -90,3 +95,8 @@ scrollbar      = { color = "mix(bg, text, 0.32)", hover_color = "mix(bg, accent,
 
 [panel]
 color = "darker(bg, 0.28)"
+# the main menu: the warm tint of every other menu's hover, and a stronger one
+# on the selected category
+menu_hover    = "mix(menu_bg, accent, 0.24)"
+menu_hover_fg = "text"
+menu_category = "mix(menu_bg, accent, 0.42)"
