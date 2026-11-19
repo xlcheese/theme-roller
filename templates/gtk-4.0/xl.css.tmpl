@@ -190,9 +190,11 @@ button.destructive-action:not(.osd), headerbar button.destructive-action:not(.os
   box-shadow: {{w.destructive.g4_shadow}}; }
 button.destructive-action:not(.osd):hover, headerbar button.destructive-action:not(.osd):hover {
   color: {{destructive_fg}};
+  border-color: {{destructive_hover_border}};
   background-image: linear-gradient(to bottom, {{lighter(destructive_top, 0.12)}}, {{lighter(destructive_bottom, 0.12)}});
   box-shadow: {{w.destructive.hover_g4_shadow}}; }
 button.destructive-action:not(.osd):active, headerbar button.destructive-action:not(.osd):active {
+  border-color: {{destructive_pressed_border}};
   background-image: image({{darker(destructive, 0.14)}});
   box-shadow: {{w.destructive.pressed_g4_shadow}}; }
 

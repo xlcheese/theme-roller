@@ -427,6 +427,9 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     d_border = style.widgets.get("destructive", {}).get("border")
     t["destructive_border"] = (sty._resolve_color(d_border, theme) if d_border
                                else pal.darker(theme["destructive"], 0.14))
+    # hover and pressed: the same border, set outright as the suggested
+    # button's are (left unset, the plain buttons' hover border showed through)
+    t["destructive_hover_border"] = t["destructive_pressed_border"] = t["destructive_border"]
     # Cinnamon's right-click and applet menus follow the same rule: square and
     # edge to edge up to Roundness 30, rounded and inset from the sides above
     if g["roundness"] <= SQUARE_LISTS_AT:
