@@ -266,6 +266,15 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
         mh_fg = mcolors["text"]
     t["menu.main_hover"], t["menu.main_hover_fg"], t["menu.fav_main_hover"] = mh, mh_fg, fav_h
     t["menu.main_hover_top"], t["menu.main_hover_bottom"] = pal.gradient(mh, m_grad / 100)
+    # Cinnamon 6.4's sidebar (favorites with names, places, system buttons) has
+    # its own background (Mint-Y's), lighter than the menu on dark themes: its
+    # hover is the menu's hover moved by as much, or menu_fav_hover
+    side_bg = pal.mix(mcolors["menu_bg"], mcolors["text"], 0.123)
+    side_h = (fav_h if style.panel.get("menu_fav_hover") else _shift(mh, mcolors["menu_bg"], side_bg))
+    t["menu.sidebar_bg"], t["menu.side_hover"] = side_bg, side_h
+    t["menu.side_hover_bottom"] = pal.gradient(side_h, m_grad / 100)[1]
+    t["menu.side_hover_fg"] = (mh_fg if not style.panel.get("menu_fav_hover") else
+                               max((mcolors["text"], mcolors["accent_fg"]), key=lambda c: pal.contrast(c, side_h)))
     # the favorites' hover only shades downward: on their short square buttons a
     # lightened top washed out (xl-Classic Dark), so the top is the hover itself
     t["menu.fav_main_hover_top"] = fav_h

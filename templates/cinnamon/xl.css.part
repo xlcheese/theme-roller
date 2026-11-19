@@ -240,13 +240,24 @@
 .appmenu-application-button, .appmenu-application-button-selected, .appmenu-sidebar-button {
   border-radius: {{menu.item_r}}px;
   transition-duration: {{hover_out_ms}}; }
-.appmenu-category-button:hover, .appmenu-application-button-selected, .appmenu-sidebar-button:hover {
+.appmenu-category-button:hover, .appmenu-application-button-selected {
   color: {{menu.main_hover_fg}};
   background-color: {{menu.main_hover}};
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.main_hover_top}};
   background-gradient-end: {{menu.main_hover_bottom}};
   transition-duration: {{hover_in_ms}}; }
+/* its sidebar: the same step from the sidebar's own background, shaded
+   downward only (a lightened top washed out on dark themes) */
+.appmenu-sidebar { background-color: {{menu.sidebar_bg}}; }
+.appmenu-sidebar-button:hover {
+  color: {{menu.side_hover_fg}};
+  background-color: {{menu.side_hover}};
+  background-gradient-direction: vertical;
+  background-gradient-start: {{menu.side_hover}};
+  background-gradient-end: {{menu.side_hover_bottom}};
+  transition-duration: {{hover_in_ms}}; }
+.appmenu-sidebar-button:hover StLabel { color: {{menu.side_hover_fg}}; }
 .appmenu-category-button-selected, .appmenu-category-button-selected:hover {
   color: {{menu.category_fg}};
   background-color: {{menu.category}};
