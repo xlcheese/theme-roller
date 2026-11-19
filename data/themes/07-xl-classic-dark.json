@@ -17,7 +17,7 @@
     "window_borders": {
       "separate_colors": true,
       "title_bar": "#5178B2",
-      "title_text": "#F9F9F9",
+      "title_text": "#FFFFFF",
       "border": "#5178B2",
       "title_bar_height": 40,
       "title_gradient": 14,
