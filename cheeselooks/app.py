@@ -695,8 +695,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
                        False, False, 0)
         if TIP_URL:
             line("<small>Enjoying xl-Cheeselooks? It's free and always will be.</small>", dim=True, top=2)
-            box.pack_start(Gtk.LinkButton(uri=TIP_URL, label="Leave a tip ☕", halign=Gtk.Align.CENTER),
-                           False, False, 0)
+            tip = Gtk.Button(label="Leave a tip ☕", halign=Gtk.Align.CENTER, tooltip_text=TIP_URL)
+            tip.get_style_context().add_class("suggested-action")     # an accent button, in your theme
+            tip.connect("clicked", lambda b: Gtk.show_uri_on_window(self, TIP_URL, Gtk.get_current_event_time()))
+            box.pack_start(tip, False, False, 0)
         line("<small>Copyright © 2026 Wesley Hayslip\n"
              "Developed with the help of Claude, an AI assistant by Anthropic</small>")
         line("<small>This program comes with absolutely no warranty.\n"
