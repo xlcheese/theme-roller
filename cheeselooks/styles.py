@@ -68,7 +68,10 @@ PANEL_KEYS = ("color",
               # the main menu's hover (apps, categories, the favorites column) and
               # its text (default: a step toward the text color, Hover strength;
               # text picked to read on it)
-              "menu_hover", "menu_hover_fg")
+              "menu_hover", "menu_hover_fg",
+              # the favorites column's hover (default: menu_hover moved by as much
+              # as the column is darker than the menu, so it reads alike there)
+              "menu_fav_hover")
 # [notification]: Cinnamon's notification popups. kind: "line" (an accent line
 # along the top, Mint-Y's look), "flat" (no accent) or "bordered" (a thin
 # border all round); color: the line / border color (default accent).

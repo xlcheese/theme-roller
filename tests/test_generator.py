@@ -1079,11 +1079,17 @@ class RenderAndInstallTests(unittest.TestCase):
         self.assertEqual(t["menu.fav_main_hover"], t["menu.fav_hover"])
         accent = styles.Style(**{**base.__dict__, "panel": {"menu_hover": "accent"}})
         t = tokens.build(defaults(), accent)
-        self.assertEqual((t["menu.main_hover"], t["menu.main_hover_fg"], t["menu.fav_main_hover"]),
-                         (t["menu.accent"], t["menu.accent_fg"], t["menu.accent"]))
+        self.assertEqual((t["menu.main_hover"], t["menu.main_hover_fg"]), (t["menu.accent"], t["menu.accent_fg"]))
+        # the favorites column is darker: its hover is too, by as much
+        dm = palette.luminance(t["menu.menu_bg"]) - palette.luminance(t["menu.fav_bg"])
+        self.assertGreater(dm, 0)
+        self.assertLess(palette.luminance(t["menu.fav_main_hover"]), palette.luminance(t["menu.accent"]))
+        fav = styles.Style(**{**base.__dict__, "panel": {"menu_hover": "accent", "menu_fav_hover": "#334455"}})
+        self.assertEqual(tokens.build(defaults(), fav)["menu.fav_main_hover"], "#334455")
         own = styles.Style(**{**base.__dict__, "panel": {"menu_hover": "#DDEEFF", "menu_hover_fg": "#112233"}})
         self.assertEqual(tokens.build(defaults(), own)["menu.main_hover_fg"], "#112233")
-        errors, _w = styles.check({"name": "N", "panel": {"menu_hover": "accent", "menu_hover_fg": "accent_fg"}})
+        errors, _w = styles.check({"name": "N", "panel": {"menu_hover": "accent", "menu_hover_fg": "accent_fg",
+                                                          "menu_fav_hover": "accent"}})
         self.assertEqual(errors, [])
 
     def test_unreadable_style_is_named(self):

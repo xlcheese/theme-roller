@@ -251,9 +251,12 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # toward the text (the favorites column steps from its own background)
     if style.panel.get("menu_hover"):
         mh = sty._resolve_color(style.panel["menu_hover"], mcolors)
-        fav_h = mh
+        # on the darker favorites column, the same step from its background
+        fav_h = _shift(mh, mcolors["menu_bg"], mcolors["fav_bg"])
     else:
         mh, fav_h = mcolors["menu_hover"], mcolors["fav_hover"]
+    if style.panel.get("menu_fav_hover"):
+        fav_h = sty._resolve_color(style.panel["menu_fav_hover"], mcolors)
     if style.panel.get("menu_hover_fg"):
         mh_fg = sty._resolve_color(style.panel["menu_hover_fg"], mcolors)
     elif style.panel.get("menu_hover"):
@@ -432,6 +435,13 @@ _BOTTOM_PIECES = {
 }
 _SQUARE_STATES = {3: ("maximized", "tiled", "fullscreen"),
                   4: ("maximized", "fullscreen", "tiled", "tiled-left", "tiled-right", "tiled-bottom")}
+
+
+def _shift(color: str, frm: str, to: str) -> str:
+    """color moved by as much as `to` differs from `frm`, channel by channel:
+    the same step from a different background."""
+    c, a, b = pal.to_rgb(color), pal.to_rgb(frm), pal.to_rgb(to)
+    return pal.from_rgb(*(min(255, max(0, c[i] + b[i] - a[i])) for i in range(3)))
 
 
 def _round_bottom(r: str, gtk: int) -> str:
