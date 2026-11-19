@@ -3,7 +3,7 @@
   "name": "xl-Classic Dark",
   "settings": {
     "global": {
-      "accent": "#7A9CCF",
+      "accent": "#6688BB",
       "bg": "#2F2F2F",
       "text": "#E4E4E4",
       "roundness": 25
@@ -20,12 +20,22 @@
       "title_text": "#F9F9F9",
       "border": "#5178B2",
       "title_bar_height": 40,
-      "title_gradient": 24,
+      "title_gradient": 14,
       "window_roundness": 40,
       "button_style": "classic",
       "button_spacing": 1
     },
-    "details": {},
+    "details": {
+      "tooltips": {
+        "custom": true,
+        "bg": "#303844"
+      },
+      "focus_ring": {
+        "custom": true,
+        "color": "#354E76",
+        "style": "solid"
+      }
+    },
     "style": {
       "name": "xl-Classic-Dark"
     }

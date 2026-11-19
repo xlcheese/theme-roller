@@ -4,10 +4,10 @@
   "settings": {
     "global": {
       "accent": "#86ABD9",
-      "bg": "#323232",
+      "bg": "#272727",
       "text": "#EBEBEB",
       "roundness": 25,
-      "gradient": 38
+      "gradient": 39
     },
     "panel": {
       "separate_colors": true,
@@ -17,8 +17,9 @@
     },
     "window_borders": {
       "separate_colors": true,
-      "border": "#A5A5A5",
+      "border": "#262626",
       "title_bar_height": 38,
+      "title_gradient": 7,
       "window_roundness": 35,
       "button_style": "drawn",
       "button_spacing": 4
@@ -28,7 +29,16 @@
       "bg": "#2B2B2B",
       "text": "#E4E4E4"
     },
-    "details": {},
+    "details": {
+      "tooltips": {
+        "custom": true,
+        "bg": "#2C3A4B"
+      },
+      "focus_ring": {
+        "custom": true,
+        "color": "#3F6088"
+      }
+    },
     "style": {
       "name": "xl-Gummy-Dark"
     }
