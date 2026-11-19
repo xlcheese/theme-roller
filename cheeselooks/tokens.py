@@ -295,6 +295,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # the bottom corners: rounded only where the toolkit can (GTK 4 trims a
     # window's contents to its shape; GTK 3 rounds a window's own background)
     t["wb.r_bottom"] = t["wb.r"] if wb.get("round_bottom") else "0"
+    t["wb.bottom3.css"] = _round_bottom_gtk3(t["wb.r"]) if wb.get("round_bottom") else ""
     t.update(metacity.tokens(t))
     # Title buttons and headerbar buttons sit on the title bar. With the title
     # bar's own colours, their faces come from a palette built on those (wbp.*),
@@ -389,6 +390,25 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
 # full width (sidebars with divider lines, as Mint-Y); above it, rounded, with a
 # little space at the sides so a rounded hover doesn't touch the menu's edges.
 SQUARE_LISTS_AT = 30
+
+
+def _round_bottom_gtk3(r: str) -> str:
+    """GTK 3 doesn't trim a window's contents to its rounded corners, so the
+    pieces that paint their own background down the window's side would square
+    the corner again: sidebars (and the list, view or scroller inside one) round
+    their outer bottom corner too. Emitted only with Round bottom corners on, so
+    the switch off leaves every other radius alone."""
+    parts = ("{s}", "{s} scrolledwindow", "{s} viewport", "{s} list", "{s} .view", "{s} treeview")
+    sides = ((".sidebar:dir(ltr)", "left"), (".sidebar.left", "left"), ("placessidebar:dir(ltr)", "left"),
+             (".sidebar:dir(rtl)", "right"), (".sidebar.right", "right"), ("placessidebar:dir(rtl)", "right"))
+    out = []
+    for side in ("left", "right"):
+        sel = ",\n".join(f"window.csd {p.format(s=s)}" for s, sd in sides if sd == side for p in parts)
+        out.append(f"{sel} {{\n  border-bottom-{side}-radius: {r}px; }}")
+    sq = ",\n".join(f"window.csd.{m} {p.format(s=s)}" for m in ("maximized", "tiled", "fullscreen")
+                    for s, _sd in sides for p in parts)
+    out.append(f"{sq} {{\n  border-bottom-left-radius: 0; border-bottom-right-radius: 0; }}")
+    return "\n".join(out)
 
 
 def _lists_css(roundness: float, r: int, line: str) -> tuple[str, str]:
