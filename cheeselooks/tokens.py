@@ -303,6 +303,9 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     _add_colors(t, "wbp.", wb_pal)
     _add_gradients(t, "wbp.", wb_pal, amount)
     _add_widgets(t, "wbp.", style, wb_pal, depth, amount)
+    # the line under header bars: the style's dividers when it sets them (on
+    # the title bar's own colors), else the window border color as before
+    t["wb.line"] = (sty._resolve_color(style.dividers, wb_pal) if style.dividers else t["wb.border"])
     for state in ("", "hover_", "pressed_"):
         _linked_ltr(t, "wbp.w.", state)
     # the header bar's top highlight, on the title bar's own colour (Mint-Y's

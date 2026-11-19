@@ -436,7 +436,7 @@ headerbar button.destructive-action:active {
 headerbar, .titlebar:not(headerbar) {
   min-height: {{wb.height_inner}}px;
   color: {{wb.text}};
-  border-color: {{wb.border}};
+  border-color: {{wb.line}};      /* the line under the header bar: dividers, else the border */
   background-color: {{wb.title}};
   background-image: {{wb.title_grad}};
   box-shadow: {{wb.highlight}}; }     /* top highlight: [title_bar] highlight in the style */
@@ -691,7 +691,7 @@ scrollbar.overlay-indicator:not(.dragging):not(.hovering) slider {
 paned > separator, paned.horizontal > separator, paned.vertical > separator {
   min-width: 1px;
   min-height: 1px;
-  background-image: image({{border}});
+  background-image: image({{dividers}});
   background-size: 1px 1px; }
 
 tooltip, tooltip.background, .tooltip.background, tooltip.csd.background {
