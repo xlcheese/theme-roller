@@ -168,9 +168,13 @@ def css(t: dict[str, str], gtk4: bool = False) -> str:
         for pos in POSITIONS:
             out.append(f"notebook > header.{pos} {{\n  padding-{pos}: 0;\n  background-color: {strip}; }}\n"
                        f"{sel(pos)} {{\n  padding-{pos}: {TAB_PAD + HEADER_PAD}px; }}")
-        # Nemo's tabs sit right under its toolbar, whose bottom line then
-        # serves as their top edge (two lines side by side looked busy)
-        out.append(f".nemo-window notebook > header.top > tabs > tab {{\n"
+        # Tabs right under a main toolbar (Nemo; Xed and others: the toolbar,
+        # then panes holding the tabs) let the toolbar's bottom line serve as
+        # their top edge (two lines side by side looked busy, or like a gap)
+        under_toolbar = (".nemo-window notebook", ".primary-toolbar + notebook",
+                         ".primary-toolbar ~ paned > notebook", ".primary-toolbar ~ paned > paned > notebook",
+                         ".primary-toolbar ~ paned > box > notebook", ".primary-toolbar ~ paned > paned > box > notebook")
+        out.append(",\n".join(f"{u} > header.top > tabs > tab" for u in under_toolbar) + " {\n"
                    f"  border-top-width: 0;\n  padding-top: {TAB_PAD + HEADER_PAD + 1}px; }}")
         for pos in POSITIONS:
             radii = _RADII[pos].format(r=t["r2"] if kind == "claude" else r)
