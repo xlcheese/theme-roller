@@ -72,7 +72,7 @@ def qt5ct_conf() -> str:
     return ("[Appearance]\n"
             f"color_scheme_path={SCHEME}\n"
             "custom_palette=true\n"
-            "standard_dialogs=default\n"
+            "standard_dialogs=gtk3\n"     # keep GTK's file dialogs (in our theme), as without qt5ct
             "style=Fusion\n")
 
 
