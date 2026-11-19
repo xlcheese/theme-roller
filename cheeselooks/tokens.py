@@ -266,7 +266,10 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
         mh_fg = mcolors["text"]
     t["menu.main_hover"], t["menu.main_hover_fg"], t["menu.fav_main_hover"] = mh, mh_fg, fav_h
     t["menu.main_hover_top"], t["menu.main_hover_bottom"] = pal.gradient(mh, m_grad / 100)
-    t["menu.fav_main_hover_top"], t["menu.fav_main_hover_bottom"] = pal.gradient(fav_h, m_grad / 100)
+    # the favorites' hover only shades downward: on their short square buttons a
+    # lightened top washed out (xl-Classic Dark), so the top is the hover itself
+    t["menu.fav_main_hover_top"] = fav_h
+    t["menu.fav_main_hover_bottom"] = pal.gradient(fav_h, m_grad / 100)[1]
     m_r = shape.radius(m_round, ctl)
     t["menu.r"] = str(m_r)
     t["menu.r2"] = str(shape.window_radius(m_r))
