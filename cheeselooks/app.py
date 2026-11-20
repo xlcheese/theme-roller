@@ -116,6 +116,15 @@ SECTION_NOTES = {
 }
 GATES = {"separate_colors": True, "custom": True, "follow_global": False}  # value set when a sibling changes
 HIDDEN = set(GATES) | ({"round_bottom"} if not tokens.ROUND_BOTTOM_READY else set())
+def _integration_note(text: str) -> Gtk.Label:
+    """The explanation under an Integration switch: indented under its title and
+    as wide as the tab, so it takes a few lines rather than many."""
+    note = Gtk.Label(label=text, xalign=0, wrap=True, max_width_chars=100, margin_start=16,
+                     margin_bottom=4, hexpand=True)
+    note.get_style_context().add_class("dim-label")
+    return note
+
+
 # the line under an Integration switch (a function: some depend on what's installed)
 INTEGRATION_NOTES = {
     "flatpak_access": lambda: ("Flatpak apps get your colors: every Flatpak app may read your themes "
@@ -309,9 +318,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             row += 1
             if path[0] == "integration" and path[-1] in INTEGRATION_NOTES:
                 text = INTEGRATION_NOTES[path[-1]]()
-                note = Gtk.Label(label=text, xalign=0, wrap=True, max_width_chars=60)
-                note.get_style_context().add_class("dim-label")
-                grid.attach(note, 1, row, 1, 1)
+                grid.attach(_integration_note(text), 0, row, 2, 1)   # under the title, full width
                 row += 1
             if path == ("global", "text"):
                 row = self._image_colors_row(grid, row)
@@ -612,11 +619,9 @@ class SettingsWindow(Gtk.ApplicationWindow):
                                  "back). Reopen open apps. The next Apply puts them back.")
         button.connect("clicked", clicked)
         grid.attach(button, 1, row, 1, 1)
-        note = Gtk.Label(label="Takes the colors above out of apps now (your own come back), for example "
-                               "before using another theme. The theme itself stays; the next Apply puts "
-                               "them back.", xalign=0, wrap=True, max_width_chars=60)
-        note.get_style_context().add_class("dim-label")
-        grid.attach(note, 1, row + 1, 1, 1)
+        grid.attach(_integration_note("Takes the colors above out of apps now (your own come back), for "
+                                      "example before using another theme. The theme itself stays; the "
+                                      "next Apply puts them back."), 0, row + 1, 2, 1)
         return row + 2
 
     def _image_colors_row(self, grid: Gtk.Grid, row: int) -> int:
