@@ -3,6 +3,17 @@
 Lines and ideas collected while building xl-Cheeselooks, to use when writing
 the README and the Reddit post. Not user documentation.
 
+## Tagline
+
+> xl-Cheeselooks, a tool to allow for some good ol' fashioned Linux desktop
+> theming.
+
+(xl_cheese, 20 Nov 2026.) The thought behind it: it's been a long time since
+Linux users had a quick and easy way to change up the look of their whole
+desktop. Theming used to be part of the fun of Linux; today most desktops
+offer an accent colour and a light or dark switch, and anything more means
+hunting down themes, hand-editing CSS, or living with apps that don't match.
+
 ## What it themes, and how far it goes
 
 > Full theming where the system allows it (GTK 3, plain GTK 4, Mint's
