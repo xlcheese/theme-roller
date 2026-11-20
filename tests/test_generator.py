@@ -1470,7 +1470,7 @@ class RenderAndInstallTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "t"
             n = icons.build(t, yaru, ["Mint-Y"], d)
-            self.assertEqual(n, 14 * 5)                                         # 14 icons, 16-256px
+            self.assertEqual(n, 19 * 5)                                         # 19 icons, 16-256px
             self.assertIn("[places/256]", (d / "index.theme").read_text())
             self.assertIn("Yaru's", (d / "index.theme").read_text())
             self.assertIn("Canonical", (d / "COPYING").read_text())
@@ -1479,6 +1479,16 @@ class RenderAndInstallTests(unittest.TestCase):
             drag = d / "places" / "48" / "folder-drag-accept.svg"                # Yaru's open folder
             self.assertEqual(drag.resolve(), (d / "places" / "48" / "folder-open.svg").resolve())
             self.assertFalse((d / "places" / "48" / "folder-open.svg").is_symlink())  # a real icon, not replaced
+
+    def test_every_style_covers_mint_y(self):
+        """Every style draws Mint-Y's places icons (its own, or its folder with
+        Mint-Y's picture), at every size: none left to another icon theme."""
+        mint = {f.stem for f in (icons.source_dir("mint-y") / "48").glob("*.svg")}
+        for style, spec in icons.STYLES.items():
+            for size in spec["sizes"]:
+                have = {f.stem for f in (icons.source_dir(style) / str(size)).glob("*.svg")}
+                have |= {a for a, t in icons.aliases(style).items() if t in have}
+                self.assertEqual(mint - have, set(), (style, size))
 
     def test_breeze_folders(self):
         t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
@@ -1506,7 +1516,7 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(tuple(seen(x, y)), palette.to_rgb(want), (x, y))
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "t"
-            self.assertEqual(icons.build(t, breeze, ["Mint-Y"], d), 12 * 7)    # 12 icons, 16-96px (16-24 from the 32)
+            self.assertEqual(icons.build(t, breeze, ["Mint-Y"], d), 16 * 7)    # 16 icons, 16-96px (16-24 from the 32)
             self.assertIn("Lesser General Public", (d / "COPYING").read_text())
             drag = d / "places" / "48" / "folder-drag-accept.svg"
             self.assertEqual(drag.resolve(), (d / "places" / "48" / "folder-open.svg").resolve())

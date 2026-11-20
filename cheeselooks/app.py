@@ -1305,7 +1305,11 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                                    "but colors on “Follow theme” and shapes that follow Global change with it.")
             else:
                 b.set_tooltip_text(f"Put {dict(TABS)[section]} back to {self.base} (other tabs stay as they are)")
-        self.apply_btn.set_sensitive(not _same(self.data, self.applied) or self.data["theme"] != self.applied["theme"])
+        # per-user settings (Integration, the Icons switch and folder style) don't
+        # make a theme Custom, but they still need an Apply
+        mine = settings.keep_per_user(self.applied, self.data) != self.applied
+        self.apply_btn.set_sensitive(not _same(self.data, self.applied) or mine
+                                     or self.data["theme"] != self.applied["theme"])
         self.save_btn.set_sensitive(self.data["theme"] == themes.CUSTOM)
         row = self.theme_list.get_selected_row()
         yours = bool(row) and not row.builtin and row.theme_name != themes.CUSTOM

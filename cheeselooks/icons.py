@@ -223,7 +223,28 @@ def enable(t: dict[str, str], icons: dict) -> list[str]:
     log = [f"Icons: {n} folder and places icons in your colors ({theme_dir()})"]
     if current is not None and current != THEME and reload.set_value(*KEY, THEME):
         log.append(f"Icons: Cinnamon now uses {THEME} (yours, {previous}, fills in the rest)")
+    elif current == THEME and _reload():
+        log.append("Icons: reloaded")
     return log
+
+
+def _reload(pause: float = 0.3) -> bool:
+    """Already ours: apps keep the icons they loaded (Nemo showed the previous
+    folder style until reopened). Switch to a link to the same theme under a
+    hidden name and back, as Apply does for the GTK theme: apps reload, and
+    nothing else shows meanwhile."""
+    import time
+    swap = reload._make_swap(theme_dir(), THEME)
+    if swap is None:
+        return False
+    try:
+        reload.set_value(*KEY, swap.name)
+        time.sleep(pause)
+        reload.set_value(*KEY, THEME)
+        time.sleep(pause)
+    finally:
+        reload._remove_swap(swap)
+    return True
 
 
 def disable() -> list[str]:

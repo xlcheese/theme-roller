@@ -726,3 +726,10 @@ if necessary.  Here is a sample; alter the names:
 That's all there is to it!
 
 
+
+
+--------------------------------------------------------------------------
+Some icons here (the ones Breeze does not draw: saved search) are this style's folder with
+the picture from the matching Mint-Y icon, made by tools/compose-missing-places.py.
+Those pictures are from Mint-Y (https://github.com/linuxmint/mint-y-icons),
+CC BY-SA 4.0, by Sam Hewitt and Alexey Varfolomeev.
