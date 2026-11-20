@@ -1168,6 +1168,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             return theme["menu_bg"] if name == "bg" else theme["text"]
         if path[:2] == ("details", "focus_ring"):
             return pal.mix(theme["bg"], theme["text"], 0.25)     # the default: text at 25%
+        if path == ("icons", "second_color"):                    # the default: a shade darker than the folder
+            return icons.colours(theme, self.data["icons"])["backfolder"]
         return theme["accent"]
 
     def update_buttons(self) -> None:
