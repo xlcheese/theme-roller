@@ -1204,6 +1204,30 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertEqual(override.read_text(), own_override)
                 self.assertEqual(qt.kdeglobals_file("org.videolan.VLC").read_text(),
                                  "[Colors:Window]\nBackgroundNormal=1,2,3\n")
+
+            # Leftovers of our own (earlier versions, the experiment script) aren't
+            # "your setup": no notice, and switching off tidies them away
+            with mock.patch.dict(os.environ, env), \
+                 mock.patch.object(qt.paths, "HOME", home), \
+                 mock.patch.object(qt, "qt5ct_installed", return_value=True), \
+                 mock.patch.object(qt, "flatpak_qt_apps", return_value=["org.videolan.VLC"]):
+                (home / ".profile").write_text("# mine\n")
+                conf.write_text(f"[Appearance]\ncustom_palette=true\ncolor_scheme_path={qt.scheme_file()}\n")
+                override.write_text("[Environment]\nQT_QPA_PLATFORMTHEME=kde\n")
+                qt.kdeglobals_file("org.videolan.VLC").write_text("[General]\nColorScheme=xl-Cheeselooks\n")
+                qt.enable(t)
+                self.assertIsNone(qt.pending_notice())
+                self.assertFalse(conf.with_name("qt5ct.conf" + qt.BACKUP).exists())
+                # the watcher's round trip: off and back on, silently
+                qt.disable(set_aside=True)
+                self.assertFalse(qt.active())
+                qt.enable(t)
+                self.assertIsNone(qt.pending_notice())
+                self.assertTrue(qt.active())
+                qt.disable()
+                self.assertFalse(conf.exists())                                       # nothing of ours left
+                self.assertFalse(override.exists())
+                self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
 
     def test_editor_colors(self):

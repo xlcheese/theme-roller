@@ -230,13 +230,20 @@ def _save_state(state: dict) -> None:
     f.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
 
+def _is_ours(text: str) -> bool:
+    """A file we wrote: marked, or (from earlier versions and the experiment
+    script) pointing at our scheme or naming it."""
+    return (MARK in text or str(scheme_file()) in text or f"{SCHEME_NAME}.conf" in text
+            or f"ColorScheme={SCHEME_NAME}" in text)
+
+
 def _write(path: Path, text: str, state: dict) -> None:
     """Write a file, keeping the one it replaces (the first time) to put back later."""
     files = state.setdefault("files", {})
     key = str(path)
     if key not in files:
         backup = path.with_name(path.name + BACKUP)
-        if path.exists() and MARK not in path.read_text(encoding="utf-8", errors="replace"):
+        if path.exists() and not _is_ours(path.read_text(encoding="utf-8", errors="replace")):
             shutil.copy2(path, backup)
             files[key] = "backup"
         else:
@@ -348,6 +355,10 @@ def _set_env(path: Path, updates: dict[str, str | None]) -> None:
         path.unlink()
 
 
+def _ours_env(key: str, value: str | None) -> bool:
+    return value is not None and ((key == ENV and value == "kde") or (key == STYLE_ENV and value == ""))
+
+
 def _flatpak_app_on(app: str, state: dict, found: list[str]) -> None:
     """The app picks Qt's KDE platform theme, which reads our kdeglobals; a Qt
     style of yours (e.g. Kvantum, which ignores colours) is set aside. Your
@@ -356,18 +367,29 @@ def _flatpak_app_on(app: str, state: dict, found: list[str]) -> None:
     before = _read_env(f)
     prev = state.setdefault("flatpak_prev", {})
     if app not in prev:
-        prev[app] = {k: before.get(k) for k in (ENV, STYLE_ENV)}
-        if before.get(ENV) or before.get(STYLE_ENV):
+        # values an earlier version of this switch wrote ("kde", an emptied
+        # style) are ours, not yours: nothing to keep or put back
+        prev[app] = {k: (None if _ours_env(k, before.get(k)) else before.get(k)) for k in (ENV, STYLE_ENV)}
+        if any(v for v in prev[app].values()):
             found.append(f"{app}'s Qt setting")
     style_set = before.get(STYLE_ENV) or _read_env(overrides_dir() / "global").get(STYLE_ENV)
     _set_env(f, {ENV: "kde", **({STYLE_ENV: ""} if style_set else {})})
 
 
 def _flatpak_app_off(app: str, before: dict[str, str | None]) -> None:
-    _set_env(overrides_dir() / app, before)
+    # values of ours recorded as "before" by an earlier version are removed, not put back
+    _set_env(overrides_dir() / app, {k: (None if _ours_env(k, v) else v) for k, v in before.items()})
 
 
 # ---------------------------------------------------------------- on / off
+
+def _yours_qt5ct(text: str) -> bool:
+    """qt5ct settings of yours: your own colours or Kvantum. Settings pointing at
+    our scheme are left from an earlier time the switch was on: ours."""
+    if str(scheme_file()) in text or f"{SCHEME_NAME}.conf" in text:
+        return False
+    return "custom_palette=true" in text or "kvantum" in text.lower()
+
 
 def _found_setup() -> list[str]:
     """A Qt setup of yours that our colours now take the place of (kept, and
@@ -381,7 +403,7 @@ def _found_setup() -> list[str]:
     conf = qt5ct_dir() / "qt5ct.conf"
     if conf.exists():
         text = conf.read_text(encoding="utf-8", errors="replace")
-        if "custom_palette=true" in text or "kvantum" in text.lower():
+        if _yours_qt5ct(text):
             found.append(f"your qt5ct settings ({conf}, saved as {conf.name}{BACKUP})")
     return found
 
@@ -392,7 +414,7 @@ def enable(t: dict[str, str]) -> list[str]:
     aside the first time and kept. Returns log lines."""
     log = []
     state = _load_state()
-    first = not state.get("files") and not state.get("flatpak_prev")
+    first = not state.get("files") and not state.get("flatpak_prev") and not state.pop("set_aside", False)
     found = _found_setup() if first else []
     c = colours(t)
     if qt5ct_installed():
@@ -411,7 +433,7 @@ def enable(t: dict[str, str]) -> list[str]:
     done = []
     for app in flatpak_qt_apps():
         kde = kdeglobals_file(app)
-        if first and kde.exists() and MARK not in kde.read_text(encoding="utf-8", errors="replace"):
+        if first and kde.exists() and not _is_ours(kde.read_text(encoding="utf-8", errors="replace")):
             found.append(f"{app}'s KDE colors")
         _write(kde, kdeglobals(c), state)
         _flatpak_app_on(app, state, found)
@@ -425,17 +447,24 @@ def enable(t: dict[str, str]) -> list[str]:
     return log
 
 
-def disable() -> list[str]:
-    """Remove everything enable() wrote, putting back what it replaced."""
+def disable(set_aside: bool = False) -> list[str]:
+    """Remove everything enable() wrote, putting back what it replaced. From the
+    watcher (set_aside), it remembers that it was on, so putting it back when
+    you return to xl-Cheeselooks doesn't count as a first time (no notice)."""
     state = _load_state()
-    if not state:
+    if not state or set(state) == {"set_aside"}:
         return []
     log = []
     for key, how in state.get("files", {}).items():
         path = Path(key)
         backup = path.with_name(path.name + BACKUP)
         if how == "backup" and backup.exists():
-            shutil.move(str(backup), path)
+            if _is_ours(backup.read_text(encoding="utf-8", errors="replace")):
+                backup.unlink()               # a leftover of ours, kept by mistake: tidy it away
+                if path.exists():
+                    path.unlink()
+            else:
+                shutil.move(str(backup), path)
         elif path.exists():
             path.unlink()
     for app, before in state.get("flatpak_prev", {}).items():
@@ -443,13 +472,14 @@ def disable() -> list[str]:
     line = _set_profile(False)
     if line:
         log.append(line)
-    _save_state({})
+    _save_state({"set_aside": True} if set_aside else {})
     log.append("Qt apps: our colors removed (your own Qt setup, if any, is back)")
     return log
 
 
 def active() -> bool:
-    return bool(_load_state())
+    state = _load_state()
+    return bool(state) and set(state) != {"set_aside"}
 
 
 def pending_notice() -> str | None:

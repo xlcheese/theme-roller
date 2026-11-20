@@ -76,7 +76,7 @@ def set_aside() -> list[str]:
         log.append(line)
     gtk4.remove_assets(paths.gtk4_css())
     if qt.active():
-        log += qt.disable()
+        log += qt.disable(set_aside=True)
     if editor.active():
         log += editor.disable()
     f = set_aside_file()
