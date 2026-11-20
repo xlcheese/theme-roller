@@ -631,8 +631,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
         grid.attach(self._sort_combo("style_sort", self.fill_style_list), 1, row, 1, 1)
         self.style_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
         self.style_list.connect("row-selected", self.on_style_selected)
-        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=150,
-                                      max_content_height=320, propagate_natural_height=True)
+        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=260,
+                                      vexpand=True)   # fills the tab, as the Theme list
         scroller.get_style_context().add_class("frame")
         scroller.add(self.style_list)
         grid.attach(scroller, 0, row + 1, 2, 1)
