@@ -1429,6 +1429,20 @@ class RenderAndInstallTests(unittest.TestCase):
         self.assertIn(".navigation-sidebar > row { margin: 1px 6px; border-radius: 9px; }", g4)
         self.assertGreaterEqual(palette.contrast("#B85A38", icons.back_shade("#B85A38")), 1.6)  # Mint-like folder back
 
+    def test_folder_colors_pin_together(self):
+        import types
+        from cheeselooks import app
+        def window():
+            d = defaults()
+            d["global"]["accent"] = "#E01B24"
+            return types.SimpleNamespace(data=d, syncing=False, after_change=lambda: None)
+        w = window()
+        app.SettingsWindow.changed(w, ("icons", "folder_color"), "#3584E4")      # a blue front...
+        self.assertEqual(w.data["icons"]["second_color"], icons.back_shade("#E01B24"))  # ...the back stays dark red
+        w = window()
+        app.SettingsWindow.changed(w, ("icons", "second_color"), "#2EC27E")      # a green back...
+        self.assertEqual(w.data["icons"]["folder_color"], "#E01B24")            # ...the front stays red
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"

@@ -618,7 +618,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def _icon_preview_row(self, grid: Gtk.Grid, row: int) -> int:
         """The folders in the chosen colors, at 48 and 24px (drawn here, before Apply)."""
         note = Gtk.Label(label="Mint-Y's folders, recolored: the folder color (the front) follows your accent, "
-                               "and the second color (the back) a darker shade of it, until you choose your own. "
+                               "and the second color (the back) a darker shade of it. Choose either and both "
+                               "keep their colors from then on; Reset Icons follows the theme again. "
                                "Every other icon stays as in your current icon theme. Apply to use them.",
                          xalign=0, wrap=True, max_width_chars=100, margin_start=16, hexpand=True)
         note.get_style_context().add_class("dim-label")
@@ -1063,6 +1064,15 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
     def changed(self, path: tuple[str, ...], value: Any) -> None:
         if self.syncing:
             return
+        if path in (("icons", "folder_color"), ("icons", "second_color")) and value:
+            # touch either folder color and both stop following the theme: the
+            # other keeps the color it showed (xl_cheese: pick a blue front and
+            # the back stays the dark red it was)
+            other = "second_color" if path[-1] == "folder_color" else "folder_color"
+            if not self.data["icons"].get(other):
+                g = self.data["global"]
+                shown = icons.colours(pal.derive(g["accent"], g["bg"], g["text"]), self.data["icons"])
+                self.data["icons"][other] = shown["backfolder" if other == "second_color" else "folder"]
         _set(self.data, path, value)
         if path == ("window_borders", "button_style"):
             # a new style starts at its own roundness
