@@ -55,7 +55,7 @@ DEFAULTS: dict[str, Any] = {
     },
     # Icons tab: folders in your colors (icons.py). Off by default: a first look
     # at the Tool shouldn't change icons people chose in Mint's settings
-    "icons": {"enabled": False, "folder_color": None, "second_color": None},
+    "icons": {"enabled": False, "style": "mint-y", "folder_color": None, "second_color": None},
     "integration": {"libadwaita_colors": True, "libadwaita_accent": True,
                     "libadwaita_full": False,  # our whole GTK 4 layer for apps that ignore the theme (gtk4.py)
                     "flatpak_access": True,  # Flatpak apps can read the theme (flatpak.py); on, as the others
@@ -118,6 +118,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "scrollbars", "roundness"), "int", (0, 100)),
     (("details", "scrollbars", "width"), "int?", (6, 16)),
     (("icons", "enabled"), "bool", None),
+    (("icons", "style"), "choice", ("mint-y", "yaru")),
     (("icons", "folder_color"), "color?", None),
     (("icons", "second_color"), "color?", None),
     (("details", "sliders", "custom"), "bool", None),
@@ -233,7 +234,7 @@ def from_dict(data: dict) -> dict:
 # Sections that belong to your desktop, not to a look: picking a theme (or
 # resetting to one) keeps yours. A theme file's own copy, if any, is ignored.
 # (Paths: a whole section, or one setting in it.)
-PER_USER = (("integration",), ("icons", "enabled"))
+PER_USER = (("integration",), ("icons", "enabled"), ("icons", "style"))
 
 
 def keep_per_user(new: dict, current: dict) -> dict:

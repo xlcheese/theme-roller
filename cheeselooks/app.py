@@ -94,6 +94,7 @@ LABELS = {
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
     "enabled": "Folders in your colors", "folder_color": "Folder color", "second_color": "Second color",
+    "style": "Folder style",
     "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps",
     "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
@@ -174,7 +175,8 @@ def _sorted(items: list, order: str) -> list:
     if order in ("new", "old"):
         return sorted(items, key=lambda it: (it[1], _natural(it[0])), reverse=(order == "new"))
     return sorted(items, key=lambda it: _natural(it[0]), reverse=(order == "za"))
-CHOICE_LABELS = {"button_style": titlebuttons.STYLES}   # choices shown by name instead of id
+CHOICE_LABELS = {"button_style": titlebuttons.STYLES,   # choices shown by name instead of id
+                 "style": {k: v["name"] for k, v in icons.STYLES.items()}}
 
 
 def _get(data: dict, path: tuple[str, ...]) -> Any:
@@ -617,7 +619,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _icon_preview_row(self, grid: Gtk.Grid, row: int) -> int:
         """The folders in the chosen colors, at 48 and 24px (drawn here, before Apply)."""
-        note = Gtk.Label(label="Mint-Y's folders, recolored: the folder color (the front) follows your accent, "
+        note = Gtk.Label(label="Folders recolored: the folder color (the front) follows your accent, "
                                "and the second color (the back) a darker shade of it. Choose either and both "
                                "keep their colors from then on; Reset Icons follows the theme again. "
                                "Every other icon stays as in your current icon theme. Apply to use them.",
@@ -639,13 +641,15 @@ class SettingsWindow(Gtk.ApplicationWindow):
         if not getattr(self, "icon_images", None):
             return
         c = icons.colours(t, self.data["icons"])
+        style = icons.style_of(self.data["icons"])
         for img, name, size in self.icon_images:
-            f = icons.source_dir() / str(size) / f"{name}.svg"
+            f = icons.source_dir(style) / str(size) / f"{icons.aliases(style).get(name, name) if not (icons.source_dir(style) / str(size) / f'{name}.svg').exists() else name}.svg"
             if not f.exists():
+                img.clear()
                 continue
             loader = GdkPixbuf.PixbufLoader()
             try:
-                loader.write(icons.recolour(f.read_text(encoding="utf-8"), c).encode())
+                loader.write(icons.recolour(f.read_text(encoding="utf-8"), c, style).encode())
                 loader.close()
                 img.set_from_pixbuf(loader.get_pixbuf())
             except GLib.Error:

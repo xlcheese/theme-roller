@@ -1,13 +1,14 @@
 """Icons tab: folders in your colors (off by default).
 
-Mint-Y's folder and places icons (data/icons/mint-y/places/<size>/<name>.svg,
-cut out of Mint's source sheet by tools/import-mint-y-places.py; CC BY-SA 4.0)
-are recoloured as text, the way Mint makes Mint-Y-Blue and its other colours:
-four colours swapped,
+Each folder style is a set of SVGs, one per size and name, cut once out of
+its project's source sheet by a tools/import-*-places.py script, in that
+project's placeholder colours (STYLES). At Apply every style takes the same
+path: the placeholders are swapped for yours, as text,
 
     folder      the front              your folder color (default: the accent)
     backfolder  the back and its tab   your second color (default: the accent, darker, as Mint shades)
-    paper       the sheet inside       a light grey, as Mint's
+    backdark    darker details on it   (Yaru) the back, darker
+    paper       the sheet inside       (Mint-Y) a light grey, as Mint's
     emblem      the picture on front   dark or light, whichever reads on the folder
 
 and written as an icon theme, ~/.icons/xl-Cheeselooks, SVG at
@@ -28,13 +29,29 @@ from . import paths, reload
 
 THEME = "xl-Cheeselooks"
 KEY = ("org.cinnamon.desktop.interface", "icon-theme")
-SIZES = (16, 22, 24, 32, 48, 64, 96, 128)
-SOURCE = {"folder": "eeca8f", "backfolder": "c89e6b", "paper": "e8e8e8", "emblem": "575757"}
+# folder styles: where their SVGs are, their sizes, and which placeholder
+# colour in them is which part (both CC BY-SA 4.0; COPYING in each folder)
+STYLES = {
+    "mint-y": {"name": "Mint-Y", "dir": "mint-y", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
+               "source": {"folder": "eeca8f", "backfolder": "c89e6b", "paper": "e8e8e8", "emblem": "575757"}},
+    "yaru": {"name": "Yaru", "dir": "yaru", "sizes": (16, 24, 32, 48, 256),
+             "source": {"folder": "00ff03", "backfolder": "00ff13", "backdark": "008512", "emblem": "008502"}},
+}
+DEFAULT_STYLE = "mint-y"
+# names a style doesn't draw, borrowed from one it does (Yaru has an open
+# folder but no drag-accept one); added to Mint-Y's own list of other names
+EXTRA_ALIASES = {"yaru": {"folder-drag-accept": "folder-open"}}
+SIZES = STYLES[DEFAULT_STYLE]["sizes"]
+SOURCE = STYLES[DEFAULT_STYLE]["source"]
 FALLBACK = ("Mint-Y", "Adwaita", "gnome", "hicolor")
 
 
-def source_dir() -> Path:
-    return paths.data_dir() / "data" / "icons" / "mint-y" / "places"
+def style_of(icons: dict) -> str:
+    return icons.get("style") if icons.get("style") in STYLES else DEFAULT_STYLE
+
+
+def source_dir(style: str = DEFAULT_STYLE) -> Path:
+    return paths.data_dir() / "data" / "icons" / STYLES[style]["dir"] / "places"
 
 
 def theme_dir() -> Path:
@@ -61,7 +78,8 @@ def colours(t: dict[str, str], icons: dict) -> dict[str, str]:
     dark_emblem = pal.darker(folder, 0.72)
     light_emblem = "#F2F2F2"
     emblem = dark_emblem if pal.contrast(dark_emblem, folder) >= 3.0 else light_emblem
-    return {"folder": folder, "backfolder": back, "paper": "#E4E4E4", "emblem": emblem}
+    return {"folder": folder, "backfolder": back, "backdark": pal.darker(back, 0.45),
+            "paper": "#E4E4E4", "emblem": emblem}
 
 
 def back_shade(folder: str) -> str:
@@ -78,18 +96,19 @@ def back_shade(folder: str) -> str:
     return back
 
 
-def recolour(svg: str, c: dict[str, str]) -> str:
-    for key, src in SOURCE.items():
+def recolour(svg: str, c: dict[str, str], style: str = DEFAULT_STYLE) -> str:
+    for key, src in STYLES[style]["source"].items():
         svg = svg.replace(src, c[key].lstrip("#").lower()).replace(src.upper(), c[key].lstrip("#").lower())
     return svg
 
 
-def index_theme(inherits: list[str]) -> str:
-    dirs = [f"places/{s}{x}" for s in SIZES for x in ("", "@2x")]
+def index_theme(inherits: list[str], style: str = DEFAULT_STYLE) -> str:
+    sizes = STYLES[style]["sizes"]
+    dirs = [f"places/{s}{x}" for s in sizes for x in ("", "@2x")]
     out = ["[Icon Theme]", f"Name={THEME}",
-           "Comment=Folders in your xl-Cheeselooks colors (Mint-Y's, CC BY-SA 4.0)",
+           f"Comment=Folders in your xl-Cheeselooks colors ({STYLES[style]['name']}'s, CC BY-SA 4.0)",
            f"Inherits={','.join(inherits)}", f"Directories={','.join(dirs)}", ""]
-    for s in SIZES:
+    for s in sizes:
         for x in ("", "@2x"):
             out += [f"[places/{s}{x}]", f"Size={s}"] + (["Scale=2"] if x else []) + \
                    ["Context=Places", "Type=Fixed", ""]
@@ -113,14 +132,31 @@ def _save_state(state: dict) -> None:
     f.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
 
 
+def aliases(style: str) -> dict[str, str]:
+    """Other names for a style's icons: Mint-Y's list (data/icons/mint-y/
+    aliases.txt, from Mint's own symlinks), plus the style's extras. Only
+    names whose target the style draws are made, and never over a real icon."""
+    out = {}
+    f = source_dir().parent / "aliases.txt"
+    if f.exists():
+        for line in f.read_text(encoding="utf-8").split("\n"):
+            parts = line.split()
+            if len(parts) == 3:
+                out[parts[1]] = parts[2]
+    out.update(EXTRA_ALIASES.get(style, {}))
+    return out
+
+
 def build(t: dict[str, str], icons: dict, inherits: list[str], out: Path) -> int:
     """Write the icon theme to `out`. Returns the number of icons."""
     c = colours(t, icons)
+    style = style_of(icons)
+    src = source_dir(style)
     if out.exists():
         shutil.rmtree(out)
     count = 0
-    for f in sorted(source_dir().glob("*/*.svg")):
-        svg = recolour(f.read_text(encoding="utf-8"), c)
+    for f in sorted(src.glob("*/*.svg")):
+        svg = recolour(f.read_text(encoding="utf-8"), c, style)
         for x in ("", "@2x"):
             d = out / "places" / f"{f.parent.name}{x}"
             d.mkdir(parents=True, exist_ok=True)
@@ -128,21 +164,13 @@ def build(t: dict[str, str], icons: dict, inherits: list[str], out: Path) -> int
         count += 1
     # Mint-Y's other names for them (nemo, file-manager, folder-open...): the
     # Files app's icon on the panel is the folder, as in Mint's own colours
-    aliases = source_dir().parent / "aliases.txt"
-    if aliases.exists():
-        for line in aliases.read_text(encoding="utf-8").split("\n"):
-            parts = line.split()
-            if len(parts) != 3:
-                continue
-            size, alias, target = parts
-            for x in ("", "@2x"):
-                d = out / "places" / f"{size}{x}"
-                link = d / f"{alias}.svg"
-                if (d / f"{target}.svg").exists() and not link.exists():
-                    link.symlink_to(f"{target}.svg")
-    (out / "index.theme").write_text(index_theme(inherits), encoding="utf-8")
-    (out / "COPYING").write_text((source_dir().parent / "COPYING").read_text(encoding="utf-8"),
-                                 encoding="utf-8")
+    for d in sorted((out / "places").iterdir()):
+        for alias, target in aliases(style).items():
+            link = d / f"{alias}.svg"
+            if (d / f"{target}.svg").exists() and not link.exists():
+                link.symlink_to(f"{target}.svg")
+    (out / "index.theme").write_text(index_theme(inherits, style), encoding="utf-8")
+    (out / "COPYING").write_text((src.parent / "COPYING").read_text(encoding="utf-8"), encoding="utf-8")
     if shutil.which("gtk-update-icon-cache"):
         subprocess.run(["gtk-update-icon-cache", "-q", "-f", "-t", str(out)], capture_output=True)
     return count

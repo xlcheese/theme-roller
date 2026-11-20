@@ -1443,6 +1443,29 @@ class RenderAndInstallTests(unittest.TestCase):
         app.SettingsWindow.changed(w, ("icons", "second_color"), "#2EC27E")      # a green back...
         self.assertEqual(w.data["icons"]["folder_color"], "#E01B24")            # ...the front stays red
 
+    def test_yaru_folders(self):
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        yaru = {"style": "yaru", "folder_color": "#7A7A7A", "second_color": "#E8795E"}
+        c = icons.colours(t, yaru)
+        svg = (icons.source_dir("yaru") / "48" / "folder-music.svg").read_text()
+        out = icons.recolour(svg, c, "yaru")
+        for src in icons.STYLES["yaru"]["source"].values():
+            self.assertNotIn(src, out.lower())                                  # every placeholder swapped
+        self.assertIn("7a7a7a", out)                                            # a grey front...
+        self.assertIn("e8795e", out)                                            # ...on a coral back
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp) / "t"
+            n = icons.build(t, yaru, ["Mint-Y"], d)
+            self.assertEqual(n, 14 * 5)                                         # 14 icons, 16-256px
+            self.assertIn("[places/256]", (d / "index.theme").read_text())
+            self.assertIn("Yaru's", (d / "index.theme").read_text())
+            self.assertIn("Canonical", (d / "COPYING").read_text())
+            nemo = d / "places" / "48" / "nemo.svg"                              # the Files app: the folder
+            self.assertEqual(nemo.resolve(), (d / "places" / "48" / "folder.svg").resolve())
+            drag = d / "places" / "48" / "folder-drag-accept.svg"                # Yaru's open folder
+            self.assertEqual(drag.resolve(), (d / "places" / "48" / "folder-open.svg").resolve())
+            self.assertFalse((d / "places" / "48" / "folder-open.svg").is_symlink())  # a real icon, not replaced
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"
