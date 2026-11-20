@@ -1380,6 +1380,18 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         self.revert_btn.set_sensitive(True)
         self.revert_btn.show()
         self.update_buttons()
+        notice = qt.pending_notice()     # once: our Qt colours took the place of a setup of yours
+        if notice:
+            qt.notice_shown()
+            GLib.timeout_add(3200, self._qt_notice, notice)   # after the window comes back
+        return False
+
+    def _qt_notice(self, text: str) -> bool:
+        d = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.INFO,
+                              buttons=Gtk.ButtonsType.OK, text="Qt apps now match your theme")
+        d.format_secondary_text(text)
+        d.run()
+        d.destroy()
         return False
 
     def applied_failed(self, message: str) -> bool:

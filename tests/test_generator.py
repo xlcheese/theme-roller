@@ -1124,17 +1124,20 @@ class RenderAndInstallTests(unittest.TestCase):
         import os
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp)
-            (home / ".profile").write_text("# mine\nexport PATH=$PATH:~/bin\n")
+            own_profile = "# mine\nexport PATH=$PATH:~/bin\n"
+            (home / ".profile").write_text(own_profile)
             conf = home / ".config" / "qt5ct" / "qt5ct.conf"
             conf.parent.mkdir(parents=True)
             conf.write_text("[Appearance]\nicon_theme=Mint-Y\nstandard_dialogs=default\n\n[Fonts]\nfixed=Mono\n")
             original_conf = conf.read_text()
-            env_calls = []
-            with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(home / ".config")}), \
+            share = home / ".local" / "share"
+            env = {"XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(share)}
+            with mock.patch.dict(os.environ, env), \
                  mock.patch.object(qt.paths, "HOME", home), \
                  mock.patch.object(qt, "qt5ct_installed", return_value=True), \
-                 mock.patch.object(qt, "flatpak_qt_apps", return_value=["org.videolan.VLC"]), \
-                 mock.patch.object(qt, "_flatpak_env", side_effect=lambda app, on: env_calls.append((app, on)) or True):
+                 mock.patch.object(qt, "flatpak_qt_apps", return_value=["org.videolan.VLC"]):
+                os.environ.pop("QT_QPA_PLATFORMTHEME", None)
+                os.environ.pop("QT_STYLE_OVERRIDE", None)
                 t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
                 qt.enable(t)
                 scheme = qt.scheme_file().read_text()
@@ -1154,45 +1157,53 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertTrue(profile.startswith("# mine"))
                 kde = qt.kdeglobals_file("org.videolan.VLC").read_text()
                 self.assertIn("[Colors:Selection]", kde)
-                self.assertEqual(env_calls, [("org.videolan.VLC", True)])
+                override = share / "flatpak" / "overrides" / "org.videolan.VLC"
+                self.assertIn("QT_QPA_PLATFORMTHEME=kde", override.read_text())
+                self.assertIsNone(qt.pending_notice())                                  # nothing of yours replaced
                 qt.enable(t)                                                            # a second Apply
                 self.assertEqual((home / ".profile").read_text().count(qt.PROFILE_START), 1)
-                self.assertEqual(env_calls, [("org.videolan.VLC", True)])
                 qt.disable()
                 self.assertEqual(conf.read_text(), original_conf)                       # put back as it was
                 self.assertFalse(qt.scheme_file().exists())
                 self.assertFalse(qt.qss_file().exists())
                 self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
-                self.assertEqual((home / ".profile").read_text(), "# mine\nexport PATH=$PATH:~/bin\n")
-                self.assertEqual(env_calls[-1], ("org.videolan.VLC", False))
+                self.assertFalse(override.exists())                                     # nothing of ours left
+                self.assertEqual((home / ".profile").read_text(), own_profile)
                 self.assertFalse(qt.active())
-                # on by default, so a Qt setup of your own is never taken over:
-                # a ~/.profile that already picks a Qt platform theme...
-                (home / ".profile").write_text("export QT_QPA_PLATFORMTHEME=gtk2\n")
+
+                # A Qt setup of yours: ours takes its place, yours is kept and comes back
+                kvantum = "[Appearance]\nstyle=kvantum\ncustom_palette=true\ncolor_scheme_path=/mine.conf\n"
+                conf.write_text(kvantum)
+                (home / ".profile").write_text("export QT_STYLE_OVERRIDE=kvantum\n")
+                override.write_text("[Context]\nfilesystems=xdg-config/Kvantum:ro\n\n"
+                                    "[Environment]\nQT_STYLE_OVERRIDE=kvantum\n")
+                own_override = override.read_text()
+                qt.kdeglobals_file("org.videolan.VLC").write_text("[Colors:Window]\nBackgroundNormal=1,2,3\n")
                 qt.enable(t)
-                self.assertNotIn(qt.PROFILE_START, (home / ".profile").read_text())
-                self.assertFalse(qt.scheme_file().exists())
+                text = conf.read_text()
+                self.assertIn("style=Fusion", text)                                     # Kvantum ignores colours
+                self.assertIn(f"color_scheme_path={qt.scheme_file()}", text)
+                self.assertTrue(conf.with_name("qt5ct.conf" + qt.BACKUP).exists())
+                profile = (home / ".profile").read_text()
+                self.assertTrue(profile.startswith("export QT_STYLE_OVERRIDE=kvantum"))  # your line untouched...
+                self.assertIn("unset QT_STYLE_OVERRIDE", profile)                       # ...ours, after it, wins
+                ov = override.read_text()
+                self.assertIn("QT_QPA_PLATFORMTHEME=kde", ov)
+                self.assertIn("QT_STYLE_OVERRIDE=\n", ov)
+                self.assertIn("filesystems=xdg-config/Kvantum:ro", ov)                 # the rest of it kept
+                notice = qt.pending_notice()
+                self.assertIn("qt5ct", notice)
+                self.assertIn("org.videolan.VLC", notice)
+                qt.notice_shown()
+                self.assertIsNone(qt.pending_notice())                                  # once only
+                qt.enable(t)                                                            # next Apply: no new notice
+                self.assertIsNone(qt.pending_notice())
                 qt.disable()
-                (home / ".profile").write_text("# mine\n")
-                # ...Kvantum or another Qt theme in the session...
-                with mock.patch.dict(os.environ, {"QT_STYLE_OVERRIDE": "kvantum"}):
-                    self.assertIn("QT_STYLE_OVERRIDE", qt.own_qt_setup())
-                    qt.enable(t)
-                    self.assertFalse(qt.scheme_file().exists())
-                    qt.disable()
-                # ...qt5ct with colours of your own...
-                conf.write_text("[Appearance]\ncustom_palette=true\ncolor_scheme_path=/mine.conf\n")
-                self.assertEqual(qt.own_qt_setup(), "qt5ct already has colors of your own")
-                conf.write_text(original_conf)
-                # ...and a Flatpak app given a Qt style of yours
-                ov = home / ".local" / "share" / "flatpak" / "overrides"
-                ov.mkdir(parents=True)
-                (ov / "org.videolan.VLC").write_text("[Environment]\nQT_STYLE_OVERRIDE=kvantum\n")
-                with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(home / ".local" / "share")}):
-                    qt.enable(t)
-                    self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
-                    self.assertTrue(qt.scheme_file().exists())                          # regular apps still done
-                    qt.disable()
+                self.assertEqual(conf.read_text(), kvantum)
+                self.assertEqual((home / ".profile").read_text(), "export QT_STYLE_OVERRIDE=kvantum\n")
+                self.assertEqual(override.read_text(), own_override)
+                self.assertEqual(qt.kdeglobals_file("org.videolan.VLC").read_text(),
+                                 "[Colors:Window]\nBackgroundNormal=1,2,3\n")
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
 
     def test_unreadable_style_is_named(self):

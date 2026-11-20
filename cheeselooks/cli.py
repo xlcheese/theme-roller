@@ -203,6 +203,7 @@ def cmd_apply(args: argparse.Namespace) -> int:
     if not args.theme_dir:
         for line in _libadwaita(data, table):
             print(f"  {line}")
+        qt.notice_shown()          # its "previous Qt setup is saved" line was just printed
     if not args.no_reload and not args.theme_dir:
         for line in _apply_panel_height(data, last_good):
             print(f"  {line}")

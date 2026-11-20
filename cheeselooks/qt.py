@@ -38,6 +38,7 @@ PROFILE_START = "# >>> xl-Cheeselooks: Qt apps use the theme's colors (Integrati
 PROFILE_END = "# <<< xl-Cheeselooks <<<"
 PROFILE_LINE = "export QT_QPA_PLATFORMTHEME=qt5ct"
 ENV = "QT_QPA_PLATFORMTHEME"
+STYLE_ENV = "QT_STYLE_OVERRIDE"
 
 
 def qt5ct_dir() -> Path:
@@ -166,11 +167,14 @@ def qss_file() -> Path:
 
 
 def qt5ct_conf(existing: str) -> str:
-    """qt5ct.conf pointed at our scheme and stylesheet; anything else you had
-    there is kept (your own file dialog choice and stylesheets included)."""
-    want = {"Appearance": {"color_scheme_path": str(scheme_file()), "custom_palette": "true"},
+    """qt5ct.conf pointed at our scheme and stylesheet, in Qt's Fusion style
+    (a Kvantum style would ignore the colours). Anything else you had there is
+    kept (fonts, your file dialog choice, stylesheets), and the whole file as
+    it was is in the backup, put back when the switch goes off."""
+    want = {"Appearance": {"color_scheme_path": str(scheme_file()), "custom_palette": "true",
+                           "style": "Fusion"},
             "Interface": {"stylesheets": str(qss_file())}}
-    if_missing = {"Appearance": {"standard_dialogs": "gtk3", "style": "Fusion"}}
+    if_missing = {"Appearance": {"standard_dialogs": "gtk3"}}
     sections: list[list] = [[None, []]]            # [name, lines]
     for line in existing.splitlines():
         st = line.strip()
@@ -258,88 +262,140 @@ def _profile_without_ours(text: str) -> str:
 
 
 def _profile_sets_it(text: str) -> bool:
-    """Your own ~/.profile already chooses a Qt platform theme (left alone)."""
-    return any(ENV in line and not line.lstrip().startswith("#")
+    """Your own ~/.profile chooses a Qt theme or style (outside our block)."""
+    return any((ENV in line or STYLE_ENV in line) and not line.lstrip().startswith("#")
                for line in _profile_without_ours(text).splitlines())
 
 
 def _set_profile(on: bool) -> str | None:
+    """Our block goes at the end of ~/.profile, after any Qt line of yours, so it
+    wins without your line being touched; removing it lets yours apply again."""
     f = profile_file()
     text = f.read_text(encoding="utf-8") if f.exists() else ""
     has = PROFILE_START in text
     if on and not has:
-        if _profile_sets_it(text):
-            return f"{f} already sets {ENV}: left alone"
-        block = f"\n{PROFILE_START}\n{PROFILE_LINE}\n{PROFILE_END}\n"
+        block = f"\n{PROFILE_START}\n{PROFILE_LINE}\nunset {STYLE_ENV}\n{PROFILE_END}\n"
         f.write_text(text.rstrip("\n") + "\n" + block if text else block.lstrip("\n"), encoding="utf-8")
         return f"added {PROFILE_LINE} to {f} (Qt apps use it from your next login)"
     if not on and has:
         f.write_text(_profile_without_ours(text), encoding="utf-8")
-        return f"removed the Qt line from {f} (from your next login)"
+        return f"removed the Qt lines from {f} (from your next login)"
     return None
 
 
-# ---------------------------------------------------------------- Flatpak env
+# ---------------------------------------------------------------- Flatpak overrides
 
-def _flatpak_env(app: str, on: bool) -> bool:
-    arg = f"--env={ENV}=kde" if on else f"--unset-env={ENV}"
-    try:
-        return subprocess.run(["flatpak", "override", "--user", arg, app],
-                              capture_output=True, timeout=20).returncode == 0
-    except (OSError, subprocess.SubprocessError):
-        return False
+def overrides_dir() -> Path:
+    return paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "flatpak" / "overrides"
+
+
+def _read_env(path: Path) -> dict[str, str]:
+    env, inside = {}, False
+    if path.exists():
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            st = line.strip()
+            if st.startswith("["):
+                inside = st == "[Environment]"
+            elif inside and "=" in st:
+                k, v = st.split("=", 1)
+                env[k.strip()] = v
+    return env
+
+
+def _set_env(path: Path, updates: dict[str, str | None]) -> None:
+    """Set (or, with None, remove) keys in an override file's [Environment],
+    leaving everything else in it as it is (what `flatpak override` writes)."""
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    out, inside, done, had = [], False, set(), False
+    for line in lines:
+        st = line.strip()
+        if st.startswith("["):
+            if inside:
+                out += [f"{k}={v}" for k, v in updates.items() if v is not None and k not in done]
+                done |= set(updates)
+            inside = st == "[Environment]"
+            had = had or inside
+            out.append(line)
+            continue
+        key = st.split("=", 1)[0].strip() if inside and "=" in st else None
+        if key in updates:
+            if updates[key] is not None and key not in done:
+                out.append(f"{key}={updates[key]}")
+            done.add(key)
+            continue
+        out.append(line)
+    if inside:
+        out += [f"{k}={v}" for k, v in updates.items() if v is not None and k not in done]
+    elif not had and any(v is not None for v in updates.values()):
+        out += (["", "[Environment]"] if out else ["[Environment]"])
+        out += [f"{k}={v}" for k, v in updates.items() if v is not None]
+    # a section left with nothing in it goes too (and the file, if that was all)
+    kept: list[str] = []
+    for n, line in enumerate(out):
+        if line.strip().startswith("["):
+            rest = out[n + 1:]
+            nxt = next((k for k, l in enumerate(rest) if l.strip().startswith("[")), len(rest))
+            if not any(l.strip() for l in rest[:nxt]):
+                continue
+        kept.append(line)
+    out = kept
+    while out and not out[-1].strip():
+        out.pop()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if out:
+        path.write_text("\n".join(out) + "\n", encoding="utf-8")
+    elif path.exists():
+        path.unlink()
+
+
+def _flatpak_app_on(app: str, state: dict, found: list[str]) -> None:
+    """The app picks Qt's KDE platform theme, which reads our kdeglobals; a Qt
+    style of yours (e.g. Kvantum, which ignores colours) is set aside. Your
+    previous values are recorded the first time, to put back."""
+    f = overrides_dir() / app
+    before = _read_env(f)
+    prev = state.setdefault("flatpak_prev", {})
+    if app not in prev:
+        prev[app] = {k: before.get(k) for k in (ENV, STYLE_ENV)}
+        if before.get(ENV) or before.get(STYLE_ENV):
+            found.append(f"{app}'s Qt setting")
+    style_set = before.get(STYLE_ENV) or _read_env(overrides_dir() / "global").get(STYLE_ENV)
+    _set_env(f, {ENV: "kde", **({STYLE_ENV: ""} if style_set else {})})
+
+
+def _flatpak_app_off(app: str, before: dict[str, str | None]) -> None:
+    _set_env(overrides_dir() / app, before)
 
 
 # ---------------------------------------------------------------- on / off
 
-# ---------------------------------------------------------------- your own Qt setup
-
-def own_qt_setup(state: dict | None = None) -> str | None:
-    """Why regular Qt apps are left alone: you already set up Qt yourself
-    (another platform theme, Kvantum, your own qt5ct colours). None if not.
-    The switch is on by default, so it must never take over a setup of yours."""
-    state = _load_state() if state is None else state
-    ours = str(scheme_file()) in state.get("files", {})
-    env = os.environ.get(ENV, "")
-    if env and env != "qt5ct":
-        return f"{ENV} is set to '{env}'"
-    if os.environ.get("QT_STYLE_OVERRIDE"):
-        return f"QT_STYLE_OVERRIDE is set to '{os.environ['QT_STYLE_OVERRIDE']}'"
+def _found_setup() -> list[str]:
+    """A Qt setup of yours that our colours now take the place of (kept, and
+    back when the switch goes off): for the one-time notice."""
+    found = []
+    if os.environ.get(ENV, "") not in ("", "qt5ct") or os.environ.get(STYLE_ENV):
+        found.append("your session's Qt theme setting")
     f = profile_file()
     if f.exists() and _profile_sets_it(f.read_text(encoding="utf-8", errors="replace")):
-        return f"{f} already sets {ENV}"
+        found.append(f"the Qt line in {f} (left in place, ours comes after it)")
     conf = qt5ct_dir() / "qt5ct.conf"
-    if conf.exists() and not ours:
+    if conf.exists():
         text = conf.read_text(encoding="utf-8", errors="replace")
-        if "style=kvantum" in text.lower():
-            return "qt5ct uses Kvantum"
-        if "custom_palette=true" in text and str(scheme_file()) not in text:
-            return "qt5ct already has colors of your own"
-    return None
-
-
-def _own_flatpak_setup(app: str, state: dict) -> bool:
-    """A Flatpak app (or all of them) already given a Qt theme or style of yours."""
-    if app in state.get("flatpak_env", []):
-        return False
-    overrides = paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "flatpak" / "overrides"
-    for name in (app, "global"):
-        f = overrides / name
-        if f.exists() and any(k in f.read_text(encoding="utf-8", errors="replace")
-                              for k in (ENV, "QT_STYLE_OVERRIDE")):
-            return True
-    return False
+        if "custom_palette=true" in text or "kvantum" in text.lower():
+            found.append(f"your qt5ct settings ({conf}, saved as {conf.name}{BACKUP})")
+    return found
 
 
 def enable(t: dict[str, str]) -> list[str]:
-    """Write (or rewrite) the colour schemes from the theme's tokens. Returns log lines."""
+    """Write (or rewrite) the colour schemes from the theme's tokens. Our own
+    files are simply rewritten at each Apply; anything of yours is moved
+    aside the first time and kept. Returns log lines."""
     log = []
     state = _load_state()
+    first = not state.get("files") and not state.get("flatpak_prev")
+    found = _found_setup() if first else []
     c = colours(t)
-    mine = own_qt_setup(state)
-    if mine:
-        log.append(f"Qt apps: left your own Qt setup alone ({mine})")
-    elif qt5ct_installed():
+    if qt5ct_installed():
         _write(scheme_file(), qt5ct_scheme(c), state)
         _write(qss_file(), qss(t), state)
         conf = qt5ct_dir() / "qt5ct.conf"
@@ -348,23 +404,23 @@ def enable(t: dict[str, str]) -> list[str]:
         line = _set_profile(True)
         if line:
             log.append(line)
-        state["profile"] = PROFILE_START in (profile_file().read_text(encoding="utf-8")
-                                             if profile_file().exists() else "")
         log.append("Qt apps: colors written for qt5ct")
     else:
         log.append("Qt apps: qt5ct isn't installed (sudo apt install qt5ct), so regular Qt apps "
                    "keep Qt's colors; Flatpak Qt apps are still done")
     done = []
     for app in flatpak_qt_apps():
-        if _own_flatpak_setup(app, state):
-            log.append(f"Qt apps: left {app} alone (it has a Qt theme of your own)")
-            continue
-        _write(kdeglobals_file(app), kdeglobals(c), state)
-        if app not in state.get("flatpak_env", []) and _flatpak_env(app, True):
-            state.setdefault("flatpak_env", []).append(app)
+        kde = kdeglobals_file(app)
+        if first and kde.exists() and MARK not in kde.read_text(encoding="utf-8", errors="replace"):
+            found.append(f"{app}'s KDE colors")
+        _write(kde, kdeglobals(c), state)
+        _flatpak_app_on(app, state, found)
         done.append(app)
     if done:
         log.append(f"Qt apps: colors written for Flatpak {', '.join(done)} (restart them to see it)")
+    if found:
+        state["notice"] = found
+        log.append("Qt apps: your previous Qt setup is saved: " + "; ".join(found))
     _save_state(state)
     return log
 
@@ -382,13 +438,13 @@ def disable() -> list[str]:
             shutil.move(str(backup), path)
         elif path.exists():
             path.unlink()
-    for app in state.get("flatpak_env", []):
-        _flatpak_env(app, False)
+    for app, before in state.get("flatpak_prev", {}).items():
+        _flatpak_app_off(app, before)
     line = _set_profile(False)
     if line:
         log.append(line)
     _save_state({})
-    log.append("Qt apps: our colors removed (Qt apps go back to their own)")
+    log.append("Qt apps: our colors removed (your own Qt setup, if any, is back)")
     return log
 
 
@@ -396,13 +452,28 @@ def active() -> bool:
     return bool(_load_state())
 
 
+def pending_notice() -> str | None:
+    """Once, after our colours first took the place of a Qt setup of yours:
+    what was kept, and how to get it back. None otherwise."""
+    found = _load_state().get("notice")
+    if not found:
+        return None
+    return ("Your Qt apps now use xl-Cheeselooks colors.\n\n"
+            "Your previous Qt setup is saved: " + "; ".join(found) + ".\n\n"
+            "Turning off Integration → Qt apps puts it back.")
+
+
+def notice_shown() -> None:
+    state = _load_state()
+    if state.pop("notice", None) is not None:
+        _save_state(state)
+
+
 def note() -> str:
     """The line under the switch: when it takes effect, and what it needs."""
     text = ("Your colors in Qt apps such as VLC (Qt keeps its own shapes). "
-            "From your next login; Flatpak apps when restarted.")
-    mine = own_qt_setup()
-    if mine:
-        return text + f"\nYour own Qt setup is left alone ({mine})."
+            "From your next login; Flatpak apps when restarted. A Qt setup of your own "
+            "is saved and comes back when this is off.")
     if not qt5ct_installed():
         text += "\nRegular Qt apps need qt5ct: sudo apt install qt5ct"
     return text
