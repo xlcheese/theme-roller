@@ -318,6 +318,13 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 grid.attach(head, 0, row, 2, 1)
                 row += 1
             label = Gtk.Label(label=LABELS.get(path[-1], path[-1].replace("_", " ").capitalize()), xalign=0)
+            if path == ("icons", "style"):
+                # pictures of each style, under its name ("Folder style: Yaru")
+                self.folder_style_label = label
+                grid.attach(label, 0, row, 2, 1)
+                grid.attach(self._folder_style_picker(path, extra), 0, row + 1, 2, 1)
+                row += 2
+                continue
             grid.attach(label, 0, row, 1, 1)
             grid.attach(self._control(path, kind, extra), 1, row, 1, 1)
             row += 1
@@ -434,6 +441,52 @@ class SettingsWindow(Gtk.ApplicationWindow):
             buttons[gid] = b
         self.controls[path] = (buttons, "glyphs")
         return box
+
+    FOLDER_STYLE_PX = 96          # the style pictures: twice the 48px preview
+
+    def _folder_style_picker(self, path: tuple[str, ...], choices: tuple[str, ...]) -> Gtk.Widget:
+        """A picture of each folder style, in your colors, to click; more than
+        a row's worth wrap onto a second row."""
+        flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=5,
+                           min_children_per_line=1, homogeneous=True, halign=Gtk.Align.START,
+                           column_spacing=10, row_spacing=10, margin_start=16, margin_top=6)
+        buttons, self.folder_style_images = {}, {}
+        for sid in choices:
+            b = Gtk.ToggleButton(relief=Gtk.ReliefStyle.NONE)
+            b.set_tooltip_text(icons.STYLES[sid]["name"])
+            img = Gtk.Image()
+            b.add(img)
+            self.folder_style_images[sid] = img
+
+            def toggled(btn: Gtk.ToggleButton, s=sid) -> None:
+                if btn.get_active():
+                    self.changed(path, s)
+                elif not self.syncing and icons.style_of(self.data["icons"]) == s:
+                    btn.set_active(True)            # the chosen one stays chosen
+            b.connect("toggled", toggled)
+            flow.add(b)
+            buttons[sid] = b
+        self.controls[path] = (buttons, "folderstyle")
+        return flow
+
+    def _draw_folder_style_images(self, t: dict[str, str]) -> None:
+        """Each style's folder, in the folder colors now set (redrawn with the preview)."""
+        px = self.FOLDER_STYLE_PX
+        for sid, img in getattr(self, "folder_style_images", {}).items():
+            spec = icons.STYLES[sid]
+            size = min((s for s in spec["sizes"] if s >= px), default=max(spec["sizes"]))
+            f = icons.source_dir(sid) / str(size) / "folder.svg"
+            if not f.exists():
+                continue
+            c = icons.colours(t, {**self.data["icons"], "style": sid})
+            loader = GdkPixbuf.PixbufLoader()
+            loader.set_size(px, px)
+            try:
+                loader.write(icons.recolour(f.read_text(encoding="utf-8"), c, sid).encode())
+                loader.close()
+                img.set_from_pixbuf(loader.get_pixbuf())
+            except GLib.Error:
+                pass
 
     def _draw_glyph_images(self, color: str) -> None:
         """Our glyph sets in the text colour, for the picker (redrawn when it changes)."""
@@ -642,6 +695,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def _update_icon_preview(self, t: dict[str, str]) -> None:
         if not getattr(self, "icon_images", None):
             return
+        self._draw_folder_style_images(t)
         c = icons.colours(t, self.data["icons"])
         style = icons.style_of(self.data["icons"])
         for img, name, size in self.icon_images:
@@ -1139,6 +1193,11 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 elif kind == "inline":
                     for choice, b in widget.items():
                         b.set_active(choice == value)
+                elif kind == "folderstyle":
+                    shown = icons.style_of(self.data["icons"])
+                    for sid, b in widget.items():
+                        b.set_active(sid == shown)
+                    self.folder_style_label.set_text(f"Folder style: {icons.STYLES[shown]['name']}")
                 else:
                     widget.set_active_id(value)
             for r in self.theme_list.get_children():
