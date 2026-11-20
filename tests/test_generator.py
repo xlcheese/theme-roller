@@ -1451,8 +1451,22 @@ class RenderAndInstallTests(unittest.TestCase):
         out = icons.recolour(svg, c, "yaru")
         for src in icons.STYLES["yaru"]["source"].values():
             self.assertNotIn(src, out.lower())                                  # every placeholder swapped
-        self.assertIn("7a7a7a", out)                                            # a grey front...
-        self.assertIn("e8795e", out)                                            # ...on a coral back
+        # what you choose is what you see: Yaru's own veils worked backwards
+        import gi
+        gi.require_version("GdkPixbuf", "2.0")
+        from gi.repository import GdkPixbuf
+        big = icons.recolour((icons.source_dir("yaru") / "256" / "folder.svg").read_text(), c, "yaru")
+        loader = GdkPixbuf.PixbufLoader()
+        loader.write(big.encode())
+        loader.close()
+        pb = loader.get_pixbuf()
+
+        def seen(x, y):
+            i = y * pb.get_rowstride() + x * pb.get_n_channels()
+            return pb.get_pixels()[i:i + 3]
+        for (x, y), want in (((176, 144), "#7A7A7A"), ((72, 56), "#E8795E")):   # the front, the back
+            for got, w in zip(seen(x, y), palette.to_rgb(want)):
+                self.assertLessEqual(abs(got - w), 2, (x, y, want))
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "t"
             n = icons.build(t, yaru, ["Mint-Y"], d)

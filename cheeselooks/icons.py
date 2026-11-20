@@ -35,7 +35,16 @@ STYLES = {
     "mint-y": {"name": "Mint-Y", "dir": "mint-y", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
                "source": {"folder": "eeca8f", "backfolder": "c89e6b", "paper": "e8e8e8", "emblem": "575757"}},
     "yaru": {"name": "Yaru", "dir": "yaru", "sizes": (16, 24, 32, 48, 256),
-             "source": {"folder": "00ff03", "backfolder": "00ff13", "backdark": "008512", "emblem": "008502"}},
+             "source": {"folder": "00ff03", "backfolder": "00ff13", "backdark": "008512", "emblem": "008502"},
+             # Yaru's own layers change what you see. The front has a white veil
+             # (you see 38 + 0.851 x what's under it, measured by rendering,
+             # 24px and up): worked backwards, so you see your folder color.
+             # The back's darkening layers exist to make Yaru's one colour
+             # darker at the back; your second color sets that, so they're
+             # given the back's own colour (backdark 0: no change) and you see
+             # your second color exactly, light or dark.
+             "seen": {"folder": (38.0, 0.851)},
+             "backdark": 0.0},
 }
 DEFAULT_STYLE = "mint-y"
 # names a style doesn't draw, borrowed from one it does (Yaru has an open
@@ -78,25 +87,41 @@ def colours(t: dict[str, str], icons: dict) -> dict[str, str]:
     dark_emblem = pal.darker(folder, 0.72)
     light_emblem = "#F2F2F2"
     emblem = dark_emblem if pal.contrast(dark_emblem, folder) >= 3.0 else light_emblem
-    return {"folder": folder, "backfolder": back, "backdark": pal.darker(back, 0.45),
+    return {"folder": folder, "backfolder": back, "backdark": pal.darker(back, 0.48),
             "paper": "#E4E4E4", "emblem": emblem}
 
 
 def back_shade(folder: str) -> str:
-    """The folder's back, as Mint shades its own colours (measured over Mint-Y's
-    twelve: lightness about 0.15 lower, saturation a little less, the two
-    about 1.6-1.7 apart in contrast). At least 1.6 apart here."""
+    """The folder's back: xl_cheese's own coral Yaru folders (#FF8467 front,
+    #D44231 back) as the rule: lightness 0.19 lower, saturation x0.64, the hue
+    turned 5 degrees (toward red on warm colours). At least 1.6 apart in
+    contrast. (Mint's own twelve fitted to 0.15 / x0.8 / no turn: lighter and
+    more orange beside his folders.)"""
     import colorsys
     h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in pal.to_rgb(folder)))
-    for drop in (0.15, 0.18, 0.21, 0.24, 0.27, 0.30):
-        r, g, b = colorsys.hls_to_rgb(h, max(0.04, l - drop), s * 0.8)
+    for drop in (0.19, 0.22, 0.25, 0.28, 0.31, 0.34):
+        r, g, b = colorsys.hls_to_rgb((h - 5 / 360) % 1, max(0.04, l - drop), s * 0.64)
         back = pal.from_rgb(r * 255, g * 255, b * 255)
         if pal.contrast(folder, back) >= 1.6:
             return back
     return back
 
 
+def underneath(c: dict[str, str], style: str) -> dict[str, str]:
+    """The colours to draw so the folder *shows* c: a style's own veils and
+    shading worked backwards (STYLES[style]["seen"]: offset, scale per part)."""
+    spec = STYLES[style]
+    out = dict(c)
+    for key, (offset, scale) in spec.get("seen", {}).items():
+        rgb = [min(255.0, max(0.0, (v - offset) / scale)) for v in pal.to_rgb(c[key])]
+        out[key] = pal.from_rgb(*rgb)
+    if "backdark" in spec:
+        out["backdark"] = pal.darker(out["backfolder"], spec["backdark"])
+    return out
+
+
 def recolour(svg: str, c: dict[str, str], style: str = DEFAULT_STYLE) -> str:
+    c = underneath(c, style)
     for key, src in STYLES[style]["source"].items():
         svg = svg.replace(src, c[key].lstrip("#").lower()).replace(src.upper(), c[key].lstrip("#").lower())
     return svg
