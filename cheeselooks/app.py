@@ -268,7 +268,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
         paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
         paned.pack1(left, resize=True, shrink=False)
         paned.pack2(self._preview(), resize=False, shrink=False)
-        paned.set_position(660)
+        # no set position: the preview opens at its own width (its button row),
+        # the tabs take the rest
         main = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         main.pack_start(paned, True, True, 0)
         self.add(main)
@@ -700,19 +701,21 @@ class SettingsWindow(Gtk.ApplicationWindow):
                                "and the second color (the back) a darker shade of it. Choose either and both "
                                "keep their colors from then on; Reset Icons follows the theme again. "
                                "Every other icon stays as in your current icon theme. Apply to use them.",
-                         xalign=0, wrap=True, max_width_chars=100, margin_start=16, hexpand=True)
+                         xalign=0, wrap=True, max_width_chars=60, margin_start=16, hexpand=True)
         note.get_style_context().add_class("dim-label")
         grid.attach(note, 0, row, 2, 1)
         self.icon_images = []
-        for size in (48, 24):
-            box = Gtk.Box(spacing=10, margin_top=10, margin_start=16)
-            for name in self.ICON_PREVIEW:
+        # 48px in two rows of four; 24px in one row, without the plain folder
+        lines = [(48, self.ICON_PREVIEW[:4]), (48, self.ICON_PREVIEW[4:]), (24, self.ICON_PREVIEW[1:])]
+        for i, (size, names) in enumerate(lines):
+            box = Gtk.Box(spacing=10, margin_top=10 if i != 1 else 0, margin_start=16)
+            for name in names:
                 img = Gtk.Image()
                 img.set_tooltip_text(name)
                 box.pack_start(img, False, False, 0)
                 self.icon_images.append((img, name, size))
-            grid.attach(box, 0, row + 1 + (size == 24), 2, 1)
-        return row + 3
+            grid.attach(box, 0, row + 1 + i, 2, 1)
+        return row + 1 + len(lines)
 
     def _update_icon_preview(self, t: dict[str, str]) -> None:
         if not getattr(self, "icon_images", None):
@@ -950,6 +953,14 @@ class SettingsWindow(Gtk.ApplicationWindow):
         toggled.set_tooltip_text("A tooltip on Toggled")
         buttons.pack_start(toggled, False, False, 0)
         body.pack_start(buttons, False, False, 0)
+        linked = Gtk.Box()
+        linked.get_style_context().add_class("linked")
+        for i, label in enumerate(("Left", "Center", "Right")):
+            linked.pack_start(Gtk.ToggleButton(label=label, active=(i == 1)), False, False, 0)
+        row = Gtk.Box(spacing=10)
+        row.pack_start(linked, False, False, 0)
+        row.pack_start(Gtk.Entry(text="Some text", width_chars=8), True, True, 0)   # fills, never widens
+        body.pack_start(row, False, False, 0)
         # a drawn tooltip, always visible, in the Details tab's tooltip colours
         row = Gtk.Box(spacing=10)
         tip = Gtk.Label(label="Tooltip", valign=Gtk.Align.CENTER)
@@ -958,14 +969,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
         row.pack_start(Gtk.Switch(active=True, valign=Gtk.Align.CENTER), False, False, 0)
         row.pack_start(Gtk.CheckButton(label="Check", active=True), False, False, 0)
         row.pack_start(Gtk.RadioButton(label="Radio"), False, False, 0)
-        body.pack_start(row, False, False, 0)
-        linked = Gtk.Box()
-        linked.get_style_context().add_class("linked")
-        for i, label in enumerate(("Left", "Center", "Right")):
-            linked.pack_start(Gtk.ToggleButton(label=label, active=(i == 1)), False, False, 0)
-        row = Gtk.Box(spacing=10)
-        row.pack_start(Gtk.Entry(text="Some text", width_chars=10), True, True, 0)
-        row.pack_start(linked, False, False, 0)
         body.pack_start(row, False, False, 0)
         scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
         scale.set_value(60)
