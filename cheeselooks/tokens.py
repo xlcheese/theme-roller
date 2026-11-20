@@ -518,26 +518,37 @@ def _round_bottom(r: str, gtk: int) -> str:
 
 
 def _lists_css(roundness: float, r: int, line: str) -> tuple[str, str]:
-    """GTK 3 and GTK 4 rules for menu items (not Cinnamon's) and sidebar rows."""
+    """GTK 3 and GTK 4 rules for menu items (not Cinnamon's) and sidebar rows:
+    stack sidebars, and the places sidebar of file dialogs (GTK 3's
+    placessidebar, GTK 4's navigation-sidebar). Square and edge to edge up to
+    Roundness 30; rounded, with a little room at each end, above."""
+    places3 = ("filechooser placessidebar.sidebar list row.sidebar-row,\n"
+               ".nautilus-window placessidebar.sidebar list row.sidebar-row,\n"
+               "placessidebar.sidebar list row.sidebar-row, placessidebar row")
+    places4 = "placessidebar .navigation-sidebar > row, .navigation-sidebar > row"
     if roundness <= SQUARE_LISTS_AT:
         g3 = ("menu menuitem, .menu menuitem { margin: 0; border-radius: 0; }\n"
               "stacksidebar.sidebar row, stacksidebar.sidebar row:hover, stacksidebar.sidebar row:selected,\n"
               "stacksidebar row, stacksidebar row:hover, stacksidebar row:selected {\n"
-              "  margin: 0; border-radius: 0; box-shadow: inset 0 -1px " + line + "; }")
+              "  margin: 0; border-radius: 0; box-shadow: inset 0 -1px " + line + "; }\n"
+              + places3 + " { margin: 0; border-radius: 0; }")
         g4 = ("popover.menu > contents { padding-left: 0; padding-right: 0; }\n"
               "popover.menu modelbutton { margin: 0; border-radius: 0; }\n"
               "stacksidebar.sidebar row, stacksidebar.sidebar row:hover, stacksidebar.sidebar row:selected,\n"
               "stacksidebar row, stacksidebar row:hover, stacksidebar row:selected {\n"
-              "  margin: 0; border-radius: 0; box-shadow: inset 0 -1px " + line + "; }")
+              "  margin: 0; border-radius: 0; box-shadow: inset 0 -1px " + line + "; }\n"
+              + places4 + " { margin: 0; border-radius: 0; }")
     else:
         # rounded rows float in the list: no dividers (said outright, so the
         # square version's lines don't show through from another theme underneath)
         rows = ("stacksidebar.sidebar row, stacksidebar.sidebar row:hover, stacksidebar.sidebar row:selected,\n"
                 "stacksidebar row, stacksidebar row:hover, stacksidebar row:selected {\n"
                 f"  margin: 2px 6px; border-radius: {r}px; box-shadow: none; }}")
-        g3 = f"menu menuitem, .menu menuitem {{ margin: 0 2px; border-radius: {r}px; }}\n" + rows
+        g3 = (f"menu menuitem, .menu menuitem {{ margin: 0 2px; border-radius: {r}px; }}\n" + rows + "\n"
+              + places3 + f" {{ margin: 1px 6px; border-radius: {r}px; }}")
         g4 = (f"popover.menu > contents {{ padding-left: 8px; padding-right: 8px; }}\n"
-              f"popover.menu modelbutton {{ margin: 0 2px; border-radius: {r}px; }}\n" + rows)
+              f"popover.menu modelbutton {{ margin: 0 2px; border-radius: {r}px; }}\n" + rows + "\n"
+              + places4 + f" {{ margin: 1px 6px; border-radius: {r}px; }}")
     note = "/* Menu items and sidebar rows: square below Roundness " + str(SQUARE_LISTS_AT + 1) + " (tokens._lists_css) */\n"
     return note + g3 + "\n", note + g4 + "\n"
 

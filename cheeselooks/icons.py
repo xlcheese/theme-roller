@@ -6,7 +6,7 @@ are recoloured as text, the way Mint makes Mint-Y-Blue and its other colours:
 four colours swapped,
 
     folder      the front              your folder color (default: the accent)
-    backfolder  the back and its tab   your second color (default: a shade darker)
+    backfolder  the back and its tab   your second color (default: darker, as Mint shades)
     paper       the sheet inside       a light grey, as Mint's
     emblem      the picture on front   dark or light, whichever reads on the folder
 
@@ -48,11 +48,25 @@ def state_file() -> Path:
 def colours(t: dict[str, str], icons: dict) -> dict[str, str]:
     """The four colours, from your settings (folder and second color) and the theme."""
     folder = icons.get("folder_color") or t["accent"]
-    back = icons.get("second_color") or pal.darker(folder, 0.16)
+    back = icons.get("second_color") or back_shade(folder)
     dark_emblem = pal.darker(folder, 0.72)
     light_emblem = "#F2F2F2"
     emblem = dark_emblem if pal.contrast(dark_emblem, folder) >= 3.0 else light_emblem
     return {"folder": folder, "backfolder": back, "paper": "#E4E4E4", "emblem": emblem}
+
+
+def back_shade(folder: str) -> str:
+    """The folder's back, as Mint shades its own colours (measured over Mint-Y's
+    twelve: lightness about 0.15 lower, saturation a little less, the two
+    about 1.6-1.7 apart in contrast). At least 1.6 apart here."""
+    import colorsys
+    h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in pal.to_rgb(folder)))
+    for drop in (0.15, 0.18, 0.21, 0.24, 0.27, 0.30):
+        r, g, b = colorsys.hls_to_rgb(h, max(0.04, l - drop), s * 0.8)
+        back = pal.from_rgb(r * 255, g * 255, b * 255)
+        if pal.contrast(folder, back) >= 1.6:
+            return back
+    return back
 
 
 def recolour(svg: str, c: dict[str, str]) -> str:

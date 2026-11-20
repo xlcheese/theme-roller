@@ -1408,6 +1408,16 @@ class RenderAndInstallTests(unittest.TestCase):
         self.assertTrue(kept["icons"]["enabled"])                               # the switch stays...
         self.assertIsNone(kept["icons"]["folder_color"])                        # ...the colours are the theme's
 
+    def test_file_dialog_sidebar_follows_list_roundness(self):
+        g3, g4 = tokens._lists_css(15, 2, "#ccc")
+        self.assertIn("filechooser placessidebar.sidebar list row.sidebar-row", g3)
+        self.assertIn("{ margin: 0; border-radius: 0; }", g3.split("filechooser placessidebar")[1])
+        self.assertIn(".navigation-sidebar > row { margin: 0; border-radius: 0; }", g4)
+        g3, g4 = tokens._lists_css(40, 9, "#ccc")
+        self.assertIn("placessidebar row { margin: 1px 6px; border-radius: 9px; }", g3)
+        self.assertIn(".navigation-sidebar > row { margin: 1px 6px; border-radius: 9px; }", g4)
+        self.assertGreaterEqual(palette.contrast("#B85A38", icons.back_shade("#B85A38")), 1.6)  # Mint-like folder back
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"
