@@ -8,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import __version__, editor, flatpak, gtk4, install, paths, qt, reload, watch, settings, styles, themes, tokens
+from . import __version__, editor, flatpak, gtk4, icons, install, paths, qt, reload, watch, settings, styles, themes, tokens
 from .shape import DEFAULT_PANEL_HEIGHT
 
 
@@ -130,6 +130,15 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     return [line for line in log if line]
 
 
+def _icons(data: dict, table: dict) -> list[str]:
+    """Icons tab: folders in your colors when on; switched off, your icon theme back."""
+    if data["icons"].get("enabled"):
+        return icons.enable(table, data["icons"])
+    if icons.active():
+        return icons.disable()
+    return []
+
+
 def _flatpak_access(on: bool) -> list[str]:
     """Flatpak apps: read-only access to the theme (a user-wide override),
     granted while the switch is on; switched off, just our entries removed."""
@@ -214,6 +223,7 @@ def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
     log.append(f"style: {style.name} from {_where(style)}")
     log += [f"note: {n}" for n in tokens.warnings(data)]
     log += _libadwaita(data, table)
+    log += _icons(data, table)
     layout = table["wb.button_layout"] if (theme_dir / "metacity-1").is_dir() else None
     sb = data["details"]["scrollbars"]
     if sb["custom"]:
@@ -272,6 +282,8 @@ def _cmd_apply(args: argparse.Namespace) -> int:
         print(f"  note: {note}")
     if not args.theme_dir:
         for line in _libadwaita(data, table):
+            print(f"  {line}")
+        for line in _icons(data, table):
             print(f"  {line}")
         qt.notice_shown()          # its "previous Qt setup is saved" line was just printed
     if not args.no_reload and not args.theme_dir:

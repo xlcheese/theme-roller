@@ -37,7 +37,7 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, Pango  # noqa: E402
 
-from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, qt, reload, render, settings, styles, themes, titlebuttons, tokens, watch  # noqa: E402
+from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, icons, qt, reload, render, settings, styles, themes, titlebuttons, tokens, watch  # noqa: E402
 from . import shape  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
 
@@ -47,7 +47,7 @@ PREVIEW_DELAY_MS = 120
 TABS = [  # (settings section, tab title)
     ("global", "Global"), ("style", "Style"), ("panel", "Panel & Menu"),
     ("window_borders", "Window Borders"), ("terminal", "Terminal"),
-    ("details", "Details"), ("integration", "Integration"), ("share", "Import & Export"),
+    ("details", "Details"), ("icons", "Icons"), ("integration", "Integration"), ("share", "Import & Export"),
     ("docs", "Documentation"), ("about", "About"),
 ]
 REPO_URL = "https://github.com/xlcheese/xl-cheeselooks"
@@ -93,6 +93,7 @@ LABELS = {
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
+    "enabled": "Folders in your colors", "folder_color": "Folder color", "second_color": "Second color",
     "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps",
     "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
@@ -322,6 +323,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 row += 1
             if path == ("global", "text"):
                 row = self._image_colors_row(grid, row)
+        if section == "icons":
+            row = self._icon_preview_row(grid, row)
         if section == "integration":
             row = self._set_aside_row(grid, row)
             restart = Gtk.CheckButton(label="Restart Cinnamon after Apply", margin_top=8,
@@ -608,6 +611,44 @@ class SettingsWindow(Gtk.ApplicationWindow):
         grid.attach(Gtk.Label(label="Colors", xalign=0), 0, row, 1, 1)
         grid.attach(combo, 1, row, 1, 1)
         return row + 1
+
+    ICON_PREVIEW = ("folder", "user-home", "folder-documents", "folder-download", "folder-music",
+                    "folder-pictures", "folder-videos", "folder-drag-accept")
+
+    def _icon_preview_row(self, grid: Gtk.Grid, row: int) -> int:
+        """The folders in the chosen colors, at 48 and 24px (drawn here, before Apply)."""
+        note = Gtk.Label(label="Mint-Y's folders, recolored: the folder color follows your accent and "
+                               "the second color (the back) a shade darker, until you choose your own. "
+                               "Every other icon stays as in your current icon theme. Apply to use them.",
+                         xalign=0, wrap=True, max_width_chars=100, margin_start=16, hexpand=True)
+        note.get_style_context().add_class("dim-label")
+        grid.attach(note, 0, row, 2, 1)
+        self.icon_images = []
+        for size in (48, 24):
+            box = Gtk.Box(spacing=10, margin_top=10, margin_start=16)
+            for name in self.ICON_PREVIEW:
+                img = Gtk.Image()
+                img.set_tooltip_text(name)
+                box.pack_start(img, False, False, 0)
+                self.icon_images.append((img, name, size))
+            grid.attach(box, 0, row + 1 + (size == 24), 2, 1)
+        return row + 3
+
+    def _update_icon_preview(self, t: dict[str, str]) -> None:
+        if not getattr(self, "icon_images", None):
+            return
+        c = icons.colours(t, self.data["icons"])
+        for img, name, size in self.icon_images:
+            f = icons.source_dir() / str(size) / f"{name}.svg"
+            if not f.exists():
+                continue
+            loader = GdkPixbuf.PixbufLoader()
+            try:
+                loader.write(icons.recolour(f.read_text(encoding="utf-8"), c).encode())
+                loader.close()
+                img.set_from_pixbuf(loader.get_pixbuf())
+            except GLib.Error:
+                pass
 
     def _set_aside_row(self, grid: Gtk.Grid, row: int) -> int:
         """Take our extra colors out of apps now, without changing any setting."""
@@ -984,6 +1025,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         try:
             self.theme_css.load_from_path(str(self.preview_dir / "gtk-3.0" / "gtk.css"))
             self.extra_css.load_from_data(self._extra_css(t).encode())
+            self._update_icon_preview(t)
             # make every widget re-read its style and size: without this GTK 3
             # sometimes kept a property the new CSS no longer sets (a Linked
             # shadow after switching back) or didn't re-measure resized title

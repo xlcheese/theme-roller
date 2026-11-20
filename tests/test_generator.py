@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, editor, flatpak, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -1366,6 +1366,47 @@ class RenderAndInstallTests(unittest.TestCase):
     def test_qt5ct_empty_stylesheet_list(self):
         out = qt.qt5ct_conf("[Interface]\nstylesheets=@Invalid()\n")
         self.assertIn(f"stylesheets={qt.qss_file()}\n", out)                   # qt5ct's "empty" dropped
+
+    def test_folder_icons(self):
+        from unittest import mock
+        import os
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        c = icons.colours(t, {})
+        self.assertEqual(c["folder"], t["accent"])                              # follows the accent
+        self.assertGreaterEqual(palette.contrast(c["emblem"], c["folder"]), 3.0)  # the emblem reads
+        mine = icons.colours(t, {"folder_color": "#336699", "second_color": "#112233"})
+        self.assertEqual((mine["folder"], mine["backfolder"]), ("#336699", "#112233"))
+        for light in ("#F9C470", "#B8D8EB", "#FFFFFF"):                        # light folders: dark emblem
+            self.assertGreaterEqual(palette.contrast(icons.colours(t, {"folder_color": light})["emblem"], light), 3.0)
+        svg = (icons.source_dir() / "48" / "folder-music.svg").read_text()
+        out = icons.recolour(svg, c)
+        for src in icons.SOURCE.values():
+            self.assertNotIn(src, out.lower())                                  # every source colour swapped
+        gs = {icons.KEY: "Mint-Y-Sand"}
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(Path(tmp) / "share"),
+                                          "XDG_CONFIG_HOME": str(Path(tmp) / "config")}), \
+             mock.patch.object(icons.reload, "available", return_value=True), \
+             mock.patch.object(icons.reload, "get", side_effect=lambda *k: gs.get(k)), \
+             mock.patch.object(icons.reload, "set_value", side_effect=lambda *a: gs.__setitem__(a[:2], a[2]) or True):
+            icons.enable(t, {})
+            d = icons.theme_dir()
+            self.assertEqual(len(list(d.glob("places/*/*.svg"))), 128 * 2)      # every size, and @2x
+            index = (d / "index.theme").read_text()
+            self.assertIn("Inherits=Mint-Y-Sand,Mint-Y,Adwaita,gnome,hicolor", index)  # yours fills in the rest
+            self.assertIn("[places/48@2x]\nSize=48\nScale=2", index)
+            self.assertTrue((d / "COPYING").exists())                           # CC BY-SA credit travels along
+            self.assertEqual(gs[icons.KEY], icons.THEME)
+            icons.enable(t, {})                                                 # a second Apply: still yours behind
+            self.assertIn("Inherits=Mint-Y-Sand,", (d / "index.theme").read_text())
+            icons.disable()
+            self.assertEqual(gs[icons.KEY], "Mint-Y-Sand")
+            self.assertFalse(d.exists())
+        self.assertFalse(settings.DEFAULTS["icons"]["enabled"])                 # off by default
+        kept = settings.keep_per_user(themes.load("xl-Classic"), {**defaults(), "icons": {"enabled": True,
+                                      "folder_color": "#000000", "second_color": None}})
+        self.assertTrue(kept["icons"]["enabled"])                               # the switch stays...
+        self.assertIsNone(kept["icons"]["folder_color"])                        # ...the colours are the theme's
 
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:

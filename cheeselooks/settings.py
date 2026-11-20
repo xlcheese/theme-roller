@@ -53,6 +53,9 @@ DEFAULTS: dict[str, Any] = {
         "switches": {"custom": False, "roundness": 100},
         "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
     },
+    # Icons tab: folders in your colors (icons.py). Off by default: a first look
+    # at the Tool shouldn't change icons people chose in Mint's settings
+    "icons": {"enabled": False, "folder_color": None, "second_color": None},
     "integration": {"libadwaita_colors": True, "libadwaita_accent": True,
                     "libadwaita_full": False,  # our whole GTK 4 layer for apps that ignore the theme (gtk4.py)
                     "flatpak_access": True,  # Flatpak apps can read the theme (flatpak.py); on, as the others
@@ -114,6 +117,9 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "scrollbars", "mode"), "choice", ("overlay", "classic")),
     (("details", "scrollbars", "roundness"), "int", (0, 100)),
     (("details", "scrollbars", "width"), "int?", (6, 16)),
+    (("icons", "enabled"), "bool", None),
+    (("icons", "folder_color"), "color?", None),
+    (("icons", "second_color"), "color?", None),
     (("details", "sliders", "custom"), "bool", None),
     (("details", "sliders", "roundness"), "int", (0, 100)),
     (("details", "switches", "custom"), "bool", None),
@@ -226,15 +232,19 @@ def from_dict(data: dict) -> dict:
 
 # Sections that belong to your desktop, not to a look: picking a theme (or
 # resetting to one) keeps yours. A theme file's own copy, if any, is ignored.
-PER_USER = ("integration",)
+# (Paths: a whole section, or one setting in it.)
+PER_USER = (("integration",), ("icons", "enabled"))
 
 
 def keep_per_user(new: dict, current: dict) -> dict:
-    """`new` (a theme's settings) with `current`'s per-user sections."""
+    """`new` (a theme's settings) with `current`'s per-user sections and settings."""
     out = copy.deepcopy(new)
-    for section in PER_USER:
-        if section in current:
-            out[section] = copy.deepcopy(current[section])
+    for path in PER_USER:
+        src, dst = current, out
+        for k in path[:-1]:
+            src, dst = src.get(k, {}), dst.setdefault(k, {})
+        if path[-1] in src:
+            dst[path[-1]] = copy.deepcopy(src[path[-1]])
     return out
 
 
