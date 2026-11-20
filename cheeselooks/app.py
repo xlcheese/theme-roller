@@ -202,9 +202,11 @@ def _rgba(hex_color: str) -> Gdk.RGBA:
 
 
 def _same(a: dict, b: dict) -> bool:
-    """Equal settings, ignoring which theme they're labelled with."""
+    """Equal settings, ignoring which theme they're labelled with, and your
+    per-user settings (Integration, the Icons switch and style: not part of a
+    theme, so they'd make every theme look changed: "Custom")."""
     strip = lambda d: {k: v for k, v in d.items() if k not in ("theme", "based_on", "version")}  # noqa: E731
-    return strip(a) == strip(b)
+    return strip(a) == strip(settings.keep_per_user(b, a))
 
 
 class SettingsWindow(Gtk.ApplicationWindow):

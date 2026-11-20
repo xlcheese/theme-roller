@@ -1480,6 +1480,15 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(drag.resolve(), (d / "places" / "48" / "folder-open.svg").resolve())
             self.assertFalse((d / "places" / "48" / "folder-open.svg").is_symlink())  # a real icon, not replaced
 
+    def test_theme_stays_itself_with_per_user_settings(self):
+        from cheeselooks import app
+        theme = themes.load("xl-Cheeselooks")
+        mine = settings.keep_per_user(theme, {**theme, "integration": {**theme["integration"], "libadwaita_full": True},
+                                              "icons": {**theme["icons"], "enabled": True, "style": "yaru"}})
+        self.assertTrue(app._same(mine, theme))                       # still xl-Cheeselooks, not Custom
+        mine["global"] = {**mine["global"], "accent": "#123456"}
+        self.assertFalse(app._same(mine, theme))                      # a real change: Custom
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"
