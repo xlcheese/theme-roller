@@ -211,6 +211,14 @@ def _same(a: dict, b: dict) -> bool:
     return strip(a) == strip(settings.keep_per_user(b, a))
 
 
+def _needs_apply(data: dict, applied: dict) -> bool:
+    """Anything to Apply: another theme, a changed setting, or one of your
+    per-user settings (Integration, the Icons switch and folder style: they
+    don't make a theme Custom, but they still need an Apply)."""
+    mine = settings.keep_per_user(applied, data) != applied
+    return not _same(data, applied) or mine or data["theme"] != applied["theme"]
+
+
 class SettingsWindow(Gtk.ApplicationWindow):
     def __init__(self, app: Gtk.Application):
         super().__init__(application=app, title=APP_TITLE)
@@ -1305,11 +1313,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                                    "but colors on “Follow theme” and shapes that follow Global change with it.")
             else:
                 b.set_tooltip_text(f"Put {dict(TABS)[section]} back to {self.base} (other tabs stay as they are)")
-        # per-user settings (Integration, the Icons switch and folder style) don't
-        # make a theme Custom, but they still need an Apply
-        mine = settings.keep_per_user(self.applied, self.data) != self.applied
-        self.apply_btn.set_sensitive(not _same(self.data, self.applied) or mine
-                                     or self.data["theme"] != self.applied["theme"])
+        self.apply_btn.set_sensitive(_needs_apply(self.data, self.applied))
         self.save_btn.set_sensitive(self.data["theme"] == themes.CUSTOM)
         row = self.theme_list.get_selected_row()
         yours = bool(row) and not row.builtin and row.theme_name != themes.CUSTOM

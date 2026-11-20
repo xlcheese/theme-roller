@@ -1443,6 +1443,28 @@ class RenderAndInstallTests(unittest.TestCase):
         app.SettingsWindow.changed(w, ("icons", "second_color"), "#2EC27E")      # a green back...
         self.assertEqual(w.data["icons"]["folder_color"], "#E01B24")            # ...the front stays red
 
+    def test_icons_survive_a_theme_pick_and_apply(self):
+        """xl_cheese, 20 Nov: Icons on, pick Claude Dark, Apply: the switch and
+        folder style stay; flipping either afterwards needs an Apply."""
+        from cheeselooks import app
+        mine = defaults()
+        mine["icons"].update(enabled=True, style="breeze")
+        picked = settings.keep_per_user(themes.load("Claude Dark"), mine)      # as the theme list does
+        self.assertEqual((picked["icons"]["enabled"], picked["icons"]["style"]), (True, "breeze"))
+        self.assertTrue(app._needs_apply(picked, mine))
+        with tempfile.TemporaryDirectory() as tmp:                             # Apply saves; the app reopens
+            f = Path(tmp) / "settings.json"
+            settings.save(picked, f)
+            applied = settings.load(f)
+        self.assertEqual((applied["icons"]["enabled"], applied["icons"]["style"]), (True, "breeze"))
+        self.assertFalse(app._needs_apply(copy.deepcopy(applied), applied))
+        for path, value in ((("icons", "enabled"), False), (("icons", "style"), "yaru"),
+                            (("integration", "qt_colors"), False)):
+            changed = copy.deepcopy(applied)
+            changed[path[0]][path[1]] = value
+            self.assertTrue(app._needs_apply(changed, applied), path)
+            self.assertTrue(app._same(changed, applied), path)                 # but still the same theme
+
     def test_yaru_folders(self):
         t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
         yaru = {"style": "yaru", "folder_color": "#7A7A7A", "second_color": "#E8795E"}
