@@ -3,6 +3,7 @@
   "name": "xl-Cheeselooks",
   "settings": {
     "global": {
+      "accent": "#FF8467",
       "bg": "#F2F0F0",
       "hover_in_ms": 45,
       "hover_out_ms": 100

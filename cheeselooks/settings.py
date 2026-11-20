@@ -19,7 +19,7 @@ DEFAULTS: dict[str, Any] = {
     "version": SETTINGS_VERSION,
     "theme": "xl-Cheeselooks",     # the theme these settings came from, or "Custom"
     "global": {
-        "accent": "#FA8562", "bg": "#F5F5F5", "text": "#303030",
+        "accent": "#FF8467", "bg": "#F5F5F5", "text": "#303030",
         "size": shape.SIZE_DEFAULT, "roundness": 15, "gradient": 10,
         "hover_in_ms": 50, "hover_out_ms": 125, "hover_strength": 50,
     },

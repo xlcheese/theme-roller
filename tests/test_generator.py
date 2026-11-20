@@ -139,7 +139,7 @@ class SettingsTests(unittest.TestCase):
         s = settings.apply_preset(defaults(), {"name": "x", "panel": {"separate_colors": True, "bg": "#222222"}})
         self.assertTrue(s["panel"]["separate_colors"])
         self.assertEqual(s["panel"]["bg"], "#222222")
-        self.assertEqual(s["global"]["accent"], "#FA8562")
+        self.assertEqual(s["global"]["accent"], settings.DEFAULTS["global"]["accent"])
 
     def test_all_builtin_presets_load(self):
         for f in (REPO / "presets").rglob("*.json"):
@@ -359,7 +359,7 @@ class StyleTests(unittest.TestCase):
         self.assertGreaterEqual(palette.contrast(p["accent_fg"], p["accent"]), 4.5)  # text on accent readable
 
     def test_panel_marker(self):
-        p = palette.derive("#FA8562", "#F5F5F5", "#303030")
+        p = palette.derive(settings.DEFAULTS["global"]["accent"], "#F5F5F5", "#303030")
         none = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertNotIn("box-shadow", none["panel_marker.css"])
         for kind, want in (("line", "inset 0 -3px 0 0 "),
@@ -546,8 +546,8 @@ class TokenTests(unittest.TestCase):
 
     def test_build_defaults(self):
         t = tokens.build(defaults(), self.style)
-        self.assertEqual(t["accent"], "#FA8562")
-        self.assertEqual(t["accent_rgb"], "250, 133, 98")
+        self.assertEqual(t["accent"], settings.DEFAULTS["global"]["accent"])
+        self.assertEqual(t["accent_rgb"], palette.rgb_triplet(settings.DEFAULTS["global"]["accent"]))
         self.assertEqual(t["is_dark"], "false")
         self.assertEqual(t["panel.accent"], t["accent"])  # panel follows Global
         self.assertEqual(t["wb.title_bottom"], t["header"])  # title bar ends on toolbar color
@@ -909,7 +909,7 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertTrue((good / "theme" / "index.theme").is_file())
 
             restored = install.revert(theme, good)
-            self.assertEqual(restored["global"]["accent"], "#FA8562")
+            self.assertEqual(restored["global"]["accent"], settings.DEFAULTS["global"]["accent"])
 
     def test_cinnamon_theme(self):
         st = styles.load(DEFAULT_STYLE)
