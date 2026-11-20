@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, flatpak, qt, reload, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, editor, flatpak, qt, reload, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -1205,6 +1205,41 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertEqual(qt.kdeglobals_file("org.videolan.VLC").read_text(),
                                  "[Colors:Window]\nBackgroundNormal=1,2,3\n")
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
+
+    def test_editor_colors(self):
+        import xml.etree.ElementTree as ET
+        from unittest import mock
+        import os
+        # every shipped theme: valid XML, and every syntax colour reads on the editor
+        for f in sorted((REPO / "data" / "themes").glob("*.json")):
+            data = settings.from_dict(json.loads(f.read_text())["settings"])
+            t = tokens.build(data, styles.find(data["style"]["name"], [REPO / "styles"]))
+            root = ET.fromstring(editor.scheme_xml(t))
+            self.assertEqual(root.get("id"), editor.SCHEME_ID)
+            c = editor.colours(t)
+            for k in ("statement", "type", "constant", "string", "identifier", "preprocessor", "special",
+                      "added", "removed", "text"):
+                self.assertGreaterEqual(palette.contrast(c[k], c["bg"]), 4.5, f"{f.name}: {k}")
+            self.assertGreaterEqual(palette.contrast(c["comment"], c["bg"]), 3.0, f.name)
+            self.assertGreaterEqual(palette.contrast(c["line_numbers"], c["gutter"]), 3.0, f.name)
+        # on: written to every GtkSourceView folder, Xed switched; off: Xed's own back, files gone
+        gs = {("org.x.editor.preferences.editor", "scheme"): "classic"}
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(Path(tmp) / "share"),
+                                          "XDG_CONFIG_HOME": str(Path(tmp) / "config")}), \
+             mock.patch.object(editor.reload, "available", return_value=True), \
+             mock.patch.object(editor.reload, "get", side_effect=lambda sc, k: gs.get((sc, k))), \
+             mock.patch.object(editor.reload, "set_value", side_effect=lambda sc, k, v: gs.__setitem__((sc, k), v) or True):
+            t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+            editor.enable(t)
+            self.assertTrue(all(f.exists() for f in editor.scheme_files()))
+            self.assertEqual(gs[("org.x.editor.preferences.editor", "scheme")], editor.SCHEME_ID)
+            editor.enable(t)                                                   # a second Apply
+            editor.disable()
+            self.assertEqual(gs[("org.x.editor.preferences.editor", "scheme")], "classic")
+            self.assertFalse(any(f.exists() for f in editor.scheme_files()))
+            self.assertFalse(editor.active())
+        self.assertTrue(settings.DEFAULTS["integration"]["editor_colors"])
 
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:

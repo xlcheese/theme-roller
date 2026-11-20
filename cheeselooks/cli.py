@@ -8,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import __version__, flatpak, gtk4, install, paths, qt, reload, settings, styles, themes, tokens
+from . import __version__, editor, flatpak, gtk4, install, paths, qt, reload, settings, styles, themes, tokens
 from .shape import DEFAULT_PANEL_HEIGHT
 
 
@@ -113,6 +113,11 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
         log += qt.enable(table)
     elif qt.active():
         log += qt.disable()
+    # text editors (Xed, gedit, Meld): likewise
+    if integ.get("editor_colors"):
+        log += editor.enable(table)
+    elif editor.active():
+        log += editor.disable()
     return [line for line in log if line]
 
 

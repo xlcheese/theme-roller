@@ -54,7 +54,8 @@ DEFAULTS: dict[str, Any] = {
         "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
     },
     "integration": {"libadwaita_colors": True, "libadwaita_accent": True, "flatpak_access": False,
-                    "qt_colors": True},      # Qt apps (VLC...) in the theme's colours (qt.py);
+                    "qt_colors": True,       # Qt apps (VLC...) in the theme's colours (qt.py);
+                    "editor_colors": True},  # Xed, gedit, Meld: a colour scheme from the theme (editor.py);
                                              # on: most people wouldn't know to look for it
 }
 
@@ -122,6 +123,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("integration", "libadwaita_accent"), "bool", None),
     (("integration", "flatpak_access"), "bool", None),
     (("integration", "qt_colors"), "bool", None),
+    (("integration", "editor_colors"), "bool", None),
 ]
 
 
