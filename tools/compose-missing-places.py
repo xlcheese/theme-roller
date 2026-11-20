@@ -91,11 +91,15 @@ def mint_picture(name: str, size: int) -> tuple[ET.Element, tuple] | None:
     text = re.sub(r'url\(#([^)]+)\)', r'url(#m-\1)', text)
     text = re.sub(r'href="#([^"]+)"', r'href="#m-\1"', text)
     root = ET.fromstring(text)
-    for parent in root.iter():
+    removed = False
+    for parent in list(root.iter()):
         for c in list(parent):
             href = c.get(f"{{{XLINK}}}href") or c.get("href") or ""
             if c.tag.endswith("use") and href.startswith("#m-folder"):
                 parent.remove(c)                   # the folder: the style draws its own
+                removed = True
+    if not removed:
+        return None                                # not a folder with a picture (Mint-Y's desktop)
     vb = viewbox(root, msize)
     alone = ET.tostring(root, encoding="unicode")
     b = box(render(alone, msize), lambda r, g, b, a: a > 40)
@@ -110,6 +114,7 @@ def target(style: str, size: int) -> tuple[float, float, float, float] | None:
     if not f.exists():
         return None
     c = {"folder": "#0000f0", "backfolder": "#00f000", "backdark": "#00a000", "paper": "#f0f0f0",
+         "frontedge": "#0000a0", "frontshine": "#8080f0",
          "emblem": MARK}
     svg = icons.recolour(f.read_text(encoding="utf-8"), c, style)
     # the picture may be see-through over the folder (Yaru: red over blue shows

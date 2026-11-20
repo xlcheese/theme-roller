@@ -468,12 +468,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.controls[path] = (buttons, "glyphs")
         return box
 
-    FOLDER_STYLE_PX = 72          # the style pictures: four to a row in the narrowest window
+    FOLDER_STYLE_PX = 64          # the style pictures: three to a row (six styles: two rows)
 
     def _folder_style_picker(self, path: tuple[str, ...], choices: tuple[str, ...]) -> Gtk.Widget:
         """A picture of each folder style, in your colors, to click; more than
         a row's worth wrap onto a second row."""
-        flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=4,
+        flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=3,
                            min_children_per_line=1, homogeneous=True, halign=Gtk.Align.START,
                            column_spacing=10, row_spacing=10, margin_start=16, margin_top=6)
         buttons, self.folder_style_images = {}, {}

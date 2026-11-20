@@ -30,7 +30,8 @@ from . import paths, reload
 THEME = "xl-Cheeselooks"
 KEY = ("org.cinnamon.desktop.interface", "icon-theme")
 # folder styles: where their SVGs are, their sizes, and which placeholder
-# colour in them is which part (Mint-Y and Yaru CC BY-SA 4.0, Breeze LGPL 3+;
+# colour in them is which part (Mint-Y and Yaru CC BY-SA 4.0, Breeze LGPL 3+,
+# Adwaita CC BY-SA 3.0;
 # COPYING in each folder)
 STYLES = {
     "mint-y": {"name": "Mint-Y", "dir": "mint-y", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
@@ -50,6 +51,11 @@ STYLES = {
     # 32px drawing standing in at 16-24 (Breeze's own small ones are outlines)
     "breeze": {"name": "Breeze", "dir": "breeze", "sizes": (16, 22, 24, 32, 48, 64, 96),
                "source": {"folder": "3daee9", "backfolder": "3dae09", "emblem": "3dae39"}},
+    # GNOME's (CC BY-SA 3.0): one 128px drawing, snapped to whole pixels at
+    # 16-48px, with Mint-Y's pictures at 16-24 (tools/import-adwaita-places.py)
+    "adwaita": {"name": "Adwaita", "dir": "adwaita", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
+                "source": {"folder": "a4ca0e", "backfolder": "438d0e", "frontedge": "62a00e",
+                           "frontshine": "afd40f", "emblem": "438d1e"}},
 }
 DEFAULT_STYLE = "mint-y"
 # names a style doesn't draw, borrowed from one it does (Yaru and Breeze have an open
@@ -94,7 +100,10 @@ def colours(t: dict[str, str], icons: dict) -> dict[str, str]:
     light_emblem = "#F2F2F2"
     emblem = dark_emblem if pal.contrast(dark_emblem, folder) >= 3.0 else light_emblem
     return {"folder": folder, "backfolder": back, "backdark": pal.darker(back, 0.48),
-            "paper": "#E4E4E4", "emblem": emblem}
+            "paper": "#E4E4E4", "emblem": emblem,
+            # Adwaita's front edge and its shine, from the folder color as GNOME's
+            # (#A4CAEE front, #62A0EA edge, #AFD4FF shine)
+            "frontedge": pal.darker(folder, 0.16), "frontshine": pal.mix(folder, "#FFFFFF", 0.3)}
 
 
 def back_shade(folder: str) -> str:
