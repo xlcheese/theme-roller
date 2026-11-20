@@ -417,7 +417,7 @@ def enable(t: dict[str, str]) -> list[str]:
         _flatpak_app_on(app, state, found)
         done.append(app)
     if done:
-        log.append(f"Qt apps: colors written for Flatpak {', '.join(done)} (restart them to see it)")
+        log.append(f"Qt apps: colors written for Flatpak {', '.join(done)} (reopen them to see it)")
     if found:
         state["notice"] = found
         log.append("Qt apps: your previous Qt setup is saved: " + "; ".join(found))
@@ -471,9 +471,10 @@ def notice_shown() -> None:
 
 def note() -> str:
     """The line under the switch: when it takes effect, and what it needs."""
-    text = ("Your colors in Qt apps such as VLC (Qt keeps its own shapes). "
-            "From your next login; Flatpak apps when restarted. A Qt setup of your own "
-            "is saved and comes back when this is off.")
+    text = ("Your colors in Qt apps such as VLC (Qt keeps its own shapes). Qt apps read "
+            "their colors when they start: reopen any that are open. The first time, regular "
+            "Qt apps need you to log out and back in. A Qt setup of your own is saved and "
+            "comes back when this is off.")
     if not qt5ct_installed():
         text += "\nRegular Qt apps need qt5ct: sudo apt install qt5ct"
     return text
