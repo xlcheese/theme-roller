@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import glob
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -291,12 +292,54 @@ def _flatpak_env(app: str, on: bool) -> bool:
 
 # ---------------------------------------------------------------- on / off
 
+# ---------------------------------------------------------------- your own Qt setup
+
+def own_qt_setup(state: dict | None = None) -> str | None:
+    """Why regular Qt apps are left alone: you already set up Qt yourself
+    (another platform theme, Kvantum, your own qt5ct colours). None if not.
+    The switch is on by default, so it must never take over a setup of yours."""
+    state = _load_state() if state is None else state
+    ours = str(scheme_file()) in state.get("files", {})
+    env = os.environ.get(ENV, "")
+    if env and env != "qt5ct":
+        return f"{ENV} is set to '{env}'"
+    if os.environ.get("QT_STYLE_OVERRIDE"):
+        return f"QT_STYLE_OVERRIDE is set to '{os.environ['QT_STYLE_OVERRIDE']}'"
+    f = profile_file()
+    if f.exists() and _profile_sets_it(f.read_text(encoding="utf-8", errors="replace")):
+        return f"{f} already sets {ENV}"
+    conf = qt5ct_dir() / "qt5ct.conf"
+    if conf.exists() and not ours:
+        text = conf.read_text(encoding="utf-8", errors="replace")
+        if "style=kvantum" in text.lower():
+            return "qt5ct uses Kvantum"
+        if "custom_palette=true" in text and str(scheme_file()) not in text:
+            return "qt5ct already has colors of your own"
+    return None
+
+
+def _own_flatpak_setup(app: str, state: dict) -> bool:
+    """A Flatpak app (or all of them) already given a Qt theme or style of yours."""
+    if app in state.get("flatpak_env", []):
+        return False
+    overrides = paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "flatpak" / "overrides"
+    for name in (app, "global"):
+        f = overrides / name
+        if f.exists() and any(k in f.read_text(encoding="utf-8", errors="replace")
+                              for k in (ENV, "QT_STYLE_OVERRIDE")):
+            return True
+    return False
+
+
 def enable(t: dict[str, str]) -> list[str]:
     """Write (or rewrite) the colour schemes from the theme's tokens. Returns log lines."""
     log = []
     state = _load_state()
     c = colours(t)
-    if qt5ct_installed():
+    mine = own_qt_setup(state)
+    if mine:
+        log.append(f"Qt apps: left your own Qt setup alone ({mine})")
+    elif qt5ct_installed():
         _write(scheme_file(), qt5ct_scheme(c), state)
         _write(qss_file(), qss(t), state)
         conf = qt5ct_dir() / "qt5ct.conf"
@@ -313,6 +356,9 @@ def enable(t: dict[str, str]) -> list[str]:
                    "keep Qt's colors; Flatpak Qt apps are still done")
     done = []
     for app in flatpak_qt_apps():
+        if _own_flatpak_setup(app, state):
+            log.append(f"Qt apps: left {app} alone (it has a Qt theme of your own)")
+            continue
         _write(kdeglobals_file(app), kdeglobals(c), state)
         if app not in state.get("flatpak_env", []) and _flatpak_env(app, True):
             state.setdefault("flatpak_env", []).append(app)
@@ -354,6 +400,9 @@ def note() -> str:
     """The line under the switch: when it takes effect, and what it needs."""
     text = ("Your colors in Qt apps such as VLC (Qt keeps its own shapes). "
             "From your next login; Flatpak apps when restarted.")
+    mine = own_qt_setup()
+    if mine:
+        return text + f"\nYour own Qt setup is left alone ({mine})."
     if not qt5ct_installed():
         text += "\nRegular Qt apps need qt5ct: sudo apt install qt5ct"
     return text

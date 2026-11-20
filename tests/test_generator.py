@@ -1166,11 +1166,34 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertEqual((home / ".profile").read_text(), "# mine\nexport PATH=$PATH:~/bin\n")
                 self.assertEqual(env_calls[-1], ("org.videolan.VLC", False))
                 self.assertFalse(qt.active())
-                # a ~/.profile that already picks a Qt platform theme is left alone
+                # on by default, so a Qt setup of your own is never taken over:
+                # a ~/.profile that already picks a Qt platform theme...
                 (home / ".profile").write_text("export QT_QPA_PLATFORMTHEME=gtk2\n")
                 qt.enable(t)
                 self.assertNotIn(qt.PROFILE_START, (home / ".profile").read_text())
+                self.assertFalse(qt.scheme_file().exists())
                 qt.disable()
+                (home / ".profile").write_text("# mine\n")
+                # ...Kvantum or another Qt theme in the session...
+                with mock.patch.dict(os.environ, {"QT_STYLE_OVERRIDE": "kvantum"}):
+                    self.assertIn("QT_STYLE_OVERRIDE", qt.own_qt_setup())
+                    qt.enable(t)
+                    self.assertFalse(qt.scheme_file().exists())
+                    qt.disable()
+                # ...qt5ct with colours of your own...
+                conf.write_text("[Appearance]\ncustom_palette=true\ncolor_scheme_path=/mine.conf\n")
+                self.assertEqual(qt.own_qt_setup(), "qt5ct already has colors of your own")
+                conf.write_text(original_conf)
+                # ...and a Flatpak app given a Qt style of yours
+                ov = home / ".local" / "share" / "flatpak" / "overrides"
+                ov.mkdir(parents=True)
+                (ov / "org.videolan.VLC").write_text("[Environment]\nQT_STYLE_OVERRIDE=kvantum\n")
+                with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(home / ".local" / "share")}):
+                    qt.enable(t)
+                    self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
+                    self.assertTrue(qt.scheme_file().exists())                          # regular apps still done
+                    qt.disable()
+        self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
 
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:

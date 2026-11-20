@@ -54,7 +54,8 @@ DEFAULTS: dict[str, Any] = {
         "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
     },
     "integration": {"libadwaita_colors": True, "libadwaita_accent": True, "flatpak_access": False,
-                    "qt_colors": False},     # Qt apps (VLC...) in the theme's colours (qt.py)
+                    "qt_colors": True},      # Qt apps (VLC...) in the theme's colours (qt.py);
+                                             # on: most people wouldn't know to look for it
 }
 
 # (path, kind, extra) — kind is one of: color, color?, int, bool, choice
