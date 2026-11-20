@@ -1136,11 +1136,13 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         """The window's least height: the tallest settings tab, whole. Their
         sliders take the mouse wheel, so a tab that scrolled would fight it.
         Measured again after each preview (Size changes every control's height)."""
-        tallest = 0
-        for name, _title in TABS:
-            if name not in self.SCROLLING_TABS:
-                page = self.stack.get_child_by_name(name)
-                tallest = max(tallest, page.get_child().get_preferred_height()[1])
+        # at the width they get (the folder style pictures wrap at a narrow
+        # one); before the window is shown, the widest tab's least width
+        pages = [self.stack.get_child_by_name(n).get_child() for n, _t in TABS if n not in self.SCROLLING_TABS]
+        width = self.stack.get_allocated_width()
+        if width <= 1:
+            width = max(p.get_preferred_width()[0] for p in pages)
+        tallest = max(p.get_preferred_height_for_width(width)[1] for p in pages)
         if tallest and tallest != getattr(self, "page_height", 0):
             self.page_height = tallest
             for name, _title in TABS:

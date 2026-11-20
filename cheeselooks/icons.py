@@ -30,7 +30,8 @@ from . import paths, reload
 THEME = "xl-Cheeselooks"
 KEY = ("org.cinnamon.desktop.interface", "icon-theme")
 # folder styles: where their SVGs are, their sizes, and which placeholder
-# colour in them is which part (both CC BY-SA 4.0; COPYING in each folder)
+# colour in them is which part (Mint-Y and Yaru CC BY-SA 4.0, Breeze LGPL 3+;
+# COPYING in each folder)
 STYLES = {
     "mint-y": {"name": "Mint-Y", "dir": "mint-y", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
                "source": {"folder": "eeca8f", "backfolder": "c89e6b", "paper": "e8e8e8", "emblem": "575757"}},
@@ -45,11 +46,16 @@ STYLES = {
              # your second color exactly, light or dark.
              "seen": {"folder": (38.0, 0.851)},
              "backdark": 0.0},
+    # KDE's (LGPL 3+, COPYING in its folder): drawn in colour at 32-96px, the
+    # 32px drawing standing in at 16-24 (Breeze's own small ones are outlines)
+    "breeze": {"name": "Breeze", "dir": "breeze", "sizes": (16, 22, 24, 32, 48, 64, 96),
+               "source": {"folder": "3daee9", "backfolder": "3dae09", "emblem": "3dae39"}},
 }
 DEFAULT_STYLE = "mint-y"
-# names a style doesn't draw, borrowed from one it does (Yaru has an open
+# names a style doesn't draw, borrowed from one it does (Yaru and Breeze have an open
 # folder but no drag-accept one); added to Mint-Y's own list of other names
-EXTRA_ALIASES = {"yaru": {"folder-drag-accept": "folder-open"}}
+EXTRA_ALIASES = {"yaru": {"folder-drag-accept": "folder-open"},
+                 "breeze": {"folder-drag-accept": "folder-open"}}
 SIZES = STYLES[DEFAULT_STYLE]["sizes"]
 SOURCE = STYLES[DEFAULT_STYLE]["source"]
 FALLBACK = ("Mint-Y", "Adwaita", "gnome", "hicolor")
@@ -131,7 +137,7 @@ def index_theme(inherits: list[str], style: str = DEFAULT_STYLE) -> str:
     sizes = STYLES[style]["sizes"]
     dirs = [f"places/{s}{x}" for s in sizes for x in ("", "@2x")]
     out = ["[Icon Theme]", f"Name={THEME}",
-           f"Comment=Folders in your xl-Cheeselooks colors ({STYLES[style]['name']}'s, CC BY-SA 4.0)",
+           f"Comment=Folders in your xl-Cheeselooks colors ({STYLES[style]['name']}'s; licence in COPYING)",
            f"Inherits={','.join(inherits)}", f"Directories={','.join(dirs)}", ""]
     for s in sizes:
         for x in ("", "@2x"):

@@ -1480,6 +1480,37 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(drag.resolve(), (d / "places" / "48" / "folder-open.svg").resolve())
             self.assertFalse((d / "places" / "48" / "folder-open.svg").is_symlink())  # a real icon, not replaced
 
+    def test_breeze_folders(self):
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        breeze = {"style": "breeze", "folder_color": "#7A7A7A", "second_color": "#E8795E"}
+        c = icons.colours(t, breeze)
+        import gi
+        gi.require_version("GdkPixbuf", "2.0")
+        from gi.repository import GdkPixbuf
+        for size in icons.STYLES["breeze"]["sizes"]:
+            for f in (icons.source_dir("breeze") / str(size)).glob("*.svg"):
+                out = icons.recolour(f.read_text(), c, "breeze")
+                for src in icons.STYLES["breeze"]["source"].values():
+                    self.assertNotIn(src, out.lower(), f)                       # every placeholder swapped
+        loader = GdkPixbuf.PixbufLoader()
+        loader.write(icons.recolour((icons.source_dir("breeze") / "96" / "folder.svg").read_text(), c,
+                                    "breeze").encode())
+        loader.close()
+        pb = loader.get_pixbuf()
+        self.assertEqual(pb.get_width(), 96)
+
+        def seen(x, y):
+            i = y * pb.get_rowstride() + x * pb.get_n_channels()
+            return pb.get_pixels()[i:i + 3]
+        for (x, y), want in (((48, 60), "#7A7A7A"), ((15, 20), "#E8795E")):     # the front, the back: exact
+            self.assertEqual(tuple(seen(x, y)), palette.to_rgb(want), (x, y))
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp) / "t"
+            self.assertEqual(icons.build(t, breeze, ["Mint-Y"], d), 12 * 7)    # 12 icons, 16-96px (16-24 from the 32)
+            self.assertIn("Lesser General Public", (d / "COPYING").read_text())
+            drag = d / "places" / "48" / "folder-drag-accept.svg"
+            self.assertEqual(drag.resolve(), (d / "places" / "48" / "folder-open.svg").resolve())
+
     def test_theme_stays_itself_with_per_user_settings(self):
         from cheeselooks import app
         theme = themes.load("xl-Cheeselooks")
