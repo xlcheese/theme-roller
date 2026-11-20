@@ -8,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import __version__, flatpak, gtk4, install, paths, reload, settings, styles, themes, tokens
+from . import __version__, flatpak, gtk4, install, paths, qt, reload, settings, styles, themes, tokens
 from .shape import DEFAULT_PANEL_HEIGHT
 
 
@@ -108,6 +108,11 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     log.append(gtk4.write(paths.gtk4_css(), new))
     if integ["libadwaita_accent"]:
         log.append(reload.set_adw_accent(table["adw.accent_name"]) or "")
+    # Qt apps: rewritten at each Apply while on; switched off, removed once
+    if integ.get("qt_colors"):
+        log += qt.enable(table)
+    elif qt.active():
+        log += qt.disable()
     return [line for line in log if line]
 
 

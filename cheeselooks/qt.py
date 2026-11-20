@@ -1,0 +1,324 @@
+"""Qt apps in the theme's colours (Integration → "Qt apps"; opt-in, undoable).
+
+Qt apps (VLC, qBittorrent...) don't read GTK colours: on Cinnamon, Qt 5 uses
+its GTK 3 platform theme, which brings GTK's file dialogs and fonts but not
+the colours, so they stay Qt's light grey and blue. Two routes, both tried
+on xl_cheese's desktop with VLC (regular and Flatpak):
+
+  regular Qt apps   a qt5ct colour scheme (~/.config/qt5ct/colors/xl-Cheeselooks.conf),
+                    qt5ct.conf pointed at it, and QT_QPA_PLATFORMTHEME=qt5ct in
+                    ~/.profile (from the next login; every Qt 5 app). Needs the
+                    qt5ct package; file dialogs stay GTK's (standard_dialogs=gtk3).
+  Flatpak Qt apps   a KDE colour scheme (kdeglobals) in each KDE-runtime app's own
+                    config folder, and a per-app Flatpak override selecting Qt's
+                    KDE platform theme, which reads it. The sandbox sees neither
+                    qt5ct nor ~/.profile, hence the separate route.
+
+Only colours: Qt still draws its own widget shapes (Fusion). Everything
+written is recorded (STATE) so turning the switch off removes exactly that,
+putting back any file it replaced (*.xl-backup).
+"""
+
+from __future__ import annotations
+
+import glob
+import json
+import shutil
+import subprocess
+from pathlib import Path
+
+from . import palette as pal
+from . import paths
+
+SCHEME_NAME = "xl-Cheeselooks"
+BACKUP = ".xl-backup"
+MARK = "# Written by xl-Cheeselooks (Integration: Qt apps). Turning the switch off removes it."
+PROFILE_START = "# >>> xl-Cheeselooks: Qt apps use the theme's colors (Integration tab) >>>"
+PROFILE_END = "# <<< xl-Cheeselooks <<<"
+PROFILE_LINE = "export QT_QPA_PLATFORMTHEME=qt5ct"
+ENV = "QT_QPA_PLATFORMTHEME"
+
+
+def qt5ct_dir() -> Path:
+    return paths._xdg("XDG_CONFIG_HOME", paths.HOME / ".config") / "qt5ct"
+
+
+def scheme_file() -> Path:
+    return qt5ct_dir() / "colors" / f"{SCHEME_NAME}.conf"
+
+
+def profile_file() -> Path:
+    return paths.HOME / ".profile"
+
+
+def state_file() -> Path:
+    return paths.config_dir() / "qt-colors.json"
+
+
+def qt5ct_installed() -> bool:
+    return bool(glob.glob("/usr/lib/*/qt5/plugins/platformthemes/libqt5ct.so")
+                or glob.glob("/usr/lib/qt5/plugins/platformthemes/libqt5ct.so"))
+
+
+def flatpak_qt_apps() -> list[str]:
+    """Installed Flatpak apps on the KDE (Qt) runtime, e.g. org.videolan.VLC."""
+    if shutil.which("flatpak") is None:
+        return []
+    try:
+        out = subprocess.run(["flatpak", "list", "--app", "--columns=application,runtime"],
+                             capture_output=True, text=True, timeout=20).stdout
+    except (OSError, subprocess.SubprocessError):
+        return []
+    apps = []
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[1].startswith("org.kde.Platform/"):
+            apps.append(parts[0])
+    return sorted(set(apps))
+
+
+def kdeglobals_file(app: str) -> Path:
+    return paths.HOME / ".var" / "app" / app / "config" / "kdeglobals"
+
+
+# ---------------------------------------------------------------- colours
+
+def colours(t: dict[str, str]) -> dict[str, str]:
+    """The theme's colours as Qt's palette needs them (from the token table)."""
+    dark = pal.luminance(t["bg"]) < 0.25
+    c = {k: t[k] for k in ("bg", "base", "text", "text_dim", "button", "accent", "accent_fg")}
+    c["alt_base"] = pal.mix(t["base"], t["text"], 0.04)
+    c["tip_bg"], c["tip_text"] = t["tooltip.bg"], t["tooltip.text"]
+    # Qt draws bevels and frames from these, round the button colour
+    c["light"] = pal.lighter(t["button"], 0.25 if dark else 0.6)
+    c["midlight"] = pal.mix(c["light"], t["button"], 0.5)
+    c["dark"] = pal.darker(t["button"], 0.45 if dark else 0.3)
+    c["mid"] = pal.mix(c["dark"], t["button"], 0.5)
+    c["shadow"] = pal.darker(t["button"], 0.7)
+    c["link"] = t["accent"]
+    c["disabled_text"] = pal.mix(t["text"], t["bg"], 0.55)
+    c["white"] = "#FFFFFF"
+    return c
+
+
+def qt5ct_scheme(c: dict[str, str]) -> str:
+    # Qt 5's palette roles, in qt5ct's order (WindowText, Button, Light, Midlight,
+    # Dark, Mid, Text, BrightText, ButtonText, Base, Window, Shadow, Highlight,
+    # HighlightedText, Link, LinkVisited, AlternateBase, NoRole, ToolTipBase,
+    # ToolTipText, PlaceholderText)
+    roles = ["text", "button", "light", "midlight", "dark", "mid", "text", "white", "text", "base", "bg",
+             "shadow", "accent", "accent_fg", "link", "link", "alt_base", "bg", "tip_bg", "tip_text", "text_dim"]
+
+    def row(over: dict[int, str]) -> str:
+        return ", ".join("#ff" + c[over.get(i, r)].lstrip("#").lower() for i, r in enumerate(roles))
+    disabled = {0: "disabled_text", 6: "disabled_text", 8: "disabled_text", 12: "mid"}
+    return (f"{MARK}\n[ColorScheme]\n"
+            f"active_colors={row({})}\n"
+            f"disabled_colors={row(disabled)}\n"
+            f"inactive_colors={row({})}\n")
+
+
+def kdeglobals(c: dict[str, str]) -> str:
+    def rgb(name: str) -> str:
+        return ",".join(str(v) for v in pal.to_rgb(c[name]))
+
+    def group(name: str, bg: str, fg: str, alt: str) -> str:
+        return (f"[Colors:{name}]\n"
+                f"BackgroundNormal={rgb(bg)}\nBackgroundAlternate={rgb(alt)}\n"
+                f"ForegroundNormal={rgb(fg)}\nForegroundInactive={rgb('text_dim')}\n"
+                f"ForegroundLink={rgb('link')}\nForegroundVisited={rgb('link')}\n"
+                f"DecorationFocus={rgb('accent')}\nDecorationHover={rgb('accent')}\n\n")
+    return (f"{MARK}\n[General]\nColorScheme={SCHEME_NAME}\n\n[KDE]\nwidgetStyle=Fusion\n\n"
+            + group("Window", "bg", "text", "bg")
+            + group("View", "base", "text", "alt_base")
+            + group("Button", "button", "text", "button")
+            + group("Selection", "accent", "accent_fg", "accent")
+            + group("Tooltip", "tip_bg", "tip_text", "tip_bg")
+            + group("Complementary", "bg", "text", "bg"))
+
+
+def qt5ct_conf(existing: str) -> str:
+    """qt5ct.conf pointed at our scheme; anything else you had there is kept
+    (a file dialog choice of your own included)."""
+    want = {"color_scheme_path": str(scheme_file()), "custom_palette": "true"}
+    lines = existing.splitlines()
+    out, in_app, seen, had_app = [], False, set(), False
+    for line in lines:
+        s = line.strip()
+        if s.startswith("["):
+            if in_app:
+                out += [f"{k}={v}" for k, v in _defaults(want, seen).items()]
+            in_app = s == "[Appearance]"
+            had_app = had_app or in_app
+            out.append(line)
+            continue
+        key = s.split("=", 1)[0].strip() if "=" in s else None
+        if in_app and key in want:
+            out.append(f"{key}={want[key]}")
+            seen.add(key)
+            continue
+        if in_app and key:
+            seen.add(key)
+        out.append(line)
+    if in_app:
+        out += [f"{k}={v}" for k, v in _defaults(want, seen).items()]
+    if not had_app:
+        out += ["[Appearance]"] + [f"{k}={v}" for k, v in _defaults(want, set()).items()]
+    return "\n".join(out).strip() + "\n"
+
+
+def _defaults(want: dict[str, str], seen: set[str]) -> dict[str, str]:
+    extra = {**want, "standard_dialogs": "gtk3", "style": "Fusion"}
+    return {k: v for k, v in extra.items() if k not in seen}
+
+
+# ---------------------------------------------------------------- state
+
+def _load_state() -> dict:
+    try:
+        return json.loads(state_file().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def _save_state(state: dict) -> None:
+    f = state_file()
+    if not any(state.values()):
+        if f.exists():
+            f.unlink()
+        return
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+
+
+def _write(path: Path, text: str, state: dict) -> None:
+    """Write a file, keeping the one it replaces (the first time) to put back later."""
+    files = state.setdefault("files", {})
+    key = str(path)
+    if key not in files:
+        backup = path.with_name(path.name + BACKUP)
+        if path.exists() and MARK not in path.read_text(encoding="utf-8", errors="replace"):
+            shutil.copy2(path, backup)
+            files[key] = "backup"
+        else:
+            files[key] = "created"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+# ---------------------------------------------------------------- ~/.profile
+
+def _profile_without_ours(text: str) -> str:
+    out, skipping = [], False
+    for line in text.splitlines():
+        if line.strip() == PROFILE_START:
+            skipping = True
+            continue
+        if skipping:
+            if line.strip() == PROFILE_END:
+                skipping = False
+            continue
+        out.append(line)
+    return "\n".join(out).rstrip("\n") + "\n" if out else ""
+
+
+def _profile_sets_it(text: str) -> bool:
+    """Your own ~/.profile already chooses a Qt platform theme (left alone)."""
+    return any(ENV in line and not line.lstrip().startswith("#")
+               for line in _profile_without_ours(text).splitlines())
+
+
+def _set_profile(on: bool) -> str | None:
+    f = profile_file()
+    text = f.read_text(encoding="utf-8") if f.exists() else ""
+    has = PROFILE_START in text
+    if on and not has:
+        if _profile_sets_it(text):
+            return f"{f} already sets {ENV}: left alone"
+        block = f"\n{PROFILE_START}\n{PROFILE_LINE}\n{PROFILE_END}\n"
+        f.write_text(text.rstrip("\n") + "\n" + block if text else block.lstrip("\n"), encoding="utf-8")
+        return f"added {PROFILE_LINE} to {f} (Qt apps use it from your next login)"
+    if not on and has:
+        f.write_text(_profile_without_ours(text), encoding="utf-8")
+        return f"removed the Qt line from {f} (from your next login)"
+    return None
+
+
+# ---------------------------------------------------------------- Flatpak env
+
+def _flatpak_env(app: str, on: bool) -> bool:
+    arg = f"--env={ENV}=kde" if on else f"--unset-env={ENV}"
+    try:
+        return subprocess.run(["flatpak", "override", "--user", arg, app],
+                              capture_output=True, timeout=20).returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+# ---------------------------------------------------------------- on / off
+
+def enable(t: dict[str, str]) -> list[str]:
+    """Write (or rewrite) the colour schemes from the theme's tokens. Returns log lines."""
+    log = []
+    state = _load_state()
+    c = colours(t)
+    if qt5ct_installed():
+        _write(scheme_file(), qt5ct_scheme(c), state)
+        conf = qt5ct_dir() / "qt5ct.conf"
+        current = conf.read_text(encoding="utf-8") if conf.exists() else ""
+        _write(conf, qt5ct_conf(current), state)
+        line = _set_profile(True)
+        if line:
+            log.append(line)
+        state["profile"] = PROFILE_START in (profile_file().read_text(encoding="utf-8")
+                                             if profile_file().exists() else "")
+        log.append("Qt apps: colors written for qt5ct")
+    else:
+        log.append("Qt apps: qt5ct isn't installed (sudo apt install qt5ct), so regular Qt apps "
+                   "keep Qt's colors; Flatpak Qt apps are still done")
+    done = []
+    for app in flatpak_qt_apps():
+        _write(kdeglobals_file(app), kdeglobals(c), state)
+        if app not in state.get("flatpak_env", []) and _flatpak_env(app, True):
+            state.setdefault("flatpak_env", []).append(app)
+        done.append(app)
+    if done:
+        log.append(f"Qt apps: colors written for Flatpak {', '.join(done)} (restart them to see it)")
+    _save_state(state)
+    return log
+
+
+def disable() -> list[str]:
+    """Remove everything enable() wrote, putting back what it replaced."""
+    state = _load_state()
+    if not state:
+        return []
+    log = []
+    for key, how in state.get("files", {}).items():
+        path = Path(key)
+        backup = path.with_name(path.name + BACKUP)
+        if how == "backup" and backup.exists():
+            shutil.move(str(backup), path)
+        elif path.exists():
+            path.unlink()
+    for app in state.get("flatpak_env", []):
+        _flatpak_env(app, False)
+    line = _set_profile(False)
+    if line:
+        log.append(line)
+    _save_state({})
+    log.append("Qt apps: our colors removed (Qt apps go back to their own)")
+    return log
+
+
+def active() -> bool:
+    return bool(_load_state())
+
+
+def note() -> str:
+    """The line under the switch: when it takes effect, and what it needs."""
+    text = ("Your colors in Qt apps such as VLC (Qt keeps its own shapes). "
+            "From your next login; Flatpak apps when restarted.")
+    if not qt5ct_installed():
+        text += "\nRegular Qt apps need qt5ct: sudo apt install qt5ct"
+    return text

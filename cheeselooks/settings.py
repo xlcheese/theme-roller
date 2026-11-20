@@ -53,7 +53,8 @@ DEFAULTS: dict[str, Any] = {
         "switches": {"custom": False, "roundness": 100},
         "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
     },
-    "integration": {"libadwaita_colors": True, "libadwaita_accent": True, "flatpak_access": False},
+    "integration": {"libadwaita_colors": True, "libadwaita_accent": True, "flatpak_access": False,
+                    "qt_colors": False},     # Qt apps (VLC...) in the theme's colours (qt.py)
 }
 
 # (path, kind, extra) — kind is one of: color, color?, int, bool, choice
@@ -119,6 +120,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("integration", "libadwaita_colors"), "bool", None),
     (("integration", "libadwaita_accent"), "bool", None),
     (("integration", "flatpak_access"), "bool", None),
+    (("integration", "qt_colors"), "bool", None),
 ]
 
 

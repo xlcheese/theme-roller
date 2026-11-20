@@ -37,7 +37,7 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, Pango  # noqa: E402
 
-from . import cli, flatpak, imagecolors, palette as pal, panelmarker, paths, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
+from . import cli, flatpak, imagecolors, palette as pal, panelmarker, paths, qt, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
 from . import shape  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
 
@@ -93,6 +93,7 @@ LABELS = {
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
+    "qt_colors": "Qt apps (VLC…)",
 }
 GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
           "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
@@ -290,6 +291,11 @@ class SettingsWindow(Gtk.ApplicationWindow):
             grid.attach(label, 0, row, 1, 1)
             grid.attach(self._control(path, kind, extra), 1, row, 1, 1)
             row += 1
+            if path == ("integration", "qt_colors"):
+                note = Gtk.Label(label=qt.note(), xalign=0, wrap=True, max_width_chars=60)
+                note.get_style_context().add_class("dim-label")
+                grid.attach(note, 1, row, 1, 1)
+                row += 1
             if path == ("global", "text"):
                 row = self._image_colors_row(grid, row)
         if section == "integration":

@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, flatpak, reload, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, flatpak, qt, reload, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -1118,6 +1118,54 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertFalse(swap.is_symlink() or swap.exists())
             self.assertTrue(theme.is_dir())                          # the theme itself untouched
             self.assertIsNone(reload._make_swap(Path(tmp) / "missing", "missing"))
+
+    def test_qt_colors_switch(self):
+        from unittest import mock
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            (home / ".profile").write_text("# mine\nexport PATH=$PATH:~/bin\n")
+            conf = home / ".config" / "qt5ct" / "qt5ct.conf"
+            conf.parent.mkdir(parents=True)
+            conf.write_text("[Appearance]\nicon_theme=Mint-Y\nstandard_dialogs=default\n\n[Fonts]\nfixed=Mono\n")
+            original_conf = conf.read_text()
+            env_calls = []
+            with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(home / ".config")}), \
+                 mock.patch.object(qt.paths, "HOME", home), \
+                 mock.patch.object(qt, "qt5ct_installed", return_value=True), \
+                 mock.patch.object(qt, "flatpak_qt_apps", return_value=["org.videolan.VLC"]), \
+                 mock.patch.object(qt, "_flatpak_env", side_effect=lambda app, on: env_calls.append((app, on)) or True):
+                t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+                qt.enable(t)
+                scheme = qt.scheme_file().read_text()
+                self.assertIn("#ff" + t["accent"].lstrip("#").lower(), scheme)       # highlight = accent
+                text = conf.read_text()
+                self.assertIn(f"color_scheme_path={qt.scheme_file()}", text)
+                self.assertIn("custom_palette=true", text)
+                self.assertIn("icon_theme=Mint-Y", text)                                # yours kept
+                self.assertIn("standard_dialogs=default", text)                         # your choice kept
+                self.assertIn("[Fonts]\nfixed=Mono", text)
+                profile = (home / ".profile").read_text()
+                self.assertIn(qt.PROFILE_LINE, profile)
+                self.assertTrue(profile.startswith("# mine"))
+                kde = qt.kdeglobals_file("org.videolan.VLC").read_text()
+                self.assertIn("[Colors:Selection]", kde)
+                self.assertEqual(env_calls, [("org.videolan.VLC", True)])
+                qt.enable(t)                                                            # a second Apply
+                self.assertEqual((home / ".profile").read_text().count(qt.PROFILE_START), 1)
+                self.assertEqual(env_calls, [("org.videolan.VLC", True)])
+                qt.disable()
+                self.assertEqual(conf.read_text(), original_conf)                       # put back as it was
+                self.assertFalse(qt.scheme_file().exists())
+                self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
+                self.assertEqual((home / ".profile").read_text(), "# mine\nexport PATH=$PATH:~/bin\n")
+                self.assertEqual(env_calls[-1], ("org.videolan.VLC", False))
+                self.assertFalse(qt.active())
+                # a ~/.profile that already picks a Qt platform theme is left alone
+                (home / ".profile").write_text("export QT_QPA_PLATFORMTHEME=gtk2\n")
+                qt.enable(t)
+                self.assertNotIn(qt.PROFILE_START, (home / ".profile").read_text())
+                qt.disable()
 
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
