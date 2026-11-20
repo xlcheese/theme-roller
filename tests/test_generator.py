@@ -1386,11 +1386,16 @@ class RenderAndInstallTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, \
              mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(Path(tmp) / "share"),
                                           "XDG_CONFIG_HOME": str(Path(tmp) / "config")}), \
+             mock.patch.object(icons.paths, "HOME", Path(tmp)), \
              mock.patch.object(icons.reload, "available", return_value=True), \
              mock.patch.object(icons.reload, "get", side_effect=lambda *k: gs.get(k)), \
              mock.patch.object(icons.reload, "set_value", side_effect=lambda *a: gs.__setitem__(a[:2], a[2]) or True):
+            old = icons.old_theme_dir()
+            old.mkdir(parents=True)                                             # the first version's place
             icons.enable(t, {})
             d = icons.theme_dir()
+            self.assertEqual(d, Path(tmp) / ".icons" / icons.THEME)              # beside ~/.themes
+            self.assertFalse(old.exists())                                      # the old copy cleared away
             files = [f for f in d.glob("places/*/*.svg") if not f.is_symlink()]
             self.assertEqual(len(files), 128 * 2)                                # every size, and @2x
             nemo = d / "places" / "48" / "nemo.svg"                              # the Files app's icon...

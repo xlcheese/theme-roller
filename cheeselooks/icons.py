@@ -10,7 +10,7 @@ four colours swapped,
     paper       the sheet inside       a light grey, as Mint's
     emblem      the picture on front   dark or light, whichever reads on the folder
 
-and written as an icon theme, ~/.local/share/icons/xl-Cheeselooks, SVG at
+and written as an icon theme, ~/.icons/xl-Cheeselooks, SVG at
 every size (crisp, HiDPI included). It inherits the icon theme you had
 before, then Mint-Y, so every other icon stays as it was. Cinnamon is
 switched to it, and switched back to yours when this is off.
@@ -38,6 +38,13 @@ def source_dir() -> Path:
 
 
 def theme_dir() -> Path:
+    """~/.icons, beside ~/.themes where the GTK theme goes: the traditional
+    places Mint users and theme instructions use (both are searched)."""
+    return paths.HOME / ".icons" / THEME
+
+
+def old_theme_dir() -> Path:
+    """Where the first version wrote it: removed when the theme is rebuilt."""
     return paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "icons" / THEME
 
 
@@ -147,6 +154,8 @@ def enable(t: dict[str, str], icons: dict) -> list[str]:
         state["previous"] = current
     previous = state.get("previous")
     inherits = ([previous] if previous else []) + [n for n in FALLBACK if n != previous]
+    if old_theme_dir().exists() and old_theme_dir() != theme_dir():
+        shutil.rmtree(old_theme_dir())
     n = build(t, icons, inherits, theme_dir())
     state["on"] = True
     _save_state(state)
@@ -164,8 +173,9 @@ def disable() -> list[str]:
     previous = state.get("previous") or "Mint-Y"
     if reload.available() and reload.get(*KEY) == THEME:
         reload.set_value(*KEY, previous)
-    if theme_dir().exists():
-        shutil.rmtree(theme_dir())
+    for d in (theme_dir(), old_theme_dir()):
+        if d.exists():
+            shutil.rmtree(d)
     _save_state({})
     return [f"Icons: back to {previous}"]
 
