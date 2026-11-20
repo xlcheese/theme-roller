@@ -53,7 +53,8 @@ def _load_settings(args: argparse.Namespace) -> dict:
     data = settings.load(path)
     if getattr(args, "theme", None):
         try:
-            data = themes.load(args.theme)        # the whole theme: every tab
+            # the whole theme: every tab, but your Integration switches stay
+            data = settings.keep_per_user(themes.load(args.theme), data)
         except themes.ThemeError as exc:
             raise settings.SettingsError([str(exc)])
         fresh = False

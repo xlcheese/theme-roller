@@ -1134,7 +1134,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         else:
             self.base = row.theme_name
             self.base_cache.pop(self.base, None)
-        self.data = data
+        self.data = settings.keep_per_user(data, self.data)   # your Integration switches stay
         self.status.set_text(f"Theme: {row.theme_name}")
         self.after_change()
 
@@ -1145,7 +1145,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
 
     def reset_all(self) -> None:
         """Every tab back to the theme you started from; Custom keeps your changes."""
-        self.data = copy.deepcopy(self.base_settings())
+        self.data = settings.keep_per_user(self.base_settings(), self.data)
         self.status.set_text(f"Every tab reset to {self.base}. Your latest changes are still in Custom.")
         self.after_change()
 

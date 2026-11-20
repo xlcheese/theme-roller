@@ -91,8 +91,29 @@ def full_css(templates_dir: Path, t: dict[str, str]) -> str:
     # as can be, so our own rules (header bars, accent buttons) still win;
     # "opaque" buttons are libadwaita's way to keep an app's colour, and do.
     safety = f"button:not(.opaque) {{ color: {t['text']}; }}\n"
-    css = safety + "\n".join(parts)
+    css = safety + "\n".join(parts) + _window_button_margins(t)
     return css.replace('url("assets/', f'url("{ASSETS}/').replace("url('assets/", f"url('{ASSETS}/")
+
+
+# Current libadwaita: header bars are 47px with 6px padding above and 7 below,
+# and newer releases stretch the window buttons to fill the 34px between
+# (xl_cheese's Flatpak Calculator: 33px buttons for a 26px style).
+ADW_HEADER_CONTENT = 34
+
+
+def _window_button_margins(t: dict[str, str]) -> str:
+    """Vertical margins that bring a stretched window button back to its
+    style's height; where buttons aren't stretched (Mint's own libadwaita)
+    they only fill space that was there anyway."""
+    m = re.search(r"windowcontrols > button:not\(\.osd\) \{[^}]*?min-height: (\d+)px", t.get("titlebuttons4.css", ""))
+    if not m:
+        return ""
+    height = int(m.group(1)) + 2                 # and the 1px border above and below
+    margin = max(0, (ADW_HEADER_CONTENT - height) // 2)
+    if not margin:
+        return ""
+    return ("\n/* window buttons: their style's height, where libadwaita stretches them */\n"
+            f"windowcontrols > button:not(.osd) {{ margin-top: {margin}px; margin-bottom: {margin}px; }}\n")
 
 
 def asset_names(css: str) -> list[str]:

@@ -222,6 +222,20 @@ def from_dict(data: dict) -> dict:
     return merged
 
 
+# Sections that belong to your desktop, not to a look: picking a theme (or
+# resetting to one) keeps yours. A theme file's own copy, if any, is ignored.
+PER_USER = ("integration",)
+
+
+def keep_per_user(new: dict, current: dict) -> dict:
+    """`new` (a theme's settings) with `current`'s per-user sections."""
+    out = copy.deepcopy(new)
+    for section in PER_USER:
+        if section in current:
+            out[section] = copy.deepcopy(current[section])
+    return out
+
+
 def load(path: Path) -> dict:
     if not path.exists():
         return copy.deepcopy(DEFAULTS)

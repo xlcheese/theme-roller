@@ -1284,6 +1284,15 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertFalse((css.parent / gtk4.ASSETS).exists())
         self.assertFalse(settings.DEFAULTS["integration"]["libadwaita_full"])  # opt-in
 
+    def test_theme_change_keeps_integration(self):
+        mine = defaults()
+        mine["integration"].update(libadwaita_full=True, qt_colors=False)
+        theme = themes.load("xl-Classic")
+        kept = settings.keep_per_user(theme, mine)
+        self.assertTrue(kept["integration"]["libadwaita_full"])
+        self.assertFalse(kept["integration"]["qt_colors"])
+        self.assertEqual(kept["global"], theme["global"])                    # the look is the theme's
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"
