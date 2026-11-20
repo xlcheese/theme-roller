@@ -214,7 +214,7 @@ def _same(a: dict, b: dict) -> bool:
 class SettingsWindow(Gtk.ApplicationWindow):
     def __init__(self, app: Gtk.Application):
         super().__init__(application=app, title=APP_TITLE)
-        self.set_default_size(1180, 740)
+        # no default size: it opens at its smallest, which shows every settings tab whole
         self.applied = settings.load(paths.settings_file())
         self.data = copy.deepcopy(self.applied)
         if self.data["theme"] == themes.CUSTOM:
@@ -460,7 +460,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.controls[path] = (buttons, "glyphs")
         return box
 
-    FOLDER_STYLE_PX = 96          # the style pictures: twice the 48px preview
+    FOLDER_STYLE_PX = 72          # the style pictures: four to a row in the narrowest window
 
     def _folder_style_picker(self, path: tuple[str, ...], choices: tuple[str, ...]) -> Gtk.Widget:
         """A picture of each folder style, in your colors, to click; more than
@@ -543,13 +543,13 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.save_btn = Gtk.Button(label="Save Theme…")
         self.save_btn.set_tooltip_text("Keep your Custom settings as a theme with its own name")
         self.save_btn.connect("clicked", self.on_save_theme)
-        self.dup_btn = Gtk.Button(label="Duplicate Theme")
+        self.dup_btn = Gtk.Button(label="Duplicate")
         self.dup_btn.set_tooltip_text("Save a copy of the selected theme as one of your themes")
         self.dup_btn.connect("clicked", self.on_duplicate_theme)
-        self.rename_btn = Gtk.Button(label="Rename Theme")
+        self.rename_btn = Gtk.Button(label="Rename")
         self.rename_btn.set_tooltip_text("Rename one of your themes (built-in themes keep their names)")
         self.rename_btn.connect("clicked", self.on_rename_theme)
-        self.delete_btn = Gtk.Button(label="Delete Theme")
+        self.delete_btn = Gtk.Button(label="Delete")
         self.delete_btn.connect("clicked", self.on_delete_theme)
         buttons.pack_start(self.save_btn, False, False, 0)
         buttons.pack_start(self.dup_btn, False, False, 0)
