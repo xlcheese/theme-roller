@@ -1363,6 +1363,10 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertEqual(css.read_text().strip(), "/* mine */")       # only ours taken out
                 self.assertTrue(watch.set_aside_file().exists())
 
+    def test_qt5ct_empty_stylesheet_list(self):
+        out = qt.qt5ct_conf("[Interface]\nstylesheets=@Invalid()\n")
+        self.assertIn(f"stylesheets={qt.qss_file()}\n", out)                   # qt5ct's "empty" dropped
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"

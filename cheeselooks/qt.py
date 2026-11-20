@@ -194,7 +194,9 @@ def qt5ct_conf(existing: str) -> str:
         for ln in lines:
             key = ln.split("=", 1)[0].strip() if "=" in ln else None
             if key == "stylesheets" and name == "Interface":
-                have = [x.strip() for x in ln.split("=", 1)[1].split(",") if x.strip()]
+                # qt5ct writes "@Invalid()" for an empty list: not a stylesheet
+                have = [x.strip() for x in ln.split("=", 1)[1].split(",")
+                        if x.strip() and not x.strip().startswith("@Invalid")]
                 if set_here["stylesheets"] not in have:
                     have.append(set_here["stylesheets"])
                 out.append("stylesheets=" + ", ".join(have))
