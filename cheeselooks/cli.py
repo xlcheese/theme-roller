@@ -108,6 +108,7 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     log.append(gtk4.write(paths.gtk4_css(), new))
     if integ["libadwaita_accent"]:
         log.append(reload.set_adw_accent(table["adw.accent_name"]) or "")
+    log += _flatpak_access(integ.get("flatpak_access", False))
     # Qt apps: rewritten at each Apply while on; switched off, removed once
     if integ.get("qt_colors"):
         log += qt.enable(table)
@@ -119,6 +120,24 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     elif editor.active():
         log += editor.disable()
     return [line for line in log if line]
+
+
+def _flatpak_access(on: bool) -> list[str]:
+    """Flatpak apps: read-only access to the theme (a user-wide override),
+    granted while the switch is on; switched off, just our entries removed."""
+    if not flatpak.available():
+        return []
+    if on:
+        if len(flatpak.granted()) == len(flatpak.FILESYSTEMS):
+            return []
+        try:
+            flatpak.enable()
+            return ["Flatpak apps can see the theme (reopen any open ones)"]
+        except RuntimeError as exc:
+            return [f"Flatpak: {exc}"]
+    if flatpak.added_file().exists() and flatpak.disable():
+        return ["Flatpak apps: xl-Cheeselooks' access removed"]
+    return []
 
 
 PANEL_HEIGHT_FILE = "panels-height"   # in the last-good folder: Cinnamon's height before Apply

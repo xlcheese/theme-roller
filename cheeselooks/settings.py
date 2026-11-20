@@ -53,7 +53,8 @@ DEFAULTS: dict[str, Any] = {
         "switches": {"custom": False, "roundness": 100},
         "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
     },
-    "integration": {"libadwaita_colors": True, "libadwaita_accent": True, "flatpak_access": False,
+    "integration": {"libadwaita_colors": True, "libadwaita_accent": True,
+                    "flatpak_access": True,  # Flatpak apps can read the theme (flatpak.py); on, as the others
                     "qt_colors": True,       # Qt apps (VLC...) in the theme's colours (qt.py);
                     "editor_colors": True},  # Xed, gedit, Meld: a colour scheme from the theme (editor.py);
                                              # on: most people wouldn't know to look for it

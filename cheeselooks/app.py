@@ -93,7 +93,7 @@ LABELS = {
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
-    "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
+    "flatpak_access": "Flatpak apps", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
 GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
           "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
@@ -114,7 +114,15 @@ SECTION_NOTES = {
     "terminal": "Left on “Follow theme”, the terminal uses the theme's content colors.",
 }
 GATES = {"separate_colors": True, "custom": True, "follow_global": False}  # value set when a sibling changes
-HIDDEN = set(GATES) | {"flatpak_access"} | ({"round_bottom"} if not tokens.ROUND_BOTTOM_READY else set())
+HIDDEN = set(GATES) | ({"round_bottom"} if not tokens.ROUND_BOTTOM_READY else set())
+# the line under an Integration switch (a function: some depend on what's installed)
+INTEGRATION_NOTES = {
+    "flatpak_access": lambda: ("Flatpak apps get your colors: every Flatpak app may read your themes "
+                               "folder and GTK 4 colors (read-only). Reopen open ones."
+                               if flatpak.available() else "Flatpak isn't installed."),
+    "qt_colors": lambda: qt.note(),
+    "editor_colors": lambda: editor.NOTE,
+}
 SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 
@@ -291,8 +299,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
             grid.attach(label, 0, row, 1, 1)
             grid.attach(self._control(path, kind, extra), 1, row, 1, 1)
             row += 1
-            if path in (("integration", "qt_colors"), ("integration", "editor_colors")):
-                text = qt.note() if path[-1] == "qt_colors" else editor.NOTE
+            if path[0] == "integration" and path[-1] in INTEGRATION_NOTES:
+                text = INTEGRATION_NOTES[path[-1]]()
                 note = Gtk.Label(label=text, xalign=0, wrap=True, max_width_chars=60)
                 note.get_style_context().add_class("dim-label")
                 grid.attach(note, 1, row, 1, 1)
@@ -300,7 +308,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
             if path == ("global", "text"):
                 row = self._image_colors_row(grid, row)
         if section == "integration":
-            row = self._flatpak_row(grid, row)
             restart = Gtk.CheckButton(label="Restart Cinnamon after Apply", margin_top=8,
                                       active=self.prefs.get("restart_after_apply", False))
             restart.set_tooltip_text("Window borders (Muffin) only reload at login or a Cinnamon restart. "
@@ -585,26 +592,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
         grid.attach(Gtk.Label(label="Colors", xalign=0), 0, row, 1, 1)
         grid.attach(combo, 1, row, 1, 1)
         return row + 1
-
-    def _flatpak_row(self, grid: Gtk.Grid, row: int) -> int:
-        box = Gtk.Box(spacing=6)
-        allow = Gtk.Button(label="Let Flatpak apps see the theme…")
-        undo = Gtk.Button(label="Undo")
-        allow.connect("clicked", self.on_flatpak_allow)
-        undo.connect("clicked", self.on_flatpak_undo)
-        box.pack_start(allow, False, False, 0)
-        box.pack_start(undo, False, False, 0)
-        if not flatpak.available():
-            allow.set_sensitive(False)
-            undo.set_sensitive(False)
-            allow.set_tooltip_text("Flatpak isn't installed")
-        note = Gtk.Label(label="Flatpak apps get your colors (libadwaita keeps its own shapes there).",
-                         xalign=0, wrap=True)
-        note.get_style_context().add_class("dim-label")
-        grid.attach(Gtk.Label(label="Flatpak", xalign=0), 0, row, 1, 1)
-        grid.attach(box, 1, row, 1, 1)
-        grid.attach(note, 1, row + 1, 1, 1)
-        return row + 2
 
     def _image_colors_row(self, grid: Gtk.Grid, row: int) -> int:
         """Colors from a picture: the wallpaper or any image. Its main colors
@@ -1420,29 +1407,6 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         self.status.set_text("The previous theme is back on the desktop. Your settings here are unchanged.")
         self.update_buttons()
         return False
-
-    def on_flatpak_allow(self, _button: Gtk.Button) -> None:
-        dialog = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.QUESTION,
-                                   buttons=Gtk.ButtonsType.OK_CANCEL,
-                                   text="Let Flatpak apps see the theme?")
-        dialog.format_secondary_text(
-            "This gives every Flatpak app read-only access to your themes folder and your "
-            "GTK 4 colors. It runs:\n\n" + " ".join(flatpak.COMMAND) + "\n\nYou can undo it here.")
-        answer = dialog.run()
-        dialog.destroy()
-        if answer == Gtk.ResponseType.OK:
-            try:
-                flatpak.enable()
-                cli._set_flatpak_setting(True)
-                self.status.set_text("Flatpak apps can see the theme. Restart any open Flatpak apps.")
-            except RuntimeError as exc:
-                self.status.set_text(f"Flatpak: {exc}")
-
-    def on_flatpak_undo(self, _button: Gtk.Button) -> None:
-        changed = flatpak.disable()
-        cli._set_flatpak_setting(False)
-        self.status.set_text("Removed xl-Cheeselooks' Flatpak access." if changed
-                             else "Flatpak apps had no access from xl-Cheeselooks.")
 
 
 class SettingsApp(Gtk.Application):

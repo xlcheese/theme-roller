@@ -1241,6 +1241,25 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertFalse(editor.active())
         self.assertTrue(settings.DEFAULTS["integration"]["editor_colors"])
 
+    def test_flatpak_access_switch(self):
+        from unittest import mock
+        calls = []
+        with mock.patch.object(cli.flatpak, "available", return_value=True), \
+             mock.patch.object(cli.flatpak, "enable", side_effect=lambda: calls.append("on") or []), \
+             mock.patch.object(cli.flatpak, "disable", side_effect=lambda: calls.append("off") or True):
+            with mock.patch.object(cli.flatpak, "granted", return_value=[]):
+                self.assertTrue(cli._flatpak_access(True))            # on, not granted yet: granted
+            with mock.patch.object(cli.flatpak, "granted", return_value=list(cli.flatpak.FILESYSTEMS)):
+                self.assertEqual(cli._flatpak_access(True), [])       # already granted: nothing to do
+            with tempfile.TemporaryDirectory() as tmp:
+                rec = Path(tmp) / "flatpak-added"
+                with mock.patch.object(cli.flatpak, "added_file", return_value=rec):
+                    self.assertEqual(cli._flatpak_access(False), [])  # off, nothing of ours: left alone
+                    rec.write_text("~/.themes:ro\n")
+                    self.assertTrue(cli._flatpak_access(False))       # off: ours removed
+        self.assertEqual(calls, ["on", "off"])
+        self.assertTrue(settings.DEFAULTS["integration"]["flatpak_access"])
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"
