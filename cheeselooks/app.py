@@ -1,6 +1,6 @@
 """The xl-Cheeselooks settings app (GTK 3).
 
-Themes: the Global tab starts with the list of themes (built-in, yours, and
+Themes: the Theme tab (first) lists the themes (built-in, yours, and
 Custom). Picking one sets every tab to that theme. Changing anything makes it
 "Custom", which keeps your latest changes; Save Theme… names Custom as a theme
 of your own. Each tab's Reset button (Reset Style, Reset Panel & Menu...) puts
@@ -45,7 +45,7 @@ APP_TITLE = "xl-Cheeselooks"
 PREVIEW_DELAY_MS = 120
 
 TABS = [  # (settings section, tab title)
-    ("global", "Global"), ("style", "Style"), ("panel", "Panel & Menu"),
+    ("theme", "Theme"), ("global", "Global"), ("style", "Style"), ("panel", "Panel & Menu"),
     ("window_borders", "Window Borders"), ("terminal", "Terminal"),
     ("details", "Details"), ("icons", "Icons"), ("integration", "Integration"), ("share", "Import & Export"),
     ("docs", "Documentation"), ("about", "About"),
@@ -60,9 +60,12 @@ DOC_NOTES = [
      "widgets are drawn: their edges, hovers, tabs and panel buttons. Any theme can use any style "
      "(Style tab). Changes show in the preview; nothing changes on the desktop until <b>Apply</b>, "
      "and <b>Revert</b> puts the previous theme back."),
+    ("Theme",
+     "Pick a theme to start from. Change anything and it becomes <b>Custom</b>; <b>Save Theme…</b> "
+     "keeps your changes under a name. Your own themes can be renamed and deleted."),
     ("Global",
      "Accent, background and text colors, and the shape of everything: Size (control height), "
-     "Roundness, Gradient and how hovers fade. <b>Save Theme…</b> keeps your changes under a name."),
+     "Roundness, Gradient and how hovers fade."),
     ("Style",
      "Pick a style, and set its Depth (how strong its edges and shadows are) and Unfocused depth "
      "(how much of that unfocused windows keep)."),
@@ -94,7 +97,6 @@ LABELS = {
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
     "enabled": "Folders in your colors", "folder_color": "Folder color", "second_color": "Second color",
-    "style": "Folder style",
     "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps",
     "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
@@ -291,12 +293,14 @@ class SettingsWindow(Gtk.ApplicationWindow):
             return self._page(self._about_tab(grid))
         if section == "docs":
             return self._page(self._docs_tab(grid))
-        if section == "global":
-            row = self._theme_rows(grid, row)
+        if section == "theme":
+            return self._page(self._theme_tab(grid))
         if section == "style":
             row = self._style_rows(grid, row)
         if section == "terminal":
             row = self._terminal_picks(grid, row)
+        if section == "integration":
+            row = self._restart_row(grid, row)
         if section in SECTION_NOTES:
             note = Gtk.Label(label=SECTION_NOTES[section], xalign=0, wrap=True)
             note.get_style_context().add_class("dim-label")
@@ -320,6 +324,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             label = Gtk.Label(label=LABELS.get(path[-1], path[-1].replace("_", " ").capitalize()), xalign=0)
             if path == ("icons", "style"):
                 # pictures of each style, under its name ("Folder style: Yaru")
+                label.set_text("Folder style")
                 self.folder_style_label = label
                 grid.attach(label, 0, row, 2, 1)
                 grid.attach(self._folder_style_picker(path, extra), 0, row + 1, 2, 1)
@@ -338,21 +343,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
             row = self._icon_preview_row(grid, row)
         if section == "integration":
             row = self._set_aside_row(grid, row)
-            restart = Gtk.CheckButton(label="Restart Cinnamon after Apply", margin_top=8,
-                                      active=self.prefs.get("restart_after_apply", False))
-            restart.set_tooltip_text("Window borders (Muffin) only reload at login or a Cinnamon restart. "
-                                     "This restarts Cinnamon after each Apply, like Ctrl+Alt+Esc: "
-                                     "the panel blinks, your windows stay open.")
-
-            def toggled(b: Gtk.CheckButton) -> None:
-                self.prefs["restart_after_apply"] = b.get_active()
-                _save_prefs(self.prefs)
-            restart.connect("toggled", toggled)
-            grid.attach(restart, 0, row, 2, 1)
-            note = Gtk.Label(label="Window borders reload at the next login otherwise.", xalign=0)
-            note.get_style_context().add_class("dim-label")
-            grid.attach(note, 0, row + 1, 2, 1)
-            row += 2
         if section not in ("integration", "about", "docs"):   # integration: Flatpak access is a system change
             box = Gtk.Box(spacing=8, halign=Gtk.Align.START, margin_top=14)
             reset = Gtk.Button(label=f"Reset {dict(TABS)[section]}")
@@ -366,6 +356,27 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 self.reset_btns["all"] = every
             grid.attach(box, 0, row, 2, 1)
         return self._page(grid)
+
+    def _restart_row(self, grid: Gtk.Grid, row: int) -> int:
+        """Integration, first: restart Cinnamon after Apply (an app choice, not a setting)."""
+        restart = Gtk.CheckButton(label="Restart Cinnamon after Apply",
+                                  active=self.prefs.get("restart_after_apply", False))
+        restart.set_tooltip_text("Window borders (Muffin) only reload at login or a Cinnamon restart. "
+                                 "This restarts Cinnamon after each Apply, like Ctrl+Alt+Esc: "
+                                 "the panel blinks, your windows stay open.")
+
+        def toggled(b: Gtk.CheckButton) -> None:
+            self.prefs["restart_after_apply"] = b.get_active()
+            _save_prefs(self.prefs)
+        restart.connect("toggled", toggled)
+        grid.attach(restart, 0, row, 2, 1)
+        note = Gtk.Label(label="Window borders reload at the next login otherwise.", xalign=0)
+        note.get_style_context().add_class("dim-label")
+        grid.attach(note, 0, row + 1, 2, 1)
+        row += 2
+        sep = Gtk.Separator(margin_top=6, margin_bottom=2)
+        grid.attach(sep, 0, row, 2, 1)
+        return row + 1
 
     def _control(self, path: tuple[str, ...], kind: str, extra: Any) -> Gtk.Widget:
         if path[-1] == "button_glyphs":
@@ -418,13 +429,19 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.controls[path] = (combo, kind)
         return combo
 
+    GLYPHS_PER_ROW = 3
+
     def _glyph_picker(self, path: tuple[str, ...], sets: tuple[str, ...]) -> Gtk.Widget:
         """Joined buttons, each showing a glyph set's minimize, maximize and close
         glyphs (the icon theme's own for Icon Theme); the name is the tooltip."""
-        box = Gtk.Box(halign=Gtk.Align.START)
-        box.get_style_context().add_class("linked")
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, halign=Gtk.Align.START)
         buttons, self.glyph_images = {}, {}
-        for gid in sets:
+        line = None
+        for i, gid in enumerate(sets):
+            if i % self.GLYPHS_PER_ROW == 0:          # two rows of joined buttons (3 + 2, then 3 + 3)
+                line = Gtk.Box(halign=Gtk.Align.START)
+                line.get_style_context().add_class("linked")
+                box.pack_start(line, False, False, 0)
             b = Gtk.ToggleButton()
             b.set_tooltip_text(titlebuttons.GLYPH_SET_NAMES[gid])
             row = Gtk.Box(spacing=3)
@@ -437,7 +454,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             self.glyph_images[gid] = imgs
             b.add(row)
             b.connect("toggled", lambda btn, g=gid: btn.get_active() and self.changed(path, g))
-            box.pack_start(b, False, False, 0)
+            line.pack_start(b, False, False, 0)
             buttons[gid] = b
         self.controls[path] = (buttons, "glyphs")
         return box
@@ -447,7 +464,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def _folder_style_picker(self, path: tuple[str, ...], choices: tuple[str, ...]) -> Gtk.Widget:
         """A picture of each folder style, in your colors, to click; more than
         a row's worth wrap onto a second row."""
-        flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=5,
+        flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=4,
                            min_children_per_line=1, homogeneous=True, halign=Gtk.Align.START,
                            column_spacing=10, row_spacing=10, margin_start=16, margin_top=6)
         buttons, self.folder_style_images = {}, {}
@@ -502,6 +519,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
                                  encoding="utf-8")
                 img.set_from_file(str(f))
 
+    def _theme_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
+        """The Theme tab: your themes and the built-in ones, to pick, save and rename."""
+        grid.set_vexpand(True)
+        self._theme_rows(grid, 0)
+        return grid
+
     def _theme_rows(self, grid: Gtk.Grid, row: int) -> int:
         head = Gtk.Label(xalign=0)
         head.set_markup("<b>Theme</b>")
@@ -509,8 +532,9 @@ class SettingsWindow(Gtk.ApplicationWindow):
         grid.attach(self._sort_combo("theme_sort", self.fill_theme_list), 1, row, 1, 1)
         self.theme_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
         self.theme_list.connect("row-selected", self.on_theme_selected)
-        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=150,
-                                      max_content_height=260, propagate_natural_height=True)
+        # the tab's own: as tall as the other tabs leave room for
+        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, min_content_height=300,
+                                      vexpand=True)
         scroller.get_style_context().add_class("frame")
         scroller.add(self.theme_list)
         grid.attach(scroller, 0, row + 1, 2, 1)
@@ -531,9 +555,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         buttons.pack_start(self.rename_btn, False, False, 0)
         buttons.pack_start(self.delete_btn, False, False, 0)
         grid.attach(buttons, 0, row + 2, 2, 1)
-        sep = Gtk.Separator(margin_top=6, margin_bottom=6)
-        grid.attach(sep, 0, row + 3, 2, 1)
-        return row + 4
+        return row + 3
 
     def _row(self, title: str, subtitle: str = "", tag: str = "") -> Gtk.ListBoxRow:
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin=8)
@@ -899,7 +921,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
     # --------------------------------------------------------------- preview
     def _preview(self) -> Gtk.Widget:
         outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, margin=10)
-        outer.set_size_request(460, -1)
+        # as wide as its widest row (the buttons up to Toggled): no wider
         frame = Gtk.Frame()
         frame.get_style_context().add_class("xl-prev-window")
         win = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -927,22 +949,24 @@ class SettingsWindow(Gtk.ApplicationWindow):
         toggled = Gtk.ToggleButton(label="Toggled", active=True)
         toggled.set_tooltip_text("A tooltip on Toggled")
         buttons.pack_start(toggled, False, False, 0)
+        body.pack_start(buttons, False, False, 0)
         # a drawn tooltip, always visible, in the Details tab's tooltip colours
+        row = Gtk.Box(spacing=10)
         tip = Gtk.Label(label="Tooltip", valign=Gtk.Align.CENTER)
         tip.get_style_context().add_class("xl-prev-tooltip")
-        buttons.pack_start(tip, False, False, 0)
-        body.pack_start(buttons, False, False, 0)
+        row.pack_start(tip, False, False, 0)
+        row.pack_start(Gtk.Switch(active=True, valign=Gtk.Align.CENTER), False, False, 0)
+        row.pack_start(Gtk.CheckButton(label="Check", active=True), False, False, 0)
+        row.pack_start(Gtk.RadioButton(label="Radio"), False, False, 0)
+        body.pack_start(row, False, False, 0)
         linked = Gtk.Box()
         linked.get_style_context().add_class("linked")
         for i, label in enumerate(("Left", "Center", "Right")):
             linked.pack_start(Gtk.ToggleButton(label=label, active=(i == 1)), False, False, 0)
         row = Gtk.Box(spacing=10)
+        row.pack_start(Gtk.Entry(text="Some text", width_chars=10), True, True, 0)
         row.pack_start(linked, False, False, 0)
-        row.pack_start(Gtk.Switch(active=True, valign=Gtk.Align.CENTER), False, False, 0)
-        row.pack_start(Gtk.CheckButton(label="Check", active=True), False, False, 0)
-        row.pack_start(Gtk.RadioButton(label="Radio"), False, False, 0)
         body.pack_start(row, False, False, 0)
-        body.pack_start(Gtk.Entry(text="Some text"), False, False, 0)
         scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
         scale.set_value(60)
         scale.set_draw_value(False)
@@ -1094,11 +1118,30 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             Gtk.StyleContext.reset_widgets(Gdk.Screen.get_default())
             self._scrollbar_mode(t["scrollbar.mode"] == "overlay")
             self.queue_resize()
+            GLib.idle_add(self._fit_pages)          # measured in the new sizes
         except GLib.Error as exc:
             self.status.set_text(f"Preview CSS problem: {exc.message}")
         if self.data["theme"] == themes.CUSTOM:
             themes.save_custom(self.data, self.base)
             self.refresh_custom_subtitle()
+        return False
+
+    # tabs that may scroll: long reading, or many switches (no sliders to catch the wheel)
+    SCROLLING_TABS = ("integration", "docs", "about")
+
+    def _fit_pages(self) -> bool:
+        """The window's least height: the tallest settings tab, whole. Their
+        sliders take the mouse wheel, so a tab that scrolled would fight it.
+        Measured again after each preview (Size changes every control's height)."""
+        tallest = 0
+        for name, _title in TABS:
+            if name not in self.SCROLLING_TABS:
+                page = self.stack.get_child_by_name(name)
+                tallest = max(tallest, page.get_child().get_preferred_height()[1])
+        if tallest and tallest != getattr(self, "page_height", 0):
+            self.page_height = tallest
+            for name, _title in TABS:
+                self.stack.get_child_by_name(name).set_min_content_height(tallest)
         return False
 
     def _scrollbar_mode(self, overlay: bool) -> None:
