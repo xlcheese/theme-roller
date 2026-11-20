@@ -6,7 +6,7 @@ are recoloured as text, the way Mint makes Mint-Y-Blue and its other colours:
 four colours swapped,
 
     folder      the front              your folder color (default: the accent)
-    backfolder  the back and its tab   your second color (default: darker, as Mint shades)
+    backfolder  the back and its tab   your second color (default: the accent, darker, as Mint shades)
     paper       the sheet inside       a light grey, as Mint's
     emblem      the picture on front   dark or light, whichever reads on the folder
 
@@ -55,7 +55,9 @@ def state_file() -> Path:
 def colours(t: dict[str, str], icons: dict) -> dict[str, str]:
     """The four colours, from your settings (folder and second color) and the theme."""
     folder = icons.get("folder_color") or t["accent"]
-    back = icons.get("second_color") or back_shade(folder)
+    # the back follows your accent (not the folder color): choose a grey front
+    # and the back stays a darker accent, as Yaru's grey-front folders
+    back = icons.get("second_color") or back_shade(t["accent"])
     dark_emblem = pal.darker(folder, 0.72)
     light_emblem = "#F2F2F2"
     emblem = dark_emblem if pal.contrast(dark_emblem, folder) >= 3.0 else light_emblem

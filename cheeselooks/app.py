@@ -617,8 +617,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _icon_preview_row(self, grid: Gtk.Grid, row: int) -> int:
         """The folders in the chosen colors, at 48 and 24px (drawn here, before Apply)."""
-        note = Gtk.Label(label="Mint-Y's folders, recolored: the folder color follows your accent and "
-                               "the second color (the back) a shade darker, until you choose your own. "
+        note = Gtk.Label(label="Mint-Y's folders, recolored: the folder color (the front) follows your accent, "
+                               "and the second color (the back) a darker shade of it, until you choose your own. "
                                "Every other icon stays as in your current icon theme. Apply to use them.",
                          xalign=0, wrap=True, max_width_chars=100, margin_start=16, hexpand=True)
         note.get_style_context().add_class("dim-label")

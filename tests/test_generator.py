@@ -1374,6 +1374,8 @@ class RenderAndInstallTests(unittest.TestCase):
         c = icons.colours(t, {})
         self.assertEqual(c["folder"], t["accent"])                              # follows the accent
         self.assertGreaterEqual(palette.contrast(c["emblem"], c["folder"]), 3.0)  # the emblem reads
+        grey = icons.colours(t, {"folder_color": "#7A7A7A"})
+        self.assertEqual(grey["backfolder"], icons.back_shade(t["accent"]))      # a grey front keeps an accent back
         mine = icons.colours(t, {"folder_color": "#336699", "second_color": "#112233"})
         self.assertEqual((mine["folder"], mine["backfolder"]), ("#336699", "#112233"))
         for light in ("#F9C470", "#B8D8EB", "#FFFFFF"):                        # light folders: dark emblem
