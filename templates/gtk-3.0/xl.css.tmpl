@@ -462,14 +462,21 @@ headerbar.default-decoration, .titlebar.default-decoration {
    top and the title bar's sides are inset lines inside the title bar (a
    border there would make it taller and move its buttons).
    A shadow there isn't a border: Muffin draws it outside the frame, in the
-   resize area. Maximized and tiled windows (Muffin's "maximized" and "tiled"
+   resize area. The frame needs a background too: with compositing, Muffin
+   takes the frame's see-through parts from decoration's and the title bar's
+   backgrounds only (frames.c, meta_ui_frame_get_mask), so a border over a
+   transparent background is drawn and then masked away (xl_cheese saw a 4px
+   see-through gap). Maximized and tiled windows (Muffin's "maximized" and "tiled"
    classes on the window) have none. */
 .ssd decoration {
   border: {{wb.border_width}}px solid {{wb.border}};
   border-top-width: 0;
+  background-color: {{wb.border}};
+  background-clip: border-box;      /* under the border too (Mint-Y's base clips to the padding) */
   box-shadow: none; }
 .ssd decoration:backdrop {
   border-color: {{wb.border_unfocused}};
+  background-color: {{wb.border_unfocused}};
   box-shadow: none; }
 .ssd headerbar.titlebar.default-decoration {
   box-shadow: {{wb.ssd_title_focused}}; }

@@ -112,10 +112,31 @@ def main():
         W, H = a.width, top + 30          # some window below, to show the frame's sides and bottom
         surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
         cr = cairo.Context(surf)
-        cr.set_source_rgb(1, 1, 1)
-        cr.paint()
         Gtk.render_background(frame, cr, 0, 0, W, H)
         Gtk.render_frame(frame, cr, 0, 0, W, H)
+        # with compositing, Muffin keeps only what the frame's and title bar's
+        # backgrounds cover (frames.c, meta_ui_frame_get_mask): the rest of the
+        # frame shows as see-through, here as a checker
+        mask = cairo.ImageSurface(cairo.FORMAT_A8, W, H)
+        mc = cairo.Context(mask)
+        Gtk.render_background(frame, mc, 0, 0, W, H)
+        Gtk.render_background(bar, mc, 0, 0, W, fb[2] + (top - fb[2]))
+        checker = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
+        cc = cairo.Context(checker)
+        for yy in range(0, H, 4):
+            for xx in range(0, W, 4):
+                v = 0.55 if (xx // 4 + yy // 4) % 2 else 0.8
+                cc.set_source_rgb(v, v, v)
+                cc.rectangle(xx, yy, 4, 4)
+                cc.fill()
+        cr.save()
+        cr.set_operator(cairo.OPERATOR_DEST_IN)
+        cr.mask_surface(mask, 0, 0)
+        cr.restore()
+        cr.set_operator(cairo.OPERATOR_DEST_OVER)
+        cr.set_source_surface(checker, 0, 0)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
         cr.set_source_rgb(1, 1, 1)                                     # the window's contents
         cr.rectangle(fb[0], top, W - fb[0] - fb[1], H - top - fb[3])
         cr.fill()
