@@ -117,6 +117,20 @@ def build(t: dict[str, str], icons: dict, inherits: list[str], out: Path) -> int
             d.mkdir(parents=True, exist_ok=True)
             (d / f.name).write_text(svg, encoding="utf-8")
         count += 1
+    # Mint-Y's other names for them (nemo, file-manager, folder-open...): the
+    # Files app's icon on the panel is the folder, as in Mint's own colours
+    aliases = source_dir().parent / "aliases.txt"
+    if aliases.exists():
+        for line in aliases.read_text(encoding="utf-8").split("\n"):
+            parts = line.split()
+            if len(parts) != 3:
+                continue
+            size, alias, target = parts
+            for x in ("", "@2x"):
+                d = out / "places" / f"{size}{x}"
+                link = d / f"{alias}.svg"
+                if (d / f"{target}.svg").exists() and not link.exists():
+                    link.symlink_to(f"{target}.svg")
     (out / "index.theme").write_text(index_theme(inherits), encoding="utf-8")
     (out / "COPYING").write_text((source_dir().parent / "COPYING").read_text(encoding="utf-8"),
                                  encoding="utf-8")

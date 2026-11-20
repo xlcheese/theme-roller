@@ -2,6 +2,7 @@
 """Cut Mint-Y's places icons out of Mint's source sheet, one small SVG each.
 
     python3 tools/import-mint-y-places.py MINT_Y_ICONS_CHECKOUT
+      (a checkout with src/places and usr/share/icons/Mint-Y/places)
 
 Mint draws all its folder and places icons, at every size, on one sheet
 (src/places/src.svg in github.com/linuxmint/mint-y-icons) and renders them
@@ -93,7 +94,28 @@ def main() -> int:
         f.write_text(ET.tostring(svg, encoding="unicode") + "\n", encoding="utf-8")
         count += 1
     print(f"{count} icons written to {OUT}")
+    write_aliases(Path(sys.argv[1]))
     return 0
+
+
+def write_aliases(checkout: Path) -> None:
+    """Mint-Y's other names for these icons (nemo, file-manager, folder-open...):
+    symlinks in each size's places folder. Mint's colours copy them, so ours do
+    too (data/icons/mint-y/aliases.txt: "size alias target" lines)."""
+    places = checkout / "usr" / "share" / "icons" / "Mint-Y" / "places"
+    names = {f.stem for f in OUT.glob("*/*.svg")}
+    lines = []
+    for d in sorted(places.iterdir(), key=lambda p: p.name):
+        size = d.name
+        if not size.isdigit():
+            continue
+        for f in sorted(d.iterdir()):
+            if f.is_symlink():
+                target = Path(f.readlink()).stem
+                if target in names:
+                    lines.append(f"{size} {f.stem} {target}")
+    (OUT.parent / "aliases.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"{len(lines)} aliases written")
 
 
 if __name__ == "__main__":

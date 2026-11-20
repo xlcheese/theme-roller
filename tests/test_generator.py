@@ -1391,7 +1391,11 @@ class RenderAndInstallTests(unittest.TestCase):
              mock.patch.object(icons.reload, "set_value", side_effect=lambda *a: gs.__setitem__(a[:2], a[2]) or True):
             icons.enable(t, {})
             d = icons.theme_dir()
-            self.assertEqual(len(list(d.glob("places/*/*.svg"))), 128 * 2)      # every size, and @2x
+            files = [f for f in d.glob("places/*/*.svg") if not f.is_symlink()]
+            self.assertEqual(len(files), 128 * 2)                                # every size, and @2x
+            nemo = d / "places" / "48" / "nemo.svg"                              # the Files app's icon...
+            self.assertTrue(nemo.is_symlink())
+            self.assertEqual(nemo.resolve(), (d / "places" / "48" / "folder.svg").resolve())  # ...is the folder
             index = (d / "index.theme").read_text()
             self.assertIn("Inherits=Mint-Y-Sand,Mint-Y,Adwaita,gnome,hicolor", index)  # yours fills in the rest
             self.assertIn("[places/48@2x]\nSize=48\nScale=2", index)
