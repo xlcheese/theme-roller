@@ -454,6 +454,33 @@ headerbar:backdrop, .titlebar:not(headerbar):backdrop {
   background-image: image({{wb.unfocused}}); }
 headerbar.default-decoration, .titlebar.default-decoration {
   min-height: {{wb.button_h}}px; }
+/* Window borders on windows Cinnamon decorates (Muffin 6, Mint 22: it no
+   longer reads metacity-1, it draws frames from these CSS nodes, muffin
+   src/ui/theme.c). The frame's width is decoration's border and padding,
+   drawn with gtk_render_frame; the title bar is drawn over the frame's top,
+   full width. So: the frame's sides and bottom are decoration's border; the
+   top and the title bar's sides are inset lines inside the title bar (a
+   border there would make it taller and move its buttons).
+   A shadow there isn't a border: Muffin draws it outside the frame, in the
+   resize area. Maximized and tiled windows (Muffin's "maximized" and "tiled"
+   classes on the window) have none. */
+.ssd decoration {
+  border: {{wb.border_width}}px solid {{wb.border}};
+  border-top-width: 0;
+  box-shadow: none; }
+.ssd decoration:backdrop {
+  border-color: {{wb.border_unfocused}};
+  box-shadow: none; }
+.ssd headerbar.titlebar.default-decoration {
+  box-shadow: {{wb.ssd_title_focused}}; }
+.ssd headerbar.titlebar.default-decoration:backdrop {
+  box-shadow: {{wb.ssd_title_unfocused}}; }
+.ssd.maximized decoration, .ssd.tiled decoration,
+.ssd.maximized decoration:backdrop, .ssd.tiled decoration:backdrop {
+  border-width: 0; }
+.ssd.maximized headerbar.titlebar.default-decoration, .ssd.tiled headerbar.titlebar.default-decoration,
+.ssd.maximized headerbar.titlebar.default-decoration:backdrop, .ssd.tiled headerbar.titlebar.default-decoration:backdrop {
+  box-shadow: {{wb.highlight}}; }
 window.csd > .titlebar, window.csd > headerbar,
 window.csd > .titlebar:backdrop, window.csd > headerbar:backdrop {
   border-radius: {{wb.r}}px {{wb.r}}px 0 0; }

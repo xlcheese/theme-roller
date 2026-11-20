@@ -109,14 +109,18 @@ def main():
         text_h = tm.top + layout.get_pixel_size()[1] + tm.bottom
         content_h = max(max(buttons_h, text_h), min_size(bar)[1]) + tb[2] + tb[3]
         top = fb[2] + content_h
-        W, H = a.width, top + 12
+        W, H = a.width, top + 30          # some window below, to show the frame's sides and bottom
         surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, W, H)
         cr = cairo.Context(surf)
         cr.set_source_rgb(1, 1, 1)
         cr.paint()
-        Gtk.render_background(frame, cr, 0, 0, W, H + 20)
-        Gtk.render_frame(frame, cr, 0, 0, W, H + 20)
-        tx, ty, tw, th = fb[0], fb[2], W - fb[0] - fb[1], top - fb[2]
+        Gtk.render_background(frame, cr, 0, 0, W, H)
+        Gtk.render_frame(frame, cr, 0, 0, W, H)
+        cr.set_source_rgb(1, 1, 1)                                     # the window's contents
+        cr.rectangle(fb[0], top, W - fb[0] - fb[1], H - top - fb[3])
+        cr.fill()
+        # the title bar over the frame's top, full width (muffin theme.c: titlebar_rect)
+        tx, ty, tw, th = 0, 0, W, top
         Gtk.render_background(bar, cr, tx, ty, tw, th)
         Gtk.render_frame(bar, cr, tx, ty, tw, th)
         # content: inside the title bar's padding and border

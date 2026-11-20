@@ -360,6 +360,16 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     key = "highlight_dark" if pal.is_dark(wb_pal) else "highlight"
     hl = style.title_bar.get(key, sty.TITLE_BAR_KEYS[key])
     t["wb.highlight"] = f"inset 0 1px {pal.rgba('#FFFFFF', hl)}" if hl > 0 else "none"
+    # windows Cinnamon decorates (Muffin 6): the window border's top and the
+    # title bar's sides are drawn inside the title bar as inset lines, over
+    # it as the metacity theme drew them, so its height and buttons don't move;
+    # the highlight just under the top line
+    bw = int(t["wb.border_width"])
+    for name, colour in (("focused", t["wb.border"]), ("unfocused", t["wb.border_unfocused"])):
+        parts = [f"inset 0 {bw}px {colour}", f"inset {bw}px 0 {colour}", f"inset -{bw}px 0 {colour}"] if bw else []
+        if hl > 0:
+            parts.append(f"inset 0 {bw + 1}px {pal.rgba('#FFFFFF', hl)}")
+        t[f"wb.ssd_title_{name}"] = ", ".join(parts) or "none"
     _title_button_colors(t, style, theme, amount)
     # the style's face shape, for title buttons drawn outside the CSS (SVG faces)
     t["style.gradient_shape"] = style.gradient_shape
