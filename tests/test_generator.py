@@ -1145,6 +1145,10 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertIn("icon_theme=Mint-Y", text)                                # yours kept
                 self.assertIn("standard_dialogs=default", text)                         # your choice kept
                 self.assertIn("[Fonts]\nfixed=Mono", text)
+                self.assertIn(f"stylesheets={qt.qss_file()}", text)
+                qss = qt.qss_file().read_text()
+                self.assertIn(f"QMenuBar {{ background-color: {t['header']};", qss)        # the title bar colour
+                self.assertIn(t["w.menu_item.hover_top"], qss)                         # GTK's menu hover, not the accent
                 profile = (home / ".profile").read_text()
                 self.assertIn(qt.PROFILE_LINE, profile)
                 self.assertTrue(profile.startswith("# mine"))
@@ -1157,6 +1161,7 @@ class RenderAndInstallTests(unittest.TestCase):
                 qt.disable()
                 self.assertEqual(conf.read_text(), original_conf)                       # put back as it was
                 self.assertFalse(qt.scheme_file().exists())
+                self.assertFalse(qt.qss_file().exists())
                 self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
                 self.assertEqual((home / ".profile").read_text(), "# mine\nexport PATH=$PATH:~/bin\n")
                 self.assertEqual(env_calls[-1], ("org.videolan.VLC", False))

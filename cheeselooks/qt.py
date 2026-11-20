@@ -137,39 +137,73 @@ def kdeglobals(c: dict[str, str]) -> str:
             + group("Complementary", "bg", "text", "bg"))
 
 
+def qss(t: dict[str, str]) -> str:
+    """Where Qt's palette has no slot of its own: the menu bar in the title
+    bar / toolbar colour (GTK menubars are), and menus hovered as the style's
+    GTK menus are, not in the selection's accent. Regular Qt apps only (qt5ct
+    loads stylesheets; the Flatpak route can't, Kvantum would)."""
+    def grad(top: str, bottom: str) -> str:
+        return f"qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 {top}, stop:1 {bottom})"
+    mb, mi = "w.menubar_item.", "w.menu_item."
+    r = t["r"]
+    return f"""/* {MARK} */
+QMenuBar {{ background-color: {t['header']}; color: {t['text']}; }}
+QMenuBar::item {{ background: transparent; padding: 4px 8px; border-radius: {r}px; }}
+QMenuBar::item:selected, QMenuBar::item:pressed {{
+  background: {grad(t[mb + 'hover_top'], t[mb + 'hover_bottom'])}; color: {t[mb + 'hover_fg']}; }}
+QMenu {{ background-color: {t['menu_bg']}; color: {t['text']}; border: 1px solid {t['border']}; padding: 4px 0; }}
+QMenu::item {{ padding: 5px 24px 5px 26px; border-radius: {r}px; margin: 0 4px; }}
+QMenu::item:selected {{ background: {grad(t[mi + 'hover_top'], t[mi + 'hover_bottom'])}; color: {t[mi + 'hover_fg']}; }}
+QMenu::item:disabled {{ color: {t['text_dim']}; }}
+QMenu::separator {{ height: 1px; background: {t['border']}; margin: 4px 8px; }}
+QMenu::icon, QMenu::indicator {{ padding-left: 6px; }}
+"""
+
+
+def qss_file() -> Path:
+    return qt5ct_dir() / "qss" / f"{SCHEME_NAME}.qss"
+
+
 def qt5ct_conf(existing: str) -> str:
-    """qt5ct.conf pointed at our scheme; anything else you had there is kept
-    (a file dialog choice of your own included)."""
-    want = {"color_scheme_path": str(scheme_file()), "custom_palette": "true"}
-    lines = existing.splitlines()
-    out, in_app, seen, had_app = [], False, set(), False
-    for line in lines:
-        s = line.strip()
-        if s.startswith("["):
-            if in_app:
-                out += [f"{k}={v}" for k, v in _defaults(want, seen).items()]
-            in_app = s == "[Appearance]"
-            had_app = had_app or in_app
-            out.append(line)
-            continue
-        key = s.split("=", 1)[0].strip() if "=" in s else None
-        if in_app and key in want:
-            out.append(f"{key}={want[key]}")
-            seen.add(key)
-            continue
-        if in_app and key:
-            seen.add(key)
-        out.append(line)
-    if in_app:
-        out += [f"{k}={v}" for k, v in _defaults(want, seen).items()]
-    if not had_app:
-        out += ["[Appearance]"] + [f"{k}={v}" for k, v in _defaults(want, set()).items()]
+    """qt5ct.conf pointed at our scheme and stylesheet; anything else you had
+    there is kept (your own file dialog choice and stylesheets included)."""
+    want = {"Appearance": {"color_scheme_path": str(scheme_file()), "custom_palette": "true"},
+            "Interface": {"stylesheets": str(qss_file())}}
+    if_missing = {"Appearance": {"standard_dialogs": "gtk3", "style": "Fusion"}}
+    sections: list[list] = [[None, []]]            # [name, lines]
+    for line in existing.splitlines():
+        st = line.strip()
+        if st.startswith("[") and st.endswith("]"):
+            sections.append([st[1:-1], []])
+        else:
+            sections[-1][1].append(line)
+    for name in list(want) + [n for n in if_missing if n not in want]:
+        if not any(sec[0] == name for sec in sections):
+            sections.append([name, []])
+    out = []
+    for name, lines in sections:
+        if name is not None:
+            out.append(f"[{name}]")
+        set_here = dict(want.get(name, {}))
+        keys = {ln.split("=", 1)[0].strip() for ln in lines if "=" in ln}
+        for ln in lines:
+            key = ln.split("=", 1)[0].strip() if "=" in ln else None
+            if key == "stylesheets" and name == "Interface":
+                have = [x.strip() for x in ln.split("=", 1)[1].split(",") if x.strip()]
+                if set_here["stylesheets"] not in have:
+                    have.append(set_here["stylesheets"])
+                out.append("stylesheets=" + ", ".join(have))
+                set_here.pop("stylesheets")
+            elif key in set_here:
+                out.append(f"{key}={set_here.pop(key)}")
+            else:
+                out.append(ln)
+        while out and not out[-1].strip():
+            out.pop()
+        out += [f"{k}={v}" for k, v in set_here.items()]
+        out += [f"{k}={v}" for k, v in if_missing.get(name, {}).items() if k not in keys]
+        out.append("")
     return "\n".join(out).strip() + "\n"
-
-
-def _defaults(want: dict[str, str], seen: set[str]) -> dict[str, str]:
-    extra = {**want, "standard_dialogs": "gtk3", "style": "Fusion"}
-    return {k: v for k, v in extra.items() if k not in seen}
 
 
 # ---------------------------------------------------------------- state
@@ -264,6 +298,7 @@ def enable(t: dict[str, str]) -> list[str]:
     c = colours(t)
     if qt5ct_installed():
         _write(scheme_file(), qt5ct_scheme(c), state)
+        _write(qss_file(), qss(t), state)
         conf = qt5ct_dir() / "qt5ct.conf"
         current = conf.read_text(encoding="utf-8") if conf.exists() else ""
         _write(conf, qt5ct_conf(current), state)
