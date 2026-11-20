@@ -72,14 +72,64 @@ def libadwaita_version() -> tuple[int, int] | None:
     return (int(m.group(1)), int(m.group(2))) if m else None
 
 
-def block(templates_dir: Path, t: dict[str, str], css_variables: bool) -> str:
-    """The marked block: named colours, plus :root variables for libadwaita 1.6+."""
+ASSETS = "xl-cheeselooks-assets"     # beside gtk.css: the pictures the full styling uses
+
+
+def full_css(templates_dir: Path, t: dict[str, str]) -> str:
+    """Full styling (Integration → "Full styling for libadwaita apps"): our whole
+    GTK 4 layer and the libadwaita additions, for apps that ignore the theme
+    (Flatpak libadwaita apps bring their own, upstream libadwaita). Its
+    pictures are referred to in ASSETS beside gtk.css (copy_assets)."""
+    parts = []
+    for rel in ("gtk-4.0/xl.css.tmpl", "libadwaita-1.5/adw-extra.part"):
+        f = templates_dir / rel
+        text = render.expand_includes(f.read_text(encoding="utf-8"), f.parent)
+        parts.append(render.render_text(text, t, str(f)))
+    # This file outranks an app's own CSS, so a button the app coloured itself
+    # (with its own class) gets our face; give it our text colour too, or the
+    # app's (white on its purple) stays, unreadable on our face. As unspecific
+    # as can be, so our own rules (header bars, accent buttons) still win;
+    # "opaque" buttons are libadwaita's way to keep an app's colour, and do.
+    safety = f"button:not(.opaque) {{ color: {t['text']}; }}\n"
+    css = safety + "\n".join(parts)
+    return css.replace('url("assets/', f'url("{ASSETS}/').replace("url('assets/", f"url('{ASSETS}/")
+
+
+def asset_names(css: str) -> list[str]:
+    return sorted(set(re.findall(re.escape(ASSETS) + r"/([\w.-]+)", css)))
+
+
+def copy_assets(css: str, theme_dir: Path, gtk_css: Path) -> None:
+    """The full styling's pictures, from the built theme, beside gtk.css (a
+    Flatpak app sees that folder through the Flatpak apps switch)."""
+    dest = gtk_css.parent / ASSETS
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.mkdir(parents=True)
+    for name in asset_names(css):
+        src = theme_dir / "gtk-4.0" / "assets" / name
+        if src.exists():
+            shutil.copy2(src, dest / name)
+
+
+def remove_assets(gtk_css: Path) -> None:
+    dest = gtk_css.parent / ASSETS
+    if dest.exists():
+        shutil.rmtree(dest)
+
+
+def block(templates_dir: Path, t: dict[str, str], css_variables: bool, full: bool = False) -> str:
+    """The marked block: named colours, plus :root variables for libadwaita 1.6+,
+    plus (full) our whole GTK 4 layer."""
     part = templates_dir / "libadwaita.css.part"
     text = render.expand_includes(part.read_text(encoding="utf-8"), part.parent)
     css = render.render_text(text, t, str(part))
     if css_variables:
         names = "\n".join(f"  --{n.replace('_', '-')}: {v};" for n, v in _DEFINE.findall(css))
         css += f"/* libadwaita 1.6 and newer */\n:root {{\n{names}\n}}\n"
+    if full:
+        css += ("\n/* Full styling for libadwaita apps (Integration): the theme's GTK 4 layer.\n"
+                "   Note: this file outranks apps' own CSS. */\n" + full_css(templates_dir, t))
     return f"{BEGIN}\n{css.rstrip()}\n{END}\n"
 
 

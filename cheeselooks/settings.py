@@ -54,6 +54,7 @@ DEFAULTS: dict[str, Any] = {
         "focus_ring": {"custom": False, "color": None, "width": 1, "style": "dashed"},
     },
     "integration": {"libadwaita_colors": True, "libadwaita_accent": True,
+                    "libadwaita_full": False,  # our whole GTK 4 layer for apps that ignore the theme (gtk4.py)
                     "flatpak_access": True,  # Flatpak apps can read the theme (flatpak.py); on, as the others
                     "qt_colors": True,       # Qt apps (VLC...) in the theme's colours (qt.py);
                     "editor_colors": True},  # Xed, gedit, Meld: a colour scheme from the theme (editor.py);
@@ -122,6 +123,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "focus_ring", "width"), "int", (0, 3)),
     (("integration", "libadwaita_colors"), "bool", None),
     (("integration", "libadwaita_accent"), "bool", None),
+    (("integration", "libadwaita_full"), "bool", None),
     (("integration", "flatpak_access"), "bool", None),
     (("integration", "qt_colors"), "bool", None),
     (("integration", "editor_colors"), "bool", None),

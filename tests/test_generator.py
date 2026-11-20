@@ -1260,6 +1260,30 @@ class RenderAndInstallTests(unittest.TestCase):
         self.assertEqual(calls, ["on", "off"])
         self.assertTrue(settings.DEFAULTS["integration"]["flatpak_access"])
 
+    def test_libadwaita_full_styling(self):
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        plain = gtk4.block(REPO / "templates", t, css_variables=True)
+        full = gtk4.block(REPO / "templates", t, css_variables=True, full=True)
+        self.assertNotIn("windowcontrols", plain)                              # off: colours only
+        self.assertTrue(full.startswith(plain[:200]))                          # on: the colours, then...
+        self.assertIn("windowcontrols", full)                                  # ...our title buttons,
+        self.assertIn("toolbarview > .top-bar", full)                          # libadwaita additions
+        self.assertIn(f"button:not(.opaque) {{ color: {t['text']}; }}", full)  # readable app-coloured buttons
+        self.assertNotIn('url("assets/', full)                                 # pictures beside gtk.css
+        names = gtk4.asset_names(full)
+        self.assertIn("check-symbolic.svg", names)
+        with tempfile.TemporaryDirectory() as tmp:
+            theme = Path(tmp) / "theme"
+            install.build(REPO / "templates", t, theme)
+            css = Path(tmp) / "config" / "gtk-4.0" / "gtk.css"
+            gtk4.write(css, full)
+            gtk4.copy_assets(full, theme, css)
+            for n in names:
+                self.assertTrue((css.parent / gtk4.ASSETS / n).exists(), n)
+            gtk4.remove_assets(css)
+            self.assertFalse((css.parent / gtk4.ASSETS).exists())
+        self.assertFalse(settings.DEFAULTS["integration"]["libadwaita_full"])  # opt-in
+
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = Path(tmp) / "b-mine"

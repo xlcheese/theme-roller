@@ -93,7 +93,7 @@ LABELS = {
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
-    "flatpak_access": "Flatpak apps", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
+    "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
 GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
           "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
@@ -120,6 +120,9 @@ INTEGRATION_NOTES = {
     "flatpak_access": lambda: ("Flatpak apps get your colors: every Flatpak app may read your themes "
                                "folder and GTK 4 colors (read-only). Reopen open ones."
                                if flatpak.available() else "Flatpak isn't installed."),
+    "libadwaita_full": lambda: ("Also our buttons, title buttons and tabs in libadwaita apps that ignore "
+                                "the theme (Flatpak ones, with Flatpak apps on). It overrides apps' own "
+                                "styling, so some may lose colors of their own. Reopen open apps."),
     "qt_colors": lambda: qt.note(),
     "editor_colors": lambda: editor.NOTE,
 }

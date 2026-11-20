@@ -103,9 +103,16 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     integ = data["integration"]
     # CSS variables for libadwaita 1.6+ always: Flatpak apps bring their own,
     # newer libadwaita, and GTK 4.14 accepts the variables without warnings
-    new = (gtk4.block(paths.templates_dir(), table, css_variables=True)
+    full = bool(integ.get("libadwaita_full")) and integ["libadwaita_colors"]
+    new = (gtk4.block(paths.templates_dir(), table, css_variables=True, full=full)
            if integ["libadwaita_colors"] else None)
     log.append(gtk4.write(paths.gtk4_css(), new))
+    if full:
+        gtk4.copy_assets(new, paths.theme_dir(), paths.gtk4_css())
+        log.append("libadwaita apps: full styling (buttons, title buttons, tabs) in "
+                   f"{paths.gtk4_css()}; reopen open ones")
+    else:
+        gtk4.remove_assets(paths.gtk4_css())
     if integ["libadwaita_accent"]:
         log.append(reload.set_adw_accent(table["adw.accent_name"]) or "")
     log += _flatpak_access(integ.get("flatpak_access", False))
