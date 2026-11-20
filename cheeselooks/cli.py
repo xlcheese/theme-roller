@@ -8,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import __version__, editor, flatpak, gtk4, install, paths, qt, reload, settings, styles, themes, tokens
+from . import __version__, editor, flatpak, gtk4, install, paths, qt, reload, watch, settings, styles, themes, tokens
 from .shape import DEFAULT_PANEL_HEIGHT
 
 
@@ -186,6 +186,21 @@ def apply_to_desktop(data: dict, style: styles.Style, activate: bool = False,
     """Write the theme to ~/.themes, save the settings, update the libadwaita
     colours and reload the desktop: everything `cheeselooks apply` does.
     Returns the log lines. Used by the settings app's Apply button."""
+    with watch.applying():
+        log = _apply_to_desktop(data, style, activate, save, restart)
+    log += _watcher(data)
+    return log
+
+
+def _watcher(data: dict) -> list[str]:
+    """Integration → "Follow Mint's theme setting": the watcher at login (and now)."""
+    if data["integration"].get("watch_theme"):
+        return watch.enable()
+    return watch.disable()
+
+
+def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
+                      save: bool, restart: bool) -> list[str]:
     log = []
     height = _panel_height(data)
     table = tokens.build(data, style, panel_height=height,
@@ -212,6 +227,29 @@ def apply_to_desktop(data: dict, style: styles.Style, activate: bool = False,
 
 
 def cmd_apply(args: argparse.Namespace) -> int:
+    if args.theme_dir:
+        return _cmd_apply(args)
+    with watch.applying():
+        code = _cmd_apply(args)
+    if not args.no_reload:
+        data = settings.load(paths.settings_file())
+        for line in _watcher(data):
+            print(f"  {line}")
+    return code
+
+
+def cmd_watch(_args: argparse.Namespace) -> int:
+    return watch.run()
+
+
+def cmd_set_aside(_args: argparse.Namespace) -> int:
+    for line in watch.set_aside():
+        print(line)
+    print("Done. Reopen open apps. The next Apply puts xl-Cheeselooks' colors back.")
+    return 0
+
+
+def _cmd_apply(args: argparse.Namespace) -> int:
     data = _load_settings(args)
     style = _load_style(data["style"]["name"], args.style_dir)
     for w in style.warnings:
@@ -457,6 +495,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("path")
     p.set_defaults(func=cmd_check_style)
 
+    p = sub.add_parser("watch", help="run the theme watcher (started at login; see Integration)")
+    p.set_defaults(func=cmd_watch)
+    p = sub.add_parser("set-aside", help="take xl-Cheeselooks' colors out of GTK 4, Qt and editor apps")
+    p.set_defaults(func=cmd_set_aside)
     p = sub.add_parser("flatpak", help="let Flatpak apps see the theme (or undo it)")
     group = p.add_mutually_exclusive_group()
     group.add_argument("--enable", action="store_true", help="grant read-only access (asks first)")

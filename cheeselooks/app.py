@@ -37,7 +37,7 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, Pango  # noqa: E402
 
-from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, qt, reload, render, settings, styles, themes, titlebuttons, tokens  # noqa: E402
+from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, qt, reload, render, settings, styles, themes, titlebuttons, tokens, watch  # noqa: E402
 from . import shape  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
 
@@ -93,7 +93,8 @@ LABELS = {
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
-    "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
+    "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps",
+    "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
 GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
           "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
@@ -125,6 +126,10 @@ INTEGRATION_NOTES = {
                                 "styling, so some may lose colors of their own. Reopen open apps."),
     "qt_colors": lambda: qt.note(),
     "editor_colors": lambda: editor.NOTE,
+    "watch_theme": lambda: ("When you pick another theme in Mint's Themes settings, xl-Cheeselooks' "
+                            "colors leave GTK 4, Flatpak, Qt and editor apps too (yours come back), and "
+                            "return when you pick xl-Cheeselooks again. A tiny helper started at login "
+                            "waits for that change."),
 }
 SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
@@ -311,6 +316,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             if path == ("global", "text"):
                 row = self._image_colors_row(grid, row)
         if section == "integration":
+            row = self._set_aside_row(grid, row)
             restart = Gtk.CheckButton(label="Restart Cinnamon after Apply", margin_top=8,
                                       active=self.prefs.get("restart_after_apply", False))
             restart.set_tooltip_text("Window borders (Muffin) only reload at login or a Cinnamon restart. "
@@ -595,6 +601,23 @@ class SettingsWindow(Gtk.ApplicationWindow):
         grid.attach(Gtk.Label(label="Colors", xalign=0), 0, row, 1, 1)
         grid.attach(combo, 1, row, 1, 1)
         return row + 1
+
+    def _set_aside_row(self, grid: Gtk.Grid, row: int) -> int:
+        """Take our extra colors out of apps now, without changing any setting."""
+        button = Gtk.Button(label="Take out of apps", halign=Gtk.Align.START, margin_top=8)
+
+        def clicked(_b: Gtk.Button) -> None:
+            watch.set_aside()
+            self.status.set_text("xl-Cheeselooks' colors are out of GTK 4, Qt and editor apps (yours are "
+                                 "back). Reopen open apps. The next Apply puts them back.")
+        button.connect("clicked", clicked)
+        grid.attach(button, 1, row, 1, 1)
+        note = Gtk.Label(label="Takes the colors above out of apps now (your own come back), for example "
+                               "before using another theme. The theme itself stays; the next Apply puts "
+                               "them back.", xalign=0, wrap=True, max_width_chars=60)
+        note.get_style_context().add_class("dim-label")
+        grid.attach(note, 1, row + 1, 1, 1)
+        return row + 2
 
     def _image_colors_row(self, grid: Gtk.Grid, row: int) -> int:
         """Colors from a picture: the wallpaper or any image. Its main colors

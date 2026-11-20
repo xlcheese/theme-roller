@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, editor, flatpak, qt, reload, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, editor, flatpak, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -1292,6 +1292,52 @@ class RenderAndInstallTests(unittest.TestCase):
         self.assertTrue(kept["integration"]["libadwaita_full"])
         self.assertFalse(kept["integration"]["qt_colors"])
         self.assertEqual(kept["global"], theme["global"])                    # the look is the theme's
+
+    def test_theme_watcher(self):
+        from unittest import mock
+        import os
+        self.assertTrue(watch.is_ours("xl-Cheeselooks"))
+        self.assertTrue(watch.is_ours(".xl-Cheeselooks-reloading"))          # Apply's reload name
+        self.assertFalse(watch.is_ours("Mint-Y"))
+        calls = []
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": tmp}), \
+             mock.patch.object(watch, "set_aside", side_effect=lambda: calls.append("aside") or
+                               (watch.set_aside_file().parent.mkdir(parents=True, exist_ok=True),
+                                watch.set_aside_file().write_text(""))), \
+             mock.patch.object(watch, "restore", side_effect=lambda: calls.append("back") or
+                               watch.set_aside_file().unlink()):
+            watch._act(None)                         # setting unreadable: nothing to do
+            watch._act("xl-Cheeselooks")             # ours, nothing set aside: nothing to do
+            watch._act("Mint-Y")                     # away: set aside
+            watch._act("Mint-L")                     # still away: once is enough
+            watch._act("xl-Cheeselooks")             # back: restored
+            with watch.applying():
+                watch._act("Mint-Y")                 # Apply running: hands off
+            self.assertFalse(watch.lock_file().exists())
+            self.assertEqual(calls, ["aside", "back"])
+            # the login entry starts the checkout's command
+            text = watch.autostart_text()
+            self.assertIn("watch", text)
+            self.assertIn("X-GNOME-Autostart-enabled=true", text)
+            self.assertTrue(str(watch.autostart_file()).startswith(tmp))
+        self.assertTrue(settings.DEFAULTS["integration"]["watch_theme"])
+
+    def test_set_aside_takes_our_colors_out(self):
+        from unittest import mock
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            css = Path(tmp) / "gtk-4.0" / "gtk.css"
+            css.parent.mkdir(parents=True)
+            css.write_text("/* mine */\n")
+            t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+            gtk4.write(css, gtk4.block(REPO / "templates", t, css_variables=True))
+            with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": tmp}), \
+                 mock.patch.object(watch.qt, "active", return_value=False), \
+                 mock.patch.object(watch.editor, "active", return_value=False):
+                watch.set_aside()
+                self.assertEqual(css.read_text().strip(), "/* mine */")       # only ours taken out
+                self.assertTrue(watch.set_aside_file().exists())
 
     def test_unreadable_style_is_named(self):
         with tempfile.TemporaryDirectory() as tmp:

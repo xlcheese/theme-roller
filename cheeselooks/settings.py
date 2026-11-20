@@ -57,7 +57,8 @@ DEFAULTS: dict[str, Any] = {
                     "libadwaita_full": False,  # our whole GTK 4 layer for apps that ignore the theme (gtk4.py)
                     "flatpak_access": True,  # Flatpak apps can read the theme (flatpak.py); on, as the others
                     "qt_colors": True,       # Qt apps (VLC...) in the theme's colours (qt.py);
-                    "editor_colors": True},  # Xed, gedit, Meld: a colour scheme from the theme (editor.py);
+                    "editor_colors": True,   # Xed, gedit, Meld: a colour scheme from the theme (editor.py);
+                    "watch_theme": True},    # take those out of apps when another theme is picked (watch.py)
                                              # on: most people wouldn't know to look for it
 }
 
@@ -127,6 +128,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("integration", "flatpak_access"), "bool", None),
     (("integration", "qt_colors"), "bool", None),
     (("integration", "editor_colors"), "bool", None),
+    (("integration", "watch_theme"), "bool", None),
 ]
 
 
