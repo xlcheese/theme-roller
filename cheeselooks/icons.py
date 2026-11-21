@@ -50,6 +50,10 @@ STYLES = {
     # 32px drawing standing in at 16-24 (Breeze's own small ones are outlines)
     "breeze": {"name": "Breeze", "dir": "breeze", "sizes": (16, 22, 24, 32, 48, 64, 96),
                "source": {"folder": "3daee9", "backfolder": "3dae09", "emblem": "3dae39"}},
+    # Claude's: a card portfolio, a pocket with a thumb notch, turned the other
+    # way (tools/make-claude-folder.py; Mint-Y's pictures on it, CC BY-SA 4.0)
+    "claude": {"name": "Claude", "dir": "claude", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
+               "source": {"folder": "c1a0d1", "backfolder": "c1a0d2", "frontedge": "c1a0d3", "emblem": "c1a0d4"}},
     # ours (xl_cheese's design): an 80s school binder, racing stripes optional
     # (tools/make-xl-binder.py; Mint-Y's pictures on it, CC BY-SA 4.0)
     "xl-big-baddy": {"name": "xl-Big Baddy", "dir": "xl-big-baddy", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),

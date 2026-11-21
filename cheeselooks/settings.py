@@ -118,7 +118,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "scrollbars", "roundness"), "int", (0, 100)),
     (("details", "scrollbars", "width"), "int?", (6, 16)),
     (("icons", "enabled"), "bool", None),
-    (("icons", "style"), "choice", ("xl-big-baddy", "mint-y", "yaru", "breeze")),
+    (("icons", "style"), "choice", ("xl-big-baddy", "claude", "mint-y", "yaru", "breeze")),
     (("icons", "folder_color"), "color?", None),
     (("icons", "second_color"), "color?", None),
     (("details", "sliders", "custom"), "bool", None),
