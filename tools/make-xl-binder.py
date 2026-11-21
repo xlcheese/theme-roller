@@ -170,6 +170,35 @@ def monitor3d(z: float) -> list:
             f'<path fill="{EMBLEM}" d="{d(front(stand, z))}"/>']
 
 
+COVER = "stripes"            # "stripes": xl-Big Baddy; "checker": the 80s binder (xl_cheese's mockup)
+CHECK = 6.0                  # a checker square, on the cover
+WAVE_LOW, WAVE_HIGH, WAVE_AMP, WAVE_LEN = 9.0, 31.0, 2.4, 34.0
+
+
+def wave(v0: float, phase: float, n: int = 48) -> list:
+    return [(W * i / n, v0 + WAVE_AMP * math.sin(2 * math.pi * (W * i / n) / WAVE_LEN + phase)) for i in range(n + 1)]
+
+
+def checker_band(uid: str, z: float = 0.02) -> list:
+    """xl_cheese's 80s cover: a checkerboard band across the cover between two
+    wavy lines in the second color. The checks are projected squares, clipped
+    to the band (an SVG clip path in the same coordinates)."""
+    low, high = wave(WAVE_LOW, 0.4), wave(WAVE_HIGH, 2.2)
+    band = low + high[::-1]
+    out = [f'<clipPath id="band{uid}"><path d="{d(front(band, z))}"/></clipPath>',
+           f'<g clip-path="url(#band{uid})"><path fill="#FFFFFF" d="{d(front(band, z))}"/>']
+    cells = []
+    for i in range(int(W / CHECK) + 1):
+        for j in range(int((WAVE_HIGH + WAVE_AMP + 2) / CHECK) + 2):
+            if (i + j) % 2:
+                u0, v0 = i * CHECK, j * CHECK
+                cells.append(d(front([(u0, v0), (u0 + CHECK, v0), (u0 + CHECK, v0 + CHECK), (u0, v0 + CHECK)], z)))
+    out.append(f'<path fill="#1A1A1A" d="{" ".join(cells)}"/></g>')
+    for line in (low, high):
+        out.append(f'<path fill="none" stroke="{STRIPE}" stroke-width="3.4" d="{d(front(line, z + 0.01), close=False)}"/>')
+    return out
+
+
 def binder3d(name: str, size: int, opened: bool = False) -> str:
     parts = []
     if opened:   # the flap, up behind: its underside, plain and darker (no piping there), rising from the back's top
@@ -196,9 +225,12 @@ def binder3d(name: str, size: int, opened: bool = False) -> str:
     parts.append(f'<path fill="#E6E6E6" d="{d([(0, 0, -D_BOTTOM), (0, 5, -D_BOTTOM + 0.5), (0, 5, -0.5), (0, 0, 0)])}"/>')
     # the cover, its stripes, its ring, its picture
     parts.append(f'<path fill="{F}" d="{d(front(rounded(0, 0, W, H, 4, "tr br")))}"/>')
-    parts += stripes(0, H if opened else H - FLAP + 3, 0.02)
-    ring_top = H - FLAP - 6          # the same ring, open or closed (xl_cheese)
-    parts.append(f'<path fill="none" stroke="{RING}" stroke-width="1.8" d="{d(front(rounded(6, 6, W - 6, ring_top, 6)))}"/>')
+    if COVER == "checker":
+        parts += checker_band(name)
+    else:
+        parts += stripes(0, H if opened else H - FLAP + 3, 0.02)
+        ring_top = H - FLAP - 6          # the same ring, open or closed (xl_cheese)
+        parts.append(f'<path fill="none" stroke="{RING}" stroke-width="1.8" d="{d(front(rounded(6, 6, W - 6, ring_top, 6)))}"/>')
     if opened:   # the cover's velcro, where the flap presses down when closed
         parts.append(f'<path fill="{VELCRO}" d="{d(front(rounded(VELCRO_U[0], H - 18, VELCRO_U[1], H - 9, 0.8), 0.06))}"/>')
     parts += monitor3d(0.05) if name == "user-desktop" else picture(name, size, opened)
@@ -206,7 +238,8 @@ def binder3d(name: str, size: int, opened: bool = False) -> str:
         flap = rounded(0, H - FLAP, W, H, 6, "br bl")
         parts.append(f'<path fill="#000" fill-opacity="0.16" d="{d(front([(u, v - 1.8) for u, v in flap], 0.1))}"/>')
         parts.append(f'<path fill="{F}" d="{d(front(flap, 0.2))}"/>')
-        parts += stripes(H - FLAP, H - 0.3, 0.25)
+        if COVER != "checker":
+            parts += stripes(H - FLAP, H - 0.3, 0.25)
         piping = [(W - 4, H - 1)] + [q for q in rounded(4, H - FLAP + 4, W - 4, H + 4, 5, "br bl") if q[1] < H - 1] + [(4, H - 1)]
         parts.append(f'<path fill="none" stroke="{RING}" stroke-width="1.5" d="{d(front(piping, 0.3), close=False)}"/>')
         parts.append(f'<path fill="#fff" fill-opacity="0.2" d="{d(front([(0, H - 2), (W, H - 2), (W, H), (0, H)], 0.3))}"/>')
@@ -257,9 +290,19 @@ def binder_small(name: str, size: int, opened: bool = False) -> str:
     parts.append(f'<rect x="{x0 - sw - 1}" y="{y1 - 1}" width="{sw + 1}" height="1" fill="#E6E6E6"/>')
     r = 1.5 if size > 16 else 1
     parts.append(f'<path fill="{F}" d="M{x0} {y0} H{x1 - r} Q{x1} {y0} {x1} {y0 + r} V{y1 - r} Q{x1} {y1} {x1 - r} {y1} H{x0} Z"/>')
-    # stripes, bottom left to top right, on whole-pixel steps
+    # stripes, bottom left to top right, on whole-pixel steps (the 80s binder: its checker band)
     slope = (y1 - y0 - 1) / (x1 - x0)
-    for off in (1, 1 + st * 2 + (1 if size > 16 else 0)):
+    cell = 1 if size == 16 else 2
+    band_bottom = y1 - 2                          # the lower line; the checks above it; the upper line
+    band_top = band_bottom - cell - 1
+    if COVER == "checker":
+        parts.append(f'<rect x="{x0}" y="{band_top + 1}" width="{x1 - x0}" height="{cell}" fill="#FFFFFF"/>')
+        for i, x in enumerate(range(x0, x1, cell)):
+            if i % 2:
+                parts.append(f'<rect x="{x}" y="{band_top + 1}" width="{min(cell, x1 - x)}" height="{cell}" fill="#1A1A1A"/>')
+        for y in (band_top, band_bottom):
+            parts.append(f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="1" fill="{STRIPE}"/>')
+    for off in (1, 1 + st * 2 + (1 if size > 16 else 0)) if COVER != "checker" else ():
         y_left = y1 - off
         parts.append(f'<path fill="{STRIPE}" d="M{x0} {y_left} L{x1} {y_left - slope * (x1 - x0)} '
                      f'L{x1} {y_left - slope * (x1 - x0) - st * 1.25} L{x0} {y_left - st * 1.25} Z"/>')
@@ -271,32 +314,42 @@ def binder_small(name: str, size: int, opened: bool = False) -> str:
         parts.append(f'<path fill="#000" fill-opacity="0.18" d="M{x0} {y0 + fh} H{x1} V{y0 + fh + 1} H{x0} Z"/>')
         parts.append(f'<path fill="{F}" d="M{x0} {y0} H{x1 - r} Q{x1} {y0} {x1} {y0 + r} V{y0 + fh} H{x0} Z"/>')
         slope2 = slope
-        for off in (1, 1 + st * 2 + (1 if size > 16 else 0)):     # the stripes, on across the flap
+        for off in (1, 1 + st * 2 + (1 if size > 16 else 0)) if COVER != "checker" else ():   # stripes, across the flap
             y_left = y1 - off
             ys = [y_left - slope2 * (x - x0) for x in (x0, x1)]
             parts.append(f'<path fill="{STRIPE}" clip-path="url(#flap)" d="M{x0} {ys[0]} L{x1} {ys[1]} '
                          f'L{x1} {ys[1] - st * 1.25} L{x0} {ys[0] - st * 1.25} Z"/>')
         parts.append(f'<rect x="{x0 + 1}" y="{y0 + fh - 2}" width="{x1 - x0 - 2}" height="1" fill="{RING}" fill-opacity="0.9"/>')
     # Mint-Y's picture at its own size, on whole pixels at the cover's lower right
-    found = compose.mint_picture(name, size)
+    # (the 80s binder: Mint-Y's 16px picture, centred above the band)
+    pic_size = 16 if COVER == "checker" else size
+    found = compose.mint_picture(name, pic_size)
     pic = ""
     if found is not None:
         root, (px0, py0, px1, py1) = found
-        mvb = compose.viewbox(root, size)
-        cx = (x1 + x0 + (x1 - x0) * 0.35) / 2
-        cy = (y0 + fh + y1) / 2 + 0.5
+        mvb = compose.viewbox(root, pic_size)
+        if COVER == "checker":
+            cx, cy = (x0 + x1) / 2, (y0 + fh + band_top) / 2 + 0.5
+        else:
+            cx = (x1 + x0 + (x1 - x0) * 0.35) / 2
+            cy = (y0 + fh + y1) / 2 + 0.5
         dx = round(cx - ((px0 + px1) / 2 - mvb[0]))
         dy = round(cy - ((py0 + py1) / 2 - mvb[1]))
         inner = re.sub(MINT_EMBLEM, EMBLEM, ET.tostring(root, encoding="unicode"), flags=re.I)
-        nested = ET.Element(f"{{{SVG}}}svg", {"x": str(dx), "y": str(dy), "width": str(size), "height": str(size),
+        nested = ET.Element(f"{{{SVG}}}svg", {"x": str(dx), "y": str(dy), "width": str(pic_size),
+                                            "height": str(pic_size),
                                             "viewBox": " ".join(f"{v:g}" for v in mvb), "overflow": "visible"})
         for child in list(ET.fromstring(inner)):
             nested.append(child)
         pic = ET.tostring(nested, encoding="unicode")
     if name == "user-desktop":      # our monitor, on whole pixels
         mw, mh = (7, 5) if size == 16 else (9, 6)
-        mx = round((x1 + x0 + (x1 - x0) * 0.35) / 2 - mw / 2)
-        my = round((y0 + fh + y1) / 2 - mh / 2 - 0.5)
+        if COVER == "checker":
+            mw, mh = 7, 5
+            mx, my = round((x0 + x1) / 2 - mw / 2), round((y0 + fh + band_top) / 2 - mh / 2 - 0.5)
+        else:
+            mx = round((x1 + x0 + (x1 - x0) * 0.35) / 2 - mw / 2)
+            my = round((y0 + fh + y1) / 2 - mh / 2 - 0.5)
         pic = (f'<path fill="{EMBLEM}" fill-rule="evenodd" d="M{mx} {my} h{mw} v{mh} h{-mw} Z '
                f'M{mx + 1} {my + 1} v{mh - 2} h{mw - 2} v{-(mh - 2)} Z"/>'
                f'<rect fill="{EMBLEM}" x="{mx + mw // 2 - 1}" y="{my + mh}" width="{3 if mw > 7 else 2}" height="1"/>')
@@ -305,7 +358,21 @@ def binder_small(name: str, size: int, opened: bool = False) -> str:
             f'viewBox="0 0 {size} {size}" version="1.1">{defs}{"".join(parts)}{pic}</svg>\n')
 
 
+STYLES_MADE = {   # folder style: its cover, where it's written, its picture's box and centre
+    "xl-big-baddy": ("stripes", 34.0, (W - 6 - 34.0 / 2 - 4, 6 + 34.0 / 2 + 3)),
+    "xl-80s": ("checker", 21.0, (W / 2, (WAVE_HIGH + WAVE_AMP + H - FLAP) / 2 + 0.5)),
+}
+
+
 def main() -> int:
+    global COVER, OUT, PIC, PIC_AT
+    for style, (COVER, PIC, PIC_AT) in STYLES_MADE.items():
+        OUT = ROOT / "data" / "icons" / style / "places"
+        make()
+    return 0
+
+
+def make() -> None:
     ET.register_namespace("", SVG)
     ET.register_namespace("xlink", XLINK)
     names = sorted(f.stem for f in compose.MINT.glob("48/*.svg"))
@@ -319,7 +386,6 @@ def main() -> int:
             f.write_text(svg, encoding="utf-8")
             count += 1
     print(f"{count} icons written to {OUT}")
-    return 0
 
 
 if __name__ == "__main__":
