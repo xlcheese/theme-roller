@@ -67,7 +67,7 @@ def back_outline():
     pts += arc(50, 109 - dz, 5, 90, 30)                  # the tab's slope down
     pts += [(58, 104 - dz), (61, 104 - dz)]
     pts += arc(110, 96 - dz, 8, 90, 0)                   # top right corner
-    pts += arc(106, 22, 8, 0, -90)                       # bottom right corner
+    pts += arc(103.5, 22, 8, 0, -90)                     # bottom right corner, tucked in behind the front's
     return pts
 
 
@@ -154,14 +154,14 @@ def folder3d(name: str, size: int, opened: bool = False) -> str:
     parts.append(f'<path fill="{BACK}" d="{d([(u, v, z_back(v)) for u, v in back])}"/>')
     # the open side (turned this way, the right): the inside of the fold, dark
     top_b = 96 - BACK_DROP
-    side = on([(118, 80)], 0, tip) + on([(114, 22)], 0, tip) + [(114, 16, -0.8), (114, 22, z_back(22)),
-                                                              (118, top_b, z_back(top_b))]
+    # (it ends where the front's foot starts to round: lower, slivers showed at the corner)
+    side = on([(118, 80)], 0, tip) + on([(114, 24)], 0, tip) + [(111.8, 24, z_back(24)), (118, top_b, z_back(top_b))]
     parts.append(f'<path fill="{EDGE}" d="{d(side)}"/>')
     # the papers inside: their edges in the gap, their tops over the front
     for frac, top, colour in ((0.62, 92 - BACK_DROP, "#E9E9E9"), (0.35, 90 - BACK_DROP + 4 * bool(opened), "#FAFAFA")):
-        sheet = [(16, 20), (14, top), (116, top), (113, 20)]
+        sheet = [(16, 26), (14, top), (116, top), (110.6, 26)]   # inside the back's edge
         parts.append(f'<path fill="{colour}" d="{d([(u, v, z_back(v) * frac) for u, v in sheet])}"/>')
-        edge = [(113, 20), (116, top), (117.5, top), (114.5, 20)]
+        edge = [(110.6, 26), (116, top), (117.2, top), (111.4, 26)]
         parts.append(f'<path fill="{colour}" d="{d([(u, v, z_back(v) * frac) for u, v in edge])}"/>')
     front = front_outline()
     # the front: its own thickness on the right, then its face, its foot darker, its top edge light
