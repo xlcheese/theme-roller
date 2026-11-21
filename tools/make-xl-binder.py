@@ -197,7 +197,7 @@ def binder3d(name: str, size: int, opened: bool = False) -> str:
     # the cover, its stripes, its ring, its picture
     parts.append(f'<path fill="{F}" d="{d(front(rounded(0, 0, W, H, 4, "tr br")))}"/>')
     parts += stripes(0, H if opened else H - FLAP + 3, 0.02)
-    ring_top = H - 6 if opened else H - FLAP - 6
+    ring_top = H - FLAP - 6          # the same ring, open or closed (xl_cheese)
     parts.append(f'<path fill="none" stroke="{RING}" stroke-width="1.8" d="{d(front(rounded(6, 6, W - 6, ring_top, 6)))}"/>')
     if opened:   # the cover's velcro, where the flap presses down when closed
         parts.append(f'<path fill="{VELCRO}" d="{d(front(rounded(VELCRO_U[0], H - 18, VELCRO_U[1], H - 9, 0.8), 0.06))}"/>')
