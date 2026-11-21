@@ -171,11 +171,9 @@ def monitor3d(z: float) -> list:
 
 def binder3d(name: str, size: int, opened: bool = False) -> str:
     parts = []
-    if opened:   # the flap, up behind: its inside, darker, rising from the back's top
+    if opened:   # the flap, up behind: its underside, plain and darker (no piping there), rising from the back's top
         flap = [(u, H - 2 + v, -D_TOP + v * 0.35) for u, v in rounded(0, 0, W, FLAP, 6, "tl tr")]
         parts.append(f'<path fill="{SIDE}" d="{d(flap)}"/>')
-        parts.append(f'<path fill="none" stroke="{RING}" stroke-width="1.5" '
-                     f'd="{d([(u, H - 2 + v, -D_TOP + v * 0.35) for u, v in rounded(4, 4, W - 4, FLAP - 4, 5, "tl tr")])}"/>')
     # the open side: dark, with the paper and pink pockets inside, narrowing up
     prof = [(-D_BOTTOM, 0.0)] + [(-depth(v), v) for v in (H * 0.5, H - D_TOP / 2 - 1)] + top_curve(0) + [(0.0, 0.0)]
     parts.append(f'<path fill="{SIDE}" d="{d([(0, v, z) for z, v in prof])}"/>')
