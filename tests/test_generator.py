@@ -1537,6 +1537,22 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(icons.build(t, adw, ["Mint-Y"], Path(tmp) / "t"), 16 * 8)
             self.assertIn("GNOME Project", (Path(tmp) / "t" / "COPYING").read_text())
 
+    def test_big_baddy_stripes(self):
+        """xl-Big Baddy: no racing stripes until you pick a color (unset, they're
+        the binder's color, under its white rings, so nothing shows); then that
+        color; every placeholder swapped at every size."""
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        off = icons.colours(t, {"style": "xl-big-baddy"})
+        self.assertEqual(off["backfolder"], off["folder"])
+        on = icons.colours(t, {"style": "xl-big-baddy", "second_color": "#1A1A1A"})
+        self.assertEqual(on["backfolder"], "#1A1A1A")
+        self.assertEqual(icons.STYLES["xl-big-baddy"]["second_label"], "Racing stripes")
+        for size in icons.STYLES["xl-big-baddy"]["sizes"]:
+            for f in (icons.source_dir("xl-big-baddy") / str(size)).glob("*.svg"):
+                out = icons.recolour(f.read_text(), on, "xl-big-baddy")
+                for src in icons.STYLES["xl-big-baddy"]["source"].values():
+                    self.assertNotIn(src, out.lower(), f)
+
     def test_every_style_covers_mint_y(self):
         """Every style draws Mint-Y's places icons (its own, or its folder with
         Mint-Y's picture), at every size: none left to another icon theme."""

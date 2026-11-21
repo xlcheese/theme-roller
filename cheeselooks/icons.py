@@ -56,6 +56,14 @@ STYLES = {
     "adwaita": {"name": "Adwaita", "dir": "adwaita", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
                 "source": {"folder": "a4ca0e", "backfolder": "438d0e", "frontedge": "62a00e",
                            "frontshine": "afd40f", "emblem": "438d1e"}},
+    # ours (xl_cheese's design): an 80s school binder, racing stripes optional
+    # (tools/make-xl-binder.py; Mint-Y's pictures on it, CC BY-SA 4.0)
+    "xl-big-baddy": {"name": "xl-Big Baddy", "dir": "xl-big-baddy", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
+                     "source": {"folder": "ff0a01", "frontedge": "ff0a02", "backfolder": "ff0a03", "emblem": "ff0a04"},
+                     "second_label": "Racing stripes", "second_optional": True,
+                     "note": "Binders in your colors: the folder color follows your accent. Racing stripes "
+                             "are off until you pick a color for them; No stripes takes them off "
+                             "again. Every other icon stays as in your current icon theme. Apply to use them."},
 }
 # a style may name the second color for what it colours ("second_label":
 # "Racing stripes" for a binder without a back to colour)
@@ -98,6 +106,8 @@ def colours(t: dict[str, str], icons: dict) -> dict[str, str]:
     # the back follows your accent (not the folder color): choose a grey front
     # and the back stays a darker accent, as Yaru's grey-front folders
     back = icons.get("second_color") or back_shade(t["accent"])
+    if not icons.get("second_color") and STYLES.get(icons.get("style"), {}).get("second_optional"):
+        back = folder            # unset: none (xl-Big Baddy's stripes in the binder's colour vanish)
     dark_emblem = pal.darker(folder, 0.72)
     light_emblem = "#F2F2F2"
     emblem = dark_emblem if pal.contrast(dark_emblem, folder) >= 3.0 else light_emblem

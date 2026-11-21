@@ -50,6 +50,11 @@ TABS = [  # (settings section, tab title)
     ("details", "Details"), ("icons", "Icons"), ("integration", "Integration"), ("share", "Import & Export"),
     ("docs", "Documentation"), ("about", "About"),
 ]
+# the Icons tab's note (a folder style may have its own: icons.STYLES[...]["note"])
+ICON_NOTE = ("Folders recolored: the folder color (the front) follows your accent, and the second color "
+             "(the back) a darker shade of it. Choose either and both keep their colors from then on; Reset "
+             "Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to "
+             "use them.")
 REPO_URL = "https://github.com/xlcheese/xl-cheeselooks"
 DOCS_URL = REPO_URL + "/tree/HEAD/docs"     # HEAD: the default branch
 TIP_URL = "https://www.paypal.com/donate/?hosted_button_id=SDDYDENKXPCWN"   # About: a tip for the author ("" hides it)
@@ -398,6 +403,13 @@ class SettingsWindow(Gtk.ApplicationWindow):
             value = Gtk.Label(xalign=0, selectable=True)
             box.pack_start(button, False, False, 0)
             box.pack_start(value, False, False, 0)
+            if path == ("icons", "second_color"):
+                # xl-Big Baddy: takes the racing stripes off (shown while they're on)
+                off = Gtk.Button(label="No stripes")
+                off.connect("clicked", lambda _b: self.changed(path, None))
+                off.set_no_show_all(True)
+                box.pack_start(off, False, False, 0)
+                self.stripes_off = off
             self.controls[path] = ((button, value), kind)
             return box
         if kind in ("int", "int?"):    # int?: None shows the default (button roundness: the style's)
@@ -706,11 +718,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _icon_preview_row(self, grid: Gtk.Grid, row: int) -> int:
         """The folders in the chosen colors, at 48 and 24px (drawn here, before Apply)."""
-        note = Gtk.Label(label="Folders recolored: the folder color (the front) follows your accent, "
-                               "and the second color (the back) a darker shade of it. Choose either and both "
-                               "keep their colors from then on; Reset Icons follows the theme again. "
-                               "Every other icon stays as in your current icon theme. Apply to use them.",
-                         xalign=0, wrap=True, max_width_chars=60, margin_start=16, hexpand=True)
+        note = Gtk.Label(label=ICON_NOTE, xalign=0, wrap=True, max_width_chars=60, margin_start=16, hexpand=True)
+        self.icon_note = note
         note.get_style_context().add_class("dim-label")
         grid.attach(note, 0, row, 2, 1)
         self.icon_images = []
@@ -1181,7 +1190,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
     def changed(self, path: tuple[str, ...], value: Any) -> None:
         if self.syncing:
             return
-        if path in (("icons", "folder_color"), ("icons", "second_color")) and value:
+        optional = icons.STYLES[icons.style_of(self.data["icons"])].get("second_optional")
+        if path in (("icons", "folder_color"), ("icons", "second_color")) and value and not optional:
             # touch either folder color and both stop following the theme: the
             # other keeps the color it showed (xl_cheese: pick a blue front and
             # the back stays the dark red it was)
@@ -1228,7 +1238,10 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                     shown = value or self._effective_color(path, theme)
                     button.set_rgba(_rgba(shown))
                     if value is None and kind == "color?":
-                        label.set_text("Follow theme")
+                        label.set_text(self._unset_label(path))
+                    elif path == ("icons", "second_color") and \
+                            icons.STYLES[icons.style_of(self.data["icons"])].get("second_optional"):
+                        label.set_text(shown)              # room for No stripes beside it
                     else:
                         r, gg, b = pal.to_rgb(shown)
                         label.set_text(f"{shown}   rgb({r}, {gg}, {b})")
@@ -1268,6 +1281,14 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         finally:
             self.syncing = False
 
+    def _unset_label(self, path: tuple[str, ...]) -> str:
+        """What an unset color says: "Follow theme", or for a style whose second
+        color is optional (xl-Big Baddy's racing stripes), "None"."""
+        if path == ("icons", "second_color") and \
+                icons.STYLES[icons.style_of(self.data["icons"])].get("second_optional"):
+            return "None"
+        return "Follow theme"
+
     def _update_icon_labels(self) -> None:
         """The Icons switch names what it does: "Custom folder style" while
         off, the chosen style's name ("Yaru folder style") while on; the
@@ -1278,6 +1299,9 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         name = spec["name"] if self.data["icons"].get("enabled") else "Custom"
         self.icons_switch_label.set_markup(f"<b>{GLib.markup_escape_text(name)}</b> folder style")
         self.second_color_label.set_text(spec.get("second_label", LABELS["second_color"]))
+        if hasattr(self, "icon_note"):
+            self.icon_note.set_text(spec.get("note", ICON_NOTE))
+        self.stripes_off.set_visible(bool(spec.get("second_optional") and self.data["icons"].get("second_color")))
 
     def _int_default(self, path: tuple[str, ...]) -> int:
         """What an unset number setting shows: button roundness, the style's own;
