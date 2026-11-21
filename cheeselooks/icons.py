@@ -30,8 +30,7 @@ from . import paths, reload
 THEME = "xl-Cheeselooks"
 KEY = ("org.cinnamon.desktop.interface", "icon-theme")
 # folder styles: where their SVGs are, their sizes, and which placeholder
-# colour in them is which part (Mint-Y and Yaru CC BY-SA 4.0, Breeze LGPL 3+,
-# Adwaita CC BY-SA 3.0;
+# colour in them is which part (Mint-Y and Yaru CC BY-SA 4.0, Breeze LGPL 3+;
 # COPYING in each folder)
 STYLES = {
     "mint-y": {"name": "Mint-Y", "dir": "mint-y", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
@@ -51,11 +50,6 @@ STYLES = {
     # 32px drawing standing in at 16-24 (Breeze's own small ones are outlines)
     "breeze": {"name": "Breeze", "dir": "breeze", "sizes": (16, 22, 24, 32, 48, 64, 96),
                "source": {"folder": "3daee9", "backfolder": "3dae09", "emblem": "3dae39"}},
-    # GNOME's (CC BY-SA 3.0): one 128px drawing, snapped to whole pixels at
-    # 16-48px, with Mint-Y's pictures at 16-24 (tools/import-adwaita-places.py)
-    "adwaita": {"name": "Adwaita", "dir": "adwaita", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
-                "source": {"folder": "a4ca0e", "backfolder": "438d0e", "frontedge": "62a00e",
-                           "frontshine": "afd40f", "emblem": "438d1e"}},
     # ours (xl_cheese's design): an 80s school binder, racing stripes optional
     # (tools/make-xl-binder.py; Mint-Y's pictures on it, CC BY-SA 4.0)
     "xl-big-baddy": {"name": "xl-Big Baddy", "dir": "xl-big-baddy", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),

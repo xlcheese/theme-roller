@@ -16,8 +16,10 @@ at 33%, thin white and dark lines, and the picture in the text colour at 60%:
     the thin lines                       kept (light and dark edges)
 
 Breeze's own colours are drawn at 32, 48, 64 and 96px; its 16 and 22px
-folders are one-colour outlines, so the 32px drawing stands in at 16, 22 and
-24px. Names Breeze draws elsewhere are taken through its links (folder-music
+folders are one-colour outlines, so the 32px drawing makes 16, 22 and 24px:
+snapped to whole pixels, with Mint-Y's picture for each name drawn for that
+size (tools/smallsize.py; shrunk, Breeze's 1px outline pictures went under a
+pixel, and its edges between pixels). Names Breeze draws elsewhere are taken through its links (folder-music
 is its folder-sound, folder-recent its folder-temp); its desktop is a
 monitor, so its desktop folder (folder-desktop) is used, as its bookmark
 and network folders for user-bookmarks and gtk-network (Mint-Y's names);
@@ -83,6 +85,27 @@ def mark(svg_text: str) -> str:
     return ET.tostring(root, encoding="unicode") + "\n"
 
 
+def small_icon(text: str, name: str, size: int, box, front_top) -> str:
+    """The 32px drawing on whole pixels at `size`, with Mint-Y's picture (or,
+    where Mint-Y has none, Breeze's own)."""
+    import smallsize
+    ET.register_namespace("", SVG)
+    root = ET.fromstring(text)
+    sx, sy, tx, ty = smallsize.snap(box, front_top, 32, size)
+    cx = tx + (box[0] + box[2]) / 2 * sx
+    cy = ty + (front_top + box[3]) / 2 * sy
+    pic = smallsize.mint_picture(name, size, cx, cy, EMBLEM)
+    out = ET.Element(f"{{{SVG}}}svg", {"width": str(size), "height": str(size), "viewBox": f"0 0 {size} {size}"})
+    g = ET.SubElement(out, f"{{{SVG}}}g", {"transform": f"matrix({sx:.6f} 0 0 {sy:.6f} {tx:.6f} {ty:.6f})"})
+    for c in list(root):
+        if pic is not None and EMBLEM in (c.get("style") or "").lower():
+            continue                       # Breeze's picture: Mint-Y's, drawn for this size, instead
+        g.append(c)
+    if pic is not None:
+        out.append(pic)
+    return ET.tostring(out, encoding="unicode") + "\n"
+
+
 def sized(svg_text: str, size: int) -> str:
     return re.sub(r"<svg ", f'<svg width="{size}" height="{size}" ', svg_text, count=1)
 
@@ -90,6 +113,10 @@ def sized(svg_text: str, size: int) -> str:
 def main() -> int:
     places = Path(sys.argv[1]) / "icons" / "places"
     count = 0
+    import smallsize
+    import xml.etree.ElementTree as ET2
+    # the folder in Breeze's 32px drawing: outer box, and the front's top
+    box32, front32 = (1.0, 3.0, 31.0, 29.0), 10.0
     for name, theirs in NAMES.items():
         for size in DRAWN:
             # a size Breeze skips (folder-desktop has no 48px): the next one up
@@ -98,11 +125,26 @@ def main() -> int:
             if f is None:
                 continue
             text = mark(f.resolve().read_text(encoding="utf-8"))
-            for s in (size,) + (SMALL if size == 32 else ()):
+            if size == 32:
+                for small in SMALL:
+                    out = OUT / str(small) / f"{name}.svg"
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    out.write_text(small_icon(text, name, small, box32, front32), encoding="utf-8")
+                    count += 1
+            for s in (size,):
                 out = OUT / str(s) / f"{name}.svg"
                 out.parent.mkdir(parents=True, exist_ok=True)
                 out.write_text(sized(text, s), encoding="utf-8")
                 count += 1
+    # Mint-Y's names Breeze doesn't draw, at the small sizes: its folder, Mint-Y's picture
+    plain = mark((places / "32" / "folder.svg").resolve().read_text(encoding="utf-8"))
+    for name in smallsize.mint_names():
+        if name in NAMES or name in ("folder-drag-accept",):
+            continue
+        for small in SMALL:
+            (OUT / str(small) / f"{name}.svg").write_text(small_icon(plain, name, small, box32, front32),
+                                                          encoding="utf-8")
+            count += 1
     print(f"{count} icons written to {OUT}")
     return 0
 

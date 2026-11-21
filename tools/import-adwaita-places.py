@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Make the Adwaita folder style from GNOME's folder drawings, sharp at small sizes.
 
+Retired (21 Nov, xl_cheese: too like Mint-Y and Yaru); kept to bring it back:
+put its entry back in cheeselooks/icons.py STYLES and settings, then run this.
+
     python3 tools/import-adwaita-places.py ADWAITA_ICON_THEME_CHECKOUT
       then: python3 tools/compose-missing-places.py
 

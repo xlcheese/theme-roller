@@ -1502,41 +1502,6 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(drag.resolve(), (d / "places" / "48" / "folder-open.svg").resolve())
             self.assertFalse((d / "places" / "48" / "folder-open.svg").is_symlink())  # a real icon, not replaced
 
-    def test_adwaita_folders(self):
-        """GNOME's folders: every placeholder swapped, front and back exactly
-        your colors, and the small sizes on whole pixels."""
-        import gi
-        gi.require_version("GdkPixbuf", "2.0")
-        from gi.repository import GdkPixbuf
-        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
-        adw = {"style": "adwaita", "folder_color": "#7A7A7A", "second_color": "#E8795E"}
-        c = icons.colours(t, adw)
-        for size in icons.STYLES["adwaita"]["sizes"]:
-            for f in (icons.source_dir("adwaita") / str(size)).glob("*.svg"):
-                out = icons.recolour(f.read_text(), c, "adwaita")
-                for src in icons.STYLES["adwaita"]["source"].values():
-                    self.assertNotIn(src, out.lower(), f)
-
-        def render(size):
-            loader = GdkPixbuf.PixbufLoader()
-            loader.write(icons.recolour((icons.source_dir("adwaita") / str(size) / "folder.svg").read_text(),
-                                        c, "adwaita").encode())
-            loader.close()
-            return loader.get_pixbuf()
-
-        def px(pb, x, y):
-            i = y * pb.get_rowstride() + x * pb.get_n_channels()
-            return tuple(pb.get_pixels()[i:i + 4])
-        big = render(128)
-        self.assertEqual(px(big, 64, 80)[:3], palette.to_rgb("#7A7A7A"))      # the front
-        self.assertEqual(px(big, 20, 20)[:3], palette.to_rgb("#E8795E"))      # the back
-        small = render(24)                       # whole pixels: the folder's edge columns are solid
-        self.assertEqual(px(small, 1, 12)[3], 255)                            # (its left edge is x = 1)
-        self.assertEqual(px(small, 0, 12)[3], 0)
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(icons.build(t, adw, ["Mint-Y"], Path(tmp) / "t"), 16 * 8)
-            self.assertIn("GNOME Project", (Path(tmp) / "t" / "COPYING").read_text())
-
     def test_big_baddy_stripes(self):
         """xl-Big Baddy: no racing stripes until you pick a color (unset, they're
         the binder's color, under its white rings, so nothing shows); then that
