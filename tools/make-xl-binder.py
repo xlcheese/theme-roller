@@ -58,7 +58,7 @@ STRIPES = ((3.0, 12.0), (20.0, 29.0))  # where each band's edges meet the left e
 SLOPE = (H - 3.0) / W                  # the lower stripe: bottom-left corner to top-right corner
 PIC = 34.0                             # the picture's box on the cover, as Mint-Y's on its folder
 PIC_AT = (W - 6 - PIC / 2 - 4, 6 + PIC / 2 + 3)
-VELCRO, VELCRO_U = "#1E1E1E", (70.0, 75.0)   # the velcro strips (open binder): colour, across
+VELCRO, VELCRO_U = "#1E1E1E", (W / 2 - 2.5, W / 2 + 2.5)   # the velcro strips (open binder), centred
 FIT = 114.0                            # the binder's width in the 128px icon (Breeze-like margins)
 
 
