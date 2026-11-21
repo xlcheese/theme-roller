@@ -39,6 +39,7 @@ border    = "border_hover"
 highlight = { y = 2, blur = 2, color = "white", alpha = 0.30, alpha_dark = 0.1 }
 left      = { x = 1, blur = 2, color = "white", alpha = 0.20, alpha_dark = 0.07 }
 shade     = { y = -2, blur = 1, color = "black", alpha = 0.02 }
+right     = { x = 1, blur = 1, color = "white", alpha = 0.20, alpha_dark = 0.07 }   # as at rest (xl_cheese: it vanished on hover)
 recess = { color = "black", alpha = 0.10, light = "white", light_alpha = 0.35, light_alpha_dark = 0.1 }
 
 [edges.linked_hover]
