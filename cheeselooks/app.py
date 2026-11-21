@@ -269,6 +269,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             self.stack.add_titled(self._tab(section), section, title)
         sidebar = Gtk.StackSidebar(stack=self.stack)
         sidebar.set_size_request(160, -1)
+        self.sidebar = sidebar
         self.status = Gtk.Label(xalign=0, selectable=True, wrap=True, margin_start=12, margin_bottom=6)
         self.status.get_style_context().add_class("dim-label")
         pages = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -1140,6 +1141,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self._scrollbar_mode(t["scrollbar.mode"] == "overlay")
             self.queue_resize()
             GLib.idle_add(self._fit_pages)          # measured in the new sizes
+            GLib.timeout_add(250, self._fit_pages)  # again once restyled (the sidebar's rows lag a moment)
         except GLib.Error as exc:
             self.status.set_text(f"Preview CSS problem: {exc.message}")
         if self.data["theme"] == themes.CUSTOM:
@@ -1165,6 +1167,14 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.page_height = tallest
             for name, _title in TABS:
                 self.stack.get_child_by_name(name).set_min_content_height(tallest)
+        # ...and the sidebar's tabs, whole: above roundness 30 they're rounded,
+        # spaced out, and twelve of them can outgrow the tallest tab (xl_cheese:
+        # a scrollbar over them). Its scroller asks for all of its list.
+        scroller = next((c for c in self.sidebar.get_children() if isinstance(c, Gtk.ScrolledWindow)), None)
+        if scroller is not None and scroller.get_child() is not None:
+            need = scroller.get_child().get_preferred_height()[1]
+            if need != scroller.get_min_content_height():
+                scroller.set_min_content_height(need)
         return False
 
     def _scrollbar_mode(self, overlay: bool) -> None:
