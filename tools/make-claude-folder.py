@@ -42,7 +42,7 @@ SMALL = (16, 22, 24)
 # tab, and the front: a wedge (108 wide at the top, 100 at the foot)
 BACK_PTS = None
 T = 5.0                                     # the back sits this far behind the front
-YAW, PITCH, CAM = math.radians(-20), math.radians(9), 240.0
+YAW, PITCH, CAM = math.radians(-36), math.radians(8), 230.0
 PIC = 34.0
 PIC_AT = (64.0, 50.0)                       # the picture's centre: the middle of the front (xl_cheese)
 FIT = 116.0
@@ -60,12 +60,13 @@ def back_outline():
     """The back: rounded corners (the bottom ones too, hidden behind the
     front's), the tab at the top left (from the sketch), lowered by BACK_DROP."""
     dz = BACK_DROP
+    # as wide as the front (10..118 at the top, the fold's ends at the bottom)
     pts = arc(22, 22, 8, -90, -180)                      # bottom left corner
-    pts += arc(22, 106 - dz, 8, 180, 90)                 # top left corner, up into the tab
-    pts += [(52, 114 - dz)]
-    pts += arc(52, 109 - dz, 5, 90, 30)                  # the tab's slope down
-    pts += [(60, 104 - dz), (63, 104 - dz)]
-    pts += arc(106, 96 - dz, 8, 90, 0)                   # top right corner
+    pts += arc(18, 106 - dz, 8, 180, 90)                 # top left corner, up into the tab
+    pts += [(50, 114 - dz)]
+    pts += arc(50, 109 - dz, 5, 90, 30)                  # the tab's slope down
+    pts += [(58, 104 - dz), (61, 104 - dz)]
+    pts += arc(110, 96 - dz, 8, 90, 0)                   # top right corner
     pts += arc(106, 22, 8, 0, -90)                       # bottom right corner
     return pts
 
@@ -140,19 +141,31 @@ def monitor3d(tip: float) -> list:
             f'<path fill="{EMBLEM}" d="{d(on(stand, 0.05, tip))}"/>']
 
 
+def z_back(v: float) -> float:
+    """Front and back are one folded piece (xl_cheese's reference picture):
+    joined at a fold along the bottom, the gap between them widening upward."""
+    return -(1.5 + 20.0 * (v - 14) / 86)
+
+
 def folder3d(name: str, size: int, opened: bool = False) -> str:
-    tip = math.radians(24) if opened else 0.0
+    tip = math.radians(22) if opened else 0.0
     parts = []
     back = back_outline()
-    # the back's right edge (its thickness shows, turned this way), then the back
-    parts.append(f'<path fill="{EDGE}" d="{d([(114, 22, -T), (114, 96 - BACK_DROP, -T), (114, 96 - BACK_DROP, -T - 2), (114, 22, -T - 2)])}"/>')
-    parts.append(f'<path fill="{BACK}" d="{d([(u, v, -T) for u, v in back])}"/>')
-    if opened:   # a sheet inside, seen as the front tips away from it
-        sheet = [(20, 18), (20, 92 - BACK_DROP), (108, 92 - BACK_DROP), (108, 18)]
-        parts.append(f'<path fill="#F5F5F5" d="{d([(u, v, -T * 0.5) for u, v in sheet])}"/>')
+    parts.append(f'<path fill="{BACK}" d="{d([(u, v, z_back(v)) for u, v in back])}"/>')
+    # the open side (turned this way, the right): the inside of the fold, dark
+    top_b = 96 - BACK_DROP
+    side = on([(118, 80)], 0, tip) + on([(114, 22)], 0, tip) + [(114, 16, -0.8), (114, 22, z_back(22)),
+                                                              (118, top_b, z_back(top_b))]
+    parts.append(f'<path fill="{EDGE}" d="{d(side)}"/>')
+    # the papers inside: their edges in the gap, their tops over the front
+    for frac, top, colour in ((0.62, 92 - BACK_DROP, "#E9E9E9"), (0.35, 90 - BACK_DROP + 4 * bool(opened), "#FAFAFA")):
+        sheet = [(16, 20), (14, top), (116, top), (113, 20)]
+        parts.append(f'<path fill="{colour}" d="{d([(u, v, z_back(v) * frac) for u, v in sheet])}"/>')
+        edge = [(113, 20), (116, top), (117.5, top), (114.5, 20)]
+        parts.append(f'<path fill="{colour}" d="{d([(u, v, z_back(v) * frac) for u, v in edge])}"/>')
     front = front_outline()
-    # the front's right edge (its thickness), then the front, its foot darker, its top edge light
-    edge = on([(118, 80), (114, 22)], 0, tip) + on([(114, 22), (118, 80)], -1.8, tip)
+    # the front: its own thickness on the right, then its face, its foot darker, its top edge light
+    edge = on([(118, 80), (114, 22)], 0, tip) + on([(114, 22), (118, 80)], -1.6, tip)
     parts.append(f'<path fill="{EDGE}" d="{d(edge)}"/>')
     parts.append(f'<path fill="{FRONT}" d="{d(on(front, 0, tip))}"/>')
     foot = [(13.86, 24), (114.14, 24)] + arc(106, 22, 8, 0, -90) + arc(22, 22, 8, -90, -180)
