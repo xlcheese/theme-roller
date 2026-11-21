@@ -314,8 +314,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
             row = self._style_rows(grid, row)
         if section == "terminal":
             row = self._terminal_picks(grid, row)
-        if section == "integration":
-            row = self._restart_row(grid, row)
         if section in SECTION_NOTES:
             note = Gtk.Label(label=SECTION_NOTES[section], xalign=0, wrap=True)
             note.get_style_context().add_class("dim-label")
@@ -372,27 +370,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 self.reset_btns["all"] = every
             grid.attach(box, 0, row, 2, 1)
         return self._page(grid)
-
-    def _restart_row(self, grid: Gtk.Grid, row: int) -> int:
-        """Integration, first: restart Cinnamon after Apply (an app choice, not a setting)."""
-        restart = Gtk.CheckButton(label="Restart Cinnamon after Apply",
-                                  active=self.prefs.get("restart_after_apply", False))
-        restart.set_tooltip_text("Window borders (Muffin) only reload at login or a Cinnamon restart. "
-                                 "This restarts Cinnamon after each Apply, like Ctrl+Alt+Esc: "
-                                 "the panel blinks, your windows stay open.")
-
-        def toggled(b: Gtk.CheckButton) -> None:
-            self.prefs["restart_after_apply"] = b.get_active()
-            _save_prefs(self.prefs)
-        restart.connect("toggled", toggled)
-        grid.attach(restart, 0, row, 2, 1)
-        note = Gtk.Label(label="Window borders reload at the next login otherwise.", xalign=0)
-        note.get_style_context().add_class("dim-label")
-        grid.attach(note, 0, row + 1, 2, 1)
-        row += 2
-        sep = Gtk.Separator(margin_top=6, margin_bottom=2)
-        grid.attach(sep, 0, row, 2, 1)
-        return row + 1
 
     def _control(self, path: tuple[str, ...], kind: str, extra: Any) -> Gtk.Widget:
         if path[-1] == "button_glyphs":
@@ -1595,8 +1572,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             try:
                 style = cli._load_style(data["style"]["name"], None)
                 # Apply means "use this theme": also switch to it if it isn't active yet
-                log = cli.apply_to_desktop(data, style, activate=True,
-                                           restart=self.prefs.get("restart_after_apply", False))
+                # restarts Cinnamon by itself when window borders changed
+                log = cli.apply_to_desktop(data, style, activate=True)
                 GLib.idle_add(self.applied_ok, data, log)
             except Exception as exc:  # report anything to the user
                 GLib.idle_add(self.applied_failed, f"Apply failed: {exc}")

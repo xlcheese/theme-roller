@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -230,10 +231,48 @@ def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
         line = reload.set_overlay_scrollbars(sb["mode"] == "overlay")
         if line:
             log.append(line)
+    was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
     log += reload.apply(tokens.THEME_NAME, layout, activate=activate, theme_dir=theme_dir)
-    if restart:
-        log.append(reload.restart_cinnamon())
+    log += _window_borders(table, was_ours, force=restart)
     return log
+
+
+# ------------------------------------------------------------------ window borders
+# Cinnamon's window manager (Muffin) draws window borders from the GTK theme's
+# stylesheet, but keeps the copy it loaded by name: Apply's reload refreshes
+# apps, not the borders (xl_cheese tested: only a Cinnamon restart did). So
+# Apply restarts Cinnamon itself, only when something Muffin draws changed:
+# a fingerprint of the title bar, border and title button values, remembered.
+THEME_KEY = ("org.cinnamon.desktop.interface", "gtk-theme")
+WINDOW_BORDER_KEYS = ("wb.", "tbtn.", "titlebuttons.", "file:gtk-3")
+
+
+def window_border_fingerprint(table: dict[str, str]) -> str:
+    h = hashlib.sha256()
+    for key in sorted(table):
+        if key.startswith(WINDOW_BORDER_KEYS) or key == "titlebuttons":
+            h.update(f"{key}={table[key]}\n".encode())
+    return h.hexdigest()
+
+
+def _window_borders(table: dict[str, str], was_ours: bool, force: bool = False) -> list[str]:
+    """Restart Cinnamon if its window borders need it: what they draw changed
+    since the last Apply (or, the first time, our theme was already in use, so
+    an old copy may be loaded). Switching to the theme from another needs no
+    restart: Muffin loads it fresh."""
+    if not reload.available():
+        return []
+    f = paths.config_dir() / "window-borders"
+    try:
+        old = f.read_text(encoding="utf-8").strip()
+    except OSError:
+        old = None
+    new = window_border_fingerprint(table)
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(new + "\n", encoding="utf-8")
+    if force or (old is not None and old != new) or (old is None and was_ours):
+        return [reload.restart_cinnamon()]
+    return []
 
 
 def cmd_apply(args: argparse.Namespace) -> int:
@@ -295,10 +334,11 @@ def _cmd_apply(args: argparse.Namespace) -> int:
             line = reload.set_overlay_scrollbars(sb["mode"] == "overlay")
             if line:
                 print(f"  {line}")
+        was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
         for line in reload.apply(tokens.THEME_NAME, layout, activate=args.activate, theme_dir=theme_dir):
             print(f"  {line}")
-        if getattr(args, "restart", False):
-            print(f"  {reload.restart_cinnamon()}")
+        for line in _window_borders(table, was_ours, force=getattr(args, "restart", False)):
+            print(f"  {line}")
     return 0
 
 
@@ -338,8 +378,16 @@ def cmd_revert(args: argparse.Namespace) -> int:
         except styles.StyleError as exc:
             _err(f"libadwaita colors left as they were: {exc}")
     if not args.no_reload:
+        was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
         for line in reload.apply(tokens.THEME_NAME, theme_dir=paths.theme_dir()):
             print(f"  {line}")
+        if data:       # the restored theme's window borders, as Apply does
+            try:
+                table = tokens.build(data, _load_style(data["style"]["name"], None))
+                for line in _window_borders(table, was_ours):
+                    print(f"  {line}")
+            except styles.StyleError:
+                pass
     return 0
 
 
@@ -489,7 +537,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="reset roundness, gradient, depth and panel/menu shape to the style's defaults")
     p.add_argument("--activate", action="store_true", help="also switch Cinnamon to this theme")
     p.add_argument("--restart", action="store_true",
-                   help="restart Cinnamon afterwards (like Ctrl+Alt+Esc) so window borders reload too")
+                   help="restart Cinnamon afterwards even if window borders didn't change "
+                        "(Apply restarts it by itself when they did)")
     p.add_argument("--no-reload", action="store_true", help="write files only")
     p.add_argument("--no-save", action="store_true", help="don't save the settings used")
     p.set_defaults(func=cmd_apply)

@@ -1443,6 +1443,34 @@ class RenderAndInstallTests(unittest.TestCase):
         app.SettingsWindow.changed(w, ("icons", "second_color"), "#2EC27E")      # a green back...
         self.assertEqual(w.data["icons"]["folder_color"], "#E01B24")            # ...the front stays red
 
+    def test_cinnamon_restarts_only_when_window_borders_change(self):
+        """Muffin keeps its copy of the theme's stylesheet: Apply restarts Cinnamon
+        by itself, only when what it draws changed (xl_cheese, 21 Nov)."""
+        from unittest import mock
+        from cheeselooks import paths
+        style = styles.load(DEFAULT_STYLE)
+        base = defaults()
+        table = tokens.build(base, style)
+        panel = copy.deepcopy(base)
+        panel["panel"]["panel_opacity"] = 40                             # the panel only
+        borders = copy.deepcopy(base)
+        borders["window_borders"]["border_width"] = 4                    # the window borders
+        self.assertEqual(cli.window_border_fingerprint(tokens.build(panel, style)),
+                         cli.window_border_fingerprint(table))
+        self.assertNotEqual(cli.window_border_fingerprint(tokens.build(borders, style)),
+                            cli.window_border_fingerprint(table))
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(paths, "config_dir", lambda: Path(tmp)), \
+                mock.patch.object(reload, "available", lambda: True), \
+                mock.patch.object(reload, "restart_cinnamon", lambda: "restarted"):
+            self.assertEqual(cli._window_borders(table, was_ours=False), [])        # switched to it: loaded fresh
+            self.assertEqual(cli._window_borders(table, was_ours=True), [])         # nothing changed
+            self.assertEqual(cli._window_borders(tokens.build(panel, style), True), [])
+            self.assertEqual(cli._window_borders(tokens.build(borders, style), True), ["restarted"])
+            self.assertEqual(cli._window_borders(table, True, force=True), ["restarted"])   # --restart
+            (Path(tmp) / "window-borders").unlink()
+            self.assertEqual(cli._window_borders(table, was_ours=True), ["restarted"])  # in use, unknown copy
+
     def test_renamed_or_retired_folder_style_still_opens(self):
         """xl_cheese, 21 Nov: settings saved with "xl-80s" (renamed xl-Rad) stopped
         the app opening. Renamed: the new name; retired (Adwaita): the default."""
