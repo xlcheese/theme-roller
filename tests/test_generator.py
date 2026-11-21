@@ -1443,6 +1443,13 @@ class RenderAndInstallTests(unittest.TestCase):
         app.SettingsWindow.changed(w, ("icons", "second_color"), "#2EC27E")      # a green back...
         self.assertEqual(w.data["icons"]["folder_color"], "#E01B24")            # ...the front stays red
 
+    def test_renamed_or_retired_folder_style_still_opens(self):
+        """xl_cheese, 21 Nov: settings saved with "xl-80s" (renamed xl-Rad) stopped
+        the app opening. Renamed: the new name; retired (Adwaita): the default."""
+        for old, new in (("xl-80s", "xl-rad"), ("adwaita", settings.DEFAULTS["icons"]["style"])):
+            data = settings.from_dict({"icons": {"enabled": True, "style": old}})
+            self.assertEqual(data["icons"]["style"], new)
+
     def test_icons_survive_a_theme_pick_and_apply(self):
         """xl_cheese, 20 Nov: Icons on, pick Claude Dark, Apply: the switch and
         folder style stay; flipping either afterwards needs an Apply."""

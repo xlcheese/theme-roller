@@ -66,6 +66,7 @@ DEFAULTS: dict[str, Any] = {
 }
 
 # (path, kind, extra) — kind is one of: color, color?, int, bool, choice
+FOLDER_STYLES = ("xl-big-baddy", "xl-rad", "claude", "mint-y", "yaru", "breeze")
 _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("global", "accent"), "color", None),
     (("global", "bg"), "color", None),
@@ -118,7 +119,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "scrollbars", "roundness"), "int", (0, 100)),
     (("details", "scrollbars", "width"), "int?", (6, 16)),
     (("icons", "enabled"), "bool", None),
-    (("icons", "style"), "choice", ("xl-big-baddy", "xl-rad", "claude", "mint-y", "yaru", "breeze")),
+    (("icons", "style"), "choice", FOLDER_STYLES),
     (("icons", "folder_color"), "color?", None),
     (("icons", "second_color"), "color?", None),
     (("details", "sliders", "custom"), "bool", None),
@@ -207,6 +208,9 @@ def validate(data: dict) -> list[str]:
     return problems
 
 
+OLD_FOLDER_STYLES = {"xl-80s": "xl-rad"}
+
+
 def from_dict(data: dict) -> dict:
     """Merge user data over defaults and validate. Raises SettingsError."""
     merged = _deep_merge(DEFAULTS, data or {})
@@ -224,6 +228,13 @@ def from_dict(data: dict) -> dict:
         wb["button_style"] = titlebuttons.OLD_NAMES[wb["button_style"]]     # names before v1
     if isinstance(wb, dict) and wb.get("button_glyphs") == "theme":
         wb["button_glyphs"] = "regular"                                      # renamed
+    ic = merged.get("icons")
+    if isinstance(ic, dict) and isinstance(ic.get("style"), str):
+        # a folder style renamed (xl-80s became xl-Rad) or retired (Adwaita):
+        # the new name, or the default, rather than settings that won't open
+        ic["style"] = OLD_FOLDER_STYLES.get(ic["style"], ic["style"])
+        if ic["style"] not in FOLDER_STYLES:
+            ic["style"] = DEFAULTS["icons"]["style"]
     merged["version"] = SETTINGS_VERSION
     problems = validate(merged)
     if problems:
