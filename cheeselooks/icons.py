@@ -57,6 +57,8 @@ STYLES = {
                 "source": {"folder": "a4ca0e", "backfolder": "438d0e", "frontedge": "62a00e",
                            "frontshine": "afd40f", "emblem": "438d1e"}},
 }
+# a style may name the second color for what it colours ("second_label":
+# "Racing stripes" for a binder without a back to colour)
 DEFAULT_STYLE = "mint-y"
 # names a style doesn't draw, borrowed from one it does (Yaru and Breeze have an open
 # folder but no drag-accept one); added to Mint-Y's own list of other names

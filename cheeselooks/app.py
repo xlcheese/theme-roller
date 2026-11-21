@@ -96,7 +96,7 @@ LABELS = {
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
     "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
-    "enabled": "Folders in your colors", "folder_color": "Folder color", "second_color": "Second color",
+    "enabled": "Custom folder style", "folder_color": "Folder color", "second_color": "Second color",
     "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps",
     "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
@@ -332,13 +332,14 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 row += 1
             label = Gtk.Label(label=LABELS.get(path[-1], path[-1].replace("_", " ").capitalize()), xalign=0)
             if path == ("icons", "style"):
-                # pictures of each style, under its name ("Folder style: Yaru")
-                label.set_text("Folder style")
-                self.folder_style_label = label
-                grid.attach(label, 0, row, 2, 1)
-                grid.attach(self._folder_style_picker(path, extra), 0, row + 1, 2, 1)
-                row += 2
+                # pictures of each style, under the switch that names it
+                grid.attach(self._folder_style_picker(path, extra), 0, row, 2, 1)
+                row += 1
                 continue
+            if path == ("icons", "enabled"):
+                self.icons_switch_label = label     # "Custom folder style", "Yaru folder style"
+            if path == ("icons", "second_color"):
+                self.second_color_label = label     # some styles call it something else
             grid.attach(label, 0, row, 1, 1)
             grid.attach(self._control(path, kind, extra), 1, row, 1, 1)
             row += 1
@@ -1253,9 +1254,9 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                     shown = icons.style_of(self.data["icons"])
                     for sid, b in widget.items():
                         b.set_active(sid == shown)
-                    self.folder_style_label.set_text(f"Folder style: {icons.STYLES[shown]['name']}")
                 else:
                     widget.set_active_id(value)
+            self._update_icon_labels()
             for r in self.theme_list.get_children():
                 if r.theme_name == self.data["theme"]:
                     self.theme_list.select_row(r)
@@ -1266,6 +1267,17 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 self.term_combo.set_active_id("default")
         finally:
             self.syncing = False
+
+    def _update_icon_labels(self) -> None:
+        """The Icons switch names what it does: "Custom folder style" while
+        off, the chosen style's name ("Yaru folder style") while on; the
+        second color takes the style's own name for it."""
+        if not hasattr(self, "icons_switch_label"):
+            return
+        spec = icons.STYLES[icons.style_of(self.data["icons"])]
+        name = spec["name"] if self.data["icons"].get("enabled") else "Custom"
+        self.icons_switch_label.set_markup(f"<b>{GLib.markup_escape_text(name)}</b> folder style")
+        self.second_color_label.set_text(spec.get("second_label", LABELS["second_color"]))
 
     def _int_default(self, path: tuple[str, ...]) -> int:
         """What an unset number setting shows: button roundness, the style's own;
