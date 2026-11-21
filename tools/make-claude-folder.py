@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
-"""Draw the Claude folder style: a file pocket, turned the other way.
+"""Draw the Claude folder style: the "Hot Rod" folder, turned a little left.
 
     python3 tools/make-claude-folder.py
 
-Claude's design (21 Nov, xl_cheese asked for one of its own, "turned the
-other way to set it apart from the Linux ones"): a card portfolio. A back
-panel with a tab, a front pocket with a thumb notch at the top, a sheet of
-paper showing in it, and a stitched edge round the pocket. Seen from below
-and to the right, so its right edge shows (xl-Big Baddy shows its left; the
-Linux styles face you).
+Claude's design, picked by xl_cheese from its first sketches (21 Nov): a
+wide back with a tab, and a front panel that's a wedge, wider at the top than
+at the bottom, with a darker band along its foot and a light edge along its
+top. Turned gently the other way from xl-Big Baddy (its right edge shows) and
+seen from a little *above*, where the binder is seen from below: a different
+perspective, not a mirror of it (xl_cheese: "turned slightly opposite the
+direction xl-Big Baddy are, but not the same perspective").
 
-Drawn in true perspective from 3D at 32px and up, Mint-Y's pictures (CC BY-SA
-4.0) on the pocket, centred, by the same projection (affine over their box).
-At 16, 22 and 24px straight on, on whole pixels, Mint-Y's picture at its own
-size; no stitching there (it would be a smudge). Open (drag-accept): the
-sheets pulled up out of the pocket.
+True perspective from 3D at 32px and up, Mint-Y's pictures (CC BY-SA 4.0)
+on the front's lower right by the same projection (affine over their box);
+16, 22, 24px straight on, on whole pixels, Mint-Y's picture at its own size
+(tools/smallsize.py). Open (drag-accept): the front tipped forward.
 
 Placeholder colours (cheeselooks/icons.py):
-    #c1a0d1 the pocket (your folder color)     #c1a0d3 its edge (the pocket, darker)
-    #c1a0d2 the back panel (second color)      #c1a0d4 the picture (emblem)
+    #c1a0d1 the front (your folder color)     #c1a0d3 the front's edge and foot (darker)
+    #c1a0d2 the back and tab (second color)   #c1a0d4 the picture (emblem)
 """
 from __future__ import annotations
 
@@ -35,21 +35,48 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "icons" / "claude" / "places"
 SVG, XLINK = smallsize.SVG, smallsize.XLINK
 FRONT, BACK, EDGE, EMBLEM = "#c1a0d1", "#c1a0d2", "#c1a0d3", "#c1a0d4"
-PAPER, PAPER_SHADE, STITCH = "#F7F4EE", "#E6E1D8", "#FFFFFF"
 SIZES = (16, 22, 24, 32, 48, 64, 96, 128)
 SMALL = (16, 22, 24)
 
-W, H = 96.0, 80.0             # the back panel (u right, v up); the tab rises above
-POCKET = 54.0                 # the pocket's height at its sides
-T = 6.0                       # the folder's thickness
-NOTCH = (W / 2, 26.0, 7.0)    # thumb notch: centre, width, depth
-YAW, PITCH, CAM = math.radians(-34), math.radians(-13), 210.0
-PIC = 30.0
-FIT = 112.0
+# the folder flat, as sketched (u right, v up, a 128 box): the back with its
+# tab, and the front: a wedge (108 wide at the top, 100 at the foot)
+BACK_PTS = None
+T = 5.0                                     # the back sits this far behind the front
+YAW, PITCH, CAM = math.radians(-20), math.radians(9), 240.0
+PIC = 34.0
+PIC_AT = (86.0, 40.0)                       # the picture's centre on the front (lower right)
+FIT = 116.0
+
+
+def arc(cx, cy, r, a0, a1, n=5):
+    return [(cx + r * math.cos(math.radians(a0 + (a1 - a0) * i / n)),
+             cy + r * math.sin(math.radians(a0 + (a1 - a0) * i / n))) for i in range(n + 1)]
+
+
+def back_outline():
+    """The back: rounded corners, the tab at the top left (from the sketch)."""
+    pts = [(14, 14)]                                   # bottom left
+    pts += arc(22, 106, 8, 180, 90)                    # top left corner, up into the tab
+    pts += [(52, 114)]
+    pts += arc(52, 109, 5, 90, 30)                     # the tab's slope down
+    pts += [(60, 104), (63, 104)]
+    pts += arc(106, 96, 8, 90, 0)                      # top right corner
+    pts += [(114, 14)]
+    return pts
+
+
+def front_outline(lift=0.0):
+    """The front: wider at the top (10..118) than its foot (14..114), rounded."""
+    pts = []
+    pts += arc(16, 80, 6, 180, 90)                     # top left
+    pts += arc(112, 80, 6, 90, 0)                      # top right
+    pts += arc(106, 22, 8, 0, -90)                     # foot right (the side leans in)
+    pts += arc(22, 22, 8, -90, -180)                   # foot left
+    return pts
 
 
 def project(u, v, z):
-    x, y, zz = u - W / 2, v - H / 2, z + T / 2
+    x, y, zz = u - 64, v - 64, z + T / 2
     x, zz = x * math.cos(YAW) + zz * math.sin(YAW), -x * math.sin(YAW) + zz * math.cos(YAW)
     y, zz = y * math.cos(PITCH) - zz * math.sin(PITCH), y * math.sin(PITCH) + zz * math.cos(PITCH)
     k = CAM / (CAM - zz)
@@ -61,48 +88,26 @@ def d(pts3, close=True):
     return "M" + " L".join(f"{x:.2f} {y:.2f}" for x, y in p) + (" Z" if close else "")
 
 
-def rounded(x0, y0, x1, y1, r, corners="tl tr br bl", n=6):
-    pts = []
-    for name, cx, cy, a0 in (("tl", x0 + r, y1 - r, 180), ("tr", x1 - r, y1 - r, 90),
-                             ("br", x1 - r, y0 + r, 0), ("bl", x0 + r, y0 + r, 270)):
-        if name in corners:
-            pts += [(cx + r * math.cos(math.radians(a0 - 90 * i / n)),
-                     cy + r * math.sin(math.radians(a0 - 90 * i / n))) for i in range(n + 1)]
-        else:
-            pts.append({"tl": (x0, y1), "tr": (x1, y1), "br": (x1, y0), "bl": (x0, y0)}[name])
-    return pts
+def on(pts, z=0.0, tip=0.0):
+    """Points on the front's plane; `tip` tips it forward about its foot (open)."""
+    out = []
+    for u, v in pts:
+        h = v - 14
+        out.append((u, 14 + h * math.cos(tip), z + h * math.sin(tip)))
+    return out
 
 
-def pocket_outline(inset=0.0, n=14):
-    """The pocket, going round: bottom corners rounded, the top with its notch."""
-    top = POCKET - inset
-    cu, nw, nd = NOTCH
-    pts = rounded(inset, inset, W - inset, top, 7 - inset * 0.5, "br bl")
-    # rounded() goes tl, tr, br, bl: insert the notch between tl and tr
-    tl, rest = pts[0], pts[1:]
-    notch = []
-    for i in range(n + 1):
-        t = i / n
-        u = cu - nw / 2 + nw * t
-        notch.append((u, top - (nd - inset * 0.3) * math.sin(math.pi * t) ** 1.4))
-    return [tl] + notch + rest
-
-
-def front(pts, z=0.0):
-    return [(u, v, z) for u, v in pts]
-
-
-def picture3d(name: str, size: int) -> list:
+def picture3d(name: str, size: int, tip: float) -> list:
     found = smallsize.compose.mint_picture(name, size)
     if found is None:
-        return monitor3d() if name == "user-desktop" else []
+        return monitor3d(tip) if name == "user-desktop" else []
     pic, (x0, y0, x1, y1) = found
     k = PIC / max(x1 - x0, y1 - y0)
-    cu, cv = W / 2, POCKET * 0.44
+    cu, cv = PIC_AT
 
-    def to_pocket(x, y):
+    def at(x, y):
         return (cu + (x - (x0 + x1) / 2) * k, cv - (y - (y0 + y1) / 2) * k)
-    (ax, ay), (bx, by), (cx, cy) = (project(*to_pocket(x, y), 0.05) for x, y in ((x0, y0), (x1, y0), (x0, y1)))
+    (ax, ay), (bx, by), (cx, cy) = (project(*on([at(x, y)], 0.05, tip)[0]) for x, y in ((x0, y0), (x1, y0), (x0, y1)))
     a, b = (bx - ax) / (x1 - x0), (by - ay) / (x1 - x0)
     c, dd = (cx - ax) / (y1 - y0), (cy - ay) / (y1 - y0)
     e, f = ax - a * x0 - c * y0, ay - b * x0 - dd * y0
@@ -113,93 +118,87 @@ def picture3d(name: str, size: int) -> list:
     return [ET.tostring(g, encoding="unicode")]
 
 
-def monitor3d() -> list:
-    cu, cv = W / 2, POCKET * 0.44
+def rect_r(x0, y0, x1, y1, r):
+    return arc(x0 + r, y1 - r, r, 180, 90, 3) + arc(x1 - r, y1 - r, r, 90, 0, 3) + \
+        arc(x1 - r, y0 + r, r, 0, -90, 3) + arc(x0 + r, y0 + r, r, -90, -180, 3)
+
+
+def monitor3d(tip: float) -> list:
+    cu, cv = PIC_AT
     w, h = PIC, PIC * 0.66
     top = cv + h / 2 + 3
-    outer = rounded(cu - w / 2, top - h, cu + w / 2, top, 2.5)
-    inner = rounded(cu - w / 2 + 3, top - h + 3, cu + w / 2 - 3, top - 3, 1)
+    outer = rect_r(cu - w / 2, top - h, cu + w / 2, top, 2.5)
+    inner = rect_r(cu - w / 2 + 3, top - h + 3, cu + w / 2 - 3, top - 3, 1)
     stand = [(cu - 3, top - h), (cu + 3, top - h), (cu + 4, top - h - 4), (cu + 9, top - h - 4),
              (cu + 9, top - h - 6.5), (cu - 9, top - h - 6.5), (cu - 9, top - h - 4), (cu - 4, top - h - 4)]
-    return [f'<path fill="{EMBLEM}" fill-rule="evenodd" d="{d(front(outer, 0.05))} {d(front(inner[::-1], 0.05))}"/>',
-            f'<path fill="{EMBLEM}" d="{d(front(stand, 0.05))}"/>']
+    return [f'<path fill="{EMBLEM}" fill-rule="evenodd" d="{d(on(outer, 0.05, tip))} {d(on(inner[::-1], 0.05, tip))}"/>',
+            f'<path fill="{EMBLEM}" d="{d(on(stand, 0.05, tip))}"/>']
 
 
 def folder3d(name: str, size: int, opened: bool = False) -> str:
+    tip = math.radians(24) if opened else 0.0
     parts = []
-    # the back panel, with its tab at the top left, and its edge on the right
-    back = rounded(0, 0, W, H, 5, "tr br bl")
-    tab = [(0, H - 4), (0, H + 6), (4, H + 9), (30, H + 9), (35, H + 5), (40, H + 1), (42, H)]
-    panel = [(u, v) for u, v in back[:1]] + tab + back[1:]
-    parts.append(f'<path fill="{BACK}" d="{d([(W, v, z) for v, z in ((0, -T), (H - 5, -T), (H - 5, -T + 1.5), (0, -T + 1.5))])}"/>')
-    parts.append(f'<path fill="{BACK}" d="{d(front(panel, -T))}"/>')
-    parts.append(f'<path fill="#fff" fill-opacity="0.18" d="{d(front([(4, H + 8), (30, H + 8), (30, H + 9), (4, H + 9)], -T + 0.05))}"/>')
-    # the papers: a sheet showing over the pocket (pulled up when open)
-    lift = 16 if opened else 0
-    sheets = ((7, W - 9, POCKET + 14 + lift * 0.7, -T * 0.66, PAPER_SHADE), (5, W - 5, POCKET + 18 + lift, -T * 0.4, PAPER))
-    for u0, u1, top, z, colour in sheets:
-        parts.append(f'<path fill="{colour}" d="{d(front(rounded(u0, 3, u1, top, 2, "tl tr"), z))}"/>')
-    for i in range(3):     # a few lines of writing on the top sheet
-        v = POCKET + 14 + lift - i * 4.5
-        parts.append(f'<path fill="{PAPER_SHADE}" d="{d(front([(12, v), (W - 20 - i * 9, v), (W - 20 - i * 9, v + 1.3), (12, v + 1.3)], -T * 0.4 + 0.05))}"/>')
-    # the pocket's right edge (its thickness), then the pocket
-    outline = pocket_outline()
-    right = [(u, v) for u, v in outline if u >= W - 0.01]
-    v_top = max(v for _u, v in right)
-    parts.append(f'<path fill="{EDGE}" d="{d([(W, 0.5, 0), (W, v_top, 0), (W, v_top, -1.6), (W, 0.5, -1.6)])}"/>')
-    parts.append(f'<path fill="{FRONT}" d="{d(front(outline))}"/>')
-    # the pocket's top edge catches the light; a shade under the notch
-    parts.append(f'<path fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="1.6" '
-                 f'd="{d(front([q for q in outline[:16]], 0.03), close=False)}"/>')
-    # the stitching round it
-    stitch = pocket_outline(4.2)
-    parts.append(f'<path fill="none" stroke="{STITCH}" stroke-opacity="0.7" stroke-width="1.5" stroke-dasharray="4.5 3.5" '
-                 f'd="{d(front(stitch, 0.04))}"/>')
-    # fit by the folder alone (the picture's own coordinates would mislead)
+    back = back_outline()
+    # the back's right edge (its thickness shows, turned this way), then the back
+    parts.append(f'<path fill="{EDGE}" d="{d([(114, 14, -T), (114, 96, -T), (114, 96, -T - 2), (114, 14, -T - 2)])}"/>')
+    parts.append(f'<path fill="{BACK}" d="{d([(u, v, -T) for u, v in back])}"/>')
+    if opened:   # a sheet inside, seen as the front tips away from it
+        sheet = [(20, 18), (20, 92), (108, 92), (108, 18)]
+        parts.append(f'<path fill="#F5F5F5" d="{d([(u, v, -T * 0.5) for u, v in sheet])}"/>')
+    front = front_outline()
+    # the front's right edge (its thickness), then the front, its foot darker, its top edge light
+    edge = on([(118, 80), (114, 22)], 0, tip) + on([(114, 22), (118, 80)], -1.8, tip)
+    parts.append(f'<path fill="{EDGE}" d="{d(edge)}"/>')
+    parts.append(f'<path fill="{FRONT}" d="{d(on(front, 0, tip))}"/>')
+    foot = [(13.86, 24), (114.14, 24)] + arc(106, 22, 8, 0, -90) + arc(22, 22, 8, -90, -180)
+    parts.append(f'<path fill="#000" fill-opacity="0.13" d="{d(on(foot, 0.02, tip))}"/>')
+    top = arc(16, 80, 6, 180, 90) + arc(112, 80, 6, 90, 0)
+    shine = top + [(u, v - 2.2) for u, v in reversed(top)]
+    parts.append(f'<path fill="#fff" fill-opacity="0.3" d="{d(on(shine, 0.03, tip))}"/>')
     nums = [(float(a), float(b)) for a, b in re.findall(r"(-?\d+\.\d+) (-?\d+\.\d+)", "".join(parts))]
-    parts += picture3d(name, size)
+    parts += picture3d(name, size, tip)
     body = "".join(parts)
     bx0, bx1 = min(p[0] for p in nums), max(p[0] for p in nums)
     by0, by1 = min(p[1] for p in nums), max(p[1] for p in nums)
-    s = min(FIT / (bx1 - bx0), 122 / (by1 - by0))
+    s = min(FIT / (bx1 - bx0), 120 / (by1 - by0))
     tx, ty = 64 - s * (bx0 + bx1) / 2, 64 - s * (by0 + by1) / 2
     k = size / 128
     return (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="{XLINK}" width="{size}" height="{size}" '
             f'viewBox="0 0 {size} {size}" version="1.1"><g transform="matrix({s * k:.5f} 0 0 {s * k:.5f} '
-            f'{tx * k:.4f} {ty * k:.4f})" stroke-linejoin="round" stroke-linecap="round">{body}</g></svg>\n')
+            f'{tx * k:.4f} {ty * k:.4f})" stroke-linejoin="round">{body}</g></svg>\n')
 
 
 # ------------------------------------------------------------------ small, straight on
-SMALL_GEO = {   # size: x0, x1 (pocket), back top, pocket top, bottom, notch half-width
-    16: (1, 15, 2, 6, 15, 2),
-    22: (2, 20, 3, 10, 19, 3),
-    24: (2, 22, 3, 11, 21, 3),
+SMALL_GEO = {   # size: back x0, x1, top; tab end; front x0, x1 (top), top, bottom; foot inset
+    16: (1, 15, 2, 6, 1, 15, 5, 15, 1),
+    22: (2, 20, 3, 9, 1, 21, 7, 20, 1),
+    24: (2, 22, 3, 10, 1, 23, 8, 22, 1),
 }
 
 
 def folder_small(name: str, size: int, opened: bool = False) -> str:
-    x0, x1, bt, pt, bot, nh = SMALL_GEO[size]
+    bx0, bx1, bt, tab, fx0, fx1, ft, fb, inset = SMALL_GEO[size]
     parts = []
-    # the back panel with its tab, its right edge a shade
-    tab_w = (x1 - x0) * 2 // 5
-    parts.append(f'<path fill="{BACK}" d="M{x0} {bt} h{tab_w} l1 1 H{x1 - 1} q1 0 1 1 V{bot} H{x0} Z"/>')
-    # paper: a sheet over the pocket's top (higher when open)
-    up = 2 if opened else 0
-    parts.append(f'<rect x="{x0 + 1}" y="{bt + 2 - up}" width="{x1 - x0 - 2}" height="{pt - bt}" fill="{PAPER}"/>')
-    if size > 16:
-        parts.append(f'<rect x="{x0 + 3}" y="{bt + 4 - up}" width="{x1 - x0 - 8}" height="1" fill="{PAPER_SHADE}"/>')
-    # the pocket, its notch at the top centre
-    cx = (x0 + x1) / 2
-    parts.append(f'<path fill="{FRONT}" d="M{x0} {pt} H{cx - nh} Q{cx} {pt + nh * 0.9} {cx + nh} {pt} H{x1} '
-                 f'V{bot - 1} q0 1 -1 1 H{x0 + 1} q-1 0 -1 -1 Z"/>')
-    parts.append(f'<rect x="{x1 - 1}" y="{pt + 1}" width="1" height="{bot - pt - 2}" fill="{EDGE}"/>')
-    pic = smallsize.mint_picture(name, size, cx - 0.5, (pt + bot) / 2 + 0.5, EMBLEM)
+    # the back with its tab
+    parts.append(f'<path fill="{BACK}" d="M{bx0} {bt + 1} q0 -1 1 -1 H{tab} l2 2 H{bx1 - 1} q1 0 1 1 V{fb - 2} H{bx0} Z"/>')
+    if opened:
+        parts.append(f'<rect x="{bx0 + 1}" y="{bt + 3}" width="{bx1 - bx0 - 2}" height="{fb - bt - 5}" fill="#F5F5F5"/>')
+        ft += 2
+    # the front: a wedge, its foot a whole pixel in at each side; its edge, foot and top
+    parts.append(f'<path fill="{FRONT}" d="M{fx0} {ft + 1} q0 -1 1 -1 H{fx1 - 1} q1 0 1 1 '
+                 f'L{fx1 - inset} {fb - 1} q0 1 -1 1 H{fx0 + inset + 1} q-1 0 -1 -1 Z"/>')
+    parts.append(f'<path fill="#000" fill-opacity="0.13" d="M{fx0 + inset} {fb - 2} H{fx1 - inset} V{fb - 1} '
+                 f'q0 1 -1 1 H{fx0 + inset + 1} q-1 0 -1 -1 Z"/>')
+    parts.append(f'<rect x="{fx0 + 1}" y="{ft}" width="{fx1 - fx0 - 2}" height="1" fill="#fff" fill-opacity="0.3"/>')
+    cx = fx0 + (fx1 - fx0) * 0.62
+    cy = (ft + fb) / 2 + 0.5
+    pic = smallsize.mint_picture(name, size, cx, cy, EMBLEM)
     extra = ""
     if pic is not None:
         extra = ET.tostring(pic, encoding="unicode")
     elif name == "user-desktop":
         mw, mh = (7, 5) if size == 16 else (9, 6)
-        mx, my = round(cx - mw / 2), round((pt + bot) / 2 - mh / 2)
+        mx, my = round(cx - mw / 2), round(cy - mh / 2 - 0.5)
         extra = (f'<path fill="{EMBLEM}" fill-rule="evenodd" d="M{mx} {my} h{mw} v{mh} h{-mw} Z '
                  f'M{mx + 1} {my + 1} v{mh - 2} h{mw - 2} v{-(mh - 2)} Z"/>'
                  f'<rect fill="{EMBLEM}" x="{mx + mw // 2 - 1}" y="{my + mh}" width="{3 if mw > 7 else 2}" height="1"/>')
