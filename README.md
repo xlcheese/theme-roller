@@ -16,39 +16,45 @@ It's a throwback to GNOME 2's Clearlooks and its Color Chooser, rebuilt for toda
 - **Window Borders:** title bar colors, height, border thickness, button layout.
 - **Terminal:** follows the theme, or its own colors.
 - **Details:** tooltips, scrollbars, sliders, switches, focus ring.
-- libadwaita color and accent integration, Flatpak access, presets, and a `cheeselooks` command.
+- libadwaita color and accent integration, Flatpak access, presets, and a `theme-roller` command.
 
 ## Trying it (early testers)
-**GTK 3 apps and the Cinnamon desktop work now** (Nemo, Xed and settings windows; the panel, menus, popups, notifications and alt-tab). Window borders come next. On Linux Mint 22, from a checkout of this repository:
+**GTK 3 apps and the Cinnamon desktop work now** (Nemo, Xed and settings windows; the panel, menus, popups, notifications and alt-tab). Window borders come next. On Linux Mint 22, from a checkout of this repository, open the app:
 
 ```bash
-./bin/cheeselooks apply --activate
+./bin/theme-roller
+```
+
+or apply from the command line:
+
+```bash
+./bin/theme-roller apply --activate
 ```
 
 That writes `~/.themes/xl-Cheeselooks`, switches your apps to it and saves your settings to `~/.config/xl-cheeselooks/settings.json`. Change colors with presets (stack as many as you like), or edit that settings file and run `apply` again:
 
 ```bash
-./bin/cheeselooks apply --preset "Coral Night"
+./bin/theme-roller apply --preset "Coral Night"
 ```
 
 ```bash
-./bin/cheeselooks presets
+./bin/theme-roller presets
 ```
 
 Switch style (this also loads the style's suggested roundness, gradient, depth and panel settings), or reset to the current style's defaults:
 
 ```bash
-./bin/cheeselooks apply --style xl-Classic
+./bin/theme-roller apply --style xl-Classic
 ```
 
 ```bash
-./bin/cheeselooks apply --style-defaults
+./bin/theme-roller apply --style-defaults
 ```
 
 To go back to what you had before the last apply:
 
 ```bash
-./bin/cheeselooks revert
+./bin/theme-roller revert
 ```
 
 To go back to Mint's own theme, pick it again in **System Settings → Themes** (Applications and Desktop). If the panel ever looks like plain default Cinnamon after an apply, Cinnamon couldn't load the theme; please report it with the output of `grep -i "theme\|css" ~/.xsession-errors | tail -20`.
@@ -56,7 +62,7 @@ To go back to Mint's own theme, pick it again in **System Settings → Themes** 
 Preview without touching your desktop (opens two sample windows):
 
 ```bash
-./bin/cheeselooks apply --theme-dir /tmp/xl-Cheeselooks --no-save
+./bin/theme-roller apply --theme-dir /tmp/xl-Cheeselooks --no-save
 ```
 
 ```bash
@@ -67,8 +73,8 @@ GTK_THEME=xl-Cheeselooks XDG_DATA_HOME=/tmp/xlc python3 tools/showcase.py
 
 ### Developers
 - Tests: `python3 -m unittest discover tests`
-- Every computed value: `./bin/cheeselooks tokens [filter]`
-- Check a style file: `./bin/cheeselooks check-style PATH`
+- Every computed value: `./bin/theme-roller tokens [filter]`
+- Check a style file: `./bin/theme-roller check-style PATH`
 - Screenshots on a virtual display: `tools/preview.sh THEME_DIR out.png` (needs Xvfb and ImageMagick)
 
 ## Requirements

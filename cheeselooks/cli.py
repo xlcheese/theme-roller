@@ -469,7 +469,7 @@ def cmd_export_preset(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="cheeselooks",
+    parser = argparse.ArgumentParser(prog="theme-roller",
                                      description="Generate and apply the xl-Cheeselooks theme.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)

@@ -55,7 +55,7 @@ ICON_NOTE = ("Folders recolored: the folder color (the front) follows your accen
              "(the back) a darker shade of it. Choose either and both keep their colors from then on; Reset "
              "Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to "
              "use them.")
-REPO_URL = "https://github.com/xlcheese/xl-cheeselooks"
+REPO_URL = "https://github.com/xlcheese/theme-roller"
 DOCS_URL = REPO_URL + "/tree/HEAD/docs"     # HEAD: the default branch
 TIP_URL = "https://www.paypal.com/donate/?hosted_button_id=SDDYDENKXPCWN"   # About: a tip for the author ("" hides it)
 # Documentation tab: short notes on each part of the app (the full docs are online)
@@ -1653,7 +1653,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
 
 class SettingsApp(Gtk.Application):
     def __init__(self):
-        super().__init__(application_id="io.github.xlcheese.Cheeselooks")
+        super().__init__(application_id="io.github.xlcheese.ThemeRoller")
 
     def do_activate(self) -> None:
         win = self.props.active_window or SettingsWindow(self)

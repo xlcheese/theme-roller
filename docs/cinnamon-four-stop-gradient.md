@@ -6,7 +6,7 @@ the existing start and end. This is the brief to start a new project with.
 
 ## Why
 
-xl-Cheeselooks (github.com/xlcheese/xl-cheeselooks) is a theme generator for
+xl-Cheeselooks (github.com/xlcheese/theme-roller) is a theme generator for
 Linux Mint Cinnamon. Its styles can give buttons a glossy face in the
 Clearlooks tradition, with a crisp step across the middle:
 

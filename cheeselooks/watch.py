@@ -32,6 +32,7 @@ from . import editor, gtk4, paths, qt, reload, tokens
 SCHEMA, KEY = "org.cinnamon.desktop.interface", "gtk-theme"
 SETTLE = 2.0                  # seconds a change must last before we act on it
 AUTOSTART_NAME = "xl-cheeselooks-watch.desktop"
+WATCH_PATTERN = "(theme-roller|cheeselooks) watch"   # the old name too, started before the rename
 
 
 def is_ours(theme: str | None) -> bool:
@@ -135,18 +136,18 @@ def autostart_file() -> Path:
 
 
 def command() -> list[str]:
-    """How to start the watcher: the checkout's bin/cheeselooks, or the installed one."""
-    checkout = paths.data_dir() / "bin" / "cheeselooks"
+    """How to start the watcher: the checkout's bin/theme-roller, or the installed one."""
+    checkout = paths.data_dir() / "bin" / "theme-roller"
     if checkout.exists():
         return [sys.executable, str(checkout), "watch"]
-    return [shutil.which("cheeselooks") or "cheeselooks", "watch"]
+    return [shutil.which("theme-roller") or "theme-roller", "watch"]
 
 
 def autostart_text() -> str:
     exec_line = " ".join(f'"{c}"' if " " in c else c for c in command())
     return ("[Desktop Entry]\n"
             "Type=Application\n"
-            "Name=xl-Cheeselooks theme watcher\n"
+            "Name=Theme Roller theme watcher\n"
             "Comment=Takes xl-Cheeselooks' colors out of apps when you pick another theme\n"
             f"Exec={exec_line}\n"
             "NoDisplay=true\n"
@@ -155,7 +156,7 @@ def autostart_text() -> str:
 
 def running() -> bool:
     try:
-        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", "cheeselooks watch"],
+        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", WATCH_PATTERN],
                              capture_output=True, text=True, timeout=5).stdout
     except (OSError, subprocess.SubprocessError):
         return False
@@ -188,7 +189,7 @@ def disable() -> list[str]:
         f.unlink()
         log.append("the theme watcher no longer starts at login")
     try:
-        subprocess.run(["pkill", "-u", str(os.getuid()), "-f", "cheeselooks watch"],
+        subprocess.run(["pkill", "-u", str(os.getuid()), "-f", WATCH_PATTERN],
                        capture_output=True, timeout=5)
     except (OSError, subprocess.SubprocessError):
         pass
