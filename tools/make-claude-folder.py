@@ -44,7 +44,7 @@ BACK_PTS = None
 T = 5.0                                     # the back sits this far behind the front
 YAW, PITCH, CAM = math.radians(-20), math.radians(9), 240.0
 PIC = 34.0
-PIC_AT = (86.0, 40.0)                       # the picture's centre on the front (lower right)
+PIC_AT = (64.0, 50.0)                       # the picture's centre: the middle of the front (xl_cheese)
 FIT = 116.0
 
 
@@ -53,15 +53,20 @@ def arc(cx, cy, r, a0, a1, n=5):
              cy + r * math.sin(math.radians(a0 + (a1 - a0) * i / n))) for i in range(n + 1)]
 
 
+BACK_DROP = 6.0          # xl_cheese: the back a little lower (its top and tab), to suit the front
+
+
 def back_outline():
-    """The back: rounded corners, the tab at the top left (from the sketch)."""
-    pts = [(14, 14)]                                   # bottom left
-    pts += arc(22, 106, 8, 180, 90)                    # top left corner, up into the tab
-    pts += [(52, 114)]
-    pts += arc(52, 109, 5, 90, 30)                     # the tab's slope down
-    pts += [(60, 104), (63, 104)]
-    pts += arc(106, 96, 8, 90, 0)                      # top right corner
-    pts += [(114, 14)]
+    """The back: rounded corners (the bottom ones too, hidden behind the
+    front's), the tab at the top left (from the sketch), lowered by BACK_DROP."""
+    dz = BACK_DROP
+    pts = arc(22, 22, 8, -90, -180)                      # bottom left corner
+    pts += arc(22, 106 - dz, 8, 180, 90)                 # top left corner, up into the tab
+    pts += [(52, 114 - dz)]
+    pts += arc(52, 109 - dz, 5, 90, 30)                  # the tab's slope down
+    pts += [(60, 104 - dz), (63, 104 - dz)]
+    pts += arc(106, 96 - dz, 8, 90, 0)                   # top right corner
+    pts += arc(106, 22, 8, 0, -90)                       # bottom right corner
     return pts
 
 
@@ -140,10 +145,10 @@ def folder3d(name: str, size: int, opened: bool = False) -> str:
     parts = []
     back = back_outline()
     # the back's right edge (its thickness shows, turned this way), then the back
-    parts.append(f'<path fill="{EDGE}" d="{d([(114, 14, -T), (114, 96, -T), (114, 96, -T - 2), (114, 14, -T - 2)])}"/>')
+    parts.append(f'<path fill="{EDGE}" d="{d([(114, 22, -T), (114, 96 - BACK_DROP, -T), (114, 96 - BACK_DROP, -T - 2), (114, 22, -T - 2)])}"/>')
     parts.append(f'<path fill="{BACK}" d="{d([(u, v, -T) for u, v in back])}"/>')
     if opened:   # a sheet inside, seen as the front tips away from it
-        sheet = [(20, 18), (20, 92), (108, 92), (108, 18)]
+        sheet = [(20, 18), (20, 92 - BACK_DROP), (108, 92 - BACK_DROP), (108, 18)]
         parts.append(f'<path fill="#F5F5F5" d="{d([(u, v, -T * 0.5) for u, v in sheet])}"/>')
     front = front_outline()
     # the front's right edge (its thickness), then the front, its foot darker, its top edge light
@@ -171,8 +176,8 @@ def folder3d(name: str, size: int, opened: bool = False) -> str:
 # ------------------------------------------------------------------ small, straight on
 SMALL_GEO = {   # size: back x0, x1, top; tab end; front x0, x1 (top), top, bottom; foot inset
     16: (1, 15, 2, 6, 1, 15, 5, 15, 1),
-    22: (2, 20, 3, 9, 1, 21, 7, 20, 1),
-    24: (2, 22, 3, 10, 1, 23, 8, 22, 1),
+    22: (2, 20, 4, 9, 1, 21, 7, 20, 1),
+    24: (2, 22, 4, 10, 1, 23, 8, 22, 1),
 }
 
 
@@ -190,7 +195,7 @@ def folder_small(name: str, size: int, opened: bool = False) -> str:
     parts.append(f'<path fill="#000" fill-opacity="0.13" d="M{fx0 + inset} {fb - 2} H{fx1 - inset} V{fb - 1} '
                  f'q0 1 -1 1 H{fx0 + inset + 1} q-1 0 -1 -1 Z"/>')
     parts.append(f'<rect x="{fx0 + 1}" y="{ft}" width="{fx1 - fx0 - 2}" height="1" fill="#fff" fill-opacity="0.3"/>')
-    cx = fx0 + (fx1 - fx0) * 0.62
+    cx = (fx0 + fx1) / 2 - 0.5
     cy = (ft + fb) / 2 + 0.5
     pic = smallsize.mint_picture(name, size, cx, cy, EMBLEM)
     extra = ""
