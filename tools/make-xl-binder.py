@@ -360,7 +360,7 @@ def binder_small(name: str, size: int, opened: bool = False) -> str:
 
 STYLES_MADE = {   # folder style: its cover, where it's written, its picture's box and centre
     "xl-big-baddy": ("stripes", 34.0, (W - 6 - 34.0 / 2 - 4, 6 + 34.0 / 2 + 3)),
-    "xl-80s": ("checker", 21.0, (W / 2, (WAVE_HIGH + WAVE_AMP + H - FLAP) / 2 + 0.5)),
+    "xl-rad": ("checker", 21.0, (W / 2, (WAVE_HIGH + WAVE_AMP + H - FLAP) / 2 + 0.5)),
 }
 
 

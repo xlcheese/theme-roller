@@ -62,9 +62,9 @@ STYLES = {
                      "note": "Binders in your colors: the folder color follows your accent. Racing stripes "
                              "are off until you pick a color for them; No stripes takes them off "
                              "again. Every other icon stays as in your current icon theme. Apply to use them."},
-    # ours (xl_cheese's mockup): the 80s binder, a checkerboard band between
+    # ours (xl_cheese's mockup): xl-Rad, the 80s binder, a checkerboard band between
     # wavy lines in the second color (tools/make-xl-binder.py)
-    "xl-80s": {"name": "xl-80s", "dir": "xl-80s", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
+    "xl-rad": {"name": "xl-Rad", "dir": "xl-rad", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
                "source": {"folder": "ff0a01", "frontedge": "ff0a02", "backfolder": "ff0a03", "emblem": "ff0a04"},
                "second_label": "Wavy lines",
                "note": "Binders in your colors: the folder color follows your accent, and the wavy lines "
