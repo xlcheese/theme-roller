@@ -1,4 +1,4 @@
-"""The xl-Cheeselooks settings app (GTK 3).
+"""Theme Roller: the app that makes the xl-Cheeselooks themes (GTK 3).
 
 Themes: the Theme tab (first) lists the themes (built-in, yours, and
 Custom). Picking one sets every tab to that theme. Changing anything makes it
@@ -41,7 +41,7 @@ from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, pa
 from . import shape  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
 
-APP_TITLE = "xl-Cheeselooks"
+APP_TITLE = "Theme Roller"      # the tool; the themes and styles it makes keep the xl-Cheeselooks name
 PREVIEW_DELAY_MS = 120
 
 TABS = [  # (settings section, tab title)
@@ -856,15 +856,15 @@ class SettingsWindow(Gtk.ApplicationWindow):
             if dim:
                 label.get_style_context().add_class("dim-label")
             box.pack_start(label, False, False, 0)
-        line("<span size='large' weight='bold'>xl-Cheeselooks</span>")
+        line(f"<span size='large' weight='bold'>{APP_TITLE}</span>")
         line(GLib.markup_escape_text(__version__))
-        line("A theme maker for Linux Mint and the Cinnamon desktop: your colors and shapes, drawn by "
+        line("The xl-Cheeselooks theme maker for Linux Mint and the Cinnamon desktop: your colors and shapes, drawn by "
              "a style, for GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon panel and menus, and "
              "the window borders.")
         box.pack_start(Gtk.LinkButton(uri=REPO_URL, label="Website", halign=Gtk.Align.CENTER),
                        False, False, 0)
         if TIP_URL:
-            line("<small>Enjoying xl-Cheeselooks? It's free and always will be.</small>", dim=True, top=2)
+            line(f"<small>Enjoying {APP_TITLE}? It's free and always will be.</small>", dim=True, top=2)
             tip = Gtk.Button(label="Leave a tip ☕", halign=Gtk.Align.CENTER, tooltip_text=TIP_URL)
             tip.get_style_context().add_class("suggested-action")     # an accent button, in your theme
             tip.connect("clicked", lambda b: Gtk.show_uri_on_window(self, TIP_URL, Gtk.get_current_event_time()))
@@ -928,7 +928,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def _share_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
         text = Gtk.Label(xalign=0, wrap=True, max_width_chars=60)
         text.set_text("Share a theme as one file (.xltheme). It holds every setting, the theme's name, "
-                      "the version of xl-Cheeselooks it was made with, and your style when the theme "
+                      "the version of Theme Roller it was made with, and your style when the theme "
                       "uses one of your own, so the person importing it gets exactly your look.")
         grid.attach(text, 0, 0, 2, 1)
         export = Gtk.Button(label="Export the current theme…", halign=Gtk.Align.START)

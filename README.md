@@ -1,4 +1,7 @@
-# xl-Cheeselooks
+# Theme Roller
+
+The app that makes the **xl-Cheeselooks** themes.
+
 
 A Linux Mint Cinnamon theme you style yourself. Pick an **accent**, a **background** and a **text** color, set size, roundness, gradient and a few other sliders, click **Apply**, and the whole desktop restyles itself in about a second: the panel, menus, GTK apps, window borders and the terminal.
 
