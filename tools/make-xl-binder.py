@@ -58,6 +58,7 @@ STRIPES = ((3.0, 12.0), (20.0, 29.0))  # where each band's edges meet the left e
 SLOPE = (H - 3.0) / W                  # the lower stripe: bottom-left corner to top-right corner
 PIC = 34.0                             # the picture's box on the cover, as Mint-Y's on its folder
 PIC_AT = (W - 6 - PIC / 2 - 4, 6 + PIC / 2 + 3)
+VELCRO, VELCRO_U = "#1E1E1E", (70.0, 75.0)   # the velcro strips (open binder): colour, across
 FIT = 114.0                            # the binder's width in the 128px icon (Breeze-like margins)
 
 
@@ -174,6 +175,10 @@ def binder3d(name: str, size: int, opened: bool = False) -> str:
     if opened:   # the flap, up behind: its underside, plain and darker (no piping there), rising from the back's top
         flap = [(u, H - 2 + v, -D_TOP + v * 0.35) for u, v in rounded(0, 0, W, FLAP, 6, "tl tr")]
         parts.append(f'<path fill="{SIDE}" d="{d(flap)}"/>')
+        # its velcro strip, near the free edge (xl_cheese: the flap closed with velcro)
+        strip = [(u, H - 2 + v, -D_TOP + v * 0.35 + 0.05)
+                 for u, v in rounded(VELCRO_U[0], FLAP - 12, VELCRO_U[1], FLAP - 3, 0.8)]
+        parts.append(f'<path fill="{VELCRO}" d="{d(strip)}"/>')
     # the open side: dark, with the paper and pink pockets inside, narrowing up
     prof = [(-D_BOTTOM, 0.0)] + [(-depth(v), v) for v in (H * 0.5, H - D_TOP / 2 - 1)] + top_curve(0) + [(0.0, 0.0)]
     parts.append(f'<path fill="{SIDE}" d="{d([(0, v, z) for z, v in prof])}"/>')
@@ -194,6 +199,8 @@ def binder3d(name: str, size: int, opened: bool = False) -> str:
     parts += stripes(0, H if opened else H - FLAP + 3, 0.02)
     ring_top = H - 6 if opened else H - FLAP - 6
     parts.append(f'<path fill="none" stroke="{RING}" stroke-width="1.8" d="{d(front(rounded(6, 6, W - 6, ring_top, 6)))}"/>')
+    if opened:   # the cover's velcro, where the flap presses down when closed
+        parts.append(f'<path fill="{VELCRO}" d="{d(front(rounded(VELCRO_U[0], H - 18, VELCRO_U[1], H - 9, 0.8), 0.06))}"/>')
     parts += monitor3d(0.05) if name == "user-desktop" else picture(name, size, opened)
     if not opened:
         flap = rounded(0, H - FLAP, W, H, 6, "br bl")
