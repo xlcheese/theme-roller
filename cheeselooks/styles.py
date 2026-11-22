@@ -48,11 +48,11 @@ WIDGET_KEYS = {
     "pressed_color",
 }
 # keys only some widgets use so far (others accept them but ignore them)
-WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item"),
+WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item", "tab"),
                     "pressed_color": ("scrollbar",),
                     "selected_border": ("panel_button",), "padding": ("panel_button",),
                     "spacing": ("panel_button",),
-                    "hover_fg": ("menu_item", "menubar_item", "tab"), "selected_fg": ("panel_button",)}
+                    "hover_fg": ("menu_item", "menubar_item", "tab"), "selected_fg": ("panel_button", "tab")}
 # a text color belongs to its face: a widget that sets its own face doesn't
 # inherit the text color of the widget it is "like"
 FACE_FG = {"hover_color": "hover_fg", "selected_color": "selected_fg", "pressed_color": "pressed_fg"}

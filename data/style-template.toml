@@ -140,6 +140,9 @@ combo          = { like = "button" }
 
 # Tabs: tab_kind "boxed" (joined to the page), "open" (Mint-Y), "pills" or
 # "claude"; active_marker "none", "line" (an accent line) or "glow" (Clearlooks).
+# Pills take no marker; their selected tab is a button, or selected_color, e.g.
+#   tab = { tab_kind = "pills", selected_color = "accent" }
+# (its text: selected_fg, else whichever of text / text-on-accent reads better).
 tab            = { tab_kind = "boxed", active_marker = "none", hover_color = "lift(header, 0.6)" }
 
 # Menus: hover_color (and hover_fg for its text, e.g. "accent_fg" on an accent

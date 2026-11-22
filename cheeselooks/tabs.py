@@ -8,7 +8,10 @@ so the tab section of the GTK layer is written here.
                    open   like boxed, but unselected tabs have no box until
                           hovered (Mint-Y)
                    pills  rounded tabs floating in a trough; the selected one
-                          is a raised button
+                          is a raised button, or selected_color (e.g. "accent",
+                          its text: selected_fg, else whichever reads); pills
+                          take no active_marker (a line along a pill's top
+                          edge looked like a stray strip)
     active_marker  none   nothing extra on the selected tab
                    line   a slim accent line on the outer edge
                    glow   the line plus an accent gradient fading inward
@@ -223,10 +226,11 @@ def css(t: dict[str, str], gtk4: bool = False) -> str:
     for pos in POSITIONS:
         m = _marker(marker, pos, accent, pal.luminance(t["base"]) < 0.25)
         if kind == "pills":
-            body = (f"  color: {t['text']};\n  border-color: {t['w.button.border']};\n"
-                    f"  background-color: {t['button']};\n"
-                    f"  background-image: {t['button_grad']};\n"
-                    f"  box-shadow: {_join(t[k('w.button.shadow')], m)};")
+            fg, face, grad = pill_face(t)
+            body = (f"  color: {fg};\n  border-color: {t['w.button.border']};\n"
+                    f"  background-color: {face};\n"
+                    f"  background-image: {grad};\n"
+                    f"  box-shadow: {_join(t[k('w.button.shadow')])};")
         else:
             bar = claude_bar(pos, accent) if kind == "claude" else "none"
             # the selected tab opens into the page: outlined in the page's frame colour
@@ -236,6 +240,14 @@ def css(t: dict[str, str], gtk4: bool = False) -> str:
         selectors = sel(pos, ":checked") + (",\nnotebook > header > tabs > tab:checked" if pos == "top" else "")
         out.append(f"{selectors} {{\n{body} }}")
     return "\n".join(out) + "\n"
+
+
+def pill_face(t: dict[str, str]) -> tuple[str, str, str]:
+    """The selected pill's text, color and gradient: the style's selected_color
+    if it sets one (xl_cheese: a whole pill in the accent), else a button."""
+    if t.get("w.tab.selected_color"):
+        return t["w.tab.selected_fg"], t["w.tab.selected_color"], t["w.tab.selected_grad"]
+    return t["text"], t["button"], t["button_grad"]
 
 
 def adw_css(t: dict[str, str]) -> str:
@@ -259,10 +271,9 @@ def adw_css(t: dict[str, str]) -> str:
         out += [f"tabbar tabbox > tabboxchild {{ border-radius: {r}px; }}",
                 f"tabbar tab {{ border-radius: {r}px; color: {t['text_dim']}; background-color: transparent; }}",
                 f"tabbar tab:hover:not(:selected) {{\n{hover}",
-                f"tabbar tab:selected, tabbar tab:selected:hover {{\n  color: {t['text']};\n"
-                f"  background-color: {t['button']};\n"
-                f"  background-image: {t['button_grad']};\n"
-                f"  box-shadow: {_join(f'inset 0 0 0 1px {border}', t['w.button.g4_inset_shadow'], marker)}; }}"]
+                "tabbar tab:selected, tabbar tab:selected:hover {\n  color: %s;\n"
+                "  background-color: %s;\n  background-image: %s;\n" % pill_face(t) +
+                f"  box-shadow: {_join(f'inset 0 0 0 1px {border}', t['w.button.g4_inset_shadow'])}; }}"]
     else:
         # sit on the page: no gap below the tabs, square bottom corners
         rest_bg = t["header"] if kind == "boxed" else "transparent"

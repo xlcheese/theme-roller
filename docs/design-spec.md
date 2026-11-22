@@ -720,3 +720,5 @@ Built-in themes (`data/themes/NN-*.json`, listed in file-name order, so two-digi
 - Authors (xl_cheese): the xl-* styles, the dark styles, the binder folder icons and the README credit say Wesley Hayslip.
 
 - Claude styles renamed (xl_cheese): xl-Claude and xl-Claude-Dark are Claude and Claude-Dark (the xl- prefix is for Wesley Hayslip's designs). settings.OLD_STYLE_NAMES reads the old names. The starter style's name prompt reads "Give your new style a good name."
+
+- Pill tabs (xl_cheese): no active_marker on pills (the line along a pill's top edge looked like a stray accent strip). [widgets] tab selected_color (and selected_fg) colors the selected pill, e.g. selected_color = "accent" for a whole pill in the accent; without selected_fg its text is whichever of text / text-on-accent reads better. Notebook tabs and libadwaita's tab bar both. Boxed, open and claude tabs keep the page color, since they join the page.

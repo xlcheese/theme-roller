@@ -594,7 +594,6 @@ class TokenTests(unittest.TestCase):
         css = tokens.build(s, self.style)["tabs.css"]
         self.assertIn("tabs: boxed, selected marker: none", css)
         for kind, marker, expect, bottom in (("open", "line", "inset 0 2px 0", "inset 0 -2px 0"),
-                                             ("pills", "glow", "8px -8px", "inset 0 -1px 0 #"),
                                              ("boxed", "line", "inset 0 2px 0", "inset 0 -2px 0")):
             st = styles.Style(name="T", path=None, widgets={"tab": {"tab_kind": kind, "active_marker": marker}})
             css = tokens.build(s, st)["tabs.css"]
@@ -604,6 +603,17 @@ class TokenTests(unittest.TestCase):
         st = styles.Style(name="T", path=None, widgets={"tab": {"tab_kind": "pills", "active_marker": "glow"}})
         t = tokens.build(s, st)
         self.assertIn(f"padding: 3px;\n  background-color: {t['header']}", t["tabs.css"])  # trough = toolbar color
+        # pills take no marker (xl_cheese: an accent strip along the pill's top)
+        self.assertNotIn("8px -8px", t["tabs.css"])
+        self.assertNotIn(t["accent"], t["tabs.css"])
+        # a whole pill in the accent, its text the theme's text-on-accent
+        st = styles.Style(name="T", path=None,
+                          widgets={"tab": {"tab_kind": "pills", "selected_color": "accent"}})
+        t = tokens.build(s, st)
+        checked = t["tabs.css"].split("tab:checked {")[1]
+        self.assertIn(f"background-color: {t['accent']}", checked)
+        self.assertIn(f"color: {t['accent_fg']}", checked)
+        self.assertIn(f"background-color: {t['accent']}", tabs.adw_css(t))      # libadwaita's tab bar too
         self.assertIn("inset 0 1px 0", t["tabs.css"])      # glow edge line is 1px
 
     def test_layout_and_accent_name(self):
