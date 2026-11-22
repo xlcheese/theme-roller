@@ -1,36 +1,32 @@
 # Theme Roller
 
-**Good ol' fashioned Linux desktop theming, for Linux Mint Cinnamon.**
+**Good ol' fashioned Linux desktop theming for your Linux Mint Cinnamon desktop.**
 
-<!-- DRAFT OPENING (written by Claude as a starting point): xl_cheese to rework in his own words. -->
+Remember when customizing the theme on your Linux desktop was easy? There were hundreds of GTK2 themes available on sites like gnome-look.org, rated, reviewed, and shared by the people who made them. You could download a theme or edit the gtkrc file to make your own without a lot of time invested. At one point, we had a tool in Ubuntu and GNOME 2 which allowed effortless changes to the color and style of your theme without ever opening a gtkrc file. You could instantly make your theme as ugly as can be. That was one part of using Linux on my personal computer that I found fun.
 
-Remember when changing how your Linux desktop looked was half the fun? You'd pick a color scheme in GNOME 2, nudge a few sliders in Clearlooks, and the whole desktop came along with you. Somewhere along the way that got lost. Today you get an accent color, a light or dark switch, and if you want more, you're hunting for themes, hand-editing CSS, and living with the apps that never match.
+Somewhere along the way this got lost. Today you get an accent color, a light or dark switch, and if you want more, you're hunting for themes, hand-editing CSS, and living with the apps that never match. Creating a robust theme in Linux Mint is more work than it needs to be.
 
-Theme Roller brings it back. Pick three colors (an accent, a background and a text color), set how round, how tall and how shiny you like things, and click **Apply**. About a second later your whole desktop has changed with you: the panel and its menus, your apps, the window borders, the terminal, even your folder icons if you want them.
-
-It makes themes called **xl-Cheeselooks**. Start from one of the ten that come with it, make it yours, and save it under your own name.
-
-<!-- END OF DRAFT OPENING -->
+Theme Roller brings it back. Choose your colors, turn some knobs and dials, then click **Apply**. Your entire desktop theme changes within a second. You can make endless color and style changes from just living on the first few tabs of Theme Roller. If you want to dive deeper just click through the rest of the tabs which include the Cinnamon panel and menu, Window borders, Terminal, Icons, and other widgets if you want them.
 
 > **Status:** getting ready for its first release. You can run it today from a copy of this repository (below); a `.deb` package is on the way.
 
-## What you can change
+## Customization Options
 
-- **Theme:** start from a built-in theme (xl-Cheeselooks, xl-Classic, xl-Gummy, xl-Vintage, xl-Organ Harvest, Claude, and dark versions) or one of your own. Save, duplicate, rename, and share themes as a single `.xltheme` file.
+- **Theme:** start from any of the built-in themes, one shared from someone else, or one of your own. Save, duplicate, rename, and share themes as a single `.xltheme` file.
 - **Global:** three colors make a complete light *or* dark theme. Size, roundness, gradient, and how hovers fade in and out. Or pick your accent from your wallpaper or any picture.
-- **Style:** how things are drawn (edges, highlights, shadows, tabs), with a Depth slider. Ships with xl-Cheeselooks, xl-Classic, xl-Gummy, xl-Vintage and Claude styles, light and dark; you can write your own.
-- **Panel & Menu:** the Cinnamon panel's and menus' own colors, height, roundness, gradient and see-through.
-- **Window Borders:** title bar colors, height and gradient, border width and color, window roundness, and ten styles of window buttons with a choice of glyphs.
-- **Terminal:** follows the theme, or its own colors.
+- **Style:** how things are drawn (edges, highlights, shadows, tabs), with a Depth slider. Ships with light and dark styles you can use. You can take it further and craft your own style sheets. Make a copy of an existing one or create a starter style sheet, with every option explained, from the Documentation tab.
+- **Panel & Menu:** the Cinnamon panel's and menus' own colors, height, roundness, gradient and transparency.
+- **Window Borders:** title bar colors, height and gradient, border width and color, window roundness, and many styles of window buttons with a choice of style for **Minimize, Maximize and Close** glyphs.
+- **Terminal:** follow the theme or choose your own preferred colors.
 - **Details:** tooltips, scrollbars, sliders, switches and the focus ring.
-- **Icons:** folders in your colors, in six styles: two 80s school binders (xl-Big Baddy, with optional racing stripes, and xl-Rad), Claude's, Mint-Y, Yaru and Breeze. Off until you turn it on.
-- **Integration:** brings your colors to the apps that don't read the theme on their own: GNOME-style apps, Flatpak apps, Qt apps like VLC, and text editors. **Scan my apps** shows which of your apps are which kind, and whether the theme reaches them.
+- **Icons:** folder icons in your colors, in multiple styles to choose from. Theme Roller follows your current icon scheme and only customizes the folders. Other icons stay as they were.
+- **Integration:** brings your colors to the hodgepodge of apps that don't read the theme on their own: GNOME-style apps, Flatpak apps, Qt apps like VLC, and text editors. **Scan my apps** button shows which of your apps are which kind, and whether the theme reaches them. See below for apps which have limitations.
 
-Everything shows in a live preview first. Nothing changes on your desktop until you click **Apply**, and **Revert** puts your previous theme back.
+Everything shows in a live preview first. Nothing changes on your desktop until you click **Apply**, and **Revert** puts your previous theme back. None of your prior theme work outside of Theme Roller will be lost.
 
-## How far it goes
+## How far Theme Roller reaches
 
-Linux Mint runs apps built with several different toolkits, and each looks for its colors in its own place. Theme Roller goes as far as a theme can without fighting the system:
+Linux Mint runs apps built with several different toolkits, and each looks for its colors in a specific place. Theme Roller goes as far as a theme can to make the Linux Mint desktop look unified without fighting the system:
 
 - **GTK 3 apps** (most of Mint, Nemo, Xed, LibreOffice, Firefox…) and **the Cinnamon desktop**: fully themed.
 - **GTK 4 and Mint's libadwaita apps**: fully themed.
