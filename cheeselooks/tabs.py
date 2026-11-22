@@ -9,9 +9,7 @@ so the tab section of the GTK layer is written here.
                           hovered (Mint-Y)
                    pills  rounded tabs floating in a trough; the selected one
                           is a raised button, or selected_color (e.g. "accent",
-                          its text: selected_fg, else whichever reads); pills
-                          take no active_marker (a line along a pill's top
-                          edge looked like a stray strip)
+                          its text: selected_fg, else whichever reads)
     active_marker  none   nothing extra on the selected tab
                    line   a slim accent line on the outer edge
                    glow   the line plus an accent gradient fading inward
@@ -230,7 +228,7 @@ def css(t: dict[str, str], gtk4: bool = False) -> str:
             body = (f"  color: {fg};\n  border-color: {t['w.button.border']};\n"
                     f"  background-color: {face};\n"
                     f"  background-image: {grad};\n"
-                    f"  box-shadow: {_join(t[k('w.button.shadow')])};")
+                    f"  box-shadow: {_join(t[k('w.button.shadow')], m)};")
         else:
             bar = claude_bar(pos, accent) if kind == "claude" else "none"
             # the selected tab opens into the page: outlined in the page's frame colour
@@ -273,7 +271,7 @@ def adw_css(t: dict[str, str]) -> str:
                 f"tabbar tab:hover:not(:selected) {{\n{hover}",
                 "tabbar tab:selected, tabbar tab:selected:hover {\n  color: %s;\n"
                 "  background-color: %s;\n  background-image: %s;\n" % pill_face(t) +
-                f"  box-shadow: {_join(f'inset 0 0 0 1px {border}', t['w.button.g4_inset_shadow'])}; }}"]
+                f"  box-shadow: {_join(f'inset 0 0 0 1px {border}', t['w.button.g4_inset_shadow'], marker)}; }}"]
     else:
         # sit on the page: no gap below the tabs, square bottom corners
         rest_bg = t["header"] if kind == "boxed" else "transparent"
