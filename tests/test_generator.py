@@ -1308,6 +1308,31 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertFalse((css.parent / gtk4.ASSETS).exists())
         self.assertEqual(settings.DEFAULTS["integration"]["libadwaita"], "colors")   # full is opt-in
 
+    def test_scan_my_apps(self):
+        """Scan my apps: an app's kind, read from files, nothing run."""
+        from cheeselooks import appscan
+        self.assertIn("libc.so.6", appscan.elf_libraries(Path("/bin/ls")))      # a real program's libraries
+        self.assertIsNone(appscan.elf_libraries(REPO / "README.md"))           # not a program
+        k = appscan.kind_of_libraries
+        self.assertEqual(k(["libadwaita-1.so.0", "libgtk-4.so.1"]), appscan.GNOME)
+        self.assertEqual(k(["libQt5Widgets.so.5"]), appscan.QT)
+        self.assertEqual(k(["libgtk-3.so.0"]), appscan.GTK3)
+        self.assertIsNone(k(["libc.so.6"]))
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            scripts = {"adw.py": "gi.require_version('Adw', '1')", "gtk3.py": "gi.require_version('Gtk', '3.0')",
+                       "qt.py": "from PyQt5 import QtWidgets", "other.sh": "echo hi"}
+            for name, body in scripts.items():
+                (t / name).write_text("#!/usr/bin/python3\n" + body + "\n")
+            self.assertEqual(appscan.kind_of_script(t / "adw.py"), appscan.GNOME)
+            self.assertEqual(appscan.kind_of_script(t / "gtk3.py"), appscan.GTK3)
+            self.assertEqual(appscan.kind_of_script(t / "qt.py"), appscan.QT)
+            self.assertIsNone(appscan.kind_of_script(t / "other.sh"))
+        c = appscan.classify
+        self.assertEqual(c("x", {"Name": "Vim", "Exec": "vim %F", "Terminal": "true"}).kind, appscan.TERMINAL)
+        self.assertEqual(c("x", {"Name": "Calc", "Exec": "flatpak run org.gnome.Calculator"}).kind, appscan.FLATPAK)
+        self.assertEqual(c("x", {"Name": "Gone", "Exec": "no-such-program-here"}).kind, appscan.UNKNOWN)
+
     def test_old_integration_switches_carry_over(self):
         """22 Nov: three libadwaita switches became one choice (the GNOME accent
         part of colors), and the watcher's switch went (always on)."""

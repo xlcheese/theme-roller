@@ -331,7 +331,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
             intro = Gtk.Label(label=INTEGRATION_INTRO, xalign=0, wrap=True, max_width_chars=60, hexpand=True,
                               margin_bottom=6)
             grid.attach(intro, 0, row, 2, 1)
-            row += 1
+            scan = Gtk.Button(label="Scan my apps", halign=Gtk.Align.START, margin_bottom=8)
+            scan.set_tooltip_text("Lists the apps on this computer by kind, and whether Theme Roller "
+                                  "reaches them: the answer to \u201cwhy doesn't this app match?\u201d")
+            scan.connect("clicked", lambda _b: self._scan_dialog())
+            grid.attach(scan, 0, row + 1, 2, 1)
+            row += 2
         if section == "panel":
             order = [p for p, _g in PANEL_LAYOUT]
             heading = dict(PANEL_LAYOUT)
@@ -746,6 +751,57 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 img.set_from_pixbuf(loader.get_pixbuf())
             except GLib.Error:
                 pass
+
+    def _scan_dialog(self) -> None:
+        """Scan my apps: the apps in the menu by kind, and whether Theme Roller
+        reaches each kind with the switches as they are now (appscan.py)."""
+        from . import appscan
+        result = appscan.scan()
+        integ = self.data["integration"]
+        adw = integ.get("libadwaita", "colors")
+        on = lambda v, yes="On", no="Off: switch it on in the Integration tab": yes if v else no  # noqa: E731
+        groups = [
+            (appscan.GTK3, "Follow the theme on their own", "Nothing to do: they always match."),
+            (appscan.GNOME, "GNOME-style apps",
+             {"off": "Off: set GNOME-style apps to Colors in the Integration tab", "colors": "Colors on",
+              "full": "Colors and full styling on"}[adw]),
+            (appscan.FLATPAK, "Flatpak apps",
+             on(integ.get("flatpak_access")) + ("" if adw != "off" else
+                                                 ". GNOME-style ones also need GNOME-style apps set to Colors")),
+            (appscan.QT, "Qt apps", on(integ.get("qt_colors")) + (f". {qt.missing()}" if qt.missing() else "")),
+            (appscan.EDITOR, "Text editors", on(integ.get("editor_colors"))),
+            (appscan.TERMINAL, "Run in a terminal", "They use the terminal's colors (Terminal tab)."),
+            (appscan.WEB, "Web-based apps", "They draw their own look; no theme reaches them."),
+            (appscan.UNKNOWN, "Couldn't tell", "Many of these draw their own look."),
+        ]
+        dialog = Gtk.Dialog(title="Your apps", transient_for=self, modal=True)
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.set_default_size(520, 520)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, margin=14)
+        total = len(result.apps)
+        head = Gtk.Label(xalign=0, wrap=True, max_width_chars=60)
+        head.set_text(f"{total} apps in your menu, by kind. Changes show after Apply, in apps opened "
+                      "afterwards.")
+        box.pack_start(head, False, False, 6)
+        for kind, title, status in groups:
+            apps = result.by_kind(kind)
+            if not apps:
+                continue
+            t = Gtk.Label(xalign=0, margin_top=8)
+            t.set_markup(f"<b>{GLib.markup_escape_text(title)}</b>  ({len(apps)})")
+            box.pack_start(t, False, False, 0)
+            st = Gtk.Label(label=status, xalign=0, wrap=True, max_width_chars=60)
+            box.pack_start(st, False, False, 0)
+            names = ", ".join(a.name + (f" ({a.detail})" if a.detail else "") for a in apps)
+            lst = Gtk.Label(label=names, xalign=0, wrap=True, max_width_chars=60, selectable=True)
+            lst.get_style_context().add_class("dim-label")
+            box.pack_start(lst, False, False, 0)
+        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, vexpand=True)
+        scroller.add(box)
+        dialog.get_content_area().pack_start(scroller, True, True, 0)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
 
     def _set_aside_row(self, grid: Gtk.Grid, row: int) -> int:
         """Take our extra colors out of apps now, without changing any setting."""
