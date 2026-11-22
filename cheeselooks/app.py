@@ -170,6 +170,7 @@ INTEGRATION_MISSING = {
     "qt_colors": lambda: qt.missing(),
 }
 SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
+SORT_DEFAULTS = {"theme_sort": "new"}    # themes: yours first, then the built-in ones in their set order
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 
 
@@ -195,6 +196,17 @@ def _save_prefs(prefs: dict) -> None:
 def _natural(name: str) -> list:
     """A-Z key: case-insensitive, with numbers in order ("Theme 2" before "Theme 10")."""
     return [int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name.casefold())]
+
+
+def _theme_age(f: Path, builtin: bool) -> float:
+    """For Newest and Oldest: your themes by when they were saved; the built-in
+    ones in a set order, after yours, from the number their file starts with
+    (01-xl-cheeselooks.json first: xl_cheese's order, 22 Nov). Their file dates
+    can't hold it: a checkout or an install gives them all the same date."""
+    if not builtin:
+        return f.stat().st_mtime
+    m = re.match(r"(\d+)", f.name)
+    return -float(m.group(1)) if m else -1000.0
 
 
 def _sorted(items: list, order: str) -> list:
@@ -622,7 +634,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         combo = Gtk.ComboBoxText()
         for sid, label in SORTS:
             combo.append(sid, label)
-        combo.set_active_id(self.prefs.get(key, "az"))
+        combo.set_active_id(self.prefs.get(key, SORT_DEFAULTS.get(key, "az")))
 
         def changed(c: Gtk.ComboBoxText) -> None:
             self.prefs[key] = c.get_active_id()
@@ -636,8 +648,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.syncing = True
         for r in self.theme_list.get_children():
             self.theme_list.remove(r)
-        items = [(name, f.stat().st_mtime, f, builtin) for name, f, builtin in themes.list_themes()]
-        for name, _m, _f, builtin in _sorted(items, self.prefs.get("theme_sort", "az")):
+        items = [(name, _theme_age(f, builtin), f, builtin) for name, f, builtin in themes.list_themes()]
+        for name, _m, _f, builtin in _sorted(items, self.prefs.get("theme_sort", SORT_DEFAULTS["theme_sort"])):
             r = self._row(name, tag="" if builtin else "Your theme")
             r.theme_name, r.builtin = name, builtin
             self.theme_list.add(r)

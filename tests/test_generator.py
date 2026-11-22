@@ -817,7 +817,9 @@ class RenderAndInstallTests(unittest.TestCase):
         import os, zipfile
         from unittest import mock
         names = [n for n, _f, _b in themes.list_themes()]
-        self.assertEqual(names[:4], ["xl-Cheeselooks", "xl-Classic", "xl-Gummy", "Claude"])
+        self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
+                                 "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Vintage",
+                                 "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),
                          ("Claude", "xl-Claude", "#B85A38"))
