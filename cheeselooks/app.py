@@ -78,8 +78,8 @@ DOC_NOTES = [
      "depth (how much of that unfocused windows keep). You can also make your own: a style is one "
      "style.toml file, in ~/.local/share/xl-cheeselooks/styles/&lt;name&gt;/. <b>Create a starter "
      "style…</b> makes one with every option explained: the essentials are on, the rest switched off "
-     "with a #, each with a short note. Edit it, then pick it on the Style tab, or check it with "
-     "<tt>theme-roller check-style &lt;folder&gt;</tt>."),
+     "with a #, each with a short note. Edit it, then pick it on the Style tab. <b>Check a style "
+     "sheet for issues…</b> tells you if anything in it needs fixing."),
     ("Panel &amp; Menu",
      "The Cinnamon panel and its menus: their own colors, label weight, height, roundness, gradient "
      "and see-through. Left alone, they follow Global."),
@@ -951,15 +951,54 @@ class SettingsWindow(Gtk.ApplicationWindow):
             text.set_markup(body)
             grid.attach(text, 0, row + 1, 1, 1)
             row += 2
-            if title == "Style":       # the starter style sheet, with what it's about (xl_cheese)
-                starter = Gtk.Button(label="Create a starter style…", halign=Gtk.Align.START, margin_top=4)
+            if title == "Style":       # the starter style sheet and the check, with what they're about (xl_cheese)
+                buttons = Gtk.Box(spacing=8, halign=Gtk.Align.START, margin_top=4)
+                starter = Gtk.Button(label="Create a starter style…")
                 starter.connect("clicked", self.on_starter_style)
-                grid.attach(starter, 0, row, 1, 1)
+                check = Gtk.Button(label="Check a style sheet for issues…")
+                check.set_tooltip_text("Pick a style.toml: it's checked as Theme Roller reads it, and any "
+                                       "problems are listed with what to fix")
+                check.connect("clicked", self.on_check_style)
+                buttons.pack_start(starter, False, False, 0)
+                buttons.pack_start(check, False, False, 0)
+                grid.attach(buttons, 0, row, 1, 1)
                 row += 1
         link = Gtk.LinkButton(uri=DOCS_URL, label="Full documentation (online)", halign=Gtk.Align.START,
                               margin_top=12)
         grid.attach(link, 0, row, 1, 1)
         return grid
+
+    def on_check_style(self, _button: Gtk.Button) -> None:
+        """Check a style sheet: the same check as `theme-roller check-style`,
+        its result in a window (xl_cheese: most people won't use a terminal)."""
+        chooser = Gtk.FileChooserDialog(title="Check a style sheet", transient_for=self,
+                                        action=Gtk.FileChooserAction.OPEN)
+        chooser.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Check", Gtk.ResponseType.ACCEPT)
+        sheets = Gtk.FileFilter()
+        sheets.set_name("Style sheets (style.toml)")
+        sheets.add_pattern("*.toml")
+        chooser.add_filter(sheets)
+        yours = paths.style_dirs()[0]
+        if yours.is_dir():
+            chooser.set_current_folder(str(yours))
+        picked = chooser.get_filename() if chooser.run() == Gtk.ResponseType.ACCEPT else None
+        chooser.destroy()
+        if not picked:
+            return
+        kind = Gtk.MessageType.INFO
+        try:
+            style = styles.load(Path(picked))
+            title, lines = f"“{style.name}” looks good", [f"Warning: {w}" for w in style.warnings]
+            if not lines:
+                lines = ["No problems found. Pick it on the Style tab to use it."]
+        except styles.StyleError as exc:
+            title, kind = f"{len(exc.problems)} problem(s) to fix", Gtk.MessageType.WARNING
+            lines = list(exc.problems) + ["Fix these in the file, then check it again."]
+        dialog = Gtk.MessageDialog(transient_for=self, modal=True, message_type=kind,
+                                   buttons=Gtk.ButtonsType.CLOSE, text=title)
+        dialog.format_secondary_text(f"{picked}\n\n" + "\n".join(lines))
+        dialog.run()
+        dialog.destroy()
 
     def on_starter_style(self, _button: Gtk.Button) -> None:
         """A new style of yours from the starter style sheet, then picked."""
