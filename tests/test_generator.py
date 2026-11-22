@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -599,7 +599,9 @@ class TokenTests(unittest.TestCase):
             t = tokens.build(s, st)
             for key, field in (("spin.css", "entry"), ("spin4.css", "text")):
                 if gap:
-                    self.assertIn(f"spinbutton:not(.vertical) > {field} {{\n  margin-right: {gap}px", t[key], name)
+                    self.assertIn(f"> {field}, ", t[key], name)
+                    self.assertIn(f"margin-right: {gap}px", t[key], name)
+                    self.assertIn(f"{spin.STRONG} > button + button {{", t[key], name)   # the + keeps its shadow
                 else:      # joined: only the disabled button, solid so the field can't show through
                     self.assertNotIn("margin-right", t[key], name)
                     self.assertIn("button:disabled", t[key], name)
