@@ -257,6 +257,15 @@ def _needs_apply(data: dict, applied: dict) -> bool:
     return not _same(data, applied) or mine or data["theme"] != applied["theme"]
 
 
+def _short_name(name: str, most: int = 24) -> str:
+    """A file name for a one-line message: long ones (pictures saved from the
+    web) keep their start and their end, e.g. "W1siZiIsIjQ…dXQ.jpg"."""
+    if len(name) <= most:
+        return name
+    keep = most - 1
+    return name[:keep - keep // 2] + "…" + name[-(keep // 2):]
+
+
 class SettingsWindow(Gtk.ApplicationWindow):
     def __init__(self, app: Gtk.Application):
         super().__init__(application=app, title=APP_TITLE)
@@ -303,7 +312,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
         sidebar = Gtk.StackSidebar(stack=self.stack)
         sidebar.set_size_request(160, -1)
         self.sidebar = sidebar
-        self.status = Gtk.Label(xalign=0, selectable=True, wrap=True, margin_start=12, margin_bottom=6)
+        # wraps inside the window's width and never widens it: breaks inside long
+        # words (file names, paths) too, and asks for almost no width of its own
+        self.status = Gtk.Label(xalign=0, selectable=True, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR,
+                                max_width_chars=1, margin_start=12, margin_end=12, margin_bottom=6)
         self.status.get_style_context().add_class("dim-label")
         pages = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         pages.pack_start(self.stack, True, True, 0)
@@ -898,7 +910,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         try:
             found = imagecolors.colors(path)
         except GLib.Error as exc:
-            self.status.set_text(f"Couldn't read {path.name}: {exc.message}")
+            self.status.set_text(f"Couldn't read {_short_name(path.name)}: {exc.message}")
             return
         for child in self.image_swatches.get_children():
             self.image_swatches.remove(child)
@@ -919,9 +931,9 @@ class SettingsWindow(Gtk.ApplicationWindow):
         best = imagecolors.accent(found)
         if best:
             self._use_accent(best)
-            self.status.set_text(f"Accent from {path.name}. Or click another of its colors.")
+            self.status.set_text(f"Accent from {_short_name(path.name)}. Or click another color.")
         else:
-            self.status.set_text(f"{path.name} has no colors vivid enough for an accent.")
+            self.status.set_text(f"{_short_name(path.name)} has no colors vivid enough for an accent.")
 
     def _use_accent(self, color: str) -> None:
         self.changed(("global", "accent"), color)
