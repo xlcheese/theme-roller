@@ -62,31 +62,48 @@ TIP_URL = "https://www.paypal.com/donate/?hosted_button_id=SDDYDENKXPCWN"   # Ab
 DOC_NOTES = [
     ("Themes and styles",
      "A <b>theme</b> is your colors and settings: everything on these tabs. A <b>style</b> is how "
-     "widgets are drawn: their edges, hovers, tabs and panel buttons. Any theme can use any style "
-     "(Style tab). Changes show in the preview; nothing changes on the desktop until <b>Apply</b>, "
-     "and <b>Revert</b> puts the previous theme back."),
+     "things are drawn: edges, hovers, tabs and panel buttons. Any theme can use any style. Everything "
+     "shows in the preview first; nothing changes on your desktop until you click <b>Apply</b>, and "
+     "<b>Revert</b> puts your previous theme back."),
     ("Theme",
-     "Pick a theme to start from. Change anything and it becomes <b>Custom</b>; <b>Save Theme…</b> "
-     "keeps your changes under a name. Your own themes can be renamed and deleted."),
+     "Start from a built-in theme, one shared by someone else, or one of your own. Change anything and "
+     "it becomes <b>Custom</b>; <b>Save Theme…</b> keeps your changes under a name. Your own themes "
+     "can be duplicated, renamed and deleted."),
     ("Global",
-     "Accent, background and text colors, and the shape of everything: Size (control height), "
-     "Roundness, Gradient and how hovers fade."),
+     "Three colors make a complete light or dark theme: accent, background and text. Then the shape of "
+     "everything: Size, Roundness, Gradient, and how hovers fade. <b>Colors from</b> picks an accent "
+     "from your wallpaper or any picture."),
     ("Style",
-     "Pick a style, and set its Depth (how strong its edges and shadows are) and Unfocused depth "
-     "(how much of that unfocused windows keep)."),
+     "Pick how things are drawn, and set its Depth (how strong edges and shadows are) and Unfocused "
+     "depth (how much of that unfocused windows keep)."),
     ("Panel &amp; Menu",
-     "The Cinnamon panel and menus: their own colors, label weight, and the panel's and menu's "
-     "height, roundness, gradient and opacity. Left alone, they follow Global."),
+     "The Cinnamon panel and its menus: their own colors, label weight, height, roundness, gradient "
+     "and see-through. Left alone, they follow Global."),
     ("Window Borders",
-     "Title bars and the window buttons: colors, height, border, roundness, and one of several "
-     "button styles with its roundness, spacing and glyphs."),
+     "Title bars and window buttons: colors, height, gradient, border, roundness, and a choice of "
+     "button styles and Minimize, Maximize and Close glyphs. When these change, Apply restarts "
+     "Cinnamon by itself (your windows stay open), as window borders only reload then."),
+    ("Terminal",
+     "The terminal follows the theme, or pick one of the color sets, or your own colors."),
     ("Details",
      "Tooltips, scrollbars (overlay or classic, roundness, width), sliders, switches and the focus ring."),
+    ("Icons",
+     "Folder icons in your colors, in six styles. Only the folders change; other icons stay as they "
+     "were. The folder color follows your accent unless you pick one; on xl-Big Baddy, the second "
+     "color is its racing stripes. Off until you switch it on."),
+    ("Integration",
+     "Linux apps come in a few kinds, and each looks for its colors in its own place. These switches "
+     "bring your colors to the hodgepodge that doesn't read the theme on its own: GNOME-style apps, "
+     "Flatpak apps, Qt apps like VLC, and text editors. <b>Scan my apps</b> shows which of your apps "
+     "are which kind; <b>Take colors out of apps</b> removes them until the next Apply. Pick another "
+     "theme in Mint's settings and Theme Roller's colors leave your apps by themselves."),
+    ("Import &amp; Export",
+     "Share a theme as one <tt>.xltheme</tt> file, and add themes others shared with you."),
     ("Your own style",
      "A style is one style.toml file, in ~/.local/share/xl-cheeselooks/styles/&lt;name&gt;/. "
-     "<b>Create a starter style…</b> below makes one with every option listed: the essentials are on, "
-     "the rest are switched off with a #, each with a short note. Edit it, then pick it on the Style "
-     "tab, or check it with <tt>cheeselooks check-style &lt;folder&gt;</tt>."),
+     "<b>Create a starter style…</b> below makes one with every option explained: the essentials are "
+     "on, the rest switched off with a #, each with a short note. Edit it, then pick it on the Style "
+     "tab, or check it with <tt>theme-roller check-style &lt;folder&gt;</tt>."),
 ]
 LABELS = {
     "accent": "Accent", "bg": "Background", "text": "Text", "size": "Size",
