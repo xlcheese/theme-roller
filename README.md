@@ -1,88 +1,108 @@
 # Theme Roller
 
-The app that makes the **xl-Cheeselooks** themes.
+**Good ol' fashioned Linux desktop theming, for Linux Mint Cinnamon.**
 
+<!-- DRAFT OPENING (written by Claude as a starting point): xl_cheese to rework in his own words. -->
 
-A Linux Mint Cinnamon theme you style yourself. Pick an **accent**, a **background** and a **text** color, set size, roundness, gradient and a few other sliders, click **Apply**, and the whole desktop restyles itself in about a second: the panel, menus, GTK apps, window borders and the terminal.
+Remember when changing how your Linux desktop looked was half the fun? You'd pick a color scheme in GNOME 2, nudge a few sliders in Clearlooks, and the whole desktop came along with you. Somewhere along the way that got lost. Today you get an accent color, a light or dark switch, and if you want more, you're hunting for themes, hand-editing CSS, and living with the apps that never match.
 
-It's a throwback to GNOME 2's Clearlooks and its Color Chooser, rebuilt for today's Cinnamon and GTK 3.
+Theme Roller brings it back. Pick three colors (an accent, a background and a text color), set how round, how tall and how shiny you like things, and click **Apply**. About a second later your whole desktop has changed with you: the panel and its menus, your apps, the window borders, the terminal, even your folder icons if you want them.
 
-> **Status: in development.** Nothing is installable yet. See the [design spec](docs/design-spec.md) and the [interactive mockup](mockup/index.html) (download and open it in a browser).
+It makes themes called **xl-Cheeselooks**. Start from one of the ten that come with it, make it yours, and save it under your own name.
 
-## Planned for v1
-- **Global:** three colors make a complete light *or* dark theme; size, roundness, gradient, hover in/out timing.
-- **Style:** how edges are drawn (borders, highlights, shadows), with a Depth slider. Ships with the *xl-Cheeselooks* style; users can write their own.
-- **Panel & Menu:** optional separate colors and shape for the panel and its menus, with presets.
-- **Window Borders:** title bar colors, height, border thickness, button layout.
+<!-- END OF DRAFT OPENING -->
+
+> **Status:** getting ready for its first release. You can run it today from a copy of this repository (below); a `.deb` package is on the way.
+
+## What you can change
+
+- **Theme:** start from a built-in theme (xl-Cheeselooks, xl-Classic, xl-Gummy, xl-Vintage, xl-Organ Harvest, Claude, and dark versions) or one of your own. Save, duplicate, rename, and share themes as a single `.xltheme` file.
+- **Global:** three colors make a complete light *or* dark theme. Size, roundness, gradient, and how hovers fade in and out. Or pick your accent from your wallpaper or any picture.
+- **Style:** how things are drawn (edges, highlights, shadows, tabs), with a Depth slider. Ships with xl-Cheeselooks, xl-Classic, xl-Gummy, xl-Vintage and Claude styles, light and dark; you can write your own.
+- **Panel & Menu:** the Cinnamon panel's and menus' own colors, height, roundness, gradient and see-through.
+- **Window Borders:** title bar colors, height and gradient, border width and color, window roundness, and ten styles of window buttons with a choice of glyphs.
 - **Terminal:** follows the theme, or its own colors.
-- **Details:** tooltips, scrollbars, sliders, switches, focus ring.
-- libadwaita color and accent integration, Flatpak access, presets, and a `theme-roller` command.
+- **Details:** tooltips, scrollbars, sliders, switches and the focus ring.
+- **Icons:** folders in your colors, in six styles: two 80s school binders (xl-Big Baddy, with optional racing stripes, and xl-Rad), Claude's, Mint-Y, Yaru and Breeze. Off until you turn it on.
+- **Integration:** brings your colors to the apps that don't read the theme on their own: GNOME-style apps, Flatpak apps, Qt apps like VLC, and text editors. **Scan my apps** shows which of your apps are which kind, and whether the theme reaches them.
 
-## Trying it (early testers)
-**GTK 3 apps and the Cinnamon desktop work now** (Nemo, Xed and settings windows; the panel, menus, popups, notifications and alt-tab). Window borders come next. On Linux Mint 22, from a checkout of this repository, open the app:
+Everything shows in a live preview first. Nothing changes on your desktop until you click **Apply**, and **Revert** puts your previous theme back.
+
+## How far it goes
+
+Linux Mint runs apps built with several different toolkits, and each looks for its colors in its own place. Theme Roller goes as far as a theme can without fighting the system:
+
+- **GTK 3 apps** (most of Mint, Nemo, Xed, LibreOffice, Firefox…) and **the Cinnamon desktop**: fully themed.
+- **GTK 4 and Mint's libadwaita apps**: fully themed.
+- **Flatpak apps and GNOME-style apps** (libadwaita): your colors, with full styling as an option.
+- **Qt apps** (VLC, KDE apps): your colors.
+- **Text editors** (Xed, gedit, Meld): a matching color scheme.
+- **Web-based apps** (Electron, Chrome apps) and apps that draw everything themselves: no theme reaches these.
+
+## Trying it
+
+On Linux Mint 22, from a copy of this repository:
+
+```bash
+git clone https://github.com/xlcheese/theme-roller.git
+```
+
+```bash
+cd theme-roller
+```
 
 ```bash
 ./bin/theme-roller
 ```
 
-or apply from the command line:
+That opens Theme Roller. Pick a theme, change what you like, and click **Apply**.
 
-```bash
-./bin/theme-roller apply --activate
-```
+To go back to Mint's own look, pick it again in **System Settings → Themes**. Theme Roller notices and takes its colors out of your other apps too.
 
-That writes `~/.themes/xl-Cheeselooks`, switches your apps to it and saves your settings to `~/.config/xl-cheeselooks/settings.json`. Change colors with presets (stack as many as you like), or edit that settings file and run `apply` again:
+## The command line
 
-```bash
-./bin/theme-roller apply --preset "Coral Night"
-```
+Everything the app does can also be done from a terminal. `theme-roller --help` lists it all; the main ones:
 
-```bash
-./bin/theme-roller presets
-```
+| Command | What it does |
+|---|---|
+| `theme-roller` | Opens the app |
+| `theme-roller apply` | Builds the theme from your saved settings and applies it |
+| `theme-roller apply --theme "xl-Classic"` | Applies a built-in or saved theme |
+| `theme-roller revert` | Goes back to the theme you had before the last Apply |
+| `theme-roller themes` | Lists the built-in themes and yours |
+| `theme-roller export-theme` / `import-theme` | Shares a theme as one `.xltheme` file |
+| `theme-roller scan --why` | Lists your apps by kind, and why for any it can't place |
+| `theme-roller set-aside` | Takes Theme Roller's colors out of your apps for now |
 
-Switch style (this also loads the style's suggested roundness, gradient, depth and panel settings), or reset to the current style's defaults:
+From a copy of the repository, run them as `./bin/theme-roller …`.
 
-```bash
-./bin/theme-roller apply --style xl-Classic
-```
+## Where things go
 
-```bash
-./bin/theme-roller apply --style-defaults
-```
+Theme Roller only writes inside your home folder:
 
-To go back to what you had before the last apply:
+- the theme: `~/.themes/xl-Cheeselooks`
+- folder icons, if you turn them on: `~/.icons/xl-Cheeselooks`
+- your settings and your own themes: `~/.config/xl-cheeselooks/` and `~/.local/share/xl-cheeselooks/`
+- for other apps: a marked block in `~/.config/gtk-4.0/gtk.css`, a Qt color scheme (qt5ct), a text editor scheme, and read access to your theme for Flatpak apps.
 
-```bash
-./bin/theme-roller revert
-```
+## Requirements
 
-To go back to Mint's own theme, pick it again in **System Settings → Themes** (Applications and Desktop). If the panel ever looks like plain default Cinnamon after an apply, Cinnamon couldn't load the theme; please report it with the output of `grep -i "theme\|css" ~/.xsession-errors | tail -20`.
+Linux Mint 22.x with Cinnamon 6.x. Everything uses the Python 3 and GTK that Mint already ships. For Qt apps to get your colors, install qt5ct (`sudo apt install qt5ct`).
 
-Preview without touching your desktop (opens two sample windows):
+## For developers
 
-```bash
-./bin/theme-roller apply --theme-dir /tmp/xl-Cheeselooks --no-save
-```
-
-```bash
-GTK_THEME=xl-Cheeselooks XDG_DATA_HOME=/tmp/xlc python3 tools/showcase.py
-```
-
-(For the second command, first run `mkdir -p /tmp/xlc/themes && ln -s /tmp/xl-Cheeselooks /tmp/xlc/themes/`.)
-
-### Developers
 - Tests: `python3 -m unittest discover tests`
 - Every computed value: `./bin/theme-roller tokens [filter]`
 - Check a style file: `./bin/theme-roller check-style PATH`
-- Screenshots on a virtual display: `tools/preview.sh THEME_DIR out.png` (needs Xvfb and ImageMagick)
-
-## Requirements
-Linux Mint 22.x with Cinnamon 6.x. No extra packages: everything uses the Python 3 and GTK that Mint already ships.
+- How it all works, and why: [the design spec](docs/design-spec.md)
 
 ## Credits
-- Built on [Linux Mint](https://github.com/linuxmint/mint-themes)'s Mint-Y and Mint-X themes.
-- Inspired by GNOME's Clearlooks theme and the GNOME Color Chooser.
+
+- Built on [Linux Mint](https://github.com/linuxmint/mint-themes)'s Mint-Y theme.
+- Inspired by GNOME 2's Clearlooks theme and the GNOME Color Chooser.
+- Folder icons from [Mint-Y](https://github.com/linuxmint/mint-y-icons) (CC BY-SA 4.0, Sam Hewitt and Alexey Varfolomeev), [Yaru](https://github.com/ubuntu/yaru) (CC BY-SA 4.0, Canonical and the Yaru contributors) and [Breeze](https://github.com/KDE/breeze-icons) (LGPL 3+, the KDE contributors). Each style's licence is in its folder under `data/icons/`.
+- xl-Big Baddy and xl-Rad are xl_cheese's designs; the Claude folders and the Claude themes were designed by Claude.
 
 ## License
-[GPL-3.0](LICENSE)
+
+Theme Roller is [GPL-3.0](LICENSE). The folder icons keep their own licences (see Credits).
