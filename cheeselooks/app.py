@@ -100,9 +100,9 @@ LABELS = {
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
-    "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
+    "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "Accent color in GNOME apps",
     "enabled": "Custom folder style", "folder_color": "Folder color", "second_color": "Second color",
-    "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps",
+    "flatpak_access": "Flatpak apps", "libadwaita_full": "Advanced styling for libadwaita apps",
     "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
 GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
@@ -135,20 +135,24 @@ def _integration_note(text: str) -> Gtk.Label:
 
 
 # the line under an Integration switch (a function: some depend on what's installed)
+# kept short: people read a line, not a paragraph (xl_cheese's wording, 22 Nov)
 INTEGRATION_NOTES = {
-    "flatpak_access": lambda: ("Flatpak apps get your colors: every Flatpak app may read your themes "
-                               "folder and GTK 4 colors (read-only). Reopen open ones."
-                               if flatpak.available() else "Flatpak isn't installed."),
-    "libadwaita_full": lambda: ("Also our buttons, title buttons and tabs in libadwaita apps that ignore "
-                                "the theme (Flatpak ones, with Flatpak apps on). It overrides apps' own "
-                                "styling, so some may lose colors of their own. Reopen open apps."),
+    "libadwaita_colors": lambda: "GNOME apps such as Calculator and Text Editor.",
+    "flatpak_access": lambda: ("Lets Flatpak apps read your theme, so they get its colors. Reopen open "
+                               "apps to see them." if flatpak.available() else "Flatpak isn't installed."),
     "qt_colors": lambda: qt.note(),
     "editor_colors": lambda: editor.NOTE,
-    "watch_theme": lambda: ("When you pick another theme in Mint's Themes settings, xl-Cheeselooks' "
-                            "colors leave GTK 4, Flatpak, Qt and editor apps too (yours come back), and "
-                            "return when you pick xl-Cheeselooks again. A tiny helper started at login "
-                            "waits for that change."),
+    "libadwaita_full": lambda: ("Besides colors, libadwaita apps get your theme's buttons, title buttons and "
+                                "tabs. This overrides apps' own styling, so some lose colors of their own. "
+                                "Flatpak apps need Flatpak apps on. Reopen apps to see changes."),
+    "watch_theme": lambda: ("When you pick another theme in Mint's Themes settings, Theme Roller's colors "
+                            "leave GTK 4, Flatpak, Qt and editor apps. Pick xl-Cheeselooks again, or "
+                            "Apply, and they come back."),
 }
+# the Integration tab's groups: the heading each starts under
+INTEGRATION_LAYOUT = {("integration", "libadwaita_colors"): "Your colors in other apps",
+                      ("integration", "libadwaita_accent"): "Extras",
+                      ("integration", "watch_theme"): "When you switch themes"}
 SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 
@@ -322,6 +326,8 @@ class SettingsWindow(Gtk.ApplicationWindow):
         group = None
         rules = [r for r in settings._RULES if r[0][0] == section and r[0][-1] not in HIDDEN]
         heading = {}
+        if section == "integration":
+            heading = INTEGRATION_LAYOUT
         if section == "panel":
             order = [p for p, _g in PANEL_LAYOUT]
             heading = dict(PANEL_LAYOUT)
@@ -734,17 +740,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _set_aside_row(self, grid: Gtk.Grid, row: int) -> int:
         """Take our extra colors out of apps now, without changing any setting."""
-        button = Gtk.Button(label="Take out of apps", halign=Gtk.Align.START, margin_top=8)
+        button = Gtk.Button(label="Take colors out of apps", halign=Gtk.Align.START, margin_top=8)
 
         def clicked(_b: Gtk.Button) -> None:
             watch.set_aside()
-            self.status.set_text("xl-Cheeselooks' colors are out of GTK 4, Qt and editor apps (yours are "
-                                 "back). Reopen open apps. The next Apply puts them back.")
+            self.status.set_text("Theme Roller's colors are out of your apps. Reopen open apps. "
+                                 "The next Apply puts them back.")
         button.connect("clicked", clicked)
         grid.attach(button, 1, row, 1, 1)
-        grid.attach(_integration_note("Takes the colors above out of apps now (your own come back), for "
-                                      "example before using another theme. The theme itself stays; the "
-                                      "next Apply puts them back."), 0, row + 1, 2, 1)
+        grid.attach(_integration_note("Removes Theme Roller's colors from all apps now. Your settings and the "
+                                      "theme stay; the next Apply puts the colors back."), 0, row + 1, 2, 1)
         return row + 2
 
     def _image_colors_row(self, grid: Gtk.Grid, row: int) -> int:

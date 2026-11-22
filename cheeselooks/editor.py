@@ -239,6 +239,4 @@ def active() -> bool:
     return bool(_load_state())
 
 
-NOTE = ("Xed, gedit and Meld use your colors in their text area (switched for you; off puts "
-        "back your previous scheme). Other GTK editors: pick “xl-Cheeselooks” in their color "
-        "settings.")
+NOTE = "Xed, gedit and Meld get your theme colors."

@@ -503,10 +503,9 @@ def notice_shown() -> None:
 
 def note() -> str:
     """The line under the switch: when it takes effect, and what it needs."""
-    text = ("Your colors in Qt apps such as VLC (Qt keeps its own shapes). Qt apps read "
-            "their colors when they start: reopen any that are open. The first time, regular "
-            "Qt apps need you to log out and back in. A Qt setup of your own is saved and "
-            "comes back when this is off.")
+    text = ("The first time, log out and back in to see your colors in Qt apps; after that, "
+            "reopening them is enough. If you had your own Qt setup, it's saved and comes back "
+            "when this is off.")
     if not qt5ct_installed():
-        text += "\nRegular Qt apps need qt5ct: sudo apt install qt5ct"
+        text += "\nNeeds qt5ct: sudo apt install qt5ct"
     return text

@@ -130,12 +130,13 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "focus_ring", "color"), "color?", None),
     (("details", "focus_ring", "style"), "choice", ("dashed", "dotted", "solid")),
     (("details", "focus_ring", "width"), "int", (0, 3)),
+    # (the Integration tab's order: most people first; xl_cheese, 22 Nov)
     (("integration", "libadwaita_colors"), "bool", None),
-    (("integration", "libadwaita_accent"), "bool", None),
-    (("integration", "libadwaita_full"), "bool", None),
     (("integration", "flatpak_access"), "bool", None),
     (("integration", "qt_colors"), "bool", None),
     (("integration", "editor_colors"), "bool", None),
+    (("integration", "libadwaita_accent"), "bool", None),
+    (("integration", "libadwaita_full"), "bool", None),
     (("integration", "watch_theme"), "bool", None),
 ]
 
