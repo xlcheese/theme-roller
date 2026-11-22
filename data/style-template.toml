@@ -38,6 +38,12 @@ description = "My own style."
 # draws them darker, as Mint-Y Dark does.
 #dividers = "darker(bg, 0.35)"
 
+# Spin buttons (a number field with − and + buttons): 0 joins them in one box
+# (Mint-Y; suits buttons recessed like the fields), a few pixels draw them
+# apart, the field like any text field and the − + like ordinary buttons
+# (suits raised buttons with a drop shadow).
+#spin_gap = 5
+
 # Button faces: "smooth" (top to bottom), "split" (glossy, a step at the
 # middle, as Clearlooks Gummy) or "glass" (light reflected from below).
 #gradient_shape = "smooth"

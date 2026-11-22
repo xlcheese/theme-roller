@@ -20,7 +20,7 @@ import dataclasses
 from . import palette as pal
 from . import render, shape
 from . import styles as sty
-from . import gtk4, metacity, titlebuttons, panelmarker, tabs
+from . import gtk4, metacity, titlebuttons, panelmarker, spin, tabs
 
 THEME_NAME = "xl-Cheeselooks"
 SCROLL_SLIDER_BORDER = 4   # px, Mint-Y's transparent border around the scrollbar thumb
@@ -202,6 +202,8 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["tabs.css"] = tabs.css(t)
     t["tabs4.css"] = tabs.css(t, gtk4=True)
     t["tabs_adw.css"] = tabs.adw_css(t)
+    t["spin.css"] = spin.css(t, style.spin_gap)
+    t["spin4.css"] = spin.css(t, style.spin_gap, gtk4=True)
     t.update(gtk4.tokens(t))
 
     # --- Panel & Menu: shared colors, separate shapes

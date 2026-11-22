@@ -377,6 +377,9 @@ entry:focus-within, spinbutton:focus-within:not(.vertical) {
   border-color: {{w.entry.focus_border}};
   box-shadow: {{w.entry.focus_g4_shadow}}; }
 
+/* Spin buttons apart from their field, if the style asks (spin_gap; cheeselooks/spin.py) */
+{{spin4.css}}
+
 /* Entries and spin buttons inside list rows (libadwaita's entry and spin
    rows) are part of the row: no frame of their own */
 row.entry entry, row.entry text, row.spin spinbutton, row.spin spinbutton > text,

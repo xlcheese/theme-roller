@@ -10,6 +10,9 @@ name = "xl-Vintage"
 author = "Wesley Hayslip"
 description = "Hard square bevels, grey buttons on an indigo title bar: OS/2 Warp."
 
+# A gap between a spin button's field and its − + buttons (raised buttons, recessed fields)
+spin_gap = 5
+
 adapt_strength = 0.6
 
 [defaults]

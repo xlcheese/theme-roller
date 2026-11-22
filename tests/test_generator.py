@@ -589,6 +589,26 @@ class TokenTests(unittest.TestCase):
         with self.assertRaises(styles.StyleError):
             styles.load(d)
 
+    def test_spin_gap(self):
+        # xl_cheese: raised buttons beside a recessed field look better apart
+        s = defaults()
+        for name, gap in (("xl-Cheeselooks", 5), ("xl-Cheeselooks-Dark", 5), ("Claude", 5),
+                          ("Claude-Dark", 5), ("xl-Vintage", 5), ("xl-Classic", 0), ("xl-Gummy", 0)):
+            st = styles.find(name, [REPO / "styles"])
+            self.assertEqual(st.spin_gap, gap, name)
+            t = tokens.build(s, st)
+            for key, field in (("spin.css", "entry"), ("spin4.css", "text")):
+                if gap:
+                    self.assertIn(f"spinbutton:not(.vertical) > {field} {{\n  margin-right: {gap}px", t[key], name)
+                else:      # joined: only the disabled button, solid so the field can't show through
+                    self.assertNotIn("margin-right", t[key], name)
+                    self.assertIn("button:disabled", t[key], name)
+        self.assertIn("{{spin.css}}", (REPO / "templates" / "gtk-3.0" / "xl.css.tmpl").read_text())
+        self.assertIn("{{spin4.css}}", (REPO / "templates" / "gtk-4.0" / "xl.css.tmpl").read_text())
+        for bad in ("5", -1, 13, True):
+            errors, _w = styles.check({"name": "T", "spin_gap": bad})
+            self.assertTrue(any("spin_gap" in e for e in errors), bad)
+
     def test_tab_kinds_and_markers(self):
         s = defaults()
         css = tokens.build(s, self.style)["tabs.css"]

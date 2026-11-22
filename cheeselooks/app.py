@@ -1157,7 +1157,15 @@ class SettingsWindow(Gtk.ApplicationWindow):
         scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
         scale.set_value(60)
         scale.set_draw_value(False)
-        body.pack_start(scale, False, False, 0)
+        # beside the slider, a spin button (the style's spin_gap); at its lowest,
+        # so its − shows the disabled look too
+        row = Gtk.Box(spacing=10)
+        row.pack_start(scale, True, True, 0)
+        spin = Gtk.SpinButton.new_with_range(0, 99, 1)
+        spin.set_width_chars(2)
+        spin.set_valign(Gtk.Align.CENTER)
+        row.pack_start(spin, False, False, 0)
+        body.pack_start(row, False, False, 0)
         notebook = Gtk.Notebook()
         for name in ("General", "Colors", "Advanced"):
             lb = Gtk.ListBox()

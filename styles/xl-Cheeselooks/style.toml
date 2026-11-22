@@ -10,6 +10,9 @@ name = "xl-Cheeselooks"
 author = "Wesley Hayslip"
 description = "Muted buttons with a soft shadow, fields set into the window, boxed tabs."
 
+# A gap between a spin button's field and its − + buttons (raised buttons, recessed fields)
+spin_gap = 5
+
 adapt_strength = 0.6
 
 [defaults]

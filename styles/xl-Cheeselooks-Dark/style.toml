@@ -12,6 +12,9 @@ name = "xl-Cheeselooks-Dark"
 author = "Wesley Hayslip"
 description = "Muted buttons with a soft shadow, fields set into the window, boxed tabs. xl-Cheeselooks for dark colours."
 
+# A gap between a spin button's field and its − + buttons (raised buttons, recessed fields)
+spin_gap = 5
+
 adapt_strength = 0.6
 dividers = "darker(bg, 0.35)"
 
