@@ -27,7 +27,7 @@ SCROLL_SLIDER_BORDER = 4   # px, Mint-Y's transparent border around the scrollba
 HOVER_CALIBRATION = 0.8
 
 GRADIENT_COLORS = (
-    "button", "button_hover", "accent", "accent_hover", "select", "hover",
+    "button", "button_hover", "accent", "accent_hover", "select", "sidebar_select", "hover",
     "sidebar_hover", "menu_hover", "fav_hover", "menubar_hover", "panel",
     "pb_rest", "pb_hover", "pb_focus", "pb_attention", "destructive", "pressed",
 )

@@ -166,7 +166,7 @@ def title_gradient(color: str, amount: float) -> tuple[str, str]:
 def stand_out(select: str, surfaces: tuple[str, ...], fg: str,
               least: float = 1.3, target: float = 1.5) -> str:
     """The selection color, moved until it stands out from every surface it's
-    drawn on (lists, the window, the sidebar). An accent about as light as the
+    drawn on (the list, or the window; the sidebar is checked on its own). An accent about as light as the
     background (xl_cheese's Cobalt: a dark blue on blue-grey) made selected rows
     and text hard to see. Below `least`, it steps darker or lighter, whichever
     reaches `target` sooner while the text on it (fg) still reads at 2.6:1.
@@ -224,7 +224,11 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
             select = darker(select, 0.04)
 
     base = pick(mix(bg, WHITE, 0.75), darker(bg, 0.18))
-    select = stand_out(select, (base, bg, mix(bg, text, 0.035 if not dark else 0.03)), accent_fg)
+    # each surface gets its own check: a list darker than the sidebar can need a
+    # stronger selection while the sidebar's already stands out (Cobalt)
+    sidebar = pick(mix(bg, text, 0.035), mix(bg, text, 0.03))
+    sidebar_select = stand_out(select, (sidebar,), accent_fg)
+    select = stand_out(select, (base, bg), accent_fg)
 
     header = mix(bg, text, 0.066)   # Mint-Y's toolbar shade: #E8E8E8 on the default colors
     # light buttons rest a little below white so hover has room to go lighter
@@ -252,7 +256,8 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
         # hover for buttons that aren't drawn at rest (toolbar, title buttons) and
         # unselected tabs: lighter than the toolbar, but not as bright as a full button hover
         "flat_hover": pick(lift(header, 0.50), lift(header, 0.08)),
-        "sidebar": pick(mix(bg, text, 0.035), mix(bg, text, 0.03)),
+        "sidebar": sidebar,
+        "sidebar_select": sidebar_select,
         "sidebar_hover": pick(mix(bg, text, 0.035 + 0.105 * hover), mix(bg, text, 0.03 + 0.10 * hover)),
         "hover": pick(mix(bg, text, 0.07 * hover), mix(bg, text, 0.08 * hover)),
         # pressed and toggled: darker on light themes; on dark ones too, into a
