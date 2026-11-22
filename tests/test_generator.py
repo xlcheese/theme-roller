@@ -1232,6 +1232,16 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
 
+    def test_editor_selection_stands_out(self):
+        # Cobalt (xl_cheese): a dark blue accent about as light as the blue-grey
+        # background. The usual tint barely showed; now the selection goes past
+        # the accent, darker, away from the background, and the text still reads.
+        t = palette.derive("#3D5278", "#5C6E8C", "#E6E6E6")
+        c = editor.colours(t)
+        self.assertGreaterEqual(palette.contrast(c["select"], c["bg"]), 1.5)
+        self.assertLess(palette.luminance(c["select"]), palette.luminance(t["accent"]))
+        self.assertGreaterEqual(palette.contrast(c["select_fg"], c["select"]), 4.5)
+
     def test_editor_colors(self):
         import xml.etree.ElementTree as ET
         from unittest import mock
@@ -1248,6 +1258,8 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertGreaterEqual(palette.contrast(c[k], c["bg"]), 4.5, f"{f.name}: {k}")
             self.assertGreaterEqual(palette.contrast(c["comment"], c["bg"]), 3.0, f.name)
             self.assertGreaterEqual(palette.contrast(c["line_numbers"], c["gutter"]), 3.0, f.name)
+            self.assertGreaterEqual(palette.contrast(c["select"], c["bg"]), 1.2, f.name)
+            self.assertGreaterEqual(palette.contrast(c["select_fg"], c["select"]), 4.5, f.name)
         # on: written to every GtkSourceView folder, Xed switched; off: Xed's own back, files gone
         gs = {("org.x.editor.preferences.editor", "scheme"): "classic"}
         with tempfile.TemporaryDirectory() as tmp, \
