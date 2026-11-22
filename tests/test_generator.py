@@ -1310,6 +1310,15 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertFalse((css.parent / gtk4.ASSETS).exists())
         self.assertEqual(settings.DEFAULTS["integration"]["libadwaita"], "colors")   # full is opt-in
 
+    def test_every_style_with_every_button_style(self):
+        """xl_cheese, 22 Nov: xl-Gummy with the Gargantuan buttons crashed the preview
+        (spacing values taken for gradient colours). Every pairing must build."""
+        for st in [p.name for p in (REPO / "styles").iterdir() if (p / "style.toml").exists()]:
+            for bs in titlebuttons.STYLES:
+                d = defaults()
+                d["style"]["name"], d["window_borders"]["button_style"] = st, bs
+                tokens.build(d, styles.load(REPO / "styles" / st))
+
     def test_scan_my_apps(self):
         """Scan my apps: an app's kind, read from files, nothing run."""
         from cheeselooks import appscan

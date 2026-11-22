@@ -102,7 +102,10 @@ def _add_face_gradients(t: dict[str, str], style: sty.Style) -> None:
     title bar and Cinnamon (two-colour gradients only) use the plain pair."""
     for key in [k for k in t if k.endswith("_top")]:
         base = key[: -len("_top")]
-        if base + "_bottom" in t and not key.endswith("_rgb"):
+        # colours only: wb.button_pad_top / _bottom are spacings (xl-Gummy with the
+        # Gargantuan buttons crashed the preview: "not a hex color: '1'", xl_cheese)
+        if (base + "_bottom" in t and not key.endswith("_rgb")
+                and str(t[key]).startswith("#") and str(t[base + "_bottom"]).startswith("#")):
             t[base + "_grad"] = pal.gradient_css(t[key], t[base + "_bottom"],
                                                  style.gradient_shape, style.split_step,
                                                  style.glass_return)
