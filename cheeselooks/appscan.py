@@ -32,7 +32,9 @@ GTK3, GNOME, FLATPAK, QT, EDITOR, TERMINAL, WEB, UNKNOWN = (
     "gtk3", "gnome", "flatpak", "qt", "editor", "terminal", "web", "unknown")
 EDITORS = {"xed", "gedit", "meld"}        # the Text editors switch (editor.py)
 # apps that choose their toolkit at runtime, whose look on Mint is known
-KNOWN = {"libreoffice": GTK3, "soffice": GTK3, "firefox": GTK3, "thunderbird": GTK3}
+# (VLC and NVIDIA Settings load theirs as a plugin: Qt, GTK 3)
+KNOWN = {"libreoffice": GTK3, "soffice": GTK3, "firefox": GTK3, "thunderbird": GTK3,
+         "vlc": QT, "nvidia-settings": GTK3}
 LIB_DIRS = [Path(p) for p in ("/usr/lib/x86_64-linux-gnu", "/usr/lib/aarch64-linux-gnu", "/usr/lib64",
                               "/usr/lib", "/lib/x86_64-linux-gnu", "/lib")]
 WEB_MARKERS = ("chrome_100_percent.pak", "resources.pak", "app.asar", "snapshot_blob.bin")
@@ -89,15 +91,21 @@ def read_desktop(f: Path) -> dict[str, str]:
     return out
 
 
+ALSO = "_also"    # an entry's other copies, further down the search path (as the menu, yours first)
+
+
 def menu_apps() -> list[tuple[str, dict[str, str]]]:
-    """(id, entry) for each app the menu shows; an earlier directory wins, as the menu's."""
-    found: dict[str, dict[str, str]] = {}
+    """(id, entry) for each app the menu shows; an earlier directory wins, as the
+    menu's. Later copies of the same app are kept in entry[ALSO]: a copy in your
+    home folder may start the app through another program (Buffet Menu's)."""
+    found: dict[str, dict] = {}
     for d in desktop_dirs():
         for f in sorted(d.rglob("*.desktop")):
             app_id = f.relative_to(d).as_posix().replace("/", "-")
-            if app_id in found:
-                continue
             e = read_desktop(f)
+            if app_id in found:
+                found[app_id].setdefault(ALSO, []).append(e)
+                continue
             found[app_id] = e
     out = []
     for app_id, e in found.items():
@@ -182,12 +190,23 @@ def kind_of_script(f: Path, follow: int = 1) -> str | None:
         if pattern.search(text):
             return kind
     if follow:      # a launcher: the script or program it runs (Mint's tools: /usr/lib/linuxmint/...)
-        for ref in re.findall(r"(/usr/(?:lib|share|bin)/[\w./+-]+)", text):
-            p = Path(ref)
+        refs = [Path(r) for r in re.findall(r"(/(?:usr|opt)/[\w./+-]+)", text)]
+        refs += [Path(w) for w in (shutil.which(n) for n in re.findall(r"\b(?:exec|pkexec)\s+([\w.+-]+)", text)) if w]
+        for p in refs:
             if p.is_file() and p != f:
                 k = kind_of_file(p, follow - 1)
                 if k:
                     return k
+    if f.suffix == ".py":   # a Python app may import its toolkit in another file of its package
+        for other in sorted(f.parent.rglob("*.py"))[:80]:
+            if other != f:
+                try:
+                    t = other.read_text(encoding="utf-8", errors="replace")[:100_000]
+                except OSError:
+                    continue
+                for pattern, kind in SCRIPT_KINDS:
+                    if pattern.search(t):
+                        return kind
     return None
 
 
@@ -228,12 +247,33 @@ def kind_of_elf(f: Path, libs: list[str], depth: int = 2) -> str | None:
 def kind_of_file(f: Path, follow: int = 1) -> str | None:
     if f.name in KNOWN:
         return KNOWN[f.name]
+    if any((f.resolve().parent / m).exists() for m in WEB_MARKERS):
+        return WEB                                 # Electron or Chrome, started by a program or a script
     libs = elf_libraries(f)
     if libs is not None:
-        if any((f.resolve().parent / m).exists() for m in WEB_MARKERS):
-            return WEB
         return kind_of_elf(f, libs)
     return kind_of_script(f, follow)
+
+
+WRAPPERS = {"env", "pkexec", "sh", "bash", "dash", "gksu", "gksudo", "sudo", "nice", "ionice", "python3",
+            "python", "perl", "java", "exec"}
+
+
+def programs(exec_line: str) -> list[Path]:
+    """Every program or script an Exec= line names, in order: the first may only
+    start another (pkexec, python3, a launcher such as Buffet Menu's)."""
+    try:
+        words = shlex.split(exec_line)
+    except ValueError:
+        words = exec_line.split()
+    out = []
+    for w in words:
+        if w.startswith(("%", "-")) or ("=" in w and not w.startswith("/")):
+            continue
+        found = w if w.startswith("/") else shutil.which(w)
+        if found and Path(found).is_file() and Path(found) not in out:
+            out.append(Path(found))
+    return out
 
 
 def program(exec_line: str) -> Path | None:
@@ -273,11 +313,18 @@ def classify(app_id: str, e: dict[str, str]) -> App:
         return App(name, FLATPAK, detail)
     if e.get("Terminal", "").lower() == "true":
         return App(name, TERMINAL)
-    prog = program(e.get("Exec", ""))
-    if prog is not None and prog.name in EDITORS:
-        return App(name, EDITOR)
-    kind = kind_of_file(prog) if prog is not None else None
-    return App(name, kind or UNKNOWN)
+    # this entry, then its other copies (yours may start it through another program)
+    for entry in [e] + e.get(ALSO, []):
+        progs = programs(entry.get("Exec", ""))
+        if any(p.name in EDITORS for p in progs):
+            return App(name, EDITOR)
+        for p in progs:
+            if p.name in WRAPPERS:
+                continue
+            kind = kind_of_file(p)
+            if kind:
+                return App(name, kind)
+    return App(name, UNKNOWN)
 
 
 def scan() -> Scan:

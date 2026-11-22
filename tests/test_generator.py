@@ -1328,6 +1328,30 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(appscan.kind_of_script(t / "gtk3.py"), appscan.GTK3)
             self.assertEqual(appscan.kind_of_script(t / "qt.py"), appscan.QT)
             self.assertIsNone(appscan.kind_of_script(t / "other.sh"))
+        # xl_cheese's desktop, 22 Nov: Buffet Menu's own copy of an app's entry
+        # (in your home folder) starts it through its launcher; the app's real
+        # entry underneath still says what it is. Also: pkexec / python3 first.
+        from unittest import mock
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            (t / "home" / "applications").mkdir(parents=True)
+            (t / "sys" / "applications").mkdir(parents=True)
+            app = t / "viewer.py"
+            app.write_text("#!/usr/bin/python3\ngi.require_version('Gtk', '3.0')\n")
+            launcher = t / "launch-with-menus"
+            launcher.write_text("#!/bin/sh\n\"$@\"\n")
+            launcher.chmod(0o755)
+            (t / "sys" / "applications" / "viewer.desktop").write_text(
+                f"[Desktop Entry]\nType=Application\nName=Viewer\nExec=python3 {app} %U\n")
+            (t / "home" / "applications" / "viewer.desktop").write_text(
+                f"[Desktop Entry]\nType=Application\nName=Viewer\nExec={launcher} viewer %U\n")
+            (t / "sys" / "applications" / "admin.desktop").write_text(
+                f"[Desktop Entry]\nType=Application\nName=Admin\nExec=pkexec {app}\n")
+            with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(t / "home"), "XDG_DATA_DIRS": str(t / "sys")}):
+                kinds = {a.name: a.kind for a in appscan.scan().apps}
+            self.assertEqual(kinds["Viewer"], appscan.GTK3)     # past the launcher, from the real entry
+            self.assertEqual(kinds["Admin"], appscan.GTK3)      # past pkexec
         c = appscan.classify
         self.assertEqual(c("x", {"Name": "Vim", "Exec": "vim %F", "Terminal": "true"}).kind, appscan.TERMINAL)
         self.assertEqual(c("x", {"Name": "Calc", "Exec": "flatpak run org.gnome.Calculator"}).kind, appscan.FLATPAK)
