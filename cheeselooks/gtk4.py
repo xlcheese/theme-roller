@@ -76,7 +76,7 @@ ASSETS = "xl-cheeselooks-assets"     # beside gtk.css: the pictures the full sty
 
 
 def full_css(templates_dir: Path, t: dict[str, str]) -> str:
-    """Full styling (Integration → "Full styling for libadwaita apps"): our whole
+    """Full styling (Integration → GNOME-style apps: Full): our whole
     GTK 4 layer and the libadwaita additions, for apps that ignore the theme
     (Flatpak libadwaita apps bring their own, upstream libadwaita). Its
     pictures are referred to in ASSETS beside gtk.css (copy_assets)."""

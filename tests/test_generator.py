@@ -1306,14 +1306,28 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertTrue((css.parent / gtk4.ASSETS / n).exists(), n)
             gtk4.remove_assets(css)
             self.assertFalse((css.parent / gtk4.ASSETS).exists())
-        self.assertFalse(settings.DEFAULTS["integration"]["libadwaita_full"])  # opt-in
+        self.assertEqual(settings.DEFAULTS["integration"]["libadwaita"], "colors")   # full is opt-in
+
+    def test_old_integration_switches_carry_over(self):
+        """22 Nov: three libadwaita switches became one choice (the GNOME accent
+        part of colors), and the watcher's switch went (always on)."""
+        cases = (({"libadwaita_colors": True, "libadwaita_full": False}, "colors"),
+                 ({"libadwaita_colors": True, "libadwaita_full": True}, "full"),
+                 ({"libadwaita_colors": False, "libadwaita_full": True}, "off"),
+                 ({"libadwaita_colors": True, "libadwaita_accent": False, "watch_theme": False}, "colors"))
+        for old, new in cases:
+            data = settings.from_dict({"integration": old})
+            self.assertEqual(data["integration"]["libadwaita"], new, old)
+            for gone in ("libadwaita_colors", "libadwaita_accent", "libadwaita_full", "watch_theme"):
+                self.assertNotIn(gone, data["integration"])
+        self.assertEqual(settings.from_dict({"integration": {"libadwaita": "off"}})["integration"]["libadwaita"], "off")
 
     def test_theme_change_keeps_integration(self):
         mine = defaults()
-        mine["integration"].update(libadwaita_full=True, qt_colors=False)
+        mine["integration"].update(libadwaita="full", qt_colors=False)
         theme = themes.load("xl-Classic")
         kept = settings.keep_per_user(theme, mine)
-        self.assertTrue(kept["integration"]["libadwaita_full"])
+        self.assertEqual(kept["integration"]["libadwaita"], "full")
         self.assertFalse(kept["integration"]["qt_colors"])
         self.assertEqual(kept["global"], theme["global"])                    # the look is the theme's
 
@@ -1345,7 +1359,7 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertIn("watch", text)
             self.assertIn("X-GNOME-Autostart-enabled=true", text)
             self.assertTrue(str(watch.autostart_file()).startswith(tmp))
-        self.assertTrue(settings.DEFAULTS["integration"]["watch_theme"])
+        self.assertNotIn("watch_theme", settings.DEFAULTS["integration"])  # always on: no setting
 
     def test_set_aside_takes_our_colors_out(self):
         from unittest import mock
@@ -1597,7 +1611,7 @@ class RenderAndInstallTests(unittest.TestCase):
     def test_theme_stays_itself_with_per_user_settings(self):
         from cheeselooks import app
         theme = themes.load("xl-Cheeselooks")
-        mine = settings.keep_per_user(theme, {**theme, "integration": {**theme["integration"], "libadwaita_full": True},
+        mine = settings.keep_per_user(theme, {**theme, "integration": {**theme["integration"], "libadwaita": "full"},
                                               "icons": {**theme["icons"], "enabled": True, "style": "yaru"}})
         self.assertTrue(app._same(mine, theme))                       # still xl-Cheeselooks, not Custom
         mine["global"] = {**mine["global"], "accent": "#123456"}

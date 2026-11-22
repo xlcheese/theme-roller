@@ -100,10 +100,9 @@ LABELS = {
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
-    "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "Accent color in GNOME apps",
+    "libadwaita": "GNOME-style apps",
     "enabled": "Custom folder style", "folder_color": "Folder color", "second_color": "Second color",
-    "flatpak_access": "Flatpak apps", "libadwaita_full": "Advanced styling for libadwaita apps",
-    "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
+    "flatpak_access": "Flatpak apps", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
 GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
           "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
@@ -135,24 +134,25 @@ def _integration_note(text: str) -> Gtk.Label:
 
 
 # the line under an Integration switch (a function: some depend on what's installed)
-# kept short: people read a line, not a paragraph (xl_cheese's wording, 22 Nov)
-INTEGRATION_NOTES = {
-    "libadwaita_colors": lambda: "GNOME apps such as Calculator and Text Editor.",
-    "flatpak_access": lambda: ("Lets Flatpak apps read your theme, so they get its colors. Reopen open "
-                               "apps to see them." if flatpak.available() else "Flatpak isn't installed."),
+# The Integration tab (xl_cheese, 22 Nov): one intro explains why apps need
+# help, so each row is just a name; what each does and when it shows is its
+# tooltip; only something missing is said under it.
+INTEGRATION_INTRO = ("Linux apps come in a few kinds, and each looks for its colors in its own place. "
+                     "Theme Roller brings your theme to all of them. These are already set, so you only "
+                     "need this tab if an app doesn't match.")
+INTEGRATION_TIPS = {
+    "libadwaita": ("GNOME apps such as Calculator and Text Editor (libadwaita). Colors: your colors, and "
+                   "GNOME's accent to match. Full: also your buttons, title buttons and tabs; this "
+                   "overrides apps' own styling, so some lose colors of their own (Flatpak ones need "
+                   "Flatpak apps on). Reopen apps to see changes."),
+    "flatpak_access": "Lets Flatpak apps read your theme, so they get its colors. Reopen open apps to see them.",
     "qt_colors": lambda: qt.note(),
     "editor_colors": lambda: editor.NOTE,
-    "libadwaita_full": lambda: ("Besides colors, libadwaita apps get your theme's buttons, title buttons and "
-                                "tabs. This overrides apps' own styling, so some lose colors of their own. "
-                                "Flatpak apps need Flatpak apps on. Reopen apps to see changes."),
-    "watch_theme": lambda: ("When you pick another theme in Mint's Themes settings, Theme Roller's colors "
-                            "leave GTK 4, Flatpak, Qt and editor apps. Pick xl-Cheeselooks again, or "
-                            "Apply, and they come back."),
 }
-# the Integration tab's groups: the heading each starts under
-INTEGRATION_LAYOUT = {("integration", "libadwaita_colors"): "Your colors in other apps",
-                      ("integration", "libadwaita_accent"): "Extras",
-                      ("integration", "watch_theme"): "When you switch themes"}
+INTEGRATION_MISSING = {
+    "flatpak_access": lambda: "" if flatpak.available() else "Flatpak isn't installed.",
+    "qt_colors": lambda: qt.missing(),
+}
 SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 
@@ -187,6 +187,7 @@ def _sorted(items: list, order: str) -> list:
         return sorted(items, key=lambda it: (it[1], _natural(it[0])), reverse=(order == "new"))
     return sorted(items, key=lambda it: _natural(it[0]), reverse=(order == "za"))
 CHOICE_LABELS = {"button_style": titlebuttons.STYLES,   # choices shown by name instead of id
+                 "libadwaita": {"off": "Off", "colors": "Colors", "full": "Full"},
                  "style": {k: v["name"] for k, v in icons.STYLES.items()}}
 
 
@@ -327,7 +328,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
         rules = [r for r in settings._RULES if r[0][0] == section and r[0][-1] not in HIDDEN]
         heading = {}
         if section == "integration":
-            heading = INTEGRATION_LAYOUT
+            intro = Gtk.Label(label=INTEGRATION_INTRO, xalign=0, wrap=True, max_width_chars=60, hexpand=True,
+                              margin_bottom=6)
+            grid.attach(intro, 0, row, 2, 1)
+            row += 1
         if section == "panel":
             order = [p for p, _g in PANEL_LAYOUT]
             heading = dict(PANEL_LAYOUT)
@@ -351,12 +355,17 @@ class SettingsWindow(Gtk.ApplicationWindow):
             if path == ("icons", "second_color"):
                 self.second_color_label = label     # some styles call it something else
             grid.attach(label, 0, row, 1, 1)
-            grid.attach(self._control(path, kind, extra), 1, row, 1, 1)
+            ctl = self._control(path, kind, extra)
+            grid.attach(ctl, 1, row, 1, 1)
             row += 1
-            if path[0] == "integration" and path[-1] in INTEGRATION_NOTES:
-                text = INTEGRATION_NOTES[path[-1]]()
-                grid.attach(_integration_note(text), 0, row, 2, 1)   # under the title, full width
-                row += 1
+            if path[0] == "integration":
+                tip = INTEGRATION_TIPS.get(path[-1], "")
+                label.set_tooltip_text(tip() if callable(tip) else tip)
+                ctl.set_tooltip_text(label.get_tooltip_text())      # on the switch too
+                missing = INTEGRATION_MISSING.get(path[-1], lambda: "")()
+                if missing:                                          # only what's missing shows
+                    grid.attach(_integration_note(missing), 0, row, 2, 1)
+                    row += 1
             if path == ("global", "text"):
                 row = self._image_colors_row(grid, row)
         if section == "icons":
@@ -747,10 +756,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
             self.status.set_text("Theme Roller's colors are out of your apps. Reopen open apps. "
                                  "The next Apply puts them back.")
         button.connect("clicked", clicked)
-        grid.attach(button, 1, row, 1, 1)
-        grid.attach(_integration_note("Removes Theme Roller's colors from all apps now. Your settings and the "
-                                      "theme stay; the next Apply puts the colors back."), 0, row + 1, 2, 1)
-        return row + 2
+        button.set_tooltip_text("Removes Theme Roller's colors from all apps now. Your settings and the "
+                                "theme stay; the next Apply puts the colors back.")
+        grid.attach(button, 0, row, 2, 1)
+        return row + 1
 
     def _image_colors_row(self, grid: Gtk.Grid, row: int) -> int:
         """Colors from a picture: the wallpaper or any image. Its main colors

@@ -502,10 +502,12 @@ def notice_shown() -> None:
 
 
 def note() -> str:
-    """The line under the switch: when it takes effect, and what it needs."""
-    text = ("The first time, log out and back in to see your colors in Qt apps; after that, "
+    """The switch's tooltip: when it takes effect."""
+    return ("The first time, log out and back in to see your colors in Qt apps; after that, "
             "reopening them is enough. If you had your own Qt setup, it's saved and comes back "
             "when this is off.")
-    if not qt5ct_installed():
-        text += "\nNeeds qt5ct: sudo apt install qt5ct"
-    return text
+
+
+def missing() -> str:
+    """Shown under the switch, only when needed: what's missing."""
+    return "" if qt5ct_installed() else "Needs qt5ct: sudo apt install qt5ct"

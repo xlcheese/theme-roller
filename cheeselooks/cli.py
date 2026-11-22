@@ -105,9 +105,10 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     integ = data["integration"]
     # CSS variables for libadwaita 1.6+ always: Flatpak apps bring their own,
     # newer libadwaita, and GTK 4.14 accepts the variables without warnings
-    full = bool(integ.get("libadwaita_full")) and integ["libadwaita_colors"]
+    colors = integ.get("libadwaita", "colors") != "off"
+    full = integ.get("libadwaita") == "full"
     new = (gtk4.block(paths.templates_dir(), table, css_variables=True, full=full)
-           if integ["libadwaita_colors"] else None)
+           if colors else None)
     log.append(gtk4.write(paths.gtk4_css(), new))
     if full:
         gtk4.copy_assets(new, paths.theme_dir(), paths.gtk4_css())
@@ -115,7 +116,7 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
                    f"{paths.gtk4_css()}; reopen open ones")
     else:
         gtk4.remove_assets(paths.gtk4_css())
-    if integ["libadwaita_accent"]:
+    if colors:                     # GNOME's own accent setting, to match (part of colors)
         log.append(reload.set_adw_accent(table["adw.accent_name"]) or "")
     log += _flatpak_access(integ.get("flatpak_access", False))
     # Qt apps: rewritten at each Apply while on; switched off, removed once
@@ -203,10 +204,9 @@ def apply_to_desktop(data: dict, style: styles.Style, activate: bool = False,
 
 
 def _watcher(data: dict) -> list[str]:
-    """Integration → "Follow Mint's theme setting": the watcher at login (and now)."""
-    if data["integration"].get("watch_theme"):
-        return watch.enable()
-    return watch.disable()
+    """The theme watcher, at login (and now): always on since 22 Nov (xl_cheese:
+    nobody wants Theme Roller's colors stuck on another theme)."""
+    return watch.enable()
 
 
 def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
