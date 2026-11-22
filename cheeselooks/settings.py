@@ -206,6 +206,8 @@ def validate(data: dict) -> list[str]:
 
 
 OLD_FOLDER_STYLES = {"xl-80s": "xl-rad"}
+# styles renamed: saved settings and themes with the old name still find them
+OLD_STYLE_NAMES = {"xl-Claude": "Claude", "xl-Claude-Dark": "Claude-Dark"}
 
 
 def from_dict(data: dict) -> dict:
@@ -235,6 +237,9 @@ def from_dict(data: dict) -> dict:
                                    else "full" if old.get("libadwaita_full") else "colors")
         for key in ("libadwaita_colors", "libadwaita_accent", "libadwaita_full", "watch_theme"):
             integ.pop(key, None)
+    st = merged.get("style")
+    if isinstance(st, dict) and st.get("name") in OLD_STYLE_NAMES:
+        st["name"] = OLD_STYLE_NAMES[st["name"]]
     ic = merged.get("icons")
     if isinstance(ic, dict) and isinstance(ic.get("style"), str):
         # a folder style renamed (xl-80s became xl-Rad) or retired (Adwaita):

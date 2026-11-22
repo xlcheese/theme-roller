@@ -718,3 +718,5 @@ Built-in themes (`data/themes/NN-*.json`, listed in file-name order, so two-digi
 
 - Missing styles and new styles (22 Nov, xl_cheese renamed xl-Cobalt to xl-Pigeon): a theme whose style is gone no longer stops the preview (which also left the window squashed, with nothing measured), Apply or the watcher. cli.style_or_stand_in uses xl-Cheeselooks or xl-Cheeselooks-Dark (by the colors) and the status line says so. The style folders are rescanned whenever the window comes back into focus (a style added, renamed or edited in Nemo or a text editor shows up, and the preview redraws), so no Rescan button is needed.
 - Authors (xl_cheese): the xl-* styles, the dark styles, the binder folder icons and the README credit say Wesley Hayslip.
+
+- Claude styles renamed (xl_cheese): xl-Claude and xl-Claude-Dark are Claude and Claude-Dark (the xl- prefix is for Wesley Hayslip's designs). settings.OLD_STYLE_NAMES reads the old names. The starter style's name prompt reads "Give your new style a good name."

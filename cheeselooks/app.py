@@ -1077,8 +1077,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             except styles.StyleError:
                 return name
             raise themes.ThemeError(f"there's already a style called {name}")
-        name = self._ask_name("Create Style", "A new style of yours, from the starter style sheet. "
-                              "Its name:", "My Style", check)
+        name = self._ask_name("Create Style", "Give your new style a good name.", "My Style", check)
         if not name:
             return
         folder = paths.style_dirs()[0] / name

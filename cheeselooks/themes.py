@@ -12,7 +12,7 @@ changes until you pick another theme or save Custom under a name of its own.
 A theme file holds only what differs from the defaults plus the style's own
 [defaults], so a theme stays small and follows improvements to its style:
 
-    {"format": 1, "name": "Claude", "settings": {"style": {"name": "xl-Claude"},
+    {"format": 1, "name": "Claude", "settings": {"style": {"name": "Claude"},
                                                  "global": {"accent": "#B85A38", ...}}}
 
 Export packs a theme into one compressed file (<name>.xltheme, a zip) with

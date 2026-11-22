@@ -806,7 +806,7 @@ class RenderAndInstallTests(unittest.TestCase):
 
     def test_settings_app_preview_css(self):
         from cheeselooks import app
-        t = tokens.build(defaults(), styles.load(REPO / "styles" / "xl-Claude"))
+        t = tokens.build(defaults(), styles.load(REPO / "styles" / "Claude"))
         css = app.SettingsWindow._extra_css(None, t)          # the drawn panel and terminal sample
         self.assertIn(t["panel.w.panel_button.selected_color"], css)
         self.assertEqual(css.count("{"), css.count("}"))              # balanced rules
@@ -822,7 +822,7 @@ class RenderAndInstallTests(unittest.TestCase):
                                  "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),
-                         ("Claude", "xl-Claude", "#B85A38"))
+                         ("Claude", "Claude", "#B85A38"))
         self.assertEqual(claude["global"]["roundness"], 35)          # the style's [defaults] apply
         with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as home2:
             def use(h):
@@ -1231,6 +1231,14 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertFalse(override.exists())
                 self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
+
+    def test_renamed_claude_styles(self):
+        # xl-Claude and xl-Claude-Dark lost their xl- (xl_cheese): settings and
+        # themes saved with the old names still find them
+        for old, new in (("xl-Claude", "Claude"), ("xl-Claude-Dark", "Claude-Dark")):
+            data = settings.from_dict({"style": {"name": old}})
+            self.assertEqual(data["style"]["name"], new)
+            self.assertEqual(cli._load_style(new, None).name, new)
 
     def test_missing_style_stands_in(self):
         # xl_cheese renamed his style's folder and name; the theme still named the
