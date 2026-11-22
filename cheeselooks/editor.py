@@ -5,7 +5,7 @@ Xed, gedit, Meld and other GTK text editors colour their text area with a
 GtkSourceView colour scheme, not the GTK theme. A scheme made for light
 themes (Xed's Classic) on a dark theme gave white line numbers on a fixed
 light gutter and dark-blue comments on dark. So at each Apply we write an
-"xl-Cheeselooks" scheme from the theme: the editor background and text, the
+"Theme Roller" scheme from the theme: the editor background and text, the
 gutter and line numbers, the current line, selection and cursor, matching
 brackets and search results in the accent, and syntax colours worked out to
 read on the editor background (light or dark), keyed to the accent's hue.
@@ -27,8 +27,9 @@ from xml.sax.saxutils import quoteattr
 from . import palette as pal
 from . import paths, reload
 
-SCHEME_ID = "xl-cheeselooks"
-SCHEME_NAME = "xl-Cheeselooks"
+SCHEME_ID = "xl-cheeselooks"          # the id editors store: kept, so a saved choice still works
+SCHEME_NAME = "Theme Roller"           # the name editors show (xl_cheese, 22 Nov): made by the tool,
+                                       # from whichever theme is applied
 STYLE_DIRS = ("gtksourceview-3.0", "gtksourceview-4", "gtksourceview-5", "libgedit-gtksourceview-300")
 # (schema, key): the editors we switch to the scheme, if installed
 EDITORS = (("org.x.editor.preferences.editor", "scheme", "Xed"),
@@ -158,10 +159,10 @@ def scheme_xml(t: dict[str, str]) -> str:
         ("sh:variable-definition", dict(foreground=c["type"])),
     ]
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
-             "<!-- Written by xl-Cheeselooks from your theme at each Apply (Integration: Text editors). -->",
+             "<!-- Written by Theme Roller from your theme at each Apply (Integration: Text editors). -->",
              f'<style-scheme id="{SCHEME_ID}" name="{SCHEME_NAME}" version="1.0">',
-             "  <author>xl-Cheeselooks</author>",
-             "  <description>Your xl-Cheeselooks theme's colors, made by the xl-Cheeselooks tool.</description>"]
+             "  <author>Theme Roller</author>",
+             "  <description>Your theme's colors, made by Theme Roller.</description>"]
     for name, attrs in rows:
         a = " ".join(f"{k}={quoteattr(v)}" for k, v in attrs.items())
         lines.append(f'  <style name="{name}" {a}/>')
@@ -212,7 +213,7 @@ def enable(t: dict[str, str]) -> list[str]:
             if current != SCHEME_ID and reload.set_value(schema, key, SCHEME_ID):
                 switched.append(name)
     _save_state(state)
-    log = ["Text editors: xl-Cheeselooks color scheme written"]
+    log = ["Text editors: Theme Roller color scheme written"]
     if switched:
         log.append(f"Text editors: {', '.join(switched)} switched to it")
     return log
@@ -232,11 +233,13 @@ def disable() -> list[str]:
         if f.exists():
             f.unlink()
     _save_state({})
-    return ["Text editors: xl-Cheeselooks color scheme removed, your previous schemes back"]
+    return ["Text editors: Theme Roller color scheme removed, your previous schemes back"]
 
 
 def active() -> bool:
     return bool(_load_state())
 
 
-NOTE = "Xed, gedit and Meld get your theme colors."
+NOTE = ("Xed, gedit and Meld get a color scheme from your theme: line numbers, the current line, "
+        "highlights and syntax colors. Their text area follows the theme either way. Reopen them to "
+        "see changes.")
