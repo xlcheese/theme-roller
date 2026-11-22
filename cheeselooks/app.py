@@ -75,7 +75,11 @@ DOC_NOTES = [
      "from your wallpaper or any picture."),
     ("Style",
      "Pick how things are drawn, and set its Depth (how strong edges and shadows are) and Unfocused "
-     "depth (how much of that unfocused windows keep)."),
+     "depth (how much of that unfocused windows keep). You can also make your own: a style is one "
+     "style.toml file, in ~/.local/share/xl-cheeselooks/styles/&lt;name&gt;/. <b>Create a starter "
+     "style…</b> makes one with every option explained: the essentials are on, the rest switched off "
+     "with a #, each with a short note. Edit it, then pick it on the Style tab, or check it with "
+     "<tt>theme-roller check-style &lt;folder&gt;</tt>."),
     ("Panel &amp; Menu",
      "The Cinnamon panel and its menus: their own colors, label weight, height, roundness, gradient "
      "and see-through. Left alone, they follow Global."),
@@ -99,11 +103,6 @@ DOC_NOTES = [
      "theme in Mint's settings and Theme Roller's colors leave your apps by themselves."),
     ("Import &amp; Export",
      "Share a theme as one <tt>.xltheme</tt> file, and add themes others shared with you."),
-    ("Your own style",
-     "A style is one style.toml file, in ~/.local/share/xl-cheeselooks/styles/&lt;name&gt;/. "
-     "<b>Create a starter style…</b> below makes one with every option explained: the essentials are "
-     "on, the rest switched off with a #, each with a short note. Edit it, then pick it on the Style "
-     "tab, or check it with <tt>theme-roller check-style &lt;folder&gt;</tt>."),
 ]
 LABELS = {
     "accent": "Accent", "bg": "Background", "text": "Text", "size": "Size",
@@ -952,12 +951,14 @@ class SettingsWindow(Gtk.ApplicationWindow):
             text.set_markup(body)
             grid.attach(text, 0, row + 1, 1, 1)
             row += 2
-        box = Gtk.Box(spacing=8, margin_top=12, halign=Gtk.Align.START)
-        starter = Gtk.Button(label="Create a starter style…")
-        starter.connect("clicked", self.on_starter_style)
-        box.pack_start(starter, False, False, 0)
-        box.pack_start(Gtk.LinkButton(uri=DOCS_URL, label="Full documentation (online)"), False, False, 0)
-        grid.attach(box, 0, row, 1, 1)
+            if title == "Style":       # the starter style sheet, with what it's about (xl_cheese)
+                starter = Gtk.Button(label="Create a starter style…", halign=Gtk.Align.START, margin_top=4)
+                starter.connect("clicked", self.on_starter_style)
+                grid.attach(starter, 0, row, 1, 1)
+                row += 1
+        link = Gtk.LinkButton(uri=DOCS_URL, label="Full documentation (online)", halign=Gtk.Align.START,
+                              margin_top=12)
+        grid.attach(link, 0, row, 1, 1)
         return grid
 
     def on_starter_style(self, _button: Gtk.Button) -> None:
