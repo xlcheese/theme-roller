@@ -8,7 +8,7 @@
 # Alpha values are written for Depth 50. alpha_dark is used on dark themes.
 
 name = "xl-Gummy"
-author = "xl_cheese"
+author = "Wesley Hayslip"
 description = "Bright, crisp glass buttons, sunken fields, boxed tabs with an accent glow."
 
 adapt_strength = 0.6

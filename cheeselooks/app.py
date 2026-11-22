@@ -337,6 +337,31 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.update_preview()
         self.update_buttons()
         self.show_all()
+        self._styles_seen = self._style_files()
+        self.connect("focus-in-event", self._on_focus_in)
+
+    def _style_files(self) -> tuple:
+        """Every style.toml in the style folders, with when it last changed."""
+        found = []
+        for base in paths.style_dirs():
+            if base.is_dir():
+                for f in sorted(base.glob("*/style.toml")):
+                    try:
+                        found.append((str(f), f.stat().st_mtime))
+                    except OSError:
+                        pass
+        return tuple(found)
+
+    def _on_focus_in(self, *_args) -> bool:
+        """Back from Nemo or a text editor: a style added, renamed or edited
+        there shows up without reopening Theme Roller, and the preview redraws
+        with it."""
+        now = self._style_files()
+        if now != self._styles_seen:
+            self._styles_seen = now
+            self.fill_style_list()
+            self.update_preview()
+        return False
 
     # ------------------------------------------------------------------ tabs
     def _page(self, grid: Gtk.Grid) -> Gtk.Widget:
@@ -1255,10 +1280,13 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
 .xl-prev-terminal {{ font-family: monospace; color: {t['term.text']}; background-color: {t['term.bg']}; padding: 6px; }}
 """
 
+    def _style(self, data: dict) -> tuple[styles.Style, str]:
+        return cli.style_or_stand_in(data)
+
     def update_preview(self) -> bool:
         self.pending = 0
         try:
-            style = cli._load_style(self.data["style"]["name"], None)
+            style, missing = self._style(self.data)
             ph = self.data["panel"]["panel_height"] or self._int_default(("panel", "panel_height"))
             t = tokens.build(self.data, style, panel_height=ph)
         except (styles.StyleError, settings.SettingsError, KeyError) as exc:
@@ -1285,6 +1313,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             GLib.timeout_add(250, self._fit_pages)  # again once restyled (the sidebar's rows lag a moment)
         except GLib.Error as exc:
             self.status.set_text(f"Preview CSS problem: {exc.message}")
+        if missing:
+            self.status.set_text(missing)
         if self.data["theme"] == themes.CUSTOM:
             themes.save_custom(self.data, self.base)
             self.refresh_custom_subtitle()
@@ -1734,7 +1764,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
 
         def work() -> None:
             try:
-                style = cli._load_style(data["style"]["name"], None)
+                style, _missing = self._style(data)
                 # Apply means "use this theme": also switch to it if it isn't active yet
                 # restarts Cinnamon by itself when window borders changed
                 log = cli.apply_to_desktop(data, style, activate=True)

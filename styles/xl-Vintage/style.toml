@@ -7,7 +7,7 @@
 # (dark themes, dark title bars).
 
 name = "xl-Vintage"
-author = "xl_cheese"
+author = "Wesley Hayslip"
 description = "Hard square bevels, grey buttons on an indigo title bar: OS/2 Warp."
 
 adapt_strength = 0.6

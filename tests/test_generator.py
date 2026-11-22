@@ -1232,6 +1232,20 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
 
+    def test_missing_style_stands_in(self):
+        # xl_cheese renamed his style's folder and name; the theme still named the
+        # old one. Preview, Apply and the watcher use the default style instead.
+        data = defaults()
+        data["style"]["name"] = "xl-Gone"
+        style, note = cli.style_or_stand_in(data)
+        self.assertEqual(style.name, "xl-Cheeselooks")
+        self.assertIn("xl-Gone", note)
+        data["global"].update(bg="#2B2B2A", text="#E6E6E6")
+        self.assertEqual(cli.style_or_stand_in(data)[0].name, "xl-Cheeselooks-Dark")
+        data["style"]["name"] = "xl-Classic"
+        style, note = cli.style_or_stand_in(data)            # a style that's there: used, no note
+        self.assertEqual((style.name, note), ("xl-Classic", ""))
+
     def test_selection_stands_out(self):
         # Cobalt: selected rows, icons and text were the accent, about as light as
         # the list behind them. Now darker, away from the list, the window and the

@@ -3,13 +3,13 @@
 # (darker than the surface) where the light style draws grey lines, hover
 # borders that brighten toward the text, a stronger drop shadow, faint glints
 # instead of bright highlights, and a recess that still shows on dark grey.
-# Built from xl_cheese's xl-Gummy (tools: see docs/design-spec.md).
+# By Wesley Hayslip.
 #
 # Alpha values are written for Depth 50. alpha_dark is what dark colours use;
 # alpha is the fallback if you pair this style with light colours.
 
 name = "xl-Gummy-Dark"
-author = "xl_cheese, dark tuning by Claude"
+author = "Wesley Hayslip"
 description = "Bright, crisp glass buttons, sunken fields, boxed tabs with an accent glow. xl-Gummy for dark colours."
 
 adapt_strength = 0.6

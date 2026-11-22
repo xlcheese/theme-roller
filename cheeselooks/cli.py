@@ -9,7 +9,7 @@ import re
 import sys
 from pathlib import Path
 
-from . import __version__, editor, flatpak, gtk4, icons, install, paths, qt, reload, watch, settings, styles, themes, tokens
+from . import __version__, editor, palette, flatpak, gtk4, icons, install, paths, qt, reload, watch, settings, styles, themes, tokens
 from .shape import DEFAULT_PANEL_HEIGHT
 
 
@@ -78,6 +78,22 @@ def _load_settings(args: argparse.Namespace) -> dict:
 def _load_style(name: str, extra_dir: str | None) -> styles.Style:
     dirs = ([Path(extra_dir)] if extra_dir else []) + paths.style_dirs()
     return styles.find(name, dirs)
+
+
+def style_or_stand_in(data: dict) -> tuple[styles.Style, str]:
+    """The theme's style, or, if it's gone (renamed or removed), the default
+    style for light or dark colors, with a note saying so. Without this a
+    theme whose style was renamed couldn't preview or Apply, and the app's
+    window opened squashed."""
+    name = data["style"]["name"]
+    try:
+        return _load_style(name, None), ""
+    except styles.StyleError:
+        g = data["global"]
+        dark = palette.luminance(g["bg"]) < palette.luminance(g["text"])
+        stand_in = _load_style("xl-Cheeselooks-Dark" if dark else "xl-Cheeselooks", None)
+        return stand_in, (f"Style “{name}” wasn't found (renamed or removed?), so {stand_in.name} "
+                          "stands in. Pick a style on the Style tab.")
 
 
 def _where(style: styles.Style) -> str:

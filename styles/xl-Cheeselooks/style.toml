@@ -7,7 +7,7 @@
 # (dark themes, dark title bars).
 
 name = "xl-Cheeselooks"
-author = "xl_cheese"
+author = "Wesley Hayslip"
 description = "Muted buttons with a soft shadow, fields set into the window, boxed tabs."
 
 adapt_strength = 0.6

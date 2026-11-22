@@ -90,7 +90,7 @@ def restore() -> list[str]:
     """Write the extra files again, from your saved settings."""
     from . import cli, settings
     data = settings.load(paths.settings_file())
-    style = cli._load_style(data["style"]["name"], None)
+    style, _missing = cli.style_or_stand_in(data)
     table = tokens.build(data, style)
     log = cli._libadwaita(data, table)
     if set_aside_file().exists():

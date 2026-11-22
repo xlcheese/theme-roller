@@ -7,7 +7,7 @@
 # (dark themes, dark title bars).
 
 name = "xl-Classic"
-author = "xl_cheese"
+author = "Wesley Hayslip"
 description = "A traditional bevel with a recess, sunken fields, boxed tabs."
 
 adapt_strength = 0.6

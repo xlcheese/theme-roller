@@ -97,7 +97,7 @@ Linux Mint 22.x with Cinnamon 6.x. Everything uses the Python 3 and GTK that Min
 - Built on [Linux Mint](https://github.com/linuxmint/mint-themes)'s Mint-Y theme.
 - Inspired by GNOME 2's Clearlooks theme and the GNOME Color Chooser.
 - Folder icons from [Mint-Y](https://github.com/linuxmint/mint-y-icons) (CC BY-SA 4.0, Sam Hewitt and Alexey Varfolomeev), [Yaru](https://github.com/ubuntu/yaru) (CC BY-SA 4.0, Canonical and the Yaru contributors) and [Breeze](https://github.com/KDE/breeze-icons) (LGPL 3+, the KDE contributors). Each style's licence is in its folder under `data/icons/`.
-- xl-Big Baddy and xl-Rad are xl_cheese's designs; the Claude folders and the Claude themes were designed by Claude.
+- xl-Big Baddy and xl-Rad are Wesley Hayslip's designs; the Claude folders and the Claude themes were designed by Claude.
 
 ## License
 
