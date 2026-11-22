@@ -56,16 +56,16 @@ DEFAULTS: dict[str, Any] = {
     # Icons tab: folders in your colors (icons.py). Off by default: a first look
     # at the Tool shouldn't change icons people chose in Mint's settings
     "icons": {"enabled": False, "style": "mint-y", "folder_color": None, "second_color": None},
-    "integration": {"libadwaita_colors": True, "libadwaita_accent": True,
-                    "libadwaita_full": False,  # our whole GTK 4 layer for apps that ignore the theme (gtk4.py)
+    # (the theme watcher is always on since 22 Nov: no setting; watch.py)
+    "integration": {"libadwaita": "colors",  # GNOME-style apps: off, colors (and GNOME's accent), or full:
+                                             # our whole GTK 4 layer for apps that ignore the theme (gtk4.py)
                     "flatpak_access": True,  # Flatpak apps can read the theme (flatpak.py); on, as the others
                     "qt_colors": True,       # Qt apps (VLC...) in the theme's colours (qt.py);
-                    "editor_colors": True,   # Xed, gedit, Meld: a colour scheme from the theme (editor.py);
-                    "watch_theme": True},    # take those out of apps when another theme is picked (watch.py)
-                                             # on: most people wouldn't know to look for it
+                    "editor_colors": True},  # Xed, gedit, Meld: a colour scheme from the theme (editor.py)
 }
 
 # (path, kind, extra) — kind is one of: color, color?, int, bool, choice
+FOLDER_STYLES = ("xl-big-baddy", "xl-rad", "claude", "mint-y", "yaru", "breeze")
 _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("global", "accent"), "color", None),
     (("global", "bg"), "color", None),
@@ -118,7 +118,7 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "scrollbars", "roundness"), "int", (0, 100)),
     (("details", "scrollbars", "width"), "int?", (6, 16)),
     (("icons", "enabled"), "bool", None),
-    (("icons", "style"), "choice", ("xl-big-baddy", "xl-rad", "claude", "mint-y", "yaru", "breeze")),
+    (("icons", "style"), "choice", FOLDER_STYLES),
     (("icons", "folder_color"), "color?", None),
     (("icons", "second_color"), "color?", None),
     (("details", "sliders", "custom"), "bool", None),
@@ -129,13 +129,11 @@ _RULES: list[tuple[tuple[str, ...], str, Any]] = [
     (("details", "focus_ring", "color"), "color?", None),
     (("details", "focus_ring", "style"), "choice", ("dashed", "dotted", "solid")),
     (("details", "focus_ring", "width"), "int", (0, 3)),
-    (("integration", "libadwaita_colors"), "bool", None),
-    (("integration", "libadwaita_accent"), "bool", None),
-    (("integration", "libadwaita_full"), "bool", None),
+    # (the Integration tab's order: most people first; xl_cheese, 22 Nov)
+    (("integration", "libadwaita"), "choice", ("off", "colors", "full")),
     (("integration", "flatpak_access"), "bool", None),
     (("integration", "qt_colors"), "bool", None),
     (("integration", "editor_colors"), "bool", None),
-    (("integration", "watch_theme"), "bool", None),
 ]
 
 
@@ -207,6 +205,9 @@ def validate(data: dict) -> list[str]:
     return problems
 
 
+OLD_FOLDER_STYLES = {"xl-80s": "xl-rad"}
+
+
 def from_dict(data: dict) -> dict:
     """Merge user data over defaults and validate. Raises SettingsError."""
     merged = _deep_merge(DEFAULTS, data or {})
@@ -224,6 +225,23 @@ def from_dict(data: dict) -> dict:
         wb["button_style"] = titlebuttons.OLD_NAMES[wb["button_style"]]     # names before v1
     if isinstance(wb, dict) and wb.get("button_glyphs") == "theme":
         wb["button_glyphs"] = "regular"                                      # renamed
+    integ = merged.get("integration")
+    if isinstance(integ, dict):
+        # three switches before 22 Nov (colors, GNOME accent, full styling): now one
+        # choice, the accent part of colors; the watcher's switch is gone (always on)
+        old = (data or {}).get("integration") or {}
+        if "libadwaita" not in old and "libadwaita_colors" in old:
+            integ["libadwaita"] = ("off" if not old.get("libadwaita_colors")
+                                   else "full" if old.get("libadwaita_full") else "colors")
+        for key in ("libadwaita_colors", "libadwaita_accent", "libadwaita_full", "watch_theme"):
+            integ.pop(key, None)
+    ic = merged.get("icons")
+    if isinstance(ic, dict) and isinstance(ic.get("style"), str):
+        # a folder style renamed (xl-80s became xl-Rad) or retired (Adwaita):
+        # the new name, or the default, rather than settings that won't open
+        ic["style"] = OLD_FOLDER_STYLES.get(ic["style"], ic["style"])
+        if ic["style"] not in FOLDER_STYLES:
+            ic["style"] = DEFAULTS["icons"]["style"]
     merged["version"] = SETTINGS_VERSION
     problems = validate(merged)
     if problems:

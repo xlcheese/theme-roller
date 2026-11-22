@@ -1,4 +1,4 @@
-"""The theme watcher (Integration → "Follow Mint's theme setting"; on by default).
+"""The theme watcher (always on since 22 Nov; there is no switch for it).
 
 Some of what Apply writes lives outside the theme folder and applies whatever
 theme is selected: the colour block (and full styling) in

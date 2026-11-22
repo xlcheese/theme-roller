@@ -1306,14 +1306,128 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertTrue((css.parent / gtk4.ASSETS / n).exists(), n)
             gtk4.remove_assets(css)
             self.assertFalse((css.parent / gtk4.ASSETS).exists())
-        self.assertFalse(settings.DEFAULTS["integration"]["libadwaita_full"])  # opt-in
+        self.assertEqual(settings.DEFAULTS["integration"]["libadwaita"], "colors")   # full is opt-in
+
+    def test_scan_my_apps(self):
+        """Scan my apps: an app's kind, read from files, nothing run."""
+        from cheeselooks import appscan
+        self.assertIn("libc.so.6", appscan.elf_libraries(Path("/bin/ls")))      # a real program's libraries
+        self.assertIsNone(appscan.elf_libraries(REPO / "README.md"))           # not a program
+        k = appscan.kind_of_libraries
+        self.assertEqual(k(["libadwaita-1.so.0", "libgtk-4.so.1"]), appscan.GNOME)
+        self.assertEqual(k(["libQt5Widgets.so.5"]), appscan.QT)
+        self.assertEqual(k(["libgtk-3.so.0"]), appscan.GTK3)
+        self.assertIsNone(k(["libc.so.6"]))
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            scripts = {"adw.py": "gi.require_version('Adw', '1')", "gtk3.py": "gi.require_version('Gtk', '3.0')",
+                       "qt.py": "from PyQt5 import QtWidgets", "other.sh": "echo hi"}
+            for name, body in scripts.items():
+                (t / name).write_text("#!/usr/bin/python3\n" + body + "\n")
+            self.assertEqual(appscan.kind_of_script(t / "adw.py"), appscan.GNOME)
+            self.assertEqual(appscan.kind_of_script(t / "gtk3.py"), appscan.GTK3)
+            self.assertEqual(appscan.kind_of_script(t / "qt.py"), appscan.QT)
+            self.assertIsNone(appscan.kind_of_script(t / "other.sh"))
+        # xl_cheese's desktop, 22 Nov: Buffet Menu's own copy of an app's entry
+        # (in your home folder) starts it through its launcher; the app's real
+        # entry underneath still says what it is. Also: pkexec / python3 first.
+        from unittest import mock
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            (t / "home" / "applications").mkdir(parents=True)
+            (t / "sys" / "applications").mkdir(parents=True)
+            app = t / "viewer.py"
+            app.write_text("#!/usr/bin/python3\ngi.require_version('Gtk', '3.0')\n")
+            launcher = t / "launch-with-menus"
+            launcher.write_text("#!/bin/sh\n\"$@\"\n")
+            launcher.chmod(0o755)
+            (t / "sys" / "applications" / "viewer.desktop").write_text(
+                f"[Desktop Entry]\nType=Application\nName=Viewer\nExec=python3 {app} %U\n")
+            (t / "home" / "applications" / "viewer.desktop").write_text(
+                f"[Desktop Entry]\nType=Application\nName=Viewer\nExec={launcher} viewer %U\n")
+            (t / "sys" / "applications" / "admin.desktop").write_text(
+                f"[Desktop Entry]\nType=Application\nName=Admin\nExec=pkexec {app}\n")
+            with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(t / "home"), "XDG_DATA_DIRS": str(t / "sys")}):
+                kinds = {a.name: a.kind for a in appscan.scan().apps}
+            self.assertEqual(kinds["Viewer"], appscan.GTK3)     # past the launcher, from the real entry
+            self.assertEqual(kinds["Admin"], appscan.GTK3)      # past pkexec
+        # a Python launcher whose GTK is in an installed package (Bluetooth Manager, Onboard...)
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            (t / "site" / "bluething" / "main").mkdir(parents=True)
+            (t / "site" / "bluething" / "main" / "window.py").write_text("gi.require_version('Gtk', '3.0')\n")
+            (t / "bluething-manager").write_text("#!/usr/bin/python3\nfrom bluething.main import window\n")
+            with mock.patch.object(appscan, "PY_SITES", [t / "site"]):
+                self.assertEqual(appscan.kind_of_script(t / "bluething-manager"), appscan.GTK3)
+            # setuptools launcher naming its package in quotes (PDF Arranger)
+            (t / "site" / "pdf_thing").mkdir()
+            (t / "site" / "pdf_thing" / "app.py").write_text("from gi.repository import Gtk\n")
+            (t / "pdf-thing").write_text("#!/usr/bin/python3\nimport re, sys\n"
+                                         "sys.exit(load_entry_point('pdf-thing==1.0', 'gui_scripts', 'x')())\n")
+            # a launcher putting the app's own folder on Python's path (xl-Annotate)
+            (t / "share" / "annot").mkdir(parents=True)
+            (t / "share" / "annot" / "window.py").write_text("gi.require_version('Gtk', '3.0')\n")
+            (t / "annot").write_text(f"#!/usr/bin/python3\nimport sys\nsys.path.insert(0, '{t / 'share'}')\n"
+                                     "from annot import window\n")
+            # two steps: a shell launcher running a Python launcher (gufw)
+            (t / "outer").write_text(f"#!/bin/bash\npkexec {t / 'bluething-manager'} \"$@\"\n")
+            with mock.patch.object(appscan, "PY_SITES", [t / "site"]):
+                self.assertEqual(appscan.kind_of_script(t / "pdf-thing"), appscan.GTK3)
+                self.assertEqual(appscan.kind_of_script(t / "outer"), appscan.GTK3)
+            self.assertEqual(appscan.kind_of_script(t / "annot"), appscan.GTK3)
+        # xl_cheese's last four, their launchers as on his desktop (22 Nov)
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            gtk = "gi.require_version('Gtk', '3.0')\n"
+            (t / "share" / "scp").mkdir(parents=True)
+            (t / "share" / "scp" / "system-config-printer.py").write_text("#!/usr/bin/python3\nimport config\n")
+            (t / "share" / "scp" / "printerproperties.py").write_text(gtk)
+            (t / "bin").mkdir()
+            (t / "bin" / "printers").write_text(f"#!/bin/sh\nprefix={t}\nexec ${{prefix}}/share/scp/"
+                                                "system-config-printer.py \"$@\"\n")
+            (t / "lib" / "stick").mkdir(parents=True)
+            (t / "lib" / "stick" / "mintstick.py").write_text("#!/usr/bin/python3\n" + gtk)
+            (t / "bin" / "stick").write_text(f"#!/bin/sh\nset -e\nDIR={t}/lib/stick\n\n$DIR/mintstick.py \"$@\"\n")
+            (t / "libexec" / "warp").mkdir(parents=True)
+            for i in range(120):                               # many generated files first, alphabetically
+                (t / "libexec" / "warp" / f"a{i:03}_pb2.py").write_text("x = 1\n")
+            (t / "libexec" / "warp" / "warpinator.py").write_text(gtk)
+            (t / "libexec" / "warp" / "warpinator-launch.py").write_text("#!/usr/bin/python3\nimport os\n")
+            (t / "bin" / "warp").write_text(f"#!/bin/sh\nexec {t}/libexec/warp/warpinator-launch.py $@\n")
+            (t / "lib" / "xl-shot").mkdir()
+            (t / "lib" / "xl-shot" / "annotate.py").write_text(gtk)
+            (t / "bin" / "xl-annotate").write_text(
+                "#!/usr/bin/python3\nimport os\nimport sys\n_here = os.path.dirname(os.path.realpath(__file__))\n"
+                'sys.path.insert(0, os.path.normpath(os.path.join(_here, os.pardir, "lib", "xl-shot")))\n'
+                "from annotate import main\n")
+            for launcher in ("printers", "stick", "warp", "xl-annotate"):
+                self.assertEqual(appscan.kind_of_script(t / "bin" / launcher), appscan.GTK3, launcher)
+        c = appscan.classify
+        self.assertEqual(c("x", {"Name": "Vim", "Exec": "vim %F", "Terminal": "true"}).kind, appscan.TERMINAL)
+        self.assertEqual(c("x", {"Name": "Calc", "Exec": "flatpak run org.gnome.Calculator"}).kind, appscan.FLATPAK)
+        self.assertEqual(c("x", {"Name": "Gone", "Exec": "no-such-program-here"}).kind, appscan.UNKNOWN)
+
+    def test_old_integration_switches_carry_over(self):
+        """22 Nov: three libadwaita switches became one choice (the GNOME accent
+        part of colors), and the watcher's switch went (always on)."""
+        cases = (({"libadwaita_colors": True, "libadwaita_full": False}, "colors"),
+                 ({"libadwaita_colors": True, "libadwaita_full": True}, "full"),
+                 ({"libadwaita_colors": False, "libadwaita_full": True}, "off"),
+                 ({"libadwaita_colors": True, "libadwaita_accent": False, "watch_theme": False}, "colors"))
+        for old, new in cases:
+            data = settings.from_dict({"integration": old})
+            self.assertEqual(data["integration"]["libadwaita"], new, old)
+            for gone in ("libadwaita_colors", "libadwaita_accent", "libadwaita_full", "watch_theme"):
+                self.assertNotIn(gone, data["integration"])
+        self.assertEqual(settings.from_dict({"integration": {"libadwaita": "off"}})["integration"]["libadwaita"], "off")
 
     def test_theme_change_keeps_integration(self):
         mine = defaults()
-        mine["integration"].update(libadwaita_full=True, qt_colors=False)
+        mine["integration"].update(libadwaita="full", qt_colors=False)
         theme = themes.load("xl-Classic")
         kept = settings.keep_per_user(theme, mine)
-        self.assertTrue(kept["integration"]["libadwaita_full"])
+        self.assertEqual(kept["integration"]["libadwaita"], "full")
         self.assertFalse(kept["integration"]["qt_colors"])
         self.assertEqual(kept["global"], theme["global"])                    # the look is the theme's
 
@@ -1345,7 +1459,7 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertIn("watch", text)
             self.assertIn("X-GNOME-Autostart-enabled=true", text)
             self.assertTrue(str(watch.autostart_file()).startswith(tmp))
-        self.assertTrue(settings.DEFAULTS["integration"]["watch_theme"])
+        self.assertNotIn("watch_theme", settings.DEFAULTS["integration"])  # always on: no setting
 
     def test_set_aside_takes_our_colors_out(self):
         from unittest import mock
@@ -1442,6 +1556,41 @@ class RenderAndInstallTests(unittest.TestCase):
         w = window()
         app.SettingsWindow.changed(w, ("icons", "second_color"), "#2EC27E")      # a green back...
         self.assertEqual(w.data["icons"]["folder_color"], "#E01B24")            # ...the front stays red
+
+    def test_cinnamon_restarts_only_when_window_borders_change(self):
+        """Muffin keeps its copy of the theme's stylesheet: Apply restarts Cinnamon
+        by itself, only when what it draws changed (xl_cheese, 21 Nov)."""
+        from unittest import mock
+        from cheeselooks import paths
+        style = styles.load(DEFAULT_STYLE)
+        base = defaults()
+        table = tokens.build(base, style)
+        panel = copy.deepcopy(base)
+        panel["panel"]["panel_opacity"] = 40                             # the panel only
+        borders = copy.deepcopy(base)
+        borders["window_borders"]["border_width"] = 4                    # the window borders
+        self.assertEqual(cli.window_border_fingerprint(tokens.build(panel, style)),
+                         cli.window_border_fingerprint(table))
+        self.assertNotEqual(cli.window_border_fingerprint(tokens.build(borders, style)),
+                            cli.window_border_fingerprint(table))
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(paths, "config_dir", lambda: Path(tmp)), \
+                mock.patch.object(reload, "available", lambda: True), \
+                mock.patch.object(reload, "restart_cinnamon", lambda: "restarted"):
+            self.assertEqual(cli._window_borders(table, was_ours=False), [])        # switched to it: loaded fresh
+            self.assertEqual(cli._window_borders(table, was_ours=True), [])         # nothing changed
+            self.assertEqual(cli._window_borders(tokens.build(panel, style), True), [])
+            self.assertEqual(cli._window_borders(tokens.build(borders, style), True), ["restarted"])
+            self.assertEqual(cli._window_borders(table, True, force=True), ["restarted"])   # --restart
+            (Path(tmp) / "window-borders").unlink()
+            self.assertEqual(cli._window_borders(table, was_ours=True), ["restarted"])  # in use, unknown copy
+
+    def test_renamed_or_retired_folder_style_still_opens(self):
+        """xl_cheese, 21 Nov: settings saved with "xl-80s" (renamed xl-Rad) stopped
+        the app opening. Renamed: the new name; retired (Adwaita): the default."""
+        for old, new in (("xl-80s", "xl-rad"), ("adwaita", settings.DEFAULTS["icons"]["style"])):
+            data = settings.from_dict({"icons": {"enabled": True, "style": old}})
+            self.assertEqual(data["icons"]["style"], new)
 
     def test_icons_survive_a_theme_pick_and_apply(self):
         """xl_cheese, 20 Nov: Icons on, pick Claude Dark, Apply: the switch and
@@ -1562,7 +1711,7 @@ class RenderAndInstallTests(unittest.TestCase):
     def test_theme_stays_itself_with_per_user_settings(self):
         from cheeselooks import app
         theme = themes.load("xl-Cheeselooks")
-        mine = settings.keep_per_user(theme, {**theme, "integration": {**theme["integration"], "libadwaita_full": True},
+        mine = settings.keep_per_user(theme, {**theme, "integration": {**theme["integration"], "libadwaita": "full"},
                                               "icons": {**theme["icons"], "enabled": True, "style": "yaru"}})
         self.assertTrue(app._same(mine, theme))                       # still xl-Cheeselooks, not Custom
         mine["global"] = {**mine["global"], "accent": "#123456"}

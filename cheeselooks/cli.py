@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -104,9 +105,10 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     integ = data["integration"]
     # CSS variables for libadwaita 1.6+ always: Flatpak apps bring their own,
     # newer libadwaita, and GTK 4.14 accepts the variables without warnings
-    full = bool(integ.get("libadwaita_full")) and integ["libadwaita_colors"]
+    colors = integ.get("libadwaita", "colors") != "off"
+    full = integ.get("libadwaita") == "full"
     new = (gtk4.block(paths.templates_dir(), table, css_variables=True, full=full)
-           if integ["libadwaita_colors"] else None)
+           if colors else None)
     log.append(gtk4.write(paths.gtk4_css(), new))
     if full:
         gtk4.copy_assets(new, paths.theme_dir(), paths.gtk4_css())
@@ -114,7 +116,7 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
                    f"{paths.gtk4_css()}; reopen open ones")
     else:
         gtk4.remove_assets(paths.gtk4_css())
-    if integ["libadwaita_accent"]:
+    if colors:                     # GNOME's own accent setting, to match (part of colors)
         log.append(reload.set_adw_accent(table["adw.accent_name"]) or "")
     log += _flatpak_access(integ.get("flatpak_access", False))
     # Qt apps: rewritten at each Apply while on; switched off, removed once
@@ -202,10 +204,9 @@ def apply_to_desktop(data: dict, style: styles.Style, activate: bool = False,
 
 
 def _watcher(data: dict) -> list[str]:
-    """Integration → "Follow Mint's theme setting": the watcher at login (and now)."""
-    if data["integration"].get("watch_theme"):
-        return watch.enable()
-    return watch.disable()
+    """The theme watcher, at login (and now): always on since 22 Nov (xl_cheese:
+    nobody wants Theme Roller's colors stuck on another theme)."""
+    return watch.enable()
 
 
 def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
@@ -230,10 +231,48 @@ def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
         line = reload.set_overlay_scrollbars(sb["mode"] == "overlay")
         if line:
             log.append(line)
+    was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
     log += reload.apply(tokens.THEME_NAME, layout, activate=activate, theme_dir=theme_dir)
-    if restart:
-        log.append(reload.restart_cinnamon())
+    log += _window_borders(table, was_ours, force=restart)
     return log
+
+
+# ------------------------------------------------------------------ window borders
+# Cinnamon's window manager (Muffin) draws window borders from the GTK theme's
+# stylesheet, but keeps the copy it loaded by name: Apply's reload refreshes
+# apps, not the borders (xl_cheese tested: only a Cinnamon restart did). So
+# Apply restarts Cinnamon itself, only when something Muffin draws changed:
+# a fingerprint of the title bar, border and title button values, remembered.
+THEME_KEY = ("org.cinnamon.desktop.interface", "gtk-theme")
+WINDOW_BORDER_KEYS = ("wb.", "tbtn.", "titlebuttons.", "file:gtk-3")
+
+
+def window_border_fingerprint(table: dict[str, str]) -> str:
+    h = hashlib.sha256()
+    for key in sorted(table):
+        if key.startswith(WINDOW_BORDER_KEYS) or key == "titlebuttons":
+            h.update(f"{key}={table[key]}\n".encode())
+    return h.hexdigest()
+
+
+def _window_borders(table: dict[str, str], was_ours: bool, force: bool = False) -> list[str]:
+    """Restart Cinnamon if its window borders need it: what they draw changed
+    since the last Apply (or, the first time, our theme was already in use, so
+    an old copy may be loaded). Switching to the theme from another needs no
+    restart: Muffin loads it fresh."""
+    if not reload.available():
+        return []
+    f = paths.config_dir() / "window-borders"
+    try:
+        old = f.read_text(encoding="utf-8").strip()
+    except OSError:
+        old = None
+    new = window_border_fingerprint(table)
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(new + "\n", encoding="utf-8")
+    if force or (old is not None and old != new) or (old is None and was_ours):
+        return [reload.restart_cinnamon()]
+    return []
 
 
 def cmd_apply(args: argparse.Namespace) -> int:
@@ -246,6 +285,27 @@ def cmd_apply(args: argparse.Namespace) -> int:
         for line in _watcher(data):
             print(f"  {line}")
     return code
+
+
+def cmd_scan(args: argparse.Namespace) -> int:
+    """Scan my apps, on the command line; --why shows what the scan saw for
+    apps it couldn't tell (to improve it)."""
+    from . import appscan
+    entries = appscan.menu_apps()
+    apps = [(appscan.classify(i, e), i, e) for i, e in entries]
+    for kind in (appscan.GTK3, appscan.GNOME, appscan.FLATPAK, appscan.QT, appscan.EDITOR,
+                 appscan.TERMINAL, appscan.WEB, appscan.UNKNOWN):
+        group = sorted((a for a in apps if a[0].kind == kind), key=lambda a: a[0].name.lower())
+        if group:
+            print(f"{kind} ({len(group)}): " + ", ".join(a[0].name for a in group))
+    if args.why:
+        print()
+        for app, app_id, e in sorted(apps, key=lambda a: a[0].name.lower()):
+            if app.kind == appscan.UNKNOWN:
+                print(f"{app.name}  [{app_id}]")
+                for line in appscan.why(app_id, e):
+                    print(line)
+    return 0
 
 
 def cmd_watch(_args: argparse.Namespace) -> int:
@@ -295,10 +355,11 @@ def _cmd_apply(args: argparse.Namespace) -> int:
             line = reload.set_overlay_scrollbars(sb["mode"] == "overlay")
             if line:
                 print(f"  {line}")
+        was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
         for line in reload.apply(tokens.THEME_NAME, layout, activate=args.activate, theme_dir=theme_dir):
             print(f"  {line}")
-        if getattr(args, "restart", False):
-            print(f"  {reload.restart_cinnamon()}")
+        for line in _window_borders(table, was_ours, force=getattr(args, "restart", False)):
+            print(f"  {line}")
     return 0
 
 
@@ -338,8 +399,16 @@ def cmd_revert(args: argparse.Namespace) -> int:
         except styles.StyleError as exc:
             _err(f"libadwaita colors left as they were: {exc}")
     if not args.no_reload:
+        was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
         for line in reload.apply(tokens.THEME_NAME, theme_dir=paths.theme_dir()):
             print(f"  {line}")
+        if data:       # the restored theme's window borders, as Apply does
+            try:
+                table = tokens.build(data, _load_style(data["style"]["name"], None))
+                for line in _window_borders(table, was_ours):
+                    print(f"  {line}")
+            except styles.StyleError:
+                pass
     return 0
 
 
@@ -489,7 +558,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="reset roundness, gradient, depth and panel/menu shape to the style's defaults")
     p.add_argument("--activate", action="store_true", help="also switch Cinnamon to this theme")
     p.add_argument("--restart", action="store_true",
-                   help="restart Cinnamon afterwards (like Ctrl+Alt+Esc) so window borders reload too")
+                   help="restart Cinnamon afterwards even if window borders didn't change "
+                        "(Apply restarts it by itself when they did)")
     p.add_argument("--no-reload", action="store_true", help="write files only")
     p.add_argument("--no-save", action="store_true", help="don't save the settings used")
     p.set_defaults(func=cmd_apply)
@@ -507,6 +577,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("path")
     p.set_defaults(func=cmd_check_style)
 
+    p = sub.add_parser("scan", help="list your apps by kind (Integration: Scan my apps)")
+    p.add_argument("--why", action="store_true", help="show what the scan saw for apps it couldn't tell")
+    p.set_defaults(func=cmd_scan)
     p = sub.add_parser("watch", help="run the theme watcher (started at login; see Integration)")
     p.set_defaults(func=cmd_watch)
     p = sub.add_parser("set-aside", help="take xl-Cheeselooks' colors out of GTK 4, Qt and editor apps")

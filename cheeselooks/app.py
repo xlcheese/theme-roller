@@ -100,10 +100,9 @@ LABELS = {
     "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
     "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
     "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
-    "libadwaita_colors": "Colors for libadwaita apps", "libadwaita_accent": "GNOME accent color",
+    "libadwaita": "GNOME-style apps",
     "enabled": "Custom folder style", "folder_color": "Folder color", "second_color": "Second color",
-    "flatpak_access": "Flatpak apps", "libadwaita_full": "Full styling for libadwaita apps",
-    "watch_theme": "Follow Mint's theme setting", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
+    "flatpak_access": "Flatpak apps", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
 }
 GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
           "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
@@ -135,19 +134,24 @@ def _integration_note(text: str) -> Gtk.Label:
 
 
 # the line under an Integration switch (a function: some depend on what's installed)
-INTEGRATION_NOTES = {
-    "flatpak_access": lambda: ("Flatpak apps get your colors: every Flatpak app may read your themes "
-                               "folder and GTK 4 colors (read-only). Reopen open ones."
-                               if flatpak.available() else "Flatpak isn't installed."),
-    "libadwaita_full": lambda: ("Also our buttons, title buttons and tabs in libadwaita apps that ignore "
-                                "the theme (Flatpak ones, with Flatpak apps on). It overrides apps' own "
-                                "styling, so some may lose colors of their own. Reopen open apps."),
+# The Integration tab (xl_cheese, 22 Nov): one intro explains why apps need
+# help, so each row is just a name; what each does and when it shows is its
+# tooltip; only something missing is said under it.
+INTEGRATION_INTRO = ("Linux apps come in a few kinds, and each looks for its colors in its own place. "
+                     "Theme Roller brings your theme to all of them. These are already set, so you only "
+                     "need this tab if an app doesn't match.")
+INTEGRATION_TIPS = {
+    "libadwaita": ("GNOME apps such as Calculator and Text Editor (libadwaita). Colors: your colors, and "
+                   "GNOME's accent to match. Full: also your buttons, title buttons and tabs; this "
+                   "overrides apps' own styling, so some lose colors of their own (Flatpak ones need "
+                   "Flatpak apps on). Reopen apps to see changes."),
+    "flatpak_access": "Lets Flatpak apps read your theme, so they get its colors. Reopen open apps to see them.",
     "qt_colors": lambda: qt.note(),
     "editor_colors": lambda: editor.NOTE,
-    "watch_theme": lambda: ("When you pick another theme in Mint's Themes settings, xl-Cheeselooks' "
-                            "colors leave GTK 4, Flatpak, Qt and editor apps too (yours come back), and "
-                            "return when you pick xl-Cheeselooks again. A tiny helper started at login "
-                            "waits for that change."),
+}
+INTEGRATION_MISSING = {
+    "flatpak_access": lambda: "" if flatpak.available() else "Flatpak isn't installed.",
+    "qt_colors": lambda: qt.missing(),
 }
 SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
@@ -183,6 +187,7 @@ def _sorted(items: list, order: str) -> list:
         return sorted(items, key=lambda it: (it[1], _natural(it[0])), reverse=(order == "new"))
     return sorted(items, key=lambda it: _natural(it[0]), reverse=(order == "za"))
 CHOICE_LABELS = {"button_style": titlebuttons.STYLES,   # choices shown by name instead of id
+                 "libadwaita": {"off": "Off", "colors": "Colors", "full": "Full"},
                  "style": {k: v["name"] for k, v in icons.STYLES.items()}}
 
 
@@ -269,6 +274,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             self.stack.add_titled(self._tab(section), section, title)
         sidebar = Gtk.StackSidebar(stack=self.stack)
         sidebar.set_size_request(160, -1)
+        self.sidebar = sidebar
         self.status = Gtk.Label(xalign=0, selectable=True, wrap=True, margin_start=12, margin_bottom=6)
         self.status.get_style_context().add_class("dim-label")
         pages = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -313,8 +319,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
             row = self._style_rows(grid, row)
         if section == "terminal":
             row = self._terminal_picks(grid, row)
-        if section == "integration":
-            row = self._restart_row(grid, row)
         if section in SECTION_NOTES:
             note = Gtk.Label(label=SECTION_NOTES[section], xalign=0, wrap=True)
             note.get_style_context().add_class("dim-label")
@@ -323,6 +327,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
         group = None
         rules = [r for r in settings._RULES if r[0][0] == section and r[0][-1] not in HIDDEN]
         heading = {}
+        if section == "integration":
+            intro = Gtk.Label(label=INTEGRATION_INTRO, xalign=0, wrap=True, max_width_chars=60, hexpand=True,
+                              margin_bottom=6)
+            grid.attach(intro, 0, row, 2, 1)
+            scan = Gtk.Button(label="Scan my apps", halign=Gtk.Align.START, margin_bottom=8)
+            scan.set_tooltip_text("Lists the apps on this computer by kind, and whether Theme Roller "
+                                  "reaches them: the answer to \u201cwhy doesn't this app match?\u201d")
+            scan.connect("clicked", lambda _b: self._scan_dialog())
+            grid.attach(scan, 0, row + 1, 2, 1)
+            row += 2
         if section == "panel":
             order = [p for p, _g in PANEL_LAYOUT]
             heading = dict(PANEL_LAYOUT)
@@ -346,12 +360,17 @@ class SettingsWindow(Gtk.ApplicationWindow):
             if path == ("icons", "second_color"):
                 self.second_color_label = label     # some styles call it something else
             grid.attach(label, 0, row, 1, 1)
-            grid.attach(self._control(path, kind, extra), 1, row, 1, 1)
+            ctl = self._control(path, kind, extra)
+            grid.attach(ctl, 1, row, 1, 1)
             row += 1
-            if path[0] == "integration" and path[-1] in INTEGRATION_NOTES:
-                text = INTEGRATION_NOTES[path[-1]]()
-                grid.attach(_integration_note(text), 0, row, 2, 1)   # under the title, full width
-                row += 1
+            if path[0] == "integration":
+                tip = INTEGRATION_TIPS.get(path[-1], "")
+                label.set_tooltip_text(tip() if callable(tip) else tip)
+                ctl.set_tooltip_text(label.get_tooltip_text())      # on the switch too
+                missing = INTEGRATION_MISSING.get(path[-1], lambda: "")()
+                if missing:                                          # only what's missing shows
+                    grid.attach(_integration_note(missing), 0, row, 2, 1)
+                    row += 1
             if path == ("global", "text"):
                 row = self._image_colors_row(grid, row)
         if section == "icons":
@@ -371,27 +390,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 self.reset_btns["all"] = every
             grid.attach(box, 0, row, 2, 1)
         return self._page(grid)
-
-    def _restart_row(self, grid: Gtk.Grid, row: int) -> int:
-        """Integration, first: restart Cinnamon after Apply (an app choice, not a setting)."""
-        restart = Gtk.CheckButton(label="Restart Cinnamon after Apply",
-                                  active=self.prefs.get("restart_after_apply", False))
-        restart.set_tooltip_text("Window borders (Muffin) only reload at login or a Cinnamon restart. "
-                                 "This restarts Cinnamon after each Apply, like Ctrl+Alt+Esc: "
-                                 "the panel blinks, your windows stay open.")
-
-        def toggled(b: Gtk.CheckButton) -> None:
-            self.prefs["restart_after_apply"] = b.get_active()
-            _save_prefs(self.prefs)
-        restart.connect("toggled", toggled)
-        grid.attach(restart, 0, row, 2, 1)
-        note = Gtk.Label(label="Window borders reload at the next login otherwise.", xalign=0)
-        note.get_style_context().add_class("dim-label")
-        grid.attach(note, 0, row + 1, 2, 1)
-        row += 2
-        sep = Gtk.Separator(margin_top=6, margin_bottom=2)
-        grid.attach(sep, 0, row, 2, 1)
-        return row + 1
 
     def _control(self, path: tuple[str, ...], kind: str, extra: Any) -> Gtk.Widget:
         if path[-1] == "button_glyphs":
@@ -754,20 +752,70 @@ class SettingsWindow(Gtk.ApplicationWindow):
             except GLib.Error:
                 pass
 
+    def _scan_dialog(self) -> None:
+        """Scan my apps: the apps in the menu by kind, and whether Theme Roller
+        reaches each kind with the switches as they are now (appscan.py)."""
+        from . import appscan
+        result = appscan.scan()
+        integ = self.data["integration"]
+        adw = integ.get("libadwaita", "colors")
+        on = lambda v, yes="On", no="Off: switch it on in the Integration tab": yes if v else no  # noqa: E731
+        groups = [
+            (appscan.GTK3, "Follow the theme on their own", "Nothing to do: they always match."),
+            (appscan.GNOME, "GNOME-style apps",
+             {"off": "Off: set GNOME-style apps to Colors in the Integration tab", "colors": "Colors on",
+              "full": "Colors and full styling on"}[adw]),
+            (appscan.FLATPAK, "Flatpak apps",
+             on(integ.get("flatpak_access")) + ("" if adw != "off" else
+                                                 ". GNOME-style ones also need GNOME-style apps set to Colors")),
+            (appscan.QT, "Qt apps", on(integ.get("qt_colors")) + (f". {qt.missing()}" if qt.missing() else "")),
+            (appscan.EDITOR, "Text editors", on(integ.get("editor_colors"))),
+            (appscan.TERMINAL, "Run in a terminal", "They use the terminal's colors (Terminal tab)."),
+            (appscan.WEB, "Web-based apps", "They draw their own look; no theme reaches them."),
+            (appscan.UNKNOWN, "Couldn't tell", "Many of these draw their own look."),
+        ]
+        dialog = Gtk.Dialog(title="Your apps", transient_for=self, modal=True)
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.set_default_size(520, 520)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, margin=14)
+        total = len(result.apps)
+        head = Gtk.Label(xalign=0, wrap=True, max_width_chars=60)
+        head.set_text(f"{total} apps in your menu, by kind. Changes show after Apply, in apps opened "
+                      "afterwards.")
+        box.pack_start(head, False, False, 6)
+        for kind, title, status in groups:
+            apps = result.by_kind(kind)
+            if not apps:
+                continue
+            t = Gtk.Label(xalign=0, margin_top=8)
+            t.set_markup(f"<b>{GLib.markup_escape_text(title)}</b>  ({len(apps)})")
+            box.pack_start(t, False, False, 0)
+            st = Gtk.Label(label=status, xalign=0, wrap=True, max_width_chars=60)
+            box.pack_start(st, False, False, 0)
+            names = ", ".join(a.name + (f" ({a.detail})" if a.detail else "") for a in apps)
+            lst = Gtk.Label(label=names, xalign=0, wrap=True, max_width_chars=60, selectable=True)
+            lst.get_style_context().add_class("dim-label")
+            box.pack_start(lst, False, False, 0)
+        scroller = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, vexpand=True)
+        scroller.add(box)
+        dialog.get_content_area().pack_start(scroller, True, True, 0)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+
     def _set_aside_row(self, grid: Gtk.Grid, row: int) -> int:
         """Take our extra colors out of apps now, without changing any setting."""
-        button = Gtk.Button(label="Take out of apps", halign=Gtk.Align.START, margin_top=8)
+        button = Gtk.Button(label="Take colors out of apps", halign=Gtk.Align.START, margin_top=8)
 
         def clicked(_b: Gtk.Button) -> None:
             watch.set_aside()
-            self.status.set_text("xl-Cheeselooks' colors are out of GTK 4, Qt and editor apps (yours are "
-                                 "back). Reopen open apps. The next Apply puts them back.")
+            self.status.set_text("Theme Roller's colors are out of your apps. Reopen open apps. "
+                                 "The next Apply puts them back.")
         button.connect("clicked", clicked)
-        grid.attach(button, 1, row, 1, 1)
-        grid.attach(_integration_note("Takes the colors above out of apps now (your own come back), for "
-                                      "example before using another theme. The theme itself stays; the "
-                                      "next Apply puts them back."), 0, row + 1, 2, 1)
-        return row + 2
+        button.set_tooltip_text("Removes Theme Roller's colors from all apps now. Your settings and the "
+                                "theme stay; the next Apply puts the colors back.")
+        grid.attach(button, 0, row, 2, 1)
+        return row + 1
 
     def _image_colors_row(self, grid: Gtk.Grid, row: int) -> int:
         """Colors from a picture: the wallpaper or any image. Its main colors
@@ -1140,6 +1188,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self._scrollbar_mode(t["scrollbar.mode"] == "overlay")
             self.queue_resize()
             GLib.idle_add(self._fit_pages)          # measured in the new sizes
+            GLib.timeout_add(250, self._fit_pages)  # again once restyled (the sidebar's rows lag a moment)
         except GLib.Error as exc:
             self.status.set_text(f"Preview CSS problem: {exc.message}")
         if self.data["theme"] == themes.CUSTOM:
@@ -1165,6 +1214,14 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.page_height = tallest
             for name, _title in TABS:
                 self.stack.get_child_by_name(name).set_min_content_height(tallest)
+        # ...and the sidebar's tabs, whole: above roundness 30 they're rounded,
+        # spaced out, and twelve of them can outgrow the tallest tab (xl_cheese:
+        # a scrollbar over them). Its scroller asks for all of its list.
+        scroller = next((c for c in self.sidebar.get_children() if isinstance(c, Gtk.ScrolledWindow)), None)
+        if scroller is not None and scroller.get_child() is not None:
+            need = scroller.get_child().get_preferred_height()[1]
+            if need != scroller.get_min_content_height():
+                scroller.set_min_content_height(need)
         return False
 
     def _scrollbar_mode(self, overlay: bool) -> None:
@@ -1585,8 +1642,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             try:
                 style = cli._load_style(data["style"]["name"], None)
                 # Apply means "use this theme": also switch to it if it isn't active yet
-                log = cli.apply_to_desktop(data, style, activate=True,
-                                           restart=self.prefs.get("restart_after_apply", False))
+                # restarts Cinnamon by itself when window borders changed
+                log = cli.apply_to_desktop(data, style, activate=True)
                 GLib.idle_add(self.applied_ok, data, log)
             except Exception as exc:  # report anything to the user
                 GLib.idle_add(self.applied_failed, f"Apply failed: {exc}")
