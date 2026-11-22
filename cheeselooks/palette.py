@@ -163,6 +163,31 @@ def title_gradient(color: str, amount: float) -> tuple[str, str]:
 # Palette
 # --------------------------------------------------------------------------
 
+def stand_out(select: str, surfaces: tuple[str, ...], fg: str,
+              least: float = 1.3, target: float = 1.5) -> str:
+    """The selection color, moved until it stands out from every surface it's
+    drawn on (lists, the window, the sidebar). An accent about as light as the
+    background (xl_cheese's Cobalt: a dark blue on blue-grey) made selected rows
+    and text hard to see. Below `least`, it steps darker or lighter, whichever
+    reaches `target` sooner while the text on it (fg) still reads at 2.6:1.
+    Every built-in theme is far above `least` and keeps its color."""
+    def worst(c: str) -> float:
+        return min(contrast(c, s) for s in surfaces)
+    if worst(select) >= least:
+        return select
+    best = select
+    for step in range(1, 26):
+        for move in (darker, lighter):
+            c = move(select, step * 0.03)
+            if contrast(c, fg) < 2.6:
+                continue
+            if worst(c) >= target:
+                return c
+            if worst(c) > worst(best):
+                best = c
+    return best
+
+
 def derive(accent: str, bg: str, text: str, hover: float = 1.0,
            button_face: str | None = None) -> dict[str, str]:
     """Work out the full palette from the three picks.
@@ -198,13 +223,15 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
                 break
             select = darker(select, 0.04)
 
+    base = pick(mix(bg, WHITE, 0.75), darker(bg, 0.18))
+    select = stand_out(select, (base, bg, mix(bg, text, 0.035 if not dark else 0.03)), accent_fg)
+
     header = mix(bg, text, 0.066)   # Mint-Y's toolbar shade: #E8E8E8 on the default colors
     # light buttons rest a little below white so hover has room to go lighter
     button = pick(mix(bg, WHITE, 0.30), mix(bg, text, 0.08))
     if button_face:      # a style's button color: the face, and the hover worked out from it
         button = normalize(button_face)
     border_strong = pick(mix(bg, text, 0.30), mix(bg, text, 0.26))
-    base = pick(mix(bg, WHITE, 0.75), darker(bg, 0.18))
     menu_bg = base                                             # GTK menus: content color, as Mint-Y
     shell_menu_bg = pick(mix(bg, text, 0.03), mix(bg, text, 0.04))  # Cinnamon menus and popups
     fav_bg = pick(mix(bg, text, 0.075), mix(bg, text, 0.09))

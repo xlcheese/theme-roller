@@ -1232,6 +1232,27 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
 
+    def test_selection_stands_out(self):
+        # Cobalt: selected rows, icons and text were the accent, about as light as
+        # the list behind them. Now darker, away from the list, the window and the
+        # sidebar, with white text still reading.
+        t = palette.derive("#3D5278", "#5C6E8C", "#E6E6E6")
+        for surface in ("base", "bg", "sidebar"):
+            self.assertGreaterEqual(palette.contrast(t["select"], t[surface]), 1.5, surface)
+        self.assertGreaterEqual(palette.contrast(t["accent_fg"], t["select"]), 2.6)
+        self.assertEqual(t["accent"], "#3D5278")                 # the accent itself is kept
+        # a pale accent on a pale theme goes the other way only if its text still reads
+        t = palette.derive("#F2F2F0", "#F0F0EE", "#303030")
+        self.assertGreaterEqual(palette.contrast(t["accent_fg"], t["select"]), 2.6)
+        self.assertGreater(min(palette.contrast(t["select"], t[k]) for k in ("base", "bg", "sidebar")),
+                           palette.contrast("#F2F2F0", t["base"]))
+        # every built-in theme keeps its selection color
+        for f in sorted((REPO / "data" / "themes").glob("*.json")):
+            g = json.loads(f.read_text())["settings"]["global"]
+            t = palette.derive(g["accent"], g["bg"], g.get("text", "#303030"))
+            self.assertEqual(palette.stand_out(t["select"], (t["base"], t["bg"], t["sidebar"]), t["accent_fg"]),
+                             t["select"], f.name)
+
     def test_editor_selection_stands_out(self):
         # Cobalt (xl_cheese): a dark blue accent about as light as the blue-grey
         # background. The usual tint barely showed; now the selection goes past

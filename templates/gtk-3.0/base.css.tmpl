@@ -42,7 +42,7 @@
     background-color: {{mix(bg, base, 0.6)}};
     color: {{alpha(text, 0.42)}}; }
   .gtkstyle-fallback:selected {
-    background-color: {{accent}};
+    background-color: {{select}};
     color: {{accent_fg}}; }
 
 .view, iconview,
@@ -79,7 +79,7 @@ label.separator {
 
 label selection {
   color: {{accent_fg}};
-  background-color: {{accent}}; }
+  background-color: {{select}}; }
 
 label:disabled {
   color: {{alpha(text, 0.42)}}; }
@@ -975,7 +975,7 @@ window > .titlebar:not(headerbar), window > .titlebar:not(headerbar):backdrop, w
     background-color: {{alpha(base, 0.75)}}; }
   
   .primary-toolbar entry selection:focus, headerbar entry selection:focus {
-    background-color: {{accent}};
+    background-color: {{select}};
     color: {{accent_fg}}; }
   
   .primary-toolbar entry progress, headerbar entry progress {
@@ -2463,7 +2463,7 @@ calendar {
   border-radius: {{r}}px;
   padding: 2px; }
   calendar:selected {
-    background-color: {{accent}};
+    background-color: {{select}};
     color: {{accent_fg}};
     border-radius: 1.5px; }
   calendar.header {
@@ -3302,7 +3302,7 @@ NautilusListView .view, NautilusListView iconview {
     background-color: {{alpha(text, 0.05)}}; }
     .open-document-selector-treeview.view:hover:selected, iconview.open-document-selector-treeview:hover:selected {
       color: {{accent_fg}};
-      background-color: {{accent}}; }
+      background-color: {{select}}; }
 
 .open-document-selector-name-label {
   color: {{alpha(text, 0.87)}}; }
@@ -3327,7 +3327,7 @@ NautilusListView .view, NautilusListView iconview {
         color: {{accent_fg}}; }
     .gedit-document-panel row:selected, .gedit-document-panel row:selected:hover {
       color: {{accent_fg}};
-      background-color: {{accent}}; }
+      background-color: {{select}}; }
     .gedit-document-panel row:hover:not(:selected) button:active {
       color: {{alpha(text, 0.87)}}; }
   .gedit-document-panel row button {
@@ -3597,7 +3597,7 @@ TotemGrilo.vertical GdMainView.frame {
 
 SynapseGuiSelectionContainer *:selected,
 SynapseGuiViewVirgilio *:selected {
-  background-color: {{accent}}; }
+  background-color: {{select}}; }
 
 .tr-workarea .undershoot,
 .tr-workarea .overshoot {
@@ -3667,7 +3667,7 @@ MatePanelAppletFrameDBus > MatePanelAppletFrameDBus {
 
 .mintmenu:selected {
   color: {{accent_fg}};
-  background-color: {{accent}}; }
+  background-color: {{select}}; }
 
 .wnck-pager {
   background-color: {{alpha(text, 0.04)}}; }
@@ -3727,7 +3727,7 @@ BirdieWidgetsTweetList * {
 
 MarlinViewWindow *:selected, MarlinViewWindow *:selected:focus {
   color: {{accent_fg}};
-  background-color: {{accent}};
+  background-color: {{select}};
   outline-color: transparent; }
 
 MarlinViewWindow GtkIconView.view:selected, MarlinViewWindow GtkIconView.view:selected:focus, MarlinViewWindow GtkIconView.view:selected:hover, MarlinViewWindow GtkIconView.view:selected:focus:hover {
@@ -3796,14 +3796,14 @@ SwitchboardCategoryView .view:selected:focus {
 
 EvWindow .content-view .view:selected, EvWindow .content-view iconview:selected,
 EvWindow .content-view .view:focus:selected {
-  background-color: {{accent}};
+  background-color: {{select}};
   color: {{accent_fg}}; }
 
 .thunar .sidebar .view, .thunar .sidebar iconview {
   background-color: {{mix(bg, text, 0.015)}};
   color: {{alpha(text, 0.87)}}; }
   .thunar .sidebar .view:selected, .thunar .sidebar iconview:selected, .thunar .sidebar .view:active, .thunar .sidebar iconview:active {
-    background: {{accent}};
+    background: {{select}};
     color: {{accent_fg}}; }
 
 .thunar toolbar.horizontal button image, .thunar .horizontal.inline-toolbar button image {

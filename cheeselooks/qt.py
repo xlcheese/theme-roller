@@ -98,6 +98,7 @@ def colours(t: dict[str, str]) -> dict[str, str]:
     c["mid"] = pal.mix(c["dark"], t["button"], 0.5)
     c["shadow"] = pal.darker(t["button"], 0.7)
     c["link"] = t["accent"]
+    c["select"] = t["select"]        # selected rows and text: the same color as GTK apps
     c["disabled_text"] = pal.mix(t["text"], t["bg"], 0.55)
     c["white"] = "#FFFFFF"
     return c
@@ -109,7 +110,7 @@ def qt5ct_scheme(c: dict[str, str]) -> str:
     # HighlightedText, Link, LinkVisited, AlternateBase, NoRole, ToolTipBase,
     # ToolTipText, PlaceholderText)
     roles = ["text", "button", "light", "midlight", "dark", "mid", "text", "white", "text", "base", "bg",
-             "shadow", "accent", "accent_fg", "link", "link", "alt_base", "bg", "tip_bg", "tip_text", "text_dim"]
+             "shadow", "select", "accent_fg", "link", "link", "alt_base", "bg", "tip_bg", "tip_text", "text_dim"]
 
     def row(over: dict[int, str]) -> str:
         return ", ".join("#ff" + c[over.get(i, r)].lstrip("#").lower() for i, r in enumerate(roles))
@@ -134,7 +135,7 @@ def kdeglobals(c: dict[str, str]) -> str:
             + group("Window", "bg", "text", "bg")
             + group("View", "base", "text", "alt_base")
             + group("Button", "button", "text", "button")
-            + group("Selection", "accent", "accent_fg", "accent")
+            + group("Selection", "select", "accent_fg", "select")
             + group("Tooltip", "tip_bg", "tip_text", "tip_bg")
             + group("Complementary", "bg", "text", "bg"))
 
