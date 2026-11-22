@@ -850,8 +850,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
         show as swatches, the best one becomes the accent; any swatch can be
         clicked instead. Background and text stay as they are."""
         label = Gtk.Label(label="Colors from", xalign=0)
-        grid.attach(label, 0, row, 1, 1)
+        holder = Gtk.Box(valign=Gtk.Align.START)          # as tall as the buttons, so it lines up
+        holder.pack_start(label, False, False, 0)
+        grid.attach(holder, 0, row, 1, 1)
         box = Gtk.Box(spacing=6)
+        column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        column.pack_start(box, False, False, 0)
         wall = Gtk.Button(label="Wallpaper")
         wall.set_tooltip_text("Take an accent from your desktop wallpaper")
         wall.connect("clicked", lambda _b: self._colors_from(imagecolors.wallpaper()))
@@ -860,10 +864,17 @@ class SettingsWindow(Gtk.ApplicationWindow):
         pick.connect("clicked", self.on_pick_image)
         box.pack_start(wall, False, False, 0)
         box.pack_start(pick, False, False, 0)
-        self.image_swatches = Gtk.Box(spacing=3, margin_start=6)
+        # the picture's colors go under the buttons (beside them they widened the
+        # window); hidden until there are some
+        self.image_swatches = Gtk.Box(spacing=3, halign=Gtk.Align.START)
         self.image_swatches.get_style_context().add_class("linked")
-        box.pack_start(self.image_swatches, False, False, 0)
-        grid.attach(box, 1, row, 1, 1)
+        self.image_swatches.set_no_show_all(True)
+        column.pack_start(self.image_swatches, False, False, 0)
+        same = Gtk.SizeGroup(mode=Gtk.SizeGroupMode.VERTICAL)
+        same.add_widget(holder)
+        same.add_widget(box)
+        self._colors_from_group = same
+        grid.attach(column, 1, row, 1, 1)
         return row + 1
 
     def on_pick_image(self, _button: Gtk.Button) -> None:
@@ -902,11 +913,13 @@ class SettingsWindow(Gtk.ApplicationWindow):
             b.add(swatch)
             b.connect("clicked", lambda _b, c=color: self._use_accent(c))
             self.image_swatches.pack_start(b, False, False, 0)
-        self.image_swatches.show_all()
+        for child in self.image_swatches.get_children():
+            child.show_all()
+        self.image_swatches.set_visible(bool(found))
         best = imagecolors.accent(found)
         if best:
             self._use_accent(best)
-            self.status.set_text(f"Accent {best} from {path.name}. Click a swatch to use another of its colors.")
+            self.status.set_text(f"Accent from {path.name}. Or click another of its colors.")
         else:
             self.status.set_text(f"{path.name} has no colors vivid enough for an accent.")
 
