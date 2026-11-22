@@ -69,27 +69,6 @@ def _hue(base: str, turn: float, sat: float, light: float) -> str:
     return pal.from_rgb(r * 255, g * 255, b * 255)
 
 
-def _selection(bg: str, accent: str, share: float) -> str:
-    """The selected-text background: share of the way from the editor background
-    to the accent. When the accent is about as light as the background (a dark
-    blue accent on a blue-grey background) that tint barely shows, so it goes on
-    toward the accent and, if needed, past it: darker when the accent is darker
-    than the background, lighter when it's lighter. Away from the background."""
-    sel = pal.mix(bg, accent, share)
-    if pal.contrast(sel, bg) >= 1.2:     # every built-in theme: left as it was
-        return sel
-    for step in range(1, 21):            # toward the accent
-        sel = pal.mix(bg, accent, share + (1 - share) * step / 20)
-        if pal.contrast(sel, bg) >= 1.5:
-            return sel
-    away = pal.darker if pal.luminance(accent) <= pal.luminance(bg) else pal.lighter
-    for step in range(1, 21):            # past it, away from the background
-        sel = away(accent, step * 0.04)
-        if pal.contrast(sel, bg) >= 1.5:
-            return sel
-    return sel
-
-
 def colours(t: dict[str, str]) -> dict[str, str]:
     bg, text, accent = t["base"], t["text"], t["accent"]
     dark = pal.luminance(bg) < 0.25
@@ -100,7 +79,9 @@ def colours(t: dict[str, str]) -> dict[str, str]:
     c["line_numbers"] = _readable(pal.mix(text, bg, 0.5), c["gutter"], 3.0)
     c["current_line"] = pal.mix(bg, text, 0.06 if dark else 0.04)
     c["current_number"] = text
-    c["select"] = _selection(bg, accent, 0.35 if dark else 0.28)
+    # a tint of the accent; when the accent is about as light as the background
+    # (Cobalt) the tint barely shows, so it's moved until it stands out (palette.stand_out)
+    c["select"] = pal.stand_out(pal.mix(bg, accent, 0.35 if dark else 0.28), (bg,), text, least=1.2)
     # the text keeps its color on the selection, unless the theme's text-on-accent reads better
     c["select_fg"] = text
     if pal.contrast(text, c["select"]) < 4.5 and \

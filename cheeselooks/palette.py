@@ -165,22 +165,24 @@ def title_gradient(color: str, amount: float) -> tuple[str, str]:
 
 def stand_out(select: str, surfaces: tuple[str, ...], fg: str,
               least: float = 1.3, target: float = 1.5) -> str:
-    """The selection color, moved until it stands out from every surface it's
-    drawn on (the list, or the window; the sidebar is checked on its own). An accent about as light as the
-    background (xl_cheese's Cobalt: a dark blue on blue-grey) made selected rows
-    and text hard to see. Below `least`, it steps darker or lighter, whichever
-    reaches `target` sooner while the text on it (fg) still reads at 2.6:1.
-    Every built-in theme is far above `least` and keeps its color."""
+    """The selection color, moved until it stands out from the surfaces it's
+    drawn on. An accent about as light as the background (xl_cheese's Cobalt:
+    a dark blue on blue-grey) made selections hard to see. Below `least` it
+    steps away from the surfaces (darker if it's darker than them, else
+    lighter) to `target`, keeping the text on it (fg) readable at 2.6:1; only
+    if that can't work does it try the other way. Every built-in theme is above
+    `least` and keeps its color. Used for GTK selections and the editor scheme."""
     def worst(c: str) -> float:
         return min(contrast(c, s) for s in surfaces)
     if worst(select) >= least:
         return select
+    below = luminance(select) <= sum(luminance(s) for s in surfaces) / len(surfaces)
     best = select
-    for step in range(1, 26):
-        for move in (darker, lighter):
+    for move in ((darker, lighter) if below else (lighter, darker)):
+        for step in range(1, 26):
             c = move(select, step * 0.03)
             if contrast(c, fg) < 2.6:
-                continue
+                break
             if worst(c) >= target:
                 return c
             if worst(c) > worst(best):
