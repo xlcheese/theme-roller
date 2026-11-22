@@ -287,6 +287,27 @@ def cmd_apply(args: argparse.Namespace) -> int:
     return code
 
 
+def cmd_scan(args: argparse.Namespace) -> int:
+    """Scan my apps, on the command line; --why shows what the scan saw for
+    apps it couldn't tell (to improve it)."""
+    from . import appscan
+    entries = appscan.menu_apps()
+    apps = [(appscan.classify(i, e), i, e) for i, e in entries]
+    for kind in (appscan.GTK3, appscan.GNOME, appscan.FLATPAK, appscan.QT, appscan.EDITOR,
+                 appscan.TERMINAL, appscan.WEB, appscan.UNKNOWN):
+        group = sorted((a for a in apps if a[0].kind == kind), key=lambda a: a[0].name.lower())
+        if group:
+            print(f"{kind} ({len(group)}): " + ", ".join(a[0].name for a in group))
+    if args.why:
+        print()
+        for app, app_id, e in sorted(apps, key=lambda a: a[0].name.lower()):
+            if app.kind == appscan.UNKNOWN:
+                print(f"{app.name}  [{app_id}]")
+                for line in appscan.why(app_id, e):
+                    print(line)
+    return 0
+
+
 def cmd_watch(_args: argparse.Namespace) -> int:
     return watch.run()
 
@@ -556,6 +577,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("path")
     p.set_defaults(func=cmd_check_style)
 
+    p = sub.add_parser("scan", help="list your apps by kind (Integration: Scan my apps)")
+    p.add_argument("--why", action="store_true", help="show what the scan saw for apps it couldn't tell")
+    p.set_defaults(func=cmd_scan)
     p = sub.add_parser("watch", help="run the theme watcher (started at login; see Integration)")
     p.set_defaults(func=cmd_watch)
     p = sub.add_parser("set-aside", help="take xl-Cheeselooks' colors out of GTK 4, Qt and editor apps")

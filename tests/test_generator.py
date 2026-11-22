@@ -1352,6 +1352,14 @@ class RenderAndInstallTests(unittest.TestCase):
                 kinds = {a.name: a.kind for a in appscan.scan().apps}
             self.assertEqual(kinds["Viewer"], appscan.GTK3)     # past the launcher, from the real entry
             self.assertEqual(kinds["Admin"], appscan.GTK3)      # past pkexec
+        # a Python launcher whose GTK is in an installed package (Bluetooth Manager, Onboard...)
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            (t / "site" / "bluething" / "main").mkdir(parents=True)
+            (t / "site" / "bluething" / "main" / "window.py").write_text("gi.require_version('Gtk', '3.0')\n")
+            (t / "bluething-manager").write_text("#!/usr/bin/python3\nfrom bluething.main import window\n")
+            with mock.patch.object(appscan, "PY_SITES", [t / "site"]):
+                self.assertEqual(appscan.kind_of_script(t / "bluething-manager"), appscan.GTK3)
         c = appscan.classify
         self.assertEqual(c("x", {"Name": "Vim", "Exec": "vim %F", "Terminal": "true"}).kind, appscan.TERMINAL)
         self.assertEqual(c("x", {"Name": "Calc", "Exec": "flatpak run org.gnome.Calculator"}).kind, appscan.FLATPAK)

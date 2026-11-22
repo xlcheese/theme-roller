@@ -197,6 +197,14 @@ def kind_of_script(f: Path, follow: int = 1) -> str | None:
                 k = kind_of_file(p, follow - 1)
                 if k:
                     return k
+    # a Python launcher: the app's code is an installed package (blueman, onboard,
+    # pdfarranger, mintstick...): its toolkit is imported somewhere in there
+    if follow and text.startswith("#!") and "python" in text.split("\n", 1)[0]:
+        for module in dict.fromkeys(re.findall(r"^\s*(?:from|import)\s+([A-Za-z_]\w*)", text, re.M)):
+            for pkg in python_package(module):
+                k = kind_of_package(pkg)
+                if k:
+                    return k
     if f.suffix == ".py":   # a Python app may import its toolkit in another file of its package
         for other in sorted(f.parent.rglob("*.py"))[:80]:
             if other != f:
@@ -240,6 +248,39 @@ def kind_of_elf(f: Path, libs: list[str], depth: int = 2) -> str | None:
         if sub:
             kind = kind_of_elf(p, sub, depth - 1)
             if kind:
+                return kind
+    return None
+
+
+PY_SITES = sorted(set(Path(p) for pattern in ("/usr/lib/python3/dist-packages", "/usr/lib/python3*/site-packages",
+                                               "/usr/local/lib/python3*/dist-packages",
+                                               "/usr/lib/python3*/dist-packages")
+                     for p in __import__("glob").glob(pattern)))
+STDLIB = {"os", "sys", "re", "gi", "json", "subprocess", "time", "gettext", "locale", "signal", "argparse",
+          "threading", "pathlib", "shutil", "setproctitle", "dbus", "traceback", "logging", "typing"}
+
+
+def python_package(module: str) -> list[Path]:
+    """An installed package's folder (or module file), if `module` is one."""
+    if module in STDLIB:
+        return []
+    out = []
+    for site in PY_SITES:
+        for p in (site / module, site / f"{module}.py"):
+            if p.exists():
+                out.append(p)
+    return out
+
+
+def kind_of_package(pkg: Path) -> str | None:
+    files = [pkg] if pkg.is_file() else sorted(pkg.rglob("*.py"))[:150]
+    for f in files:
+        try:
+            t = f.read_text(encoding="utf-8", errors="replace")[:100_000]
+        except OSError:
+            continue
+        for pattern, kind in SCRIPT_KINDS:
+            if pattern.search(t):
                 return kind
     return None
 
@@ -325,6 +366,23 @@ def classify(app_id: str, e: dict[str, str]) -> App:
             if kind:
                 return App(name, kind)
     return App(name, UNKNOWN)
+
+
+def why(app_id: str, e: dict) -> list[str]:
+    """For `theme-roller scan --why`: how an app starts, and what each part is."""
+    out = []
+    for entry in [e] + e.get(ALSO, []):
+        out.append(f"  Exec={entry.get('Exec', '')}")
+        for p in programs(entry.get("Exec", "")):
+            try:
+                with open(p, "rb") as fh:
+                    head = fh.read(120)
+            except OSError:
+                head = b""
+            what = ("program" if head[:4] == b"\x7fELF" else
+                    "script: " + head.split(b"\n", 1)[0].decode("latin-1", "replace") if head[:2] == b"#!" else "file")
+            out.append(f"    {p} ({what}) -> {kind_of_file(p) or 'nothing found'}")
+    return out
 
 
 def scan() -> Scan:
