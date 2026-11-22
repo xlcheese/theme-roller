@@ -27,9 +27,12 @@ GAP_RANGE = (0, 12)
 # Mint-Y's own spin button rules (base.css) are very specific (e.g.
 # "spinbutton:not(.vertical) > entry + button:not(:active):hover"), and won
 # over ours: the + lost its shadow, the − kept an accent edge beside a focused
-# field, the field kept square corners on one side. Classes no widget has,
-# negated, raise ours above them without matching anything else.
-STRONG = "spinbutton:not(.vertical):not(.xl-a):not(.xl-b):not(.xl-c):not(.xl-d)"
+# field, the field kept square corners on one side, and the + lost its
+# raised edge at rest beside a disabled − (a rule six classes strong:
+# "> button:disabled + button:not(:disabled):not(:active):not(:checked):not(:hover)").
+# Classes no widget has, negated, raise ours above all of them (nine) without
+# matching anything else.
+STRONG = ("spinbutton:not(.vertical)" + "".join(f":not(.xl-{c})" for c in "abcdefgh"))
 
 
 def _solid(over: str, color: str, amount: float) -> str:
