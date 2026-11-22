@@ -34,7 +34,11 @@ EDITORS = {"xed", "gedit", "meld"}        # the Text editors switch (editor.py)
 # apps that choose their toolkit at runtime, whose look on Mint is known
 # (VLC and NVIDIA Settings load theirs as a plugin: Qt, GTK 3)
 KNOWN = {"libreoffice": GTK3, "soffice": GTK3, "firefox": GTK3, "thunderbird": GTK3,
-         "vlc": QT, "nvidia-settings": GTK3}
+         "vlc": QT, "nvidia-settings": GTK3,
+         # their launchers pick the program from a variable (xl_cheese's scan, 22 Nov)
+         "timeshift-launcher": GTK3, "VirtualBox": QT, "virtualbox": QT,
+         # Cinnamon's own on-screen keyboard: drawn by Cinnamon, in its theme
+         "cinnamon-dbus-command": GTK3}
 LIB_DIRS = [Path(p) for p in ("/usr/lib/x86_64-linux-gnu", "/usr/lib/aarch64-linux-gnu", "/usr/lib64",
                               "/usr/lib", "/lib/x86_64-linux-gnu", "/lib")]
 WEB_MARKERS = ("chrome_100_percent.pak", "resources.pak", "app.asar", "snapshot_blob.bin")
@@ -181,7 +185,7 @@ SCRIPT_KINDS = ((re.compile(r"""require_version\(\s*['"]Adw['"]|from gi\.reposit
                 (re.compile(r"""require_version\(\s*['"]Gtk['"]\s*,\s*['"]3\.0|from gi\.repository import [^\n]*\bGtk\b"""), GTK3))
 
 
-def kind_of_script(f: Path, follow: int = 1) -> str | None:
+def kind_of_script(f: Path, follow: int = 2) -> str | None:
     try:
         text = f.read_text(encoding="utf-8", errors="replace")[:200_000]
     except OSError:
@@ -191,7 +195,10 @@ def kind_of_script(f: Path, follow: int = 1) -> str | None:
             return kind
     if follow:      # a launcher: the script or program it runs (Mint's tools: /usr/lib/linuxmint/...)
         refs = [Path(r) for r in re.findall(r"(/(?:usr|opt)/[\w./+-]+)", text)]
-        refs += [Path(w) for w in (shutil.which(n) for n in re.findall(r"\b(?:exec|pkexec)\s+([\w.+-]+)", text)) if w]
+        for n in re.findall(r"\b(?:exec|pkexec)\s+(/?[\w./+-]+)", text):     # by name or by path
+            w = n if n.startswith("/") else shutil.which(n)
+            if w:
+                refs.append(Path(w))
         for p in refs:
             if p.is_file() and p != f:
                 k = kind_of_file(p, follow - 1)
@@ -199,9 +206,14 @@ def kind_of_script(f: Path, follow: int = 1) -> str | None:
                     return k
     # a Python launcher: the app's code is an installed package (blueman, onboard,
     # pdfarranger, mintstick...): its toolkit is imported somewhere in there
-    if follow and text.startswith("#!") and "python" in text.split("\n", 1)[0]:
-        for module in dict.fromkeys(re.findall(r"^\s*(?:from|import)\s+([A-Za-z_]\w*)", text, re.M)):
-            for pkg in python_package(module):
+    if text.startswith("#!") and "python" in text.split("\n", 1)[0] or f.suffix == ".py":
+        modules = re.findall(r"^\s*(?:from|import)\s+([A-Za-z_]\w*)", text, re.M)
+        # setuptools launchers name their package in quotes (PDF Arranger)
+        modules += [m.replace("-", "_") for m in re.findall(r"""(?:load_entry_point|distribution|entry_points)\(\s*['"]([\w-]+)""", text)]
+        # folders the launcher puts on Python's path (an app's own code in /usr/share/<app>)
+        extra = [Path(d) for d in re.findall(r"""['"](/[\w./+-]+)['"]""", text) if Path(d).is_dir()]
+        for module in dict.fromkeys(modules):
+            for pkg in python_package(module, extra):
                 k = kind_of_package(pkg)
                 if k:
                     return k
@@ -260,12 +272,13 @@ STDLIB = {"os", "sys", "re", "gi", "json", "subprocess", "time", "gettext", "loc
           "threading", "pathlib", "shutil", "setproctitle", "dbus", "traceback", "logging", "typing"}
 
 
-def python_package(module: str) -> list[Path]:
-    """An installed package's folder (or module file), if `module` is one."""
+def python_package(module: str, extra: list[Path] | None = None) -> list[Path]:
+    """An installed package's folder (or module file), if `module` is one: in
+    Python's usual places, or folders a launcher adds to its path."""
     if module in STDLIB:
         return []
     out = []
-    for site in PY_SITES:
+    for site in (extra or []) + PY_SITES:
         for p in (site / module, site / f"{module}.py"):
             if p.exists():
                 out.append(p)
@@ -285,7 +298,7 @@ def kind_of_package(pkg: Path) -> str | None:
     return None
 
 
-def kind_of_file(f: Path, follow: int = 1) -> str | None:
+def kind_of_file(f: Path, follow: int = 2) -> str | None:
     if f.name in KNOWN:
         return KNOWN[f.name]
     if any((f.resolve().parent / m).exists() for m in WEB_MARKERS):

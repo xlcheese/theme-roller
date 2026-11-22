@@ -1360,6 +1360,22 @@ class RenderAndInstallTests(unittest.TestCase):
             (t / "bluething-manager").write_text("#!/usr/bin/python3\nfrom bluething.main import window\n")
             with mock.patch.object(appscan, "PY_SITES", [t / "site"]):
                 self.assertEqual(appscan.kind_of_script(t / "bluething-manager"), appscan.GTK3)
+            # setuptools launcher naming its package in quotes (PDF Arranger)
+            (t / "site" / "pdf_thing").mkdir()
+            (t / "site" / "pdf_thing" / "app.py").write_text("from gi.repository import Gtk\n")
+            (t / "pdf-thing").write_text("#!/usr/bin/python3\nimport re, sys\n"
+                                         "sys.exit(load_entry_point('pdf-thing==1.0', 'gui_scripts', 'x')())\n")
+            # a launcher putting the app's own folder on Python's path (xl-Annotate)
+            (t / "share" / "annot").mkdir(parents=True)
+            (t / "share" / "annot" / "window.py").write_text("gi.require_version('Gtk', '3.0')\n")
+            (t / "annot").write_text(f"#!/usr/bin/python3\nimport sys\nsys.path.insert(0, '{t / 'share'}')\n"
+                                     "from annot import window\n")
+            # two steps: a shell launcher running a Python launcher (gufw)
+            (t / "outer").write_text(f"#!/bin/bash\npkexec {t / 'bluething-manager'} \"$@\"\n")
+            with mock.patch.object(appscan, "PY_SITES", [t / "site"]):
+                self.assertEqual(appscan.kind_of_script(t / "pdf-thing"), appscan.GTK3)
+                self.assertEqual(appscan.kind_of_script(t / "outer"), appscan.GTK3)
+            self.assertEqual(appscan.kind_of_script(t / "annot"), appscan.GTK3)
         c = appscan.classify
         self.assertEqual(c("x", {"Name": "Vim", "Exec": "vim %F", "Terminal": "true"}).kind, appscan.TERMINAL)
         self.assertEqual(c("x", {"Name": "Calc", "Exec": "flatpak run org.gnome.Calculator"}).kind, appscan.FLATPAK)
