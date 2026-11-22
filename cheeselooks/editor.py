@@ -240,6 +240,5 @@ def active() -> bool:
     return bool(_load_state())
 
 
-NOTE = ("Xed, gedit and Meld get a color scheme from your theme: line numbers, the current line, "
-        "highlights and syntax colors. Their text area follows the theme either way. Reopen them to "
-        "see changes.")
+NOTE = ("Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and "
+        "highlights. Most editors' own schemes follow your theme too. Reopen them to see changes.")
