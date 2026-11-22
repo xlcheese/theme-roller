@@ -1,6 +1,6 @@
 """User settings: defaults, loading, validation and presets.
 
-Stored as JSON in ~/.config/xl-cheeselooks/settings.json. A value of None
+Stored as JSON in ~/.config/theme-roller/settings.json. A value of None
 means "follow Global" (docs/design-spec.md, section 2).
 """
 

@@ -6,8 +6,8 @@ changing anything afterwards turns it into "Custom", which keeps your latest
 changes until you pick another theme or save Custom under a name of its own.
 
     built-in themes   data/themes/*.json in the repository
-    your themes       ~/.local/share/xl-cheeselooks/themes/*.json
-    Custom            ~/.config/xl-cheeselooks/custom.json
+    your themes       ~/.local/share/theme-roller/themes/*.json
+    Custom            ~/.config/theme-roller/custom.json
 
 A theme file holds only what differs from the defaults plus the style's own
 [defaults], so a theme stays small and follows improvements to its style:
@@ -41,7 +41,7 @@ def builtin_dir() -> Path:
 
 
 def user_dir() -> Path:
-    return paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "xl-cheeselooks" / "themes"
+    return paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / paths.APP_DIR / "themes"
 
 
 def custom_file() -> Path:

@@ -76,7 +76,7 @@ DOC_NOTES = [
     ("Style",
      "Pick how things are drawn, and set its Depth (how strong edges and shadows are) and Unfocused "
      "depth (how much of that unfocused windows keep). You can also make your own: a style is one "
-     "style.toml file, in ~/.local/share/xl-cheeselooks/styles/&lt;name&gt;/. <b>Create a starter "
+     "style.toml file, in ~/.local/share/theme-roller/styles/&lt;name&gt;/. <b>Create a starter "
      "style…</b> makes one with every option explained: the essentials are on, the rest switched off "
      "with a #, each with a short note. Edit it, then pick it on the Style tab. <b>Check a style "
      "sheet for issues…</b> tells you if anything in it needs fixing."),
@@ -263,7 +263,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.cinnamon_panel_height: int | None = None   # read once, for the Panel height slider     # tooltips name the theme (see update_buttons)
         self.syncing = False
         self.pending = 0
-        self.preview_dir = paths.HOME / ".cache" / "xl-cheeselooks" / "preview"
+        self.preview_dir = paths.cache_dir() / "preview"
         self.theme_css = Gtk.CssProvider()
         self.extra_css = Gtk.CssProvider()
         screen = Gdk.Screen.get_default()
@@ -543,7 +543,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _draw_glyph_images(self, color: str) -> None:
         """Our glyph sets in the text colour, for the picker (redrawn when it changes)."""
-        folder = paths.HOME / ".cache" / "xl-cheeselooks" / "glyphs"
+        folder = paths.cache_dir() / "glyphs"
         folder.mkdir(parents=True, exist_ok=True)
         for gid, imgs in getattr(self, "glyph_images", {}).items():
             if gid == "icons":

@@ -31,7 +31,7 @@ from . import editor, gtk4, paths, qt, reload, tokens
 
 SCHEMA, KEY = "org.cinnamon.desktop.interface", "gtk-theme"
 SETTLE = 2.0                  # seconds a change must last before we act on it
-AUTOSTART_NAME = "xl-cheeselooks-watch.desktop"
+AUTOSTART_NAME = "theme-roller-watch.desktop"
 WATCH_PATTERN = "(theme-roller|cheeselooks) watch"   # the old name too, started before the rename
 
 
