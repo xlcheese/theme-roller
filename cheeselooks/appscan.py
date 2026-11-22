@@ -185,6 +185,18 @@ SCRIPT_KINDS = ((re.compile(r"""require_version\(\s*['"]Adw['"]|from gi\.reposit
                 (re.compile(r"""require_version\(\s*['"]Gtk['"]\s*,\s*['"]3\.0|from gi\.repository import [^\n]*\bGtk\b"""), GTK3))
 
 
+def expand_shell_vars(text: str) -> str:
+    """A shell launcher's simple variables put in (prefix=/usr, DIR=/usr/lib/x)."""
+    values = {}
+    for name, value in re.findall(r"""^\s*(?:export\s+)?([A-Za-z_]\w*)=["']?([^"'\s;]+)""", text, re.M):
+        values[name] = value
+    for _ in range(2):                               # a variable built from another
+        for name, value in values.items():
+            text = text.replace("${" + name + "}", value)
+            text = re.sub(r"\$" + name + r"\b", value, text)
+    return text
+
+
 def kind_of_script(f: Path, follow: int = 2) -> str | None:
     try:
         text = f.read_text(encoding="utf-8", errors="replace")[:200_000]
@@ -194,7 +206,8 @@ def kind_of_script(f: Path, follow: int = 2) -> str | None:
         if pattern.search(text):
             return kind
     if follow:      # a launcher: the script or program it runs (Mint's tools: /usr/lib/linuxmint/...)
-        refs = [Path(r) for r in re.findall(r"(/(?:usr|opt)/[\w./+-]+)", text)]
+        text = expand_shell_vars(text)          # exec ${prefix}/share/..., DIR=...; $DIR/app.py
+        refs = [Path(r) for r in re.findall(r"(?<![\w.])(/[\w./+-]+)", text)]   # any real file it names
         for n in re.findall(r"\b(?:exec|pkexec)\s+(/?[\w./+-]+)", text):     # by name or by path
             w = n if n.startswith("/") else shutil.which(n)
             if w:
@@ -212,22 +225,35 @@ def kind_of_script(f: Path, follow: int = 2) -> str | None:
         modules += [m.replace("-", "_") for m in re.findall(r"""(?:load_entry_point|distribution|entry_points)\(\s*['"]([\w-]+)""", text)]
         # folders the launcher puts on Python's path (an app's own code in /usr/share/<app>)
         extra = [Path(d) for d in re.findall(r"""['"](/[\w./+-]+)['"]""", text) if Path(d).is_dir()]
+        # a folder built from pieces (os.path.join(here, "..", "lib", "xl-screenshot")):
+        # any quoted name that is a folder in the usual places for an app's code
+        for word in set(re.findall(r"""['"]([\w.+-]{3,})['"]""", text)):
+            for base in (Path("/usr/lib"), Path("/usr/share"), Path("/usr/libexec"), Path("/opt"),
+                         f.resolve().parent.parent / "lib", f.resolve().parent.parent / "share"):
+                if (base / word).is_dir():
+                    extra.append(base / word)
         for module in dict.fromkeys(modules):
             for pkg in python_package(module, extra):
                 k = kind_of_package(pkg)
                 if k:
                     return k
-    if f.suffix == ".py":   # a Python app may import its toolkit in another file of its package
-        for other in sorted(f.parent.rglob("*.py"))[:80]:
-            if other != f:
-                try:
-                    t = other.read_text(encoding="utf-8", errors="replace")[:100_000]
-                except OSError:
-                    continue
-                for pattern, kind in SCRIPT_KINDS:
-                    if pattern.search(t):
-                        return kind
+        for folder in dict.fromkeys(extra):          # the app's own code folder, whatever it imports
+            k = kind_of_package(folder)
+            if k:
+                return k
+    if f.suffix == ".py":   # a Python app may import its toolkit in another file of its folder
+        return kind_of_package(f.parent)
     return None
+
+
+def likely_first(files) -> list[Path]:
+    """Files most likely to set the toolkit first (window, main, the app's own
+    name), then the rest; generated code (grpc, pb2) last."""
+    def rank(p: Path) -> tuple:
+        n = p.name.lower()
+        return (0 if re.search(r"window|main|app|gui|ui\b|launch", n) else
+                2 if re.search(r"_pb2|grpc|test", n) else 1, len(p.parts), n)
+    return sorted(files, key=rank)
 
 
 def library_path(name: str, origin: Path, libs: list[str]) -> Path | None:
@@ -286,10 +312,13 @@ def python_package(module: str, extra: list[Path] | None = None) -> list[Path]:
 
 
 def kind_of_package(pkg: Path) -> str | None:
-    files = [pkg] if pkg.is_file() else sorted(pkg.rglob("*.py"))[:150]
+    """A package's toolkit: the first file importing one (the toolkit is set near
+    a file's top; window and main files first, up to 400 files)."""
+    files = [pkg] if pkg.is_file() else likely_first(pkg.rglob("*.py"))[:400]
     for f in files:
         try:
-            t = f.read_text(encoding="utf-8", errors="replace")[:100_000]
+            with open(f, encoding="utf-8", errors="replace") as fh:
+                t = fh.read(30_000)
         except OSError:
             continue
         for pattern, kind in SCRIPT_KINDS:

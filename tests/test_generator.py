@@ -1376,6 +1376,33 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertEqual(appscan.kind_of_script(t / "pdf-thing"), appscan.GTK3)
                 self.assertEqual(appscan.kind_of_script(t / "outer"), appscan.GTK3)
             self.assertEqual(appscan.kind_of_script(t / "annot"), appscan.GTK3)
+        # xl_cheese's last four, their launchers as on his desktop (22 Nov)
+        with tempfile.TemporaryDirectory() as tmp:
+            t = Path(tmp)
+            gtk = "gi.require_version('Gtk', '3.0')\n"
+            (t / "share" / "scp").mkdir(parents=True)
+            (t / "share" / "scp" / "system-config-printer.py").write_text("#!/usr/bin/python3\nimport config\n")
+            (t / "share" / "scp" / "printerproperties.py").write_text(gtk)
+            (t / "bin").mkdir()
+            (t / "bin" / "printers").write_text(f"#!/bin/sh\nprefix={t}\nexec ${{prefix}}/share/scp/"
+                                                "system-config-printer.py \"$@\"\n")
+            (t / "lib" / "stick").mkdir(parents=True)
+            (t / "lib" / "stick" / "mintstick.py").write_text("#!/usr/bin/python3\n" + gtk)
+            (t / "bin" / "stick").write_text(f"#!/bin/sh\nset -e\nDIR={t}/lib/stick\n\n$DIR/mintstick.py \"$@\"\n")
+            (t / "libexec" / "warp").mkdir(parents=True)
+            for i in range(120):                               # many generated files first, alphabetically
+                (t / "libexec" / "warp" / f"a{i:03}_pb2.py").write_text("x = 1\n")
+            (t / "libexec" / "warp" / "warpinator.py").write_text(gtk)
+            (t / "libexec" / "warp" / "warpinator-launch.py").write_text("#!/usr/bin/python3\nimport os\n")
+            (t / "bin" / "warp").write_text(f"#!/bin/sh\nexec {t}/libexec/warp/warpinator-launch.py $@\n")
+            (t / "lib" / "xl-shot").mkdir()
+            (t / "lib" / "xl-shot" / "annotate.py").write_text(gtk)
+            (t / "bin" / "xl-annotate").write_text(
+                "#!/usr/bin/python3\nimport os\nimport sys\n_here = os.path.dirname(os.path.realpath(__file__))\n"
+                'sys.path.insert(0, os.path.normpath(os.path.join(_here, os.pardir, "lib", "xl-shot")))\n'
+                "from annotate import main\n")
+            for launcher in ("printers", "stick", "warp", "xl-annotate"):
+                self.assertEqual(appscan.kind_of_script(t / "bin" / launcher), appscan.GTK3, launcher)
         c = appscan.classify
         self.assertEqual(c("x", {"Name": "Vim", "Exec": "vim %F", "Terminal": "true"}).kind, appscan.TERMINAL)
         self.assertEqual(c("x", {"Name": "Calc", "Exec": "flatpak run org.gnome.Calculator"}).kind, appscan.FLATPAK)
