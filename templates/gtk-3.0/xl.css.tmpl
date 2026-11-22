@@ -513,6 +513,10 @@ window.csd decoration {
 window.background.csd {
   border-bottom-left-radius: {{wb.r_bottom}}px;
   border-bottom-right-radius: {{wb.r_bottom}}px; }
+/* ...but popups (menus, combo box lists) are rounded like the menu inside
+   them: a square window background showed past the menu's rounded corners */
+window.background.csd.popup {
+  border-radius: {{r}}px; }
 {{wb.bottom3.css}}
 window.csd.maximized decoration, window.csd.tiled decoration, window.csd.fullscreen decoration,
 window.background.csd.maximized, window.background.csd.tiled, window.background.csd.fullscreen {
