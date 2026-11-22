@@ -848,8 +848,8 @@ class RenderAndInstallTests(unittest.TestCase):
         from unittest import mock
         names = [n for n, _f, _b in themes.list_themes()]
         self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
-                                 "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Vintage",
-                                 "xl-Organ Harvest"])
+                                 "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Pigeon",
+                                 "xl-Vintage", "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),
                          ("Claude", "Claude", "#B85A38"))
@@ -1306,7 +1306,13 @@ class RenderAndInstallTests(unittest.TestCase):
             t = palette.derive(g["accent"], g["bg"], g.get("text", "#303030"))
             self.assertEqual(palette.stand_out(t["select"], (t["base"], t["bg"], t["sidebar"]), t["accent_fg"]),
                              t["select"], f.name)
-            self.assertEqual(t["sidebar_select"], t["select"], f.name)
+            if f.name == "09-xl-pigeon.json":
+                # the theme this was made for: the list's selection goes darker,
+                # the sidebar (lighter) keeps the accent
+                self.assertNotEqual(t["select"], t["accent"])
+                self.assertEqual(t["sidebar_select"], t["accent"])
+            else:
+                self.assertEqual(t["sidebar_select"], t["select"], f.name)
 
     def test_editor_selection_stands_out(self):
         # Cobalt (xl_cheese): a dark blue accent about as light as the blue-grey
