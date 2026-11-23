@@ -1270,6 +1270,47 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(data["style"]["name"], new)
             self.assertEqual(cli._load_style(new, None).name, new)
 
+    def test_translations(self):
+        # every language file: readable, complete, and its {placeholders} and
+        # <markup> match the English (a broken one would crash or garble the app)
+        import importlib.util, os
+        from unittest import mock
+        from cheeselooks import i18n
+        spec = importlib.util.spec_from_file_location("update_po", REPO / "tools" / "update-po.py")
+        upd = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(upd)
+        wanted = set(upd.marked()) | set(upd.built_labels())
+        wanted.discard("")
+        langs = sorted(p.stem for p in (REPO / "po").glob("*.po"))
+        self.assertEqual(langs, ["de", "es", "fr", "it", "nl", "pt_BR", "ru"])
+        for lang in langs:
+            table = i18n.read_po(REPO / "po" / f"{lang}.po")
+            self.assertEqual(wanted - set(table), set(), f"{lang}: untranslated")
+            for msgid, msgstr in table.items():
+                self.assertEqual(upd.problems(msgid, msgstr), [], f"{lang}: {msgid[:40]}")
+                if "{" in msgid:       # the app's .format() calls work on the translation
+                    names = dict.fromkeys(upd.PLACEHOLDER.findall(msgid))
+                    msgstr.format(**{n.strip("{}"): "x" for n in names})
+        # the language comes from the environment: region and encoding are ignored,
+        # pt_BR before pt, and anything without a file (or English) is English
+        cases = {"de_DE.UTF-8": "de", "pt_BR.UTF-8": "pt_BR", "fr_CA": "fr", "en_US.UTF-8": "en",
+                 "ja_JP.UTF-8": "en", "C": "en"}
+        for value, code in cases.items():
+            with mock.patch.dict(os.environ, {"LANG": value, "LANGUAGE": "", "LC_ALL": "",
+                                              "LC_MESSAGES": "", "THEME_ROLLER_LANG": ""}):
+                self.assertEqual(i18n.language(), code, value)
+        with mock.patch.dict(os.environ, {"LANGUAGE": "ja:nl:de", "THEME_ROLLER_LANG": ""}):
+            self.assertEqual(i18n.language(), "nl")         # the first in LANGUAGE that we have
+        # the command line stays English
+        saved = i18n._TABLE
+        try:
+            i18n._TABLE = i18n.read_po(REPO / "po" / "de.po")
+            self.assertEqual(i18n._("Apply"), "Anwenden")
+            i18n.use_english()
+            self.assertEqual(i18n._("Apply"), "Apply")
+        finally:
+            i18n._TABLE = saved
+
     def test_missing_style_stands_in(self):
         # xl_cheese renamed his style's folder and name; the theme still named the
         # old one. Preview, Apply and the watcher use the default style instead.

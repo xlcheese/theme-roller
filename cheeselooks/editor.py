@@ -26,6 +26,7 @@ from xml.sax.saxutils import quoteattr
 
 from . import palette as pal
 from . import paths, reload
+from .i18n import _
 
 SCHEME_ID = "xl-cheeselooks"          # the id editors store: kept, so a saved choice still works
 SCHEME_NAME = "Theme Roller"           # the name editors show (xl_cheese, 22 Nov): made by the tool,
@@ -246,5 +247,5 @@ def active() -> bool:
     return bool(_load_state())
 
 
-NOTE = ("Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and "
-        "highlights. Most editors' own schemes follow your theme too. Reopen them to see changes.")
+NOTE = _("Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and "
+         "highlights. Most editors' own schemes follow your theme too. Reopen them to see changes.")

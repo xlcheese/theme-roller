@@ -29,6 +29,7 @@ import subprocess
 from pathlib import Path
 
 from . import palette as pal
+from .i18n import _
 from . import paths
 
 SCHEME_NAME = "xl-Cheeselooks"
@@ -491,9 +492,9 @@ def pending_notice() -> str | None:
     found = _load_state().get("notice")
     if not found:
         return None
-    return ("Your Qt apps now use xl-Cheeselooks colors.\n\n"
-            "Your previous Qt setup is saved: " + "; ".join(found) + ".\n\n"
-            "Turning off Integration → Qt apps puts it back.")
+    return _("Your Qt apps now use your theme's colors.\n\n"
+             "Your previous Qt setup is saved: {saved}.\n\n"
+             "Turning off Integration → Qt apps puts it back.").format(saved="; ".join(found))
 
 
 def notice_shown() -> None:
@@ -504,11 +505,11 @@ def notice_shown() -> None:
 
 def note() -> str:
     """The switch's tooltip: when it takes effect."""
-    return ("The first time, log out and back in to see your colors in Qt apps; after that, "
-            "reopening them is enough. If you had your own Qt setup, it's saved and comes back "
-            "when this is off.")
+    return _("The first time, log out and back in to see your colors in Qt apps; after that, "
+             "reopening them is enough. If you had your own Qt setup, it's saved and comes back "
+             "when this is off.")
 
 
 def missing() -> str:
     """Shown under the switch, only when needed: what's missing."""
-    return "" if qt5ct_installed() else "Needs qt5ct: sudo apt install qt5ct"
+    return "" if qt5ct_installed() else _("Needs qt5ct: sudo apt install qt5ct")

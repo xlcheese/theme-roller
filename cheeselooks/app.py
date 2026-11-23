@@ -39,90 +39,91 @@ from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, Pango  # noqa: E402
 
 from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, icons, qt, reload, render, settings, styles, themes, titlebuttons, tokens, watch  # noqa: E402
 from . import shape  # noqa: E402
+from .i18n import _, N_  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
 
 APP_TITLE = "Theme Roller"      # the tool; the themes and styles it makes keep the xl-Cheeselooks name
 PREVIEW_DELAY_MS = 120
 
 TABS = [  # (settings section, tab title)
-    ("theme", "Theme"), ("global", "Global"), ("style", "Style"), ("panel", "Panel & Menu"),
-    ("window_borders", "Window Borders"), ("terminal", "Terminal"),
-    ("details", "Details"), ("icons", "Icons"), ("integration", "Integration"), ("share", "Import & Export"),
-    ("docs", "Documentation"), ("about", "About"),
+    ("theme", _("Theme")), ("global", _("Global")), ("style", _("Style")), ("panel", _("Panel & Menu")),
+    ("window_borders", _("Window Borders")), ("terminal", _("Terminal")),
+    ("details", _("Details")), ("icons", _("Icons")), ("integration", _("Integration")),
+    ("share", _("Import & Export")), ("docs", _("Documentation")), ("about", _("About")),
 ]
 # the Icons tab's note (a folder style may have its own: icons.STYLES[...]["note"])
-ICON_NOTE = ("Folders recolored: the folder color (the front) follows your accent, and the second color "
-             "(the back) a darker shade of it. Choose either and both keep their colors from then on; Reset "
-             "Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to "
-             "use them.")
+ICON_NOTE = _("Folders recolored: the folder color (the front) follows your accent, and the second color "
+              "(the back) a darker shade of it. Choose either and both keep their colors from then on; Reset "
+              "Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to "
+              "use them.")
 REPO_URL = "https://github.com/xlcheese/theme-roller"
 DOCS_URL = REPO_URL + "/tree/HEAD/docs"     # HEAD: the default branch
 TIP_URL = "https://www.paypal.com/donate/?hosted_button_id=SDDYDENKXPCWN"   # About: a tip for the author ("" hides it)
 # Documentation tab: short notes on each part of the app (the full docs are online)
 DOC_NOTES = [
-    ("Themes and styles",
-     "A <b>theme</b> is your colors and settings: everything on these tabs. A <b>style</b> is how "
-     "things are drawn: edges, hovers, tabs and panel buttons. Any theme can use any style. Everything "
-     "shows in the preview first; nothing changes on your desktop until you click <b>Apply</b>, and "
-     "<b>Revert</b> puts your previous theme back."),
-    ("Theme",
-     "Start from a built-in theme, one shared by someone else, or one of your own. Change anything and "
-     "it becomes <b>Custom</b>; <b>Save Theme…</b> keeps your changes under a name. Your own themes "
-     "can be duplicated, renamed and deleted."),
-    ("Global",
-     "Three colors make a complete light or dark theme: accent, background and text. Then the shape of "
-     "everything: Size, Roundness, Gradient, and how hovers fade. <b>Colors from</b> picks an accent "
-     "from your wallpaper or any picture."),
-    ("Style",
-     "Pick how things are drawn, and set its Depth (how strong edges and shadows are) and Unfocused "
-     "depth (how much of that unfocused windows keep). You can also make your own: a style is one "
-     "style.toml file, in ~/.local/share/theme-roller/styles/&lt;name&gt;/. <b>Create a starter "
-     "style…</b> makes one with every option explained: the essentials are on, the rest switched off "
-     "with a #, each with a short note. Edit it, then pick it on the Style tab. <b>Check a style "
-     "sheet for issues…</b> tells you if anything in it needs fixing."),
-    ("Panel &amp; Menu",
-     "The Cinnamon panel and its menus: their own colors, label weight, height, roundness, gradient "
-     "and see-through. Left alone, they follow Global."),
-    ("Window Borders",
-     "Title bars and window buttons: colors, height, gradient, border, roundness, and a choice of "
-     "button styles and Minimize, Maximize and Close glyphs. When these change, Apply restarts "
-     "Cinnamon by itself (your windows stay open), as window borders only reload then."),
-    ("Terminal",
-     "The terminal follows the theme, or pick one of the color sets, or your own colors."),
-    ("Details",
-     "Tooltips, scrollbars (overlay or classic, roundness, width), sliders, switches and the focus ring."),
-    ("Icons",
-     "Folder icons in your colors, in six styles. Only the folders change; other icons stay as they "
-     "were. The folder color follows your accent unless you pick one; on xl-Big Baddy, the second "
-     "color is its racing stripes. Off until you switch it on."),
-    ("Integration",
-     "Linux apps come in a few kinds, and each looks for its colors in its own place. These switches "
-     "bring your colors to the hodgepodge that doesn't read the theme on its own: GNOME-style apps, "
-     "Flatpak apps, Qt apps like VLC, and text editors. <b>Scan my apps</b> shows which of your apps "
-     "are which kind; <b>Take colors out of apps</b> removes them until the next Apply. Pick another "
-     "theme in Mint's settings and Theme Roller's colors leave your apps by themselves."),
-    ("Import &amp; Export",
-     "Share a theme as one <tt>.xltheme</tt> file, and add themes others shared with you."),
+    (_("Themes and styles"),
+     _("A <b>theme</b> is your colors and settings: everything on these tabs. A <b>style</b> is how "
+       "things are drawn: edges, hovers, tabs and panel buttons. Any theme can use any style. Everything "
+       "shows in the preview first; nothing changes on your desktop until you click <b>Apply</b>, and "
+       "<b>Revert</b> puts your previous theme back.")),
+    (_("Theme"),
+     _("Start from a built-in theme, one shared by someone else, or one of your own. Change anything and "
+       "it becomes <b>Custom</b>; <b>Save Theme…</b> keeps your changes under a name. Your own themes "
+       "can be duplicated, renamed and deleted.")),
+    (_("Global"),
+     _("Three colors make a complete light or dark theme: accent, background and text. Then the shape of "
+       "everything: Size, Roundness, Gradient, and how hovers fade. <b>Colors from</b> picks an accent "
+       "from your wallpaper or any picture.")),
+    (_("Style"),
+     _("Pick how things are drawn, and set its Depth (how strong edges and shadows are) and Unfocused "
+       "depth (how much of that unfocused windows keep). You can also make your own: a style is one "
+       "style.toml file, in ~/.local/share/theme-roller/styles/&lt;name&gt;/. <b>Create a starter "
+       "style…</b> makes one with every option explained: the essentials are on, the rest switched off "
+       "with a #, each with a short note. Edit it, then pick it on the Style tab. <b>Check a style "
+       "sheet for issues…</b> tells you if anything in it needs fixing.")),
+    (_("Panel &amp; Menu"),
+     _("The Cinnamon panel and its menus: their own colors, label weight, height, roundness, gradient "
+       "and see-through. Left alone, they follow Global.")),
+    (_("Window Borders"),
+     _("Title bars and window buttons: colors, height, gradient, border, roundness, and a choice of "
+       "button styles and Minimize, Maximize and Close glyphs. When these change, Apply restarts "
+       "Cinnamon by itself (your windows stay open), as window borders only reload then.")),
+    (_("Terminal"),
+     _("The terminal follows the theme, or pick one of the color sets, or your own colors.")),
+    (_("Details"),
+     _("Tooltips, scrollbars (overlay or classic, roundness, width), sliders, switches and the focus ring.")),
+    (_("Icons"),
+     _("Folder icons in your colors, in six styles. Only the folders change; other icons stay as they "
+       "were. The folder color follows your accent unless you pick one; on xl-Big Baddy, the second "
+       "color is its racing stripes. Off until you switch it on.")),
+    (_("Integration"),
+     _("Linux apps come in a few kinds, and each looks for its colors in its own place. These switches "
+       "bring your colors to the hodgepodge that doesn't read the theme on its own: GNOME-style apps, "
+       "Flatpak apps, Qt apps like VLC, and text editors. <b>Scan my apps</b> shows which of your apps "
+       "are which kind; <b>Take colors out of apps</b> removes them until the next Apply. Pick another "
+       "theme in Mint's settings and Theme Roller's colors leave your apps by themselves.")),
+    (_("Import &amp; Export"),
+     _("Share a theme as one <tt>.xltheme</tt> file, and add themes others shared with you.")),
 ]
 LABELS = {
-    "accent": "Accent", "bg": "Background", "text": "Text", "size": "Size",
-    "roundness": "Roundness", "gradient": "Gradient", "hover_in_ms": "Hover in (ms)",
-    "hover_out_ms": "Hover out (ms)", "hover_strength": "Hover strength", "depth": "Depth", "unfocused_depth": "Unfocused depth",
-    "label_weight": "Label weight", "panel_opacity": "Opacity", "menu_opacity": "Opacity",
-    "notification_opacity": "Notification opacity", "panel_height": "Height",
-    "item_roundness": "Menu-item roundness",
-    "title_bar": "Title bar", "title_text": "Title text", "border": "Border",
-    "title_bar_height": "Title bar height", "border_width": "Border width", "window_roundness": "Window roundness", "round_bottom": "Round bottom corners",
-    "title_gradient": "Title bar gradient", "button_layout": "Buttons on the",
-    "button_style": "Button style", "button_roundness": "Button roundness", "button_spacing": "Button spacing", "button_glyphs": "Glyphs",
-    "mode": "Mode", "color": "Color", "width": "Width", "style": "Style",
-    "libadwaita": "GNOME-style apps",
-    "enabled": "Custom folder style", "folder_color": "Folder color", "second_color": "Second color",
-    "flatpak_access": "Flatpak apps", "qt_colors": "Qt apps (VLC…)", "editor_colors": "Text editors (Xed…)",
+    "accent": _("Accent"), "bg": _("Background"), "text": _("Text"), "size": _("Size"),
+    "roundness": _("Roundness"), "gradient": _("Gradient"), "hover_in_ms": _("Hover in (ms)"),
+    "hover_out_ms": _("Hover out (ms)"), "hover_strength": _("Hover strength"), "depth": _("Depth"), "unfocused_depth": _("Unfocused depth"),
+    "label_weight": _("Label weight"), "panel_opacity": _("Opacity"), "menu_opacity": _("Opacity"),
+    "notification_opacity": _("Notification opacity"), "panel_height": _("Height"),
+    "item_roundness": _("Menu-item roundness"),
+    "title_bar": _("Title bar"), "title_text": _("Title text"), "border": _("Border"),
+    "title_bar_height": _("Title bar height"), "border_width": _("Border width"), "window_roundness": _("Window roundness"), "round_bottom": _("Round bottom corners"),
+    "title_gradient": _("Title bar gradient"), "button_layout": _("Buttons on the"),
+    "button_style": _("Button style"), "button_roundness": _("Button roundness"), "button_spacing": _("Button spacing"), "button_glyphs": _("Glyphs"),
+    "mode": _("Mode"), "color": _("Color"), "width": _("Width"), "style": _("Style"),
+    "libadwaita": _("GNOME-style apps"),
+    "enabled": _("Custom folder style"), "folder_color": _("Folder color"), "second_color": _("Second color"),
+    "flatpak_access": _("Flatpak apps"), "qt_colors": _("Qt apps (VLC…)"), "editor_colors": _("Text editors (Xed…)"),
 }
-GROUPS = {"panel_shape": "Panel style", "menu_shape": "Menu style", "tooltips": "Tooltips",
-          "scrollbars": "Scrollbars", "sliders": "Sliders", "switches": "Switches",
-          "focus_ring": "Focus ring"}
+GROUPS = {"panel_shape": _("Panel style"), "menu_shape": _("Menu style"), "tooltips": _("Tooltips"),
+          "scrollbars": _("Scrollbars"), "sliders": _("Sliders"), "switches": _("Switches"),
+          "focus_ring": _("Focus ring")}
 # Panel & Menu: the order shown, and the heading each setting sits under
 # (Height and Opacity are kept outside the shape groups in the settings file,
 # so changing them doesn't stop the shapes following Global)
@@ -134,9 +135,9 @@ PANEL_LAYOUT = [
     (("panel", "menu_shape", "item_roundness"), "menu_shape"), (("panel", "menu_opacity"), "menu_shape"),
 ]
 SECTION_NOTES = {
-    "panel": "Colors left on “Follow theme” use the Global colors.",
-    "window_borders": "Colors left on “Follow theme” come from the Global colors.",
-    "terminal": "Left on “Follow theme”, the terminal uses the theme's content colors.",
+    "panel": _("Colors left on “Follow theme” use the Global colors."),
+    "window_borders": _("Colors left on “Follow theme” come from the Global colors."),
+    "terminal": _("Left on “Follow theme”, the terminal uses the theme's content colors."),
 }
 GATES = {"separate_colors": True, "custom": True, "follow_global": False}  # value set when a sibling changes
 HIDDEN = set(GATES) | ({"round_bottom"} if not tokens.ROUND_BOTTOM_READY else set())
@@ -153,23 +154,23 @@ def _integration_note(text: str) -> Gtk.Label:
 # The Integration tab (xl_cheese, 22 Nov): one intro explains why apps need
 # help, so each row is just a name; what each does and when it shows is its
 # tooltip; only something missing is said under it.
-INTEGRATION_INTRO = ("Linux apps come in a few kinds, and each looks for its colors in its own place. "
-                     "Theme Roller brings your theme to all of them. These are already set, so you only "
-                     "need this tab if an app doesn't match.")
+INTEGRATION_INTRO = _("Linux apps come in a few kinds, and each looks for its colors in its own place. "
+                      "Theme Roller brings your theme to all of them. These are already set, so you only "
+                      "need this tab if an app doesn't match.")
 INTEGRATION_TIPS = {
-    "libadwaita": ("GNOME apps such as Calculator and Text Editor (libadwaita). Colors: your colors, and "
-                   "GNOME's accent to match. Full: also your buttons, title buttons and tabs; this "
-                   "overrides apps' own styling, so some lose colors of their own (Flatpak ones need "
-                   "Flatpak apps on). Reopen apps to see changes."),
-    "flatpak_access": "Lets Flatpak apps read your theme, so they get its colors. Reopen open apps to see them.",
+    "libadwaita": _("GNOME apps such as Calculator and Text Editor (libadwaita). Colors: your colors, and "
+                    "GNOME's accent to match. Full: also your buttons, title buttons and tabs; this "
+                    "overrides apps' own styling, so some lose colors of their own (Flatpak ones need "
+                    "Flatpak apps on). Reopen apps to see changes."),
+    "flatpak_access": _("Lets Flatpak apps read your theme, so they get its colors. Reopen open apps to see them."),
     "qt_colors": lambda: qt.note(),
     "editor_colors": lambda: editor.NOTE,
 }
 INTEGRATION_MISSING = {
-    "flatpak_access": lambda: "" if flatpak.available() else "Flatpak isn't installed.",
+    "flatpak_access": lambda: "" if flatpak.available() else _("Flatpak isn't installed."),
     "qt_colors": lambda: qt.missing(),
 }
-SORTS = (("az", "A–Z"), ("za", "Z–A"), ("new", "Newest"), ("old", "Oldest"))
+SORTS = (("az", _("A–Z")), ("za", _("Z–A")), ("new", _("Newest")), ("old", _("Oldest")))
 SORT_DEFAULTS = {"theme_sort": "new"}    # themes: yours first, then the built-in ones in their set order
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 
@@ -215,7 +216,7 @@ def _sorted(items: list, order: str) -> list:
         return sorted(items, key=lambda it: (it[1], _natural(it[0])), reverse=(order == "new"))
     return sorted(items, key=lambda it: _natural(it[0]), reverse=(order == "za"))
 CHOICE_LABELS = {"button_style": titlebuttons.STYLES,   # choices shown by name instead of id
-                 "libadwaita": {"off": "Off", "colors": "Colors", "full": "Full"},
+                 "libadwaita": {"off": _("Off"), "colors": _("Colors"), "full": _("Full")},
                  "style": {k: v["name"] for k, v in icons.STYLES.items()}}
 
 
@@ -292,15 +293,15 @@ class SettingsWindow(Gtk.ApplicationWindow):
         Gtk.StyleContext.add_provider_for_screen(screen, self.extra_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
 
         header = Gtk.HeaderBar(show_close_button=True, title=APP_TITLE)
-        header.set_subtitle("Preview: nothing changes on the desktop until Apply")
-        self.apply_btn = Gtk.Button(label="Apply")
+        header.set_subtitle(_("Preview: nothing changes on the desktop until Apply"))
+        self.apply_btn = Gtk.Button(label=_("Apply"))
         self.apply_btn.get_style_context().add_class("suggested-action")
         self.apply_btn.connect("clicked", self.on_apply)
         header.pack_start(self.apply_btn)          # opposite the window buttons, at the outer edge
         # shown after Apply: puts the previous desktop theme back
-        self.revert_btn = Gtk.Button(label="Revert")
+        self.revert_btn = Gtk.Button(label=_("Revert"))
         self.revert_btn.get_style_context().add_class("xl-drawn")    # a drawn button, not flat
-        self.revert_btn.set_tooltip_text("Put the previous theme back on the desktop (your settings here stay)")
+        self.revert_btn.set_tooltip_text(_("Put the previous theme back on the desktop (your settings here stay)"))
         self.revert_btn.connect("clicked", self.on_revert)
         self.revert_btn.set_no_show_all(True)
         header.pack_start(self.revert_btn)
@@ -396,9 +397,9 @@ class SettingsWindow(Gtk.ApplicationWindow):
             intro = Gtk.Label(label=INTEGRATION_INTRO, xalign=0, wrap=True, max_width_chars=60, hexpand=True,
                               margin_bottom=6)
             grid.attach(intro, 0, row, 2, 1)
-            scan = Gtk.Button(label="Scan my apps", halign=Gtk.Align.START, margin_bottom=8)
-            scan.set_tooltip_text("Lists the apps on this computer by kind, and whether Theme Roller "
-                                  "reaches them: the answer to \u201cwhy doesn't this app match?\u201d")
+            scan = Gtk.Button(label=_("Scan my apps"), halign=Gtk.Align.START, margin_bottom=8)
+            scan.set_tooltip_text(_("Lists the apps on this computer by kind, and whether Theme Roller "
+                                    "reaches them: the answer to \u201cwhy doesn't this app match?\u201d"))
             scan.connect("clicked", lambda _b: self._scan_dialog())
             grid.attach(scan, 0, row + 1, 2, 1)
             row += 2
@@ -414,7 +415,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 head.set_markup(f"<b>{GLib.markup_escape_text(GROUPS.get(group, group))}</b>")
                 grid.attach(head, 0, row, 2, 1)
                 row += 1
-            label = Gtk.Label(label=LABELS.get(path[-1], path[-1].replace("_", " ").capitalize()), xalign=0)
+            label = Gtk.Label(label=LABELS.get(path[-1], _(path[-1].replace("_", " ").capitalize())), xalign=0)
             if path == ("icons", "style"):
                 # pictures of each style, under the switch that names it
                 grid.attach(self._folder_style_picker(path, extra), 0, row, 2, 1)
@@ -444,12 +445,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
             row = self._set_aside_row(grid, row)
         if section not in ("integration", "about", "docs"):   # integration: Flatpak access is a system change
             box = Gtk.Box(spacing=8, halign=Gtk.Align.START, margin_top=14)
-            reset = Gtk.Button(label=f"Reset {dict(TABS)[section]}")
+            reset = Gtk.Button(label=_("Reset {tab}").format(tab=dict(TABS)[section]))
             reset.connect("clicked", lambda _b, s=section: self.reset_section(s))
             box.pack_start(reset, False, False, 0)
             self.reset_btns[section] = reset
             if section == "global":
-                every = Gtk.Button(label="Reset All to Theme Defaults")
+                every = Gtk.Button(label=_("Reset All to Theme Defaults"))
                 every.connect("clicked", lambda _b: self.reset_all())
                 box.pack_start(every, False, False, 0)
                 self.reset_btns["all"] = every
@@ -468,7 +469,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             box.pack_start(value, False, False, 0)
             if path == ("icons", "second_color"):
                 # xl-Big Baddy: takes the racing stripes off (shown while they're on)
-                off = Gtk.Button(label="No stripes")
+                off = Gtk.Button(label=_("No stripes"))
                 off.connect("clicked", lambda _b: self.changed(path, None))
                 off.set_no_show_all(True)
                 box.pack_start(off, False, False, 0)
@@ -500,7 +501,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             box.get_style_context().add_class("linked")
             buttons = {}
             for choice in extra:
-                b = Gtk.ToggleButton(label=choice.replace("_", " ").capitalize())
+                b = Gtk.ToggleButton(label=_(choice.replace("_", " ").capitalize()))
                 b.connect("toggled", lambda btn, c=choice: btn.get_active() and self.changed(path, c))
                 box.pack_start(b, False, False, 0)
                 buttons[choice] = b
@@ -509,7 +510,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         combo = Gtk.ComboBoxText()
         names = CHOICE_LABELS.get(path[-1], {})
         for choice in extra:
-            combo.append(choice, names.get(choice, choice.replace("_", " ").capitalize()))
+            combo.append(choice, names.get(choice, _(choice.replace("_", " ").capitalize())))
         combo.connect("changed", lambda c: c.get_active_id() and self.changed(path, c.get_active_id()))
         self.controls[path] = (combo, kind)
         return combo
@@ -528,7 +529,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 line.get_style_context().add_class("linked")
                 box.pack_start(line, False, False, 0)
             b = Gtk.ToggleButton()
-            b.set_tooltip_text(titlebuttons.GLYPH_SET_NAMES[gid])
+            b.set_tooltip_text(_(titlebuttons.GLYPH_SET_NAMES[gid]))
             row = Gtk.Box(spacing=3)
             imgs = []
             for fn in ("minimize", "maximize", "close"):
@@ -612,7 +613,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _theme_rows(self, grid: Gtk.Grid, row: int) -> int:
         head = Gtk.Label(xalign=0)
-        head.set_markup("<b>Theme</b>")
+        head.set_markup("<b>{}</b>".format(GLib.markup_escape_text(_("Theme"))))
         grid.attach(head, 0, row, 1, 1)
         grid.attach(self._sort_combo("theme_sort", self.fill_theme_list), 1, row, 1, 1)
         self.theme_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
@@ -624,16 +625,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
         scroller.add(self.theme_list)
         grid.attach(scroller, 0, row + 1, 2, 1)
         buttons = Gtk.Box(spacing=6)
-        self.save_btn = Gtk.Button(label="Save Theme…")
-        self.save_btn.set_tooltip_text("Keep your Custom settings as a theme with its own name")
+        self.save_btn = Gtk.Button(label=_("Save Theme…"))
+        self.save_btn.set_tooltip_text(_("Keep your Custom settings as a theme with its own name"))
         self.save_btn.connect("clicked", self.on_save_theme)
-        self.dup_btn = Gtk.Button(label="Duplicate")
-        self.dup_btn.set_tooltip_text("Save a copy of the selected theme as one of your themes")
+        self.dup_btn = Gtk.Button(label=_("Duplicate"))
+        self.dup_btn.set_tooltip_text(_("Save a copy of the selected theme as one of your themes"))
         self.dup_btn.connect("clicked", self.on_duplicate_theme)
-        self.rename_btn = Gtk.Button(label="Rename")
-        self.rename_btn.set_tooltip_text("Rename one of your themes (built-in themes keep their names)")
+        self.rename_btn = Gtk.Button(label=_("Rename"))
+        self.rename_btn.set_tooltip_text(_("Rename one of your themes (built-in themes keep their names)"))
         self.rename_btn.connect("clicked", self.on_rename_theme)
-        self.delete_btn = Gtk.Button(label="Delete")
+        self.delete_btn = Gtk.Button(label=_("Delete"))
         self.delete_btn.connect("clicked", self.on_delete_theme)
         buttons.pack_start(self.save_btn, False, False, 0)
         buttons.pack_start(self.dup_btn, False, False, 0)
@@ -667,7 +668,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def _sort_combo(self, key: str, refill) -> Gtk.Widget:
         """"Sort: A-Z" dropdown for a list; the choice is remembered."""
         box = Gtk.Box(spacing=6, halign=Gtk.Align.END)
-        box.pack_start(Gtk.Label(label="Sort:"), False, False, 0)
+        box.pack_start(Gtk.Label(label=_("Sort:")), False, False, 0)
         combo = Gtk.ComboBoxText()
         for sid, label in SORTS:
             combo.append(sid, label)
@@ -687,10 +688,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
             self.theme_list.remove(r)
         items = [(name, _theme_age(f, builtin), f, builtin) for name, f, builtin in themes.list_themes()]
         for name, _m, _f, builtin in _sorted(items, self.prefs.get("theme_sort", SORT_DEFAULTS["theme_sort"])):
-            r = self._row(name, tag="" if builtin else "Your theme")
+            r = self._row(name, tag="" if builtin else _("Your theme"))
             r.theme_name, r.builtin = name, builtin
             self.theme_list.add(r)
-        r = self._row(themes.CUSTOM, self._custom_subtitle())      # always last
+        r = self._row(_(themes.CUSTOM), self._custom_subtitle())      # always last
         r.theme_name, r.builtin = themes.CUSTOM, False
         self.custom_sub = r.subtitle_label
         self.theme_list.add(r)
@@ -702,7 +703,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _custom_subtitle(self) -> str:
         base = themes.based_on()
-        return f"Your latest changes, based on {base}" if base else "Your latest changes"
+        return _("Your latest changes, based on {theme}").format(theme=base) if base else _("Your latest changes")
 
     def refresh_custom_subtitle(self) -> None:
         if self.custom_sub is not None:
@@ -710,7 +711,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _style_rows(self, grid: Gtk.Grid, row: int) -> int:
         head = Gtk.Label(xalign=0)
-        head.set_markup("<b>Style</b>")
+        head.set_markup("<b>{}</b>".format(GLib.markup_escape_text(_("Style"))))
         grid.attach(head, 0, row, 1, 1)
         grid.attach(self._sort_combo("style_sort", self.fill_style_list), 1, row, 1, 1)
         self.style_list = Gtk.ListBox(selection_mode=Gtk.SelectionMode.SINGLE)
@@ -744,7 +745,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 yours = builtin_dir not in d.resolve().parents and d.resolve().parent != builtin_dir
                 items.append((st.name, (d / "style.toml").stat().st_mtime, st, yours))
         for name, _m, st, yours in _sorted(items, self.prefs.get("style_sort", "az")):
-            r = self._row(name, st.description or "", "Your style" if yours else "")
+            r = self._row(name, st.description or "", _("Your style") if yours else "")
             r.style_name = name
             self.style_list.add(r)
         self.style_list.show_all()
@@ -755,7 +756,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _terminal_picks(self, grid: Gtk.Grid, row: int) -> int:
         combo = Gtk.ComboBoxText()
-        combo.append("default", "Theme default")
+        combo.append("default", _("Theme default"))
         for f in sorted((paths.builtin_presets_dir() / "terminal").glob("*.json")):
             combo.append(str(f), json.loads(f.read_text(encoding="utf-8")).get("name", f.stem))
         self.term_combo = combo
@@ -772,7 +773,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 self.data["terminal"]["separate_colors"] = True
                 self.after_change()
         combo.connect("changed", picked)
-        grid.attach(Gtk.Label(label="Colors", xalign=0), 0, row, 1, 1)
+        grid.attach(Gtk.Label(label=_("Colors"), xalign=0), 0, row, 1, 1)
         grid.attach(combo, 1, row, 1, 1)
         return row + 1
 
@@ -824,29 +825,29 @@ class SettingsWindow(Gtk.ApplicationWindow):
         result = appscan.scan()
         integ = self.data["integration"]
         adw = integ.get("libadwaita", "colors")
-        on = lambda v, yes="On", no="Off: switch it on in the Integration tab": yes if v else no  # noqa: E731
+        on = lambda v: _("On") if v else _("Off: switch it on in the Integration tab")  # noqa: E731
         groups = [
-            (appscan.GTK3, "Follow the theme on their own", "Nothing to do: they always match."),
-            (appscan.GNOME, "GNOME-style apps",
-             {"off": "Off: set GNOME-style apps to Colors in the Integration tab", "colors": "Colors on",
-              "full": "Colors and full styling on"}[adw]),
-            (appscan.FLATPAK, "Flatpak apps",
+            (appscan.GTK3, _("Follow the theme on their own"), _("Nothing to do: they always match.")),
+            (appscan.GNOME, _("GNOME-style apps"),
+             {"off": _("Off: set GNOME-style apps to Colors in the Integration tab"), "colors": _("Colors on"),
+              "full": _("Colors and full styling on")}[adw]),
+            (appscan.FLATPAK, _("Flatpak apps"),
              on(integ.get("flatpak_access")) + ("" if adw != "off" else
-                                                 ". GNOME-style ones also need GNOME-style apps set to Colors")),
-            (appscan.QT, "Qt apps", on(integ.get("qt_colors")) + (f". {qt.missing()}" if qt.missing() else "")),
-            (appscan.EDITOR, "Text editors", on(integ.get("editor_colors"))),
-            (appscan.TERMINAL, "Run in a terminal", "They use the terminal's colors (Terminal tab)."),
-            (appscan.WEB, "Web-based apps", "They draw their own look; no theme reaches them."),
-            (appscan.UNKNOWN, "Couldn't tell", "Many of these draw their own look."),
+                                                 _(". GNOME-style ones also need GNOME-style apps set to Colors"))),
+            (appscan.QT, _("Qt apps"), on(integ.get("qt_colors")) + (f". {qt.missing()}" if qt.missing() else "")),
+            (appscan.EDITOR, _("Text editors"), on(integ.get("editor_colors"))),
+            (appscan.TERMINAL, _("Run in a terminal"), _("They use the terminal's colors (Terminal tab).")),
+            (appscan.WEB, _("Web-based apps"), _("They draw their own look; no theme reaches them.")),
+            (appscan.UNKNOWN, _("Couldn't tell"), _("Many of these draw their own look.")),
         ]
-        dialog = Gtk.Dialog(title="Your apps", transient_for=self, modal=True)
-        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog = Gtk.Dialog(title=_("Your apps"), transient_for=self, modal=True)
+        dialog.add_button(_("Close"), Gtk.ResponseType.CLOSE)
         dialog.set_default_size(520, 520)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4, margin=14)
         total = len(result.apps)
         head = Gtk.Label(xalign=0, wrap=True, max_width_chars=60)
-        head.set_text(f"{total} apps in your menu, by kind. Changes show after Apply, in apps opened "
-                      "afterwards.")
+        head.set_text(_("{count} apps in your menu, by kind. Changes show after Apply, in apps opened "
+                        "afterwards.").format(count=total))
         box.pack_start(head, False, False, 6)
         for kind, title, status in groups:
             apps = result.by_kind(kind)
@@ -857,7 +858,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             box.pack_start(t, False, False, 0)
             st = Gtk.Label(label=status, xalign=0, wrap=True, max_width_chars=60)
             box.pack_start(st, False, False, 0)
-            names = ", ".join(a.name + (f" ({a.detail})" if a.detail else "") for a in apps)
+            names = ", ".join(a.name + (f" ({_(a.detail)})" if a.detail else "") for a in apps)
             lst = Gtk.Label(label=names, xalign=0, wrap=True, max_width_chars=60, selectable=True)
             lst.get_style_context().add_class("dim-label")
             box.pack_start(lst, False, False, 0)
@@ -870,15 +871,15 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _set_aside_row(self, grid: Gtk.Grid, row: int) -> int:
         """Take our extra colors out of apps now, without changing any setting."""
-        button = Gtk.Button(label="Take colors out of apps", halign=Gtk.Align.START, margin_top=8)
+        button = Gtk.Button(label=_("Take colors out of apps"), halign=Gtk.Align.START, margin_top=8)
 
         def clicked(_b: Gtk.Button) -> None:
             watch.set_aside()
-            self.status.set_text("Theme Roller's colors are out of your apps. Reopen open apps. "
-                                 "The next Apply puts them back.")
+            self.status.set_text(_("Theme Roller's colors are out of your apps. Reopen open apps. "
+                                   "The next Apply puts them back."))
         button.connect("clicked", clicked)
-        button.set_tooltip_text("Removes Theme Roller's colors from all apps now. Your settings and the "
-                                "theme stay; the next Apply puts the colors back.")
+        button.set_tooltip_text(_("Removes Theme Roller's colors from all apps now. Your settings and the "
+                                  "theme stay; the next Apply puts the colors back."))
         grid.attach(button, 0, row, 2, 1)
         return row + 1
 
@@ -886,18 +887,18 @@ class SettingsWindow(Gtk.ApplicationWindow):
         """Colors from a picture: the wallpaper or any image. Its main colors
         show as swatches, the best one becomes the accent; any swatch can be
         clicked instead. Background and text stay as they are."""
-        label = Gtk.Label(label="Colors from", xalign=0)
+        label = Gtk.Label(label=_("Colors from"), xalign=0)
         holder = Gtk.Box(valign=Gtk.Align.START)          # as tall as the buttons, so it lines up
         holder.pack_start(label, False, False, 0)
         grid.attach(holder, 0, row, 1, 1)
         box = Gtk.Box(spacing=6)
         column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         column.pack_start(box, False, False, 0)
-        wall = Gtk.Button(label="Wallpaper")
-        wall.set_tooltip_text("Take an accent from your desktop wallpaper")
+        wall = Gtk.Button(label=_("Wallpaper"))
+        wall.set_tooltip_text(_("Take an accent from your desktop wallpaper"))
         wall.connect("clicked", lambda _b: self._colors_from(imagecolors.wallpaper()))
-        pick = Gtk.Button(label="Image…")
-        pick.set_tooltip_text("Take an accent from any picture")
+        pick = Gtk.Button(label=_("Image…"))
+        pick.set_tooltip_text(_("Take an accent from any picture"))
         pick.connect("clicked", self.on_pick_image)
         box.pack_start(wall, False, False, 0)
         box.pack_start(pick, False, False, 0)
@@ -915,10 +916,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
         return row + 1
 
     def on_pick_image(self, _button: Gtk.Button) -> None:
-        chooser = Gtk.FileChooserNative.new("Take colors from a picture", self, Gtk.FileChooserAction.OPEN,
-                                            "Use", "Cancel")
+        chooser = Gtk.FileChooserNative.new(_("Take colors from a picture"), self, Gtk.FileChooserAction.OPEN,
+                                            _("Use"), _("Cancel"))
         images = Gtk.FileFilter()
-        images.set_name("Pictures")
+        images.set_name(_("Pictures"))
         images.add_pixbuf_formats()
         chooser.add_filter(images)
         pictures = GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_PICTURES)
@@ -930,18 +931,18 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _colors_from(self, path: Path | None) -> None:
         if path is None:
-            self.status.set_text("Couldn't find your wallpaper (Cinnamon's background setting has no picture).")
+            self.status.set_text(_("Couldn't find your wallpaper (Cinnamon's background setting has no picture)."))
             return
         try:
             found = imagecolors.colors(path)
         except GLib.Error as exc:
-            self.status.set_text(f"Couldn't read {_short_name(path.name)}: {exc.message}")
+            self.status.set_text(_("Couldn't read {file}: {problem}").format(file=_short_name(path.name), problem=exc.message))
             return
         for child in self.image_swatches.get_children():
             self.image_swatches.remove(child)
         for color in found:
             b = Gtk.Button()
-            b.set_tooltip_text(f"Use {color} as the accent")
+            b.set_tooltip_text(_("Use {color} as the accent").format(color=color))
             swatch = Gtk.DrawingArea()
             swatch.set_size_request(22, 16)
             rgba = Gdk.RGBA()
@@ -956,9 +957,9 @@ class SettingsWindow(Gtk.ApplicationWindow):
         best = imagecolors.accent(found)
         if best:
             self._use_accent(best)
-            self.status.set_text(f"Accent from {_short_name(path.name)}. Or click another color.")
+            self.status.set_text(_("Accent from {file}. Or click another color.").format(file=_short_name(path.name)))
         else:
-            self.status.set_text(f"{_short_name(path.name)} has no colors vivid enough for an accent.")
+            self.status.set_text(_("{file} has no colors vivid enough for an accent.").format(file=_short_name(path.name)))
 
     def _use_accent(self, color: str) -> None:
         self.changed(("global", "accent"), color)
@@ -984,22 +985,25 @@ class SettingsWindow(Gtk.ApplicationWindow):
             box.pack_start(label, False, False, 0)
         line(f"<span size='large' weight='bold'>{APP_TITLE}</span>")
         line(GLib.markup_escape_text(__version__))
-        line("The xl-Cheeselooks theme maker for Linux Mint and the Cinnamon desktop: your colors and shapes, drawn by "
-             "a style, for GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon panel and menus, and "
-             "the window borders.")
-        box.pack_start(Gtk.LinkButton(uri=REPO_URL, label="Website", halign=Gtk.Align.CENTER),
+        line(GLib.markup_escape_text(_(
+            "The xl-Cheeselooks theme maker for Linux Mint and the Cinnamon desktop: your colors and shapes, "
+            "drawn by a style, for GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon panel and menus, and "
+            "the window borders.")))
+        box.pack_start(Gtk.LinkButton(uri=REPO_URL, label=_("Website"), halign=Gtk.Align.CENTER),
                        False, False, 0)
         if TIP_URL:
-            line(f"<small>Enjoying {APP_TITLE}? It's free and always will be.</small>", dim=True, top=2)
-            tip = Gtk.Button(label="Leave a tip ☕", halign=Gtk.Align.CENTER, tooltip_text=TIP_URL)
+            line("<small>{}</small>".format(GLib.markup_escape_text(
+                _("Enjoying {app}? It's free and always will be.").format(app=APP_TITLE))), dim=True, top=2)
+            tip = Gtk.Button(label=_("Leave a tip ☕"), halign=Gtk.Align.CENTER, tooltip_text=TIP_URL)
             tip.get_style_context().add_class("suggested-action")     # an accent button, in your theme
             tip.connect("clicked", lambda b: Gtk.show_uri_on_window(self, TIP_URL, Gtk.get_current_event_time()))
             box.pack_start(tip, False, False, 0)
-        line("<small>Copyright © 2026 Wesley Hayslip\n"
-             "Developed with the help of Claude, an AI assistant by Anthropic</small>")
-        line("<small>This program comes with absolutely no warranty.\n"
-             "See the <a href='https://www.gnu.org/licenses/gpl-3.0.html'>GNU General Public License, "
-             "version 3 or later</a> for details.</small>", top=4)
+        line("<small>Copyright © 2026 Wesley Hayslip\n{}</small>".format(GLib.markup_escape_text(
+            _("Developed with the help of Claude, an AI assistant by Anthropic"))))
+        line("<small>{}</small>".format(_(
+            "This program comes with absolutely no warranty.\n"
+            "See the <a href='https://www.gnu.org/licenses/gpl-3.0.html'>GNU General Public License, "
+            "version 3 or later</a> for details.")), top=4)
         grid.attach(box, 0, 0, 1, 1)
         return grid
 
@@ -1013,19 +1017,19 @@ class SettingsWindow(Gtk.ApplicationWindow):
             text.set_markup(body)
             grid.attach(text, 0, row + 1, 1, 1)
             row += 2
-            if title == "Style":       # the starter style sheet and the check, with what they're about (xl_cheese)
+            if title == _("Style"):    # the starter style sheet and the check, with what they're about (xl_cheese)
                 buttons = Gtk.Box(spacing=8, halign=Gtk.Align.START, margin_top=4)
-                starter = Gtk.Button(label="Create a starter style…")
+                starter = Gtk.Button(label=_("Create a starter style…"))
                 starter.connect("clicked", self.on_starter_style)
-                check = Gtk.Button(label="Check a style sheet for issues…")
-                check.set_tooltip_text("Pick a style.toml: it's checked as Theme Roller reads it, and any "
-                                       "problems are listed with what to fix")
+                check = Gtk.Button(label=_("Check a style sheet for issues…"))
+                check.set_tooltip_text(_("Pick a style.toml: it's checked as Theme Roller reads it, and any "
+                                         "problems are listed with what to fix"))
                 check.connect("clicked", self.on_check_style)
                 buttons.pack_start(starter, False, False, 0)
                 buttons.pack_start(check, False, False, 0)
                 grid.attach(buttons, 0, row, 1, 1)
                 row += 1
-        link = Gtk.LinkButton(uri=DOCS_URL, label="Full documentation (online)", halign=Gtk.Align.START,
+        link = Gtk.LinkButton(uri=DOCS_URL, label=_("Full documentation (online)"), halign=Gtk.Align.START,
                               margin_top=12)
         grid.attach(link, 0, row, 1, 1)
         return grid
@@ -1033,11 +1037,11 @@ class SettingsWindow(Gtk.ApplicationWindow):
     def on_check_style(self, _button: Gtk.Button) -> None:
         """Check a style sheet: the same check as `theme-roller check-style`,
         its result in a window (xl_cheese: most people won't use a terminal)."""
-        chooser = Gtk.FileChooserDialog(title="Check a style sheet", transient_for=self,
+        chooser = Gtk.FileChooserDialog(title=_("Check a style sheet"), transient_for=self,
                                         action=Gtk.FileChooserAction.OPEN)
-        chooser.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Check", Gtk.ResponseType.ACCEPT)
+        chooser.add_buttons(_("Cancel"), Gtk.ResponseType.CANCEL, _("Check"), Gtk.ResponseType.ACCEPT)
         sheets = Gtk.FileFilter()
-        sheets.set_name("Style sheets (style.toml)")
+        sheets.set_name(_("Style sheets (style.toml)"))
         sheets.add_pattern("*.toml")
         chooser.add_filter(sheets)
         yours = paths.style_dirs()[0]
@@ -1050,12 +1054,13 @@ class SettingsWindow(Gtk.ApplicationWindow):
         kind = Gtk.MessageType.INFO
         try:
             style = styles.load(Path(picked))
-            title, lines = f"“{style.name}” looks good", [f"Warning: {w}" for w in style.warnings]
+            title = _("“{style}” looks good").format(style=style.name)
+            lines = [_("Warning: {problem}").format(problem=w) for w in style.warnings]
             if not lines:
-                lines = ["No problems found. Pick it on the Style tab to use it."]
+                lines = [_("No problems found. Pick it on the Style tab to use it.")]
         except styles.StyleError as exc:
-            title, kind = f"{len(exc.problems)} problem(s) to fix", Gtk.MessageType.WARNING
-            lines = list(exc.problems) + ["Fix these in the file, then check it again."]
+            title, kind = _("Problems to fix: {count}").format(count=len(exc.problems)), Gtk.MessageType.WARNING
+            lines = list(exc.problems) + [_("Fix these in the file, then check it again.")]
         dialog = Gtk.MessageDialog(transient_for=self, modal=True, message_type=kind,
                                    buttons=Gtk.ButtonsType.CLOSE, text=title)
         dialog.format_secondary_text(f"{picked}\n\n" + "\n".join(lines))
@@ -1067,17 +1072,18 @@ class SettingsWindow(Gtk.ApplicationWindow):
         def check(name: str) -> str:
             name = name.strip()
             if not name:
-                raise themes.ThemeError("the style needs a name")
+                raise themes.ThemeError(_("the style needs a name"))
             if len(name) > themes.MAX_NAME:
-                raise themes.ThemeError(f"names can be up to {themes.MAX_NAME} characters")
+                raise themes.ThemeError(_("names can be up to {count} characters").format(count=themes.MAX_NAME))
             if "/" in name or name.startswith("."):
-                raise themes.ThemeError("names can't contain / or start with a dot")
+                raise themes.ThemeError(_("names can't contain / or start with a dot"))
             try:
                 styles.find(name, paths.style_dirs())
             except styles.StyleError:
                 return name
-            raise themes.ThemeError(f"there's already a style called {name}")
-        name = self._ask_name("Create Style", "Give your new style a good name.", "My Style", check)
+            raise themes.ThemeError(_("there's already a style called {name}").format(name=name))
+        name = self._ask_name(_("Create Style"), _("Give your new style a good name."), _("My Style"),
+                              check, button=_("Create"))
         if not name:
             return
         folder = paths.style_dirs()[0] / name
@@ -1085,7 +1091,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         template = (paths.data_dir() / "data" / "style-template.toml").read_text(encoding="utf-8")
         (folder / "style.toml").write_text(template.replace("{{name}}", name), encoding="utf-8")
         self.fill_style_list()
-        self.status.set_text(f"Created {folder / 'style.toml'}. Edit it, then pick it on the Style tab.")
+        self.status.set_text(_("Created {file}. Edit it, then pick it on the Style tab.").format(file=folder / "style.toml"))
         try:
             Gtk.show_uri_on_window(self, folder.as_uri(), Gdk.CURRENT_TIME)   # opens the folder
         except GLib.Error:
@@ -1093,13 +1099,13 @@ class SettingsWindow(Gtk.ApplicationWindow):
 
     def _share_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
         text = Gtk.Label(xalign=0, wrap=True, max_width_chars=60)
-        text.set_text("Share a theme as one file (.xltheme). It holds every setting, the theme's name, "
-                      "the version of Theme Roller it was made with, and your style when the theme "
-                      "uses one of your own, so the person importing it gets exactly your look.")
+        text.set_text(_("Share a theme as one file (.xltheme). It holds every setting, the theme's name, "
+                        "the version of Theme Roller it was made with, and your style when the theme "
+                        "uses one of your own, so the person importing it gets exactly your look."))
         grid.attach(text, 0, 0, 2, 1)
-        export = Gtk.Button(label="Export the current theme…", halign=Gtk.Align.START)
+        export = Gtk.Button(label=_("Export the current theme…"), halign=Gtk.Align.START)
         export.connect("clicked", self.on_export)
-        imp = Gtk.Button(label="Import a theme…", halign=Gtk.Align.START)
+        imp = Gtk.Button(label=_("Import a theme…"), halign=Gtk.Align.START)
         imp.connect("clicked", self.on_import)
         grid.attach(export, 0, 1, 2, 1)
         grid.attach(imp, 0, 2, 2, 1)
@@ -1112,47 +1118,48 @@ class SettingsWindow(Gtk.ApplicationWindow):
         frame = Gtk.Frame()
         frame.get_style_context().add_class("xl-prev-window")
         win = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        hb = Gtk.HeaderBar(show_close_button=True, title="Preview")
+        hb = Gtk.HeaderBar(show_close_button=True, title=_("Preview"))
         self.prev_hb = hb
         hb.get_style_context().add_class("titlebar")
         win.pack_start(hb, False, False, 0)
         menubar = Gtk.MenuBar()
-        for name in ("File", "Edit", "View"):
+        for name in (_("File"), _("Edit"), _("View")):
             item = Gtk.MenuItem(label=name)
             sub = Gtk.Menu()
-            for entry in ("Open", "Save", "Quit"):
+            for entry in (_("Open"), _("Save"), _("Quit")):
                 sub.append(Gtk.MenuItem(label=entry))
             item.set_submenu(sub)
             menubar.append(item)
         win.pack_start(menubar, False, False, 0)
         body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, margin=10)
         buttons = Gtk.Box(spacing=6)
-        for label, cls in (("Button", None), ("Suggested", "suggested-action"), ("Delete", "destructive-action")):
+        for label, cls in ((_("Button"), None), (_("Suggested"), "suggested-action"),
+                           (_("Delete"), "destructive-action")):
             b = Gtk.Button(label=label)
-            b.set_tooltip_text(f"A tooltip on {label}")        # hover for the real thing
+            b.set_tooltip_text(_("A tooltip on {button}").format(button=label))   # hover for the real thing
             if cls:
                 b.get_style_context().add_class(cls)
             buttons.pack_start(b, False, False, 0)
-        toggled = Gtk.ToggleButton(label="Toggled", active=True)
-        toggled.set_tooltip_text("A tooltip on Toggled")
+        toggled = Gtk.ToggleButton(label=_("Toggled"), active=True)
+        toggled.set_tooltip_text(_("A tooltip on {button}").format(button=_("Toggled")))
         buttons.pack_start(toggled, False, False, 0)
         body.pack_start(buttons, False, False, 0)
         linked = Gtk.Box()
         linked.get_style_context().add_class("linked")
-        for i, label in enumerate(("Left", "Center", "Right")):
+        for i, label in enumerate((_("Left"), _("Center"), _("Right"))):
             linked.pack_start(Gtk.ToggleButton(label=label, active=(i == 1)), False, False, 0)
         row = Gtk.Box(spacing=10)
         row.pack_start(linked, False, False, 0)
-        row.pack_start(Gtk.Entry(text="Some text", width_chars=8), True, True, 0)   # fills, never widens
+        row.pack_start(Gtk.Entry(text=_("Some text"), width_chars=8), True, True, 0)   # fills, never widens
         body.pack_start(row, False, False, 0)
         # a drawn tooltip, always visible, in the Details tab's tooltip colours
         row = Gtk.Box(spacing=10)
-        tip = Gtk.Label(label="Tooltip", valign=Gtk.Align.CENTER)
+        tip = Gtk.Label(label=_("Tooltip"), valign=Gtk.Align.CENTER)
         tip.get_style_context().add_class("xl-prev-tooltip")
         row.pack_start(tip, False, False, 0)
         row.pack_start(Gtk.Switch(active=True, valign=Gtk.Align.CENTER), False, False, 0)
-        row.pack_start(Gtk.CheckButton(label="Check", active=True), False, False, 0)
-        row.pack_start(Gtk.RadioButton(label="Radio"), False, False, 0)
+        row.pack_start(Gtk.CheckButton(label=_("Check"), active=True), False, False, 0)
+        row.pack_start(Gtk.RadioButton(label=_("Radio")), False, False, 0)
         body.pack_start(row, False, False, 0)
         scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, 100, 1)
         scale.set_value(60)
@@ -1167,10 +1174,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
         row.pack_start(spin, False, False, 0)
         body.pack_start(row, False, False, 0)
         notebook = Gtk.Notebook()
-        for name in ("General", "Colors", "Advanced"):
+        for name in (_("General"), _("Colors"), _("Advanced")):
             lb = Gtk.ListBox()
-            for text in ("First row", "Selected row", "Third row", "Fourth row", "Fifth row",
-                         "Sixth row", "Seventh row", "Eighth row"):
+            for text in (_("First row"), _("Selected row"), _("Third row"), _("Fourth row"), _("Fifth row"),
+                         _("Sixth row"), _("Seventh row"), _("Eighth row")):
                 lb.add(Gtk.Label(label=text, xalign=0, margin=6))
             lb.select_row(lb.get_row_at_index(1))
             # a few rows more than fit, so the scrollbar shows (Details: Scrollbars)
@@ -1178,7 +1185,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             rows.add(lb)
             notebook.append_page(rows, Gtk.Label(label=name))
         body.pack_start(notebook, False, False, 0)
-        term = Gtk.Label(label="user@mint:~$ ls\nDesktop  Documents  Music", xalign=0, margin=6)
+        term = Gtk.Label(label="user@mint:~$ ls\n" + _("Desktop  Documents  Music"), xalign=0, margin=6)
         term.get_style_context().add_class("xl-prev-terminal")
         body.pack_start(term, False, False, 0)
         win.pack_start(body, False, False, 0)
@@ -1195,10 +1202,11 @@ class SettingsWindow(Gtk.ApplicationWindow):
             fb.get_style_context().add_class("xl-prev-fav")
             favs.pack_start(fb, False, False, 0)
         menu.pack_start(favs, False, False, 0)
-        for column in (("Favorites", "Accessories", "Graphics"), ("Calculator", "Files", "Terminal")):
+        for column in ((N_("Favorites"), N_("Accessories"), N_("Graphics")),
+                       (N_("Calculator"), N_("Files"), N_("Terminal"))):
             col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
             for name in column:
-                item = Gtk.Label(label=name, xalign=0)
+                item = Gtk.Label(label=_(name), xalign=0)
                 item.get_style_context().add_class("xl-prev-mitem")
                 if name == "Favorites":
                     item.get_style_context().add_class("selected")
@@ -1206,7 +1214,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
                     item.get_style_context().add_class("hover")
                 col.pack_start(item, False, False, 0)
             menu.pack_start(col, False, False, 0)
-        caption = Gtk.Label(label="Panel and menu (drawn preview)", xalign=0)
+        caption = Gtk.Label(label=_("Panel and menu (drawn preview)"), xalign=0)
         caption.get_style_context().add_class("dim-label")
         outer.pack_start(caption, False, False, 0)
         desk = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)     # the menu sits on the panel
@@ -1214,10 +1222,10 @@ class SettingsWindow(Gtk.ApplicationWindow):
         outer.pack_start(desk, False, False, 0)
         panel = Gtk.Box(spacing=2)
         panel.get_style_context().add_class("xl-prev-panel")
-        mbtn = Gtk.ToggleButton(label="Menu")
+        mbtn = Gtk.ToggleButton(label=_("Menu"))
         mbtn.get_style_context().add_class("xl-prev-pb")
         panel.pack_start(mbtn, False, False, 0)
-        for i, name in enumerate(("Terminal", "Files", "Browser")):
+        for i, name in enumerate((_("Terminal"), _("Files"), _("Browser"))):
             b = Gtk.ToggleButton(label=name)
             b.get_style_context().add_class("xl-prev-pb")
             if i == 1:
@@ -1297,7 +1305,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             ph = self.data["panel"]["panel_height"] or self._int_default(("panel", "panel_height"))
             t = tokens.build(self.data, style, panel_height=ph)
         except (styles.StyleError, settings.SettingsError, KeyError) as exc:
-            self.status.set_text(f"Can't preview: {exc}")
+            self.status.set_text(_("Can't preview: {problem}").format(problem=exc))
             return False
         if self.preview_dir.exists():
             shutil.rmtree(self.preview_dir)
@@ -1319,7 +1327,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             GLib.idle_add(self._fit_pages)          # measured in the new sizes
             GLib.timeout_add(250, self._fit_pages)  # again once restyled (the sidebar's rows lag a moment)
         except GLib.Error as exc:
-            self.status.set_text(f"Preview CSS problem: {exc.message}")
+            self.status.set_text(_("Preview CSS problem: {problem}").format(problem=exc.message))
         if missing:
             self.status.set_text(missing)
         if self.data["theme"] == themes.CUSTOM:
@@ -1474,8 +1482,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         color is optional (xl-Big Baddy's racing stripes), "None"."""
         if path == ("icons", "second_color") and \
                 icons.STYLES[icons.style_of(self.data["icons"])].get("second_optional"):
-            return "None"
-        return "Follow theme"
+            return _("None")
+        return _("Follow theme")
 
     def _update_icon_labels(self) -> None:
         """The Icons switch names what it does: "Custom folder style" while
@@ -1484,11 +1492,12 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if not hasattr(self, "icons_switch_label"):
             return
         spec = icons.STYLES[icons.style_of(self.data["icons"])]
-        name = spec["name"] if self.data["icons"].get("enabled") else "Custom"
-        self.icons_switch_label.set_markup(f"<b>{GLib.markup_escape_text(name)}</b> folder style")
-        self.second_color_label.set_text(spec.get("second_label", LABELS["second_color"]))
+        name = spec["name"] if self.data["icons"].get("enabled") else _("Custom")
+        self.icons_switch_label.set_markup(
+            _("<b>{name}</b> folder style").format(name=GLib.markup_escape_text(name)))
+        self.second_color_label.set_text(_(spec["second_label"]) if spec.get("second_label") else LABELS["second_color"])
         if hasattr(self, "icon_note"):
-            self.icon_note.set_text(spec.get("note", ICON_NOTE))
+            self.icon_note.set_text(_(spec["note"]) if spec.get("note") else ICON_NOTE)
         self.stripes_off.set_visible(bool(spec.get("second_optional") and self.data["icons"].get("second_color")))
 
     def _int_default(self, path: tuple[str, ...]) -> int:
@@ -1531,12 +1540,15 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         # tooltips name the theme a reset goes back to (not the labels: names can be long)
         for section, b in self.reset_btns.items():
             if section == "all":
-                b.set_tooltip_text(f"Put every tab back to {self.base}. Your latest changes stay in Custom.")
+                b.set_tooltip_text(_("Put every tab back to {theme}. Your latest changes stay in Custom.")
+                                   .format(theme=self.base))
             elif section == "global":
-                b.set_tooltip_text(f"Put Global back to {self.base}. Other tabs keep what you set there, "
-                                   "but colors on “Follow theme” and shapes that follow Global change with it.")
+                b.set_tooltip_text(_("Put Global back to {theme}. Other tabs keep what you set there, "
+                                     "but colors on “Follow theme” and shapes that follow Global change with it.")
+                                   .format(theme=self.base))
             else:
-                b.set_tooltip_text(f"Put {dict(TABS)[section]} back to {self.base} (other tabs stay as they are)")
+                b.set_tooltip_text(_("Put {tab} back to {theme} (other tabs stay as they are)")
+                                   .format(tab=dict(TABS)[section], theme=self.base))
         self.apply_btn.set_sensitive(_needs_apply(self.data, self.applied))
         self.save_btn.set_sensitive(self.data["theme"] == themes.CUSTOM)
         row = self.theme_list.get_selected_row()
@@ -1562,7 +1574,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.base = row.theme_name
             self.base_cache.pop(self.base, None)
         self.data = settings.keep_per_user(data, self.data)   # your Integration switches stay
-        self.status.set_text(f"Theme: {row.theme_name}")
+        self.status.set_text(_("Theme: {theme}").format(
+            theme=_(themes.CUSTOM) if row.theme_name == themes.CUSTOM else row.theme_name))
         self.after_change()
 
     def on_style_selected(self, _list: Gtk.ListBox, row: Gtk.ListBoxRow | None) -> None:
@@ -1573,25 +1586,25 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
     def reset_all(self) -> None:
         """Every tab back to the theme you started from; Custom keeps your changes."""
         self.data = settings.keep_per_user(self.base_settings(), self.data)
-        self.status.set_text(f"Every tab reset to {self.base}. Your latest changes are still in Custom.")
+        self.status.set_text(_("Every tab reset to {theme}. Your latest changes are still in Custom.").format(theme=self.base))
         self.after_change()
 
     def reset_section(self, section: str) -> None:
         if section in ("share",):
             return
         self.data[section] = copy.deepcopy(self.base_settings()[section])
-        self.status.set_text(f"{dict(TABS)[section]} reset to {self.base}.")
+        self.status.set_text(_("{tab} reset to {theme}.").format(tab=dict(TABS)[section], theme=self.base))
         self.after_change()
 
     def on_save_theme(self, _button: Gtk.Button) -> None:
-        dialog = Gtk.Dialog(title="Save Theme", transient_for=self, modal=True)
-        dialog.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Save", Gtk.ResponseType.OK)
+        dialog = Gtk.Dialog(title=_("Save Theme"), transient_for=self, modal=True)
+        dialog.add_buttons(_("Cancel"), Gtk.ResponseType.CANCEL, _("Save"), Gtk.ResponseType.OK)
         dialog.set_default_response(Gtk.ResponseType.OK)
         area = dialog.get_content_area()
         area.set_spacing(8)
         area.set_border_width(12)
-        area.add(Gtk.Label(label="Name your theme. It uses the style "
-                                 f"“{self.data['style']['name']}” and all your current settings.",
+        area.add(Gtk.Label(label=_("Name your theme. It uses the style “{style}” and all your current "
+                                   "settings.").format(style=self.data["style"]["name"]),
                            xalign=0, wrap=True, max_width_chars=50))
         # a name box with a dropdown of your themes (pick one to save over it),
         # filled in with the theme you started from: Save again keeps the name
@@ -1602,17 +1615,17 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         entry = combo.get_child()
         entry.set_activates_default(True)
         entry.set_max_length(themes.MAX_NAME)
-        entry.set_placeholder_text("My theme")
+        entry.set_placeholder_text(_("My theme"))
         start = self.base if self.data["theme"] == themes.CUSTOM else self.data["theme"]
         try:
             _f, builtin = themes.find(start)
         except themes.ThemeError:
             builtin = True
-        suggested = start if not builtin else f"{start} copy"
+        suggested = start if not builtin else _("{theme} copy").format(theme=start)
         entry.set_text(suggested[:themes.MAX_NAME])
         area.add(combo)
-        hint = Gtk.Label(label=f"Up to {themes.MAX_NAME} characters. Built-in themes can't be "
-                               "replaced; your own can.", xalign=0, wrap=True, max_width_chars=50)
+        hint = Gtk.Label(label=_("Up to {count} characters. Built-in themes can't be replaced; your own "
+                                 "can.").format(count=themes.MAX_NAME), xalign=0, wrap=True, max_width_chars=50)
         hint.get_style_context().add_class("dim-label")
         area.add(hint)
         dialog.show_all()
@@ -1623,7 +1636,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             try:
                 themes.save(name, self.data)
             except themes.ThemeError as exc:
-                if "already have" in str(exc) and self._confirm(f"Replace your theme “{name}”?"):
+                if getattr(exc, "exists", False) and \
+                        self._confirm(_("Replace your theme “{theme}”?").format(theme=name)):
                     themes.save(name, self.data, overwrite=True)
                 else:
                     self.status.set_text(str(exc))
@@ -1633,15 +1647,16 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.data["theme"] = name
             self.fill_theme_list()
             self.after_change()
-            self.status.set_text(f"Saved the theme “{name}”.")
+            self.status.set_text(_("Saved the theme “{theme}”.").format(theme=name))
             break
         dialog.destroy()
 
-    def _ask_name(self, title: str, text: str, name: str, check=themes.check_new_name) -> str | None:
+    def _ask_name(self, title: str, text: str, name: str, check=themes.check_new_name,
+                  button: str = "") -> str | None:
         """A small dialog with a name box (filled in and selected); None if cancelled.
         Problems with the name show in the dialog, which stays open."""
         dialog = Gtk.Dialog(title=title, transient_for=self, modal=True)
-        dialog.add_buttons("Cancel", Gtk.ResponseType.CANCEL, title.split()[0], Gtk.ResponseType.OK)
+        dialog.add_buttons(_("Cancel"), Gtk.ResponseType.CANCEL, button or _("OK"), Gtk.ResponseType.OK)
         dialog.set_default_response(Gtk.ResponseType.OK)
         area = dialog.get_content_area()
         area.set_spacing(8)
@@ -1670,8 +1685,9 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         row = self.theme_list.get_selected_row()
         if not row or row.theme_name == themes.CUSTOM:
             return
-        name = self._ask_name("Duplicate Theme", f"A copy of “{row.theme_name}”, as one of your themes:",
-                              themes.copy_name(row.theme_name))
+        name = self._ask_name(_("Duplicate Theme"),
+                              _("A copy of “{theme}”, as one of your themes:").format(theme=row.theme_name),
+                              themes.copy_name(row.theme_name), button=_("Duplicate"))
         if name is None:
             return
         try:
@@ -1680,7 +1696,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.status.set_text(str(exc))
             return
         self.fill_theme_list()
-        self.status.set_text(f"Duplicated “{row.theme_name}” as “{name}”.")
+        self.status.set_text(_("Duplicated “{theme}” as “{copy}”.").format(theme=row.theme_name, copy=name))
         for r in self.theme_list.get_children():
             if r.theme_name == name:
                 self.theme_list.select_row(r)      # switch to the copy, ready to edit
@@ -1690,7 +1706,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if not row or row.builtin or row.theme_name == themes.CUSTOM:
             return
         old = row.theme_name
-        name = self._ask_name("Rename Theme", f"A new name for “{old}”:", old)
+        name = self._ask_name(_("Rename Theme"), _("A new name for “{theme}”:").format(theme=old), old,
+                              button=_("Rename"))
         if name is None or name == old:
             return
         try:
@@ -1708,13 +1725,13 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         self.fill_theme_list()
         self.refresh_custom_subtitle()
         self.update_buttons()
-        self.status.set_text(f"Renamed “{old}” to “{name}”.")
+        self.status.set_text(_("Renamed “{old}” to “{new}”.").format(old=old, new=name))
 
     def on_delete_theme(self, _button: Gtk.Button) -> None:
         row = self.theme_list.get_selected_row()
         if not row or row.builtin or row.theme_name == themes.CUSTOM:
             return
-        if self._confirm(f"Delete your theme “{row.theme_name}”? Its style stays installed."):
+        if self._confirm(_("Delete your theme “{theme}”? Its style stays installed.").format(theme=row.theme_name)):
             themes.delete(row.theme_name)
             if self.data["theme"] == row.theme_name:
                 self.data["theme"] = themes.CUSTOM
@@ -1730,26 +1747,27 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         return answer == Gtk.ResponseType.OK
 
     def on_export(self, _button: Gtk.Button) -> None:
-        name = self.data["theme"] if self.data["theme"] != themes.CUSTOM else "My theme"
-        chooser = Gtk.FileChooserNative(title="Export theme", transient_for=self,
+        mine = _("My theme")
+        name = self.data["theme"] if self.data["theme"] != themes.CUSTOM else mine
+        chooser = Gtk.FileChooserNative(title=_("Export theme"), transient_for=self,
                                         action=Gtk.FileChooserAction.SAVE)
         chooser.set_current_name(f"{themes.slug(name)}{themes.EXTENSION}")
         chooser.set_do_overwrite_confirmation(True)
         if chooser.run() == Gtk.ResponseType.ACCEPT:
             dest = Path(chooser.get_filename())
-            label = name if name != "My theme" else dest.stem.replace("-", " ").title()
+            label = name if name != mine else dest.stem.replace("-", " ").title()
             try:
                 out = themes.export(label, self.data, dest)
-                self.status.set_text(f"Exported “{label}” to {out}")
+                self.status.set_text(_("Exported “{theme}” to {file}").format(theme=label, file=out))
             except (themes.ThemeError, styles.StyleError, OSError) as exc:
-                self.status.set_text(f"Export failed: {exc}")
+                self.status.set_text(_("Export failed: {problem}").format(problem=exc))
         chooser.destroy()
 
     def on_import(self, _button: Gtk.Button) -> None:
-        chooser = Gtk.FileChooserNative(title="Import theme", transient_for=self,
+        chooser = Gtk.FileChooserNative(title=_("Import theme"), transient_for=self,
                                         action=Gtk.FileChooserAction.OPEN)
         f = Gtk.FileFilter()
-        f.set_name("xl-Cheeselooks themes")
+        f.set_name(_("Theme Roller themes"))
         f.add_pattern(f"*{themes.EXTENSION}")
         chooser.add_filter(f)
         if chooser.run() == Gtk.ResponseType.ACCEPT:
@@ -1759,14 +1777,15 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 for r in self.theme_list.get_children():
                     if r.theme_name == name:
                         self.theme_list.select_row(r)       # loads it into the preview
-                self.status.set_text(f"Imported “{name}”." + ("\n" + "\n".join(notes) if notes else ""))
+                self.status.set_text(_("Imported “{theme}”.").format(theme=name) +
+                                     ("\n" + "\n".join(notes) if notes else ""))
             except (themes.ThemeError, OSError, ValueError) as exc:
-                self.status.set_text(f"Import failed: {exc}")
+                self.status.set_text(_("Import failed: {problem}").format(problem=exc))
         chooser.destroy()
 
     def on_apply(self, _button: Gtk.Button) -> None:
         self.apply_btn.set_sensitive(False)
-        self.status.set_text("Applying… the desktop flickers once while it reloads.")
+        self.status.set_text(_("Applying… the desktop flickers once while it reloads."))
         data = copy.deepcopy(self.data)
 
         def work() -> None:
@@ -1777,7 +1796,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 log = cli.apply_to_desktop(data, style, activate=True)
                 GLib.idle_add(self.applied_ok, data, log)
             except Exception as exc:  # report anything to the user
-                GLib.idle_add(self.applied_failed, f"Apply failed: {exc}")
+                GLib.idle_add(self.applied_failed, _("Apply failed: {problem}").format(problem=exc))
         threading.Thread(target=work, daemon=True).start()
 
     def _come_back(self) -> None:
@@ -1794,7 +1813,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
     def applied_ok(self, data: dict, log: list[str]) -> bool:
         self._come_back()
         self.applied = data
-        self.status.set_text(f"“{data['theme']}” is on the desktop. Revert puts the previous theme back.")
+        self.status.set_text(_("“{theme}” is on the desktop. Revert puts the previous theme back.")
+                             .format(theme=_(data["theme"]) if data["theme"] == themes.CUSTOM else data["theme"]))
         self.revert_btn.set_sensitive(True)
         self.revert_btn.show()
         self.update_buttons()
@@ -1806,7 +1826,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
 
     def _qt_notice(self, text: str) -> bool:
         d = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.INFO,
-                              buttons=Gtk.ButtonsType.OK, text="Qt apps now match your theme")
+                              buttons=Gtk.ButtonsType.OK, text=_("Qt apps now match your theme"))
         d.format_secondary_text(text)
         d.run()
         d.destroy()
@@ -1819,14 +1839,14 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
 
     def on_revert(self, _button: Gtk.Button) -> None:
         self.revert_btn.set_sensitive(False)
-        self.status.set_text("Reverting… the desktop flickers once while it reloads.")
+        self.status.set_text(_("Reverting… the desktop flickers once while it reloads."))
 
         def work() -> None:
             try:
                 restored, log = cli.revert_desktop()
                 GLib.idle_add(self.reverted, restored, log)
             except Exception as exc:
-                GLib.idle_add(self.applied_failed, f"Revert failed: {exc}")
+                GLib.idle_add(self.applied_failed, _("Revert failed: {problem}").format(problem=exc))
         threading.Thread(target=work, daemon=True).start()
 
     def reverted(self, restored: dict | None, log: list[str]) -> bool:
@@ -1834,7 +1854,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if restored:
             self.applied = restored
         self.revert_btn.hide()
-        self.status.set_text("The previous theme is back on the desktop. Your settings here are unchanged.")
+        self.status.set_text(_("The previous theme is back on the desktop. Your settings here are unchanged."))
         self.update_buttons()
         return False
 

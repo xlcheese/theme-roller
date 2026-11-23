@@ -554,6 +554,8 @@ def cmd_export_preset(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from . import i18n
+    i18n.use_english()          # the command line stays English (its messages are shared with the app)
     parser = argparse.ArgumentParser(prog="theme-roller",
                                      description="Generate and apply the xl-Cheeselooks theme.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")

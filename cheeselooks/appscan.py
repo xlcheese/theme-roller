@@ -26,6 +26,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import paths
+from .i18n import N_
 
 # the kinds, in the order the scan lists them
 GTK3, GNOME, FLATPAK, QT, EDITOR, TERMINAL, WEB, UNKNOWN = (
@@ -391,8 +392,8 @@ def classify(app_id: str, e: dict[str, str]) -> App:
     flat = e.get("X-Flatpak") or (re.search(r"flatpak\s+run\b.*?\s([\w.-]+\.[\w.-]+)", e.get("Exec", "")) or [None, None])[1]
     if flat:
         runtime = flatpak_runtime(flat)
-        detail = ("GNOME runtime" if "gnome" in runtime.lower() else
-                  "KDE runtime" if "kde" in runtime.lower() else "")
+        detail = (N_("GNOME runtime") if "gnome" in runtime.lower() else
+                  N_("KDE runtime") if "kde" in runtime.lower() else "")
         return App(name, FLATPAK, detail)
     if e.get("Terminal", "").lower() == "true":
         return App(name, TERMINAL)

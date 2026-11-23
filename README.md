@@ -35,6 +35,10 @@ Linux Mint runs apps built with several different toolkits, and each looks for i
 - **Text editors** (Xed, gedit, Meld): a matching color scheme.
 - **Web-based apps** (Electron, Chrome apps) and apps that draw everything themselves: no theme reaches these.
 
+## Languages
+
+Theme Roller speaks English, Spanish, German, French, Brazilian Portuguese, Italian, Russian and Dutch. It follows the language set in Mint. The command line, and theme and style names, stay in English. To help with a translation or add a language, see [po/README.md](po/README.md).
+
 ## Trying it
 
 On Linux Mint 22, from a copy of this repository:
@@ -90,6 +94,7 @@ Linux Mint 22.x with Cinnamon 6.x. Everything uses the Python 3 and GTK that Min
 - Tests: `python3 -m unittest discover tests`
 - Every computed value: `./bin/theme-roller tokens [filter]`
 - Check a style file: `./bin/theme-roller check-style PATH`
+- Translations: `tools/update-po.py` (see [po/README.md](po/README.md)); try one with `THEME_ROLLER_LANG=de ./bin/theme-roller`
 - How it all works, and why: [the design spec](docs/design-spec.md)
 
 ## Credits

@@ -31,6 +31,7 @@ from dataclasses import dataclass, replace
 
 from . import palette as pal
 from . import shape
+from .i18n import N_
 
 STYLES = {
     "flat": "xl-Cheeselooks Flat",
@@ -120,8 +121,8 @@ GLYPH_SETS = {
     "chevrons": {"close": "x", "minimize": "chevron-down", "maximize": "chevron-up", "unmaximize": "diamond"},
     "marks": {"close": "x", "minimize": "minus", "maximize": "plus", "unmaximize": "plus"},
 }
-GLYPH_SET_NAMES = {"regular": "Regular", "thin": "Thin", "chevrons": "Chevrons", "marks": "Marks",
-                   "icons": "Icon Theme"}
+GLYPH_SET_NAMES = {"regular": N_("Regular"), "thin": N_("Thin"), "chevrons": N_("Chevrons"),
+                   "marks": N_("Marks"), "icons": N_("Icon Theme")}
 # each style's own set (the picker shows it until you choose another)
 STYLE_GLYPHS = {"dots": "marks", "gargantuan": "thin", "gargantuan-circles": "thin",
                 "unpretentious": "chevrons", "unpretentious-flat": "chevrons"}
