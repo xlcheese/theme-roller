@@ -44,7 +44,7 @@ First click **About → Remove from my desktop…** in Theme Roller: Mint's defa
 ### Good to know
 
 - **Window border changes restart Cinnamon** by themselves when you click Apply. Your windows stay open; the screen flickers once. Cinnamon only reloads window borders that way.
-- **Qt apps:** the first time you switch them on, log out and back in. After that, reopening an app is enough.
+- **Qt apps:** the first time Theme Roller colors them, log out and back in. After that, reopening an app is enough.
 - **Web-based apps** (Electron and Chrome apps) draw their own look, and no theme reaches them.
 - **Built for Linux Mint 22 with Cinnamon.** Cinnamon on other Linux distributions may work, but hasn't been tested yet.
 
