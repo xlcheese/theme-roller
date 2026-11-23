@@ -1,6 +1,23 @@
-# Theme Roller
+<p align="center">
+  <img src="data/icons/xl-cheeselooks-256.png" width="128" alt="Theme Roller's icon: a swirl of colors">
+</p>
 
-**Good ol' fashioned Linux desktop theming for your Linux Mint Cinnamon desktop.**
+<h1 align="center">Theme Roller</h1>
+
+<p align="center"><b>Good ol' fashioned Linux desktop theming for your Linux Mint Cinnamon desktop.</b></p>
+
+<p align="center">
+  <a href="https://github.com/xlcheese/theme-roller/releases/latest"><b>⬇&nbsp;Download for Linux&nbsp;Mint&nbsp;22&nbsp;(.deb)</b></a>
+  &nbsp;·&nbsp; <a href="#installing">How to install</a>
+  &nbsp;·&nbsp; <a href="#customization-options">What you can change</a>
+  &nbsp;·&nbsp; Free and open source
+</p>
+
+<!-- HERO: the same Mint desktop in several themes (desktop screenshots to come); until then, the app in eight of its themes -->
+<p align="center">
+  <img src="docs/images/themes-grid.png" alt="Theme Roller's window in eight built-in themes: xl-Cheeselooks, xl-Cheeselooks Dark, xl-Gummy, Claude Dark, xl-Pigeon, xl-Organ Harvest, xl-Vintage and xl-Classic Dark">
+  <br><i>One app, eight of its built-in themes. Every picture is Theme Roller itself, wearing the theme it made.</i>
+</p>
 
 Remember when customizing the theme on your Linux desktop was easy? There were hundreds of GTK2 themes available on sites like gnome-look.org, rated, reviewed, and shared by the people who made them. You could download a theme or edit the gtkrc file to make your own without a lot of time invested. At one point, we had a tool in Ubuntu and GNOME 2 which allowed effortless changes to the color and style of your theme without ever opening a gtkrc file. You could instantly make your theme as ugly as can be. That was one part of using Linux on my personal computer that I found fun.
 
@@ -22,7 +39,33 @@ Theme Roller brings it back. Choose your colors, turn some knobs and dials, then
 - **Icons:** folder icons in your colors, in multiple styles to choose from. Theme Roller follows your current icon scheme and only customizes the folders. Other icons stay as they were.
 - **Integration:** brings your colors to the hodgepodge of apps that don't read the theme on their own: GNOME-style apps, Flatpak apps, Qt apps like VLC, and text editors. **Scan my apps** button shows which of your apps are which kind, and whether the theme reaches them. See below for apps which have limitations.
 
+<p align="center">
+  <img src="docs/images/folder-styles.png" width="560" alt="The six folder icon styles in different theme colors: xl-Big Baddy, xl-Rad, Claude, Mint-Y, Yaru and Breeze">
+  <br><i>The six folder styles, each in a different theme's colors. Drag a file over a folder and it opens.</i>
+</p>
+
 Everything shows in a live preview first. Nothing changes on your desktop until you click **Apply**, and **Revert** puts your previous theme back. None of your prior theme work outside of Theme Roller will be lost.
+
+## A tour of the tabs
+
+<table>
+  <tr>
+    <td><img src="docs/images/app-xl-cheeselooks.png" alt="The Global tab in xl-Cheeselooks"><br><b>Global</b>, in xl-Cheeselooks: three colors, then the shape of everything.</td>
+    <td><img src="docs/images/app-xl-cheeselooks-dark.png" alt="The Style tab in xl-Cheeselooks Dark"><br><b>Style</b>, in xl-Cheeselooks Dark: how things are drawn, and how deep.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/app-xl-gummy.png" alt="The Window Borders tab in xl-Gummy"><br><b>Window Borders</b>, in xl-Gummy: title bars, borders and window buttons.</td>
+    <td><img src="docs/images/app-claude-dark.png" alt="The Panel and Menu tab in Claude Dark"><br><b>Panel &amp; Menu</b>, in Claude Dark: the Cinnamon panel and its menus.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/app-xl-pigeon.png" alt="The Theme tab in xl-Pigeon"><br><b>Theme</b>, in xl-Pigeon: built-in themes, yours, and ones shared with you.</td>
+    <td><img src="docs/images/app-xl-organ-harvest.png" alt="The Icons tab in xl-Organ Harvest"><br><b>Icons</b>, in xl-Organ Harvest: folders in your colors.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/app-xl-vintage.png" alt="The Details tab in xl-Vintage"><br><b>Details</b>, in xl-Vintage: tooltips, scrollbars, sliders and switches.</td>
+    <td><img src="docs/images/app-xl-classic-dark.png" alt="The Integration tab in xl-Classic Dark"><br><b>Integration</b>, in xl-Classic Dark: your colors in apps that don't read the theme.</td>
+  </tr>
+</table>
 
 ## How far Theme Roller reaches
 
