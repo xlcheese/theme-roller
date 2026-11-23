@@ -4,12 +4,14 @@
 # entries; flat toolbar and title buttons that rise on hover; boxed tabs with
 # an accent glow on the selected tab, and on the focused window's panel button;
 # accent scrollbar thumbs with a crisp outline, as Clearlooks Gummy had.
+# Styled after Clearlooks Gummy, GNOME 2's look from 2.20 on: its widgets and colors
+# were the model; no code or images were taken from it.
 #
 # Alpha values are written for Depth 50. alpha_dark is used on dark themes.
 
 name = "xl-Gummy"
 author = "Wesley Hayslip"
-description = "Bright, crisp glass buttons, sunken fields, boxed tabs with an accent glow."
+description = "Bright, crisp glass buttons, sunken fields, boxed tabs with an accent glow. Styled after Clearlooks Gummy."
 
 adapt_strength = 0.6
 

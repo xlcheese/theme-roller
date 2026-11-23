@@ -4,13 +4,15 @@
 # borders that brighten toward the text, a stronger drop shadow, faint glints
 # instead of bright highlights, and a recess that still shows on dark grey.
 # By Wesley Hayslip.
+# Styled after GNOME 2's Clearlooks, as it looked before GNOME 2.20: its widgets and
+# colors were the model; no code or images were taken from it.
 #
 # Alpha values are written for Depth 50. alpha_dark is what dark colours use;
 # alpha is the fallback if you pair this style with light colours.
 
 name = "xl-Classic-Dark"
 author = "Wesley Hayslip"
-description = "A traditional bevel with a recess, sunken fields, boxed tabs. xl-Classic for dark colours."
+description = "A traditional bevel with a recess, sunken fields, boxed tabs. xl-Classic for dark colours. Styled after GNOME 2's Clearlooks."
 
 adapt_strength = 0.6
 dividers = "lift(bg, 0.95)"
