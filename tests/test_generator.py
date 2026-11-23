@@ -1270,6 +1270,84 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(data["style"]["name"], new)
             self.assertEqual(cli._load_style(new, None).name, new)
 
+    def test_remove_from_desktop(self):
+        # theme-roller remove (before uninstalling): our theme settings back to
+        # Mint's defaults, our files and colors gone, the watcher off; your
+        # settings and your own themes kept
+        import os
+        from unittest import mock
+        from cheeselooks import remove, watch, gtk4, paths
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            env = {"XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(home / ".local/share"),
+                   "XDG_CACHE_HOME": str(home / ".cache")}
+            gs = {("org.cinnamon.theme", "name"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.interface", "gtk-theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.wm.preferences", "theme"): "Mint-Y-Aqua"}       # someone else's: kept
+            resets = []
+
+            def run(*args):
+                if args[0] == "reset":
+                    resets.append(args[1:])
+                    gs[args[1:]] = "Mint-Y"
+                return ""
+            with mock.patch.dict(os.environ, env), mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(remove.reload, "available", return_value=True), \
+                    mock.patch.object(remove.reload, "get", side_effect=lambda sc, k: gs.get((sc, k))), \
+                    mock.patch.object(remove.reload, "_run", side_effect=run), \
+                    mock.patch.object(watch.subprocess, "run"), \
+                    mock.patch.object(remove.flatpak, "disable", return_value=False):
+                (paths.theme_dir() / "gtk-3.0").mkdir(parents=True)
+                paths.last_good_dir().mkdir(parents=True)
+                watch.autostart_file().parent.mkdir(parents=True)
+                watch.autostart_file().write_text("[Desktop Entry]\n")
+                paths.gtk4_css().parent.mkdir(parents=True)
+                paths.gtk4_css().write_text("/* mine */\n")
+                gtk4.write(paths.gtk4_css(), gtk4.block(paths.templates_dir(),
+                           tokens.build(defaults(), styles.load(DEFAULT_STYLE)), css_variables=True))
+                self.assertIn("accent", paths.gtk4_css().read_text())
+                settings.save(defaults(), paths.settings_file())
+                mine = home / ".local/share/theme-roller/themes/Mine.json"
+                mine.parent.mkdir(parents=True)
+                mine.write_text("{}")
+                remove.remove()
+                self.assertFalse(paths.theme_dir().exists())
+                self.assertFalse(paths.cache_dir().exists())
+                self.assertFalse(watch.autostart_file().exists())
+                self.assertEqual(paths.gtk4_css().read_text().strip(), "/* mine */")    # yours kept, ours gone
+                self.assertEqual(sorted(resets), [("org.cinnamon.desktop.interface", "gtk-theme"),
+                                                  ("org.cinnamon.theme", "name")])
+                self.assertEqual(gs[("org.cinnamon.desktop.wm.preferences", "theme")], "Mint-Y-Aqua")
+                self.assertTrue(paths.settings_file().exists() and mine.exists())
+                self.assertEqual(set(remove.leftovers()), {paths.config_dir(), mine.parents[1]})
+
+    def test_watcher_autostart_when_installed(self):
+        # installed, the package's /etc/xdg/autostart entry starts the watcher (and
+        # goes with the package); remove() hides it for you, Apply shows it again
+        import os
+        from unittest import mock
+        from cheeselooks import watch
+        with tempfile.TemporaryDirectory() as tmp:
+            system = Path(tmp) / "xdg-autostart"
+            system.mkdir()
+            (system / watch.AUTOSTART_NAME).write_text("[Desktop Entry]\nExec=theme-roller watch\n")
+            env = {"XDG_CONFIG_HOME": str(Path(tmp) / "config"), "THEME_ROLLER_SYSTEM_AUTOSTART": str(system)}
+            with mock.patch.dict(os.environ, env), mock.patch.object(watch.subprocess, "run"), \
+                    mock.patch.object(watch.subprocess, "Popen"), \
+                    mock.patch.object(watch, "running", return_value=True):
+                watch.enable()
+                self.assertFalse(watch.autostart_file().exists())          # the package's entry does it
+                watch.disable()
+                self.assertFalse(watch.autostart_file().exists())          # nothing left in autostart
+                self.assertTrue(watch.off_file().exists())                 # the watcher stays off for you
+                with mock.patch.object(watch.paths, "settings_file", return_value=watch.off_file()):
+                    self.assertEqual(watch.run(), 0)
+                watch.enable()                                            # the next Apply
+                self.assertFalse(watch.off_file().exists())
+            # a user who never applied: the watcher started at login just exits
+            with mock.patch.object(watch.paths, "settings_file", return_value=Path(tmp) / "none.json"):
+                self.assertEqual(watch.run(), 0)
+
     def test_translations(self):
         # every language file: readable, complete, and its {placeholders} and
         # <markup> match the English (a broken one would crash or garble the app)

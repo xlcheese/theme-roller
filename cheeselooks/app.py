@@ -1004,8 +1004,39 @@ class SettingsWindow(Gtk.ApplicationWindow):
             "This program comes with absolutely no warranty.\n"
             "See the <a href='https://www.gnu.org/licenses/gpl-3.0.html'>GNU General Public License, "
             "version 3 or later</a> for details.")), top=4)
+        # before uninstalling: a package can't tidy your home folder, so this does
+        remove = Gtk.Button(label=_("Remove from my desktop…"), halign=Gtk.Align.CENTER, margin_top=10)
+        remove.set_tooltip_text(_("Before uninstalling Theme Roller: puts Mint's default theme back and "
+                                  "takes Theme Roller's colors out of your apps"))
+        remove.connect("clicked", self.on_remove)
+        box.pack_start(remove, False, False, 0)
         grid.attach(box, 0, 0, 1, 1)
         return grid
+
+    def on_remove(self, _button: Gtk.Button) -> None:
+        """Theme Roller off the desktop (remove.py), after asking."""
+        d = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.QUESTION,
+                              buttons=Gtk.ButtonsType.OK_CANCEL,
+                              text=_("Remove Theme Roller from your desktop?"))
+        d.format_secondary_text(_(
+            "Mint's default theme comes back, Theme Roller's colors leave your apps, and the theme "
+            "watcher stops starting at login. Your settings and your own themes stay, so you can pick "
+            "up where you left off. Do this before uninstalling Theme Roller."))
+        answer = d.run()
+        d.destroy()
+        if answer != Gtk.ResponseType.OK:
+            return
+        self.status.set_text(_("Removing… the desktop flickers once while it reloads."))
+
+        def work() -> None:
+            from . import remove
+            try:
+                remove.remove()
+                GLib.idle_add(self.status.set_text, _(
+                    "Theme Roller is off your desktop. You can uninstall it now; Apply puts it back."))
+            except Exception as exc:  # report anything to the user
+                GLib.idle_add(self.status.set_text, _("Remove failed: {problem}").format(problem=exc))
+        threading.Thread(target=work, daemon=True).start()
 
     def _docs_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
         row = 0

@@ -428,6 +428,28 @@ def cmd_revert(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_remove(args: argparse.Namespace) -> int:
+    """Theme Roller off your desktop, before uninstalling it (see remove.py)."""
+    from . import remove
+    if not args.yes:
+        print("This takes Theme Roller off your desktop: Mint's default theme comes back, its colors\n"
+              "leave your apps, and the theme watcher stops starting at login. Your settings and\n"
+              "your own themes stay. Run it before uninstalling Theme Roller.")
+        try:
+            if input("Go ahead? [y/N] ").strip().lower() not in ("y", "yes"):
+                print("Nothing changed.")
+                return 1
+        except EOFError:
+            return 1
+    for line in remove.remove():
+        print(line)
+    kept = remove.leftovers()
+    print("Done. Theme Roller is off your desktop; you can uninstall it now.")
+    if kept:
+        print("Kept (delete them too to remove every trace): " + ", ".join(str(p) for p in kept))
+    return 0
+
+
 def cmd_tokens(args: argparse.Namespace) -> int:
     data = _load_settings(args)
     style = _load_style(data["style"]["name"], args.style_dir)
@@ -585,6 +607,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("revert", help="go back to the previously applied theme")
     p.add_argument("--no-reload", action="store_true")
     p.set_defaults(func=cmd_revert)
+
+    p = sub.add_parser("remove", help="take Theme Roller off your desktop (run before uninstalling)")
+    p.add_argument("--yes", action="store_true", help="don't ask first")
+    p.set_defaults(func=cmd_remove)
 
     p = sub.add_parser("tokens", help="list every computed value (for template and style authors)")
     common(p)

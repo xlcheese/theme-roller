@@ -8,7 +8,7 @@ Somewhere along the way this got lost. Today you get an accent color, a light or
 
 Theme Roller brings it back. Choose your colors, turn some knobs and dials, then click **Apply**. Your entire desktop theme changes within a second. You can make endless color and style changes from just living on the first few tabs of Theme Roller. If you want to dive deeper just click through the rest of the tabs which include the Cinnamon panel and menu, Window borders, Terminal, Icons, and other widgets if you want them.
 
-> **Status:** getting ready for its first release. You can run it today from a copy of this repository (below); a `.deb` package is on the way.
+> **Status:** getting ready for its first release. Install the `.deb` package (below), or run it from a copy of this repository.
 
 ## Customization Options
 
@@ -39,9 +39,29 @@ Linux Mint runs apps built with several different toolkits, and each looks for i
 
 Theme Roller speaks English, Spanish, German, French, Brazilian Portuguese, Italian, Russian and Dutch. It follows the language set in Mint. The command line, and theme and style names, stay in English. To help with a translation or add a language, see [po/README.md](po/README.md).
 
-## Trying it
+## Installing
 
-On Linux Mint 22, from a copy of this repository:
+On Linux Mint 22, download `theme-roller_<version>_all.deb` from the [Releases page](https://github.com/xlcheese/theme-roller/releases) and double-click it, or from a terminal:
+
+```bash
+sudo apt install ./theme-roller_*_all.deb
+```
+
+Theme Roller is then in the menu under **Preferences**. Pick a theme, change what you like, and click **Apply**.
+
+To go back to Mint's own look, pick it again in **System Settings → Themes**. Theme Roller notices and takes its colors out of your other apps too.
+
+### Uninstalling
+
+First open Theme Roller and click **About → Remove from my desktop…** (or run `theme-roller remove`). Then uninstall it from the Software Manager, or:
+
+```bash
+sudo apt remove theme-roller
+```
+
+The first step matters because the package can't tidy your home folder itself. It does that tidying: Mint's default theme comes back, Theme Roller's colors leave your apps, and its files go. Your settings and your own themes stay in `~/.config/theme-roller` and `~/.local/share/theme-roller`, in case you come back. Delete those two folders to remove every trace.
+
+### From a copy of this repository
 
 ```bash
 git clone https://github.com/xlcheese/theme-roller.git
@@ -54,10 +74,6 @@ cd theme-roller
 ```bash
 ./bin/theme-roller
 ```
-
-That opens Theme Roller. Pick a theme, change what you like, and click **Apply**.
-
-To go back to Mint's own look, pick it again in **System Settings → Themes**. Theme Roller notices and takes its colors out of your other apps too.
 
 ## The command line
 
@@ -73,6 +89,7 @@ Everything the app does can also be done from a terminal. `theme-roller --help` 
 | `theme-roller export-theme` / `import-theme` | Shares a theme as one `.xltheme` file |
 | `theme-roller scan --why` | Lists your apps by kind, and why for any it can't place |
 | `theme-roller set-aside` | Takes Theme Roller's colors out of your apps for now |
+| `theme-roller remove` | Takes Theme Roller off your desktop (before uninstalling) |
 
 From a copy of the repository, run them as `./bin/theme-roller …`.
 
@@ -94,6 +111,7 @@ Linux Mint 22.x with Cinnamon 6.x. Everything uses the Python 3 and GTK that Min
 - Tests: `python3 -m unittest discover tests`
 - Every computed value: `./bin/theme-roller tokens [filter]`
 - Check a style file: `./bin/theme-roller check-style PATH`
+- The package: `tools/build-deb.py` writes `dist/theme-roller_<version>_all.deb`
 - Translations: `tools/update-po.py` (see [po/README.md](po/README.md)); try one with `THEME_ROLLER_LANG=de ./bin/theme-roller`
 - How it all works, and why: [the design spec](docs/design-spec.md)
 
