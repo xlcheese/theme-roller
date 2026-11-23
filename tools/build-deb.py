@@ -44,16 +44,22 @@ RECOMMENDS = "qt5ct"
 SUGGESTS = "flatpak"
 
 DESCRIPTION = """\
-Style your Linux Mint Cinnamon desktop
- Theme Roller makes a complete theme for Linux Mint's Cinnamon desktop from
- your own colors and a few sliders: GTK 3 and GTK 4 apps, libadwaita apps, the
- Cinnamon panel and menus, and the window borders. Pick a style for how
- things are drawn (edges, shadows, tabs, window buttons), see it in a live
- preview, and click Apply.
+Good ol' fashioned Linux desktop theming for your Linux Mint Cinnamon desktop
+ Theme Roller is a complete custom theme generation tool for your Linux
+ Mint Cinnamon desktop. It aims to bring a unified look to your desktop
+ by theming every kind of app you use (GTK 3, GTK 4 and libadwaita),
+ along with the Cinnamon panel, the main menu and the window borders.
  .
- It also brings your colors to apps that don't read the theme on their own
- (GNOME-style apps, Flatpak apps, Qt apps like VLC, text editors), recolors
- your folder icons in one of six styles, and shares themes as a single file.
+ Choose your colors, turn some knobs and dials, then click Apply. Your
+ entire desktop theme changes within a second. You can make endless color
+ and style changes from just living on the first few tabs of Theme
+ Roller. If you want to dive deeper, click through the rest of the tabs,
+ which include the Cinnamon panel and menu, Window Borders, Terminal,
+ Icons, and other widgets if you want them.
+ .
+ It also brings your theme to the apps that don't follow Linux Mint's
+ theme on their own: Flatpak, GNOME-style and Qt apps, and your text
+ editor.
 """
 
 DESKTOP = f"""\
@@ -99,17 +105,14 @@ METAINFO = f"""\
 <component type="desktop-application">
   <id>{APP_ID}</id>
   <name>Theme Roller</name>
-  <summary>Style your Linux Mint Cinnamon desktop</summary>
+  <summary>Good ol&apos; fashioned Linux desktop theming for your Linux Mint Cinnamon desktop</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <developer id="io.github.xlcheese"><name>Wesley Hayslip</name></developer>
   <description>
-    <p>Theme Roller makes a complete theme for Linux Mint's Cinnamon desktop from your own
-    colors and a few sliders: GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon panel and
-    menus, and the window borders. Pick a style for how things are drawn, see it in a live
-    preview, and click Apply.</p>
-    <p>It also brings your colors to apps that don't read the theme on their own, recolors your
-    folder icons, and shares themes as a single file.</p>
+    <p>Theme Roller is a complete custom theme generation tool for your Linux Mint Cinnamon desktop. It aims to bring a unified look to your desktop by theming every kind of app you use (GTK 3, GTK 4 and libadwaita), along with the Cinnamon panel, the main menu and the window borders.</p>
+    <p>Choose your colors, turn some knobs and dials, then click Apply. Your entire desktop theme changes within a second. You can make endless color and style changes from just living on the first few tabs of Theme Roller. If you want to dive deeper, click through the rest of the tabs, which include the Cinnamon panel and menu, Window Borders, Terminal, Icons, and other widgets if you want them.</p>
+    <p>It also brings your theme to the apps that don't follow Linux Mint's theme on their own: Flatpak, GNOME-style and Qt apps, and your text editor.</p>
   </description>
   <launchable type="desktop-id">{APP_ID}.desktop</launchable>
   <url type="homepage">https://github.com/xlcheese/theme-roller</url>
