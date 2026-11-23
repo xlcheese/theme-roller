@@ -1212,8 +1212,31 @@ msgstr ""
 msgid "{file} isn't a Theme Roller theme file"
 msgstr ""
 
-#: cheeselooks/themes.py:301
+#: cheeselooks/themes.py:288
+#, python-brace-format
+msgid ""
+"This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended."
+msgstr ""
+
+#: cheeselooks/themes.py:295
+#, python-brace-format
+msgid ""
+"You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style."
+msgstr ""
+
+#: cheeselooks/themes.py:302
 msgid "the theme file contains an unsafe path"
+msgstr ""
+
+#: cheeselooks/themes.py:308
+#, python-brace-format
+msgid ""
+"The theme's name was longer than {count} characters: shortened to “{theme}”."
+msgstr ""
+
+#: cheeselooks/themes.py:318
+#, python-brace-format
+msgid "A theme called “{theme}” already exists: imported as “{copy}”."
 msgstr ""
 
 #: cheeselooks/titlebuttons.py:124

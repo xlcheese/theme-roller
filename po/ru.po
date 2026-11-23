@@ -1256,9 +1256,34 @@ msgstr "встроенные темы нельзя удалить"
 msgid "{file} isn't a Theme Roller theme file"
 msgstr "{file} — не файл темы Theme Roller"
 
-#: cheeselooks/themes.py:301
+#: cheeselooks/themes.py:288
+#, python-brace-format
+msgid ""
+"This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended."
+msgstr ""
+"Эта тема сделана в более новом Theme Roller ({version}). Часть её может выглядеть не так, как задумано; рекомендуется обновить Theme Roller."
+
+#: cheeselooks/themes.py:295
+#, python-brace-format
+msgid ""
+"You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style."
+msgstr ""
+"У вас уже есть папка стиля «{folder}»: оставлена ваша, так что тема использует вашу копию этого стиля."
+
+#: cheeselooks/themes.py:302
 msgid "the theme file contains an unsafe path"
 msgstr "файл темы содержит небезопасный путь"
+
+#: cheeselooks/themes.py:308
+#, python-brace-format
+msgid ""
+"The theme's name was longer than {count} characters: shortened to “{theme}”."
+msgstr "Имя темы было длиннее {count} символов: сокращено до «{theme}»."
+
+#: cheeselooks/themes.py:318
+#, python-brace-format
+msgid "A theme called “{theme}” already exists: imported as “{copy}”."
+msgstr "Тема «{theme}» уже есть: импортирована как «{copy}»."
 
 #: cheeselooks/titlebuttons.py:124
 msgid "Chevrons"

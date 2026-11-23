@@ -149,7 +149,7 @@ rm -rf /{SHARE}/cheeselooks/__pycache__
 def version() -> str:
     text = (ROOT / "cheeselooks" / "__init__.py").read_text(encoding="utf-8")
     v = re.search(r'__version__\s*=\s*"([^"]+)"', text).group(1)
-    return re.sub(r"\.?(dev|a|b|rc)(\d*)$", r"~\1\2", v)       # 0.1.0.dev0 -> 0.1.0~dev0 (sorts before 0.1.0)
+    return re.sub(r"\.?(dev|a|b|rc)(\d*)$", r"~\1\2", v)       # e.g. 1.0.0.dev0 -> 1.0.0~dev0 (sorts before 1.0.0)
 
 
 def maintainer() -> str:

@@ -285,14 +285,15 @@ def import_file(src: Path) -> tuple[str, list[str]]:
             raise ThemeError(_("{file} isn't a Theme Roller theme file").format(file=Path(src).name))
         doc = json.loads(z.read("theme.json"))
         if doc.get("format", 1) > FORMAT:
-            notes.append(f"This theme was made with a newer xl-Cheeselooks ({doc.get('tool_version', '?')}). "
-                         "Some of it may not show as intended; updating xl-Cheeselooks is recommended.")
+            notes.append(_("This theme was made with a newer Theme Roller ({version}). Some of it may "
+                           "not show as intended; updating Theme Roller is recommended.").format(
+                version=doc.get("tool_version", "?")))
         style_name = doc["settings"].get("style", {}).get("name")
         if doc.get("style_included") and style_name:
             target = paths.style_dirs()[0] / slug(style_name)
             if target.exists():
-                notes.append(f"You already have a style folder '{target.name}': kept yours, "
-                             "so the theme uses your copy of that style.")
+                notes.append(_("You already have a style folder “{folder}”: kept yours, so the theme "
+                               "uses your copy of that style.").format(folder=target.name))
             else:
                 for n in names:
                     if n.startswith("style/") and not n.endswith("/"):
@@ -304,8 +305,8 @@ def import_file(src: Path) -> tuple[str, list[str]]:
                         out.write_bytes(z.read(n))
     name = doc["name"]
     if len(name) > MAX_NAME:
-        notes.append(f"The theme's name was longer than {MAX_NAME} characters: shortened to "
-                     f"'{name[:MAX_NAME].rstrip()}'.")
+        notes.append(_("The theme's name was longer than {count} characters: shortened to “{theme}”.")
+                     .format(count=MAX_NAME, theme=name[:MAX_NAME].rstrip()))
         name = name[:MAX_NAME].rstrip()
     existing = {n for n, _f, _b in list_themes()}
     final = name
@@ -314,7 +315,8 @@ def import_file(src: Path) -> tuple[str, list[str]]:
         final = f"{name} ({i})"
         i += 1
     if final != name:
-        notes.append(f"A theme called '{name}' already exists: imported as '{final}'.")
+        notes.append(_("A theme called “{theme}” already exists: imported as “{copy}”.").format(
+            theme=name, copy=final))
     f = user_dir() / f"{slug(final)}.json"
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(json.dumps({**doc, "name": final}, indent=2) + "\n", encoding="utf-8")
