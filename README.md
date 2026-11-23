@@ -30,7 +30,7 @@ Theme Roller brings it back. Choose your colors, turn some knobs and dials, then
 
 > **Status:** 0.9.0 is the first release. It's tested on Linux Mint 22 with Cinnamon. If something looks wrong on your desktop, please [open an issue](https://github.com/xlcheese/theme-roller/issues) with a screenshot. What's new is in the [changelog](CHANGELOG.md).
 
-## Your colors, everywhere
+## Custom colors throughout
 
 Change one color and the whole desktop follows: the panel, the menu, selections, buttons, window borders, even the folders in your file manager. Here is xl-Cheeselooks Dark with nothing changed but its accent:
 
