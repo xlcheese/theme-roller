@@ -8,9 +8,13 @@
 
 <p align="center">
   <a href="https://github.com/xlcheese/theme-roller/releases/latest"><b>⬇&nbsp;Download for Linux&nbsp;Mint&nbsp;22&nbsp;(.deb)</b></a>
-  &nbsp;·&nbsp; <a href="#installing">How to install</a>
+</p>
+
+<p align="center">
+  <a href="#installing">How to install</a>
   &nbsp;·&nbsp; <a href="#customization-options">What you can change</a>
   &nbsp;·&nbsp; Free and open source
+  &nbsp;·&nbsp; <a href="https://www.paypal.com/donate/?hosted_button_id=SDDYDENKXPCWN">Like Theme Roller? Leave a tip!&nbsp;☕</a>
 </p>
 
 <p align="center">
@@ -31,7 +35,7 @@ Theme Roller brings it back. Choose your colors, turn some knobs and dials, then
 Change one color and the whole desktop follows: the panel, the menu, selections, buttons, window borders, even the folders in your file manager. Here is xl-Cheeselooks Dark with nothing changed but its accent:
 
 <p align="center">
-  <img src="docs/images/accents.png" alt="The same desktop in xl-Cheeselooks Dark four times, with a turquoise, pink, green and camo accent">
+  <img src="docs/images/accents.png" alt="The same desktop in xl-Cheeselooks Dark four times, with a green, pink, turquoise and camo accent">
 </p>
 
 And some of the themes that come with it, light and dark:
@@ -64,8 +68,8 @@ Everything shows in a live preview first. Nothing changes on your desktop until 
 
 <table>
   <tr>
-    <td><img src="docs/images/app-xl-cheeselooks.png" alt="The Global tab in xl-Cheeselooks"><br><b>Global</b>, in xl-Cheeselooks: three colors, then the shape of everything.</td>
-    <td><img src="docs/images/app-xl-cheeselooks-dark.png" alt="The Style tab in xl-Cheeselooks Dark"><br><b>Style</b>, in xl-Cheeselooks Dark: how things are drawn, and how deep.</td>
+    <td><img src="docs/images/app-xl-cheeselooks.png" alt="The Global tab in xl-Cheeselooks"><br><b>Global</b>, in xl-Cheeselooks: three color options with sliders to adjust the overall look.</td>
+    <td><img src="docs/images/app-xl-cheeselooks-dark.png" alt="The Style tab in xl-Cheeselooks Dark"><br><b>Style</b>, in xl-Cheeselooks Dark: displays a list of style sheets which define details of how widgets, such as buttons, are drawn.</td>
   </tr>
   <tr>
     <td><img src="docs/images/app-xl-gummy.png" alt="The Window Borders tab in xl-Gummy"><br><b>Window Borders</b>, in xl-Gummy: title bars, borders and window buttons.</td>

@@ -1270,6 +1270,14 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(data["style"]["name"], new)
             self.assertEqual(cli._load_style(new, None).name, new)
 
+    def test_a_new_user_starts_from_the_theme_file(self):
+        # no settings yet: the default theme as its file has it, not the bare
+        # defaults (xl_cheese: the first Apply gave a white terminal)
+        missing = Path(tempfile.mkdtemp()) / "settings.json"
+        first = settings.load(missing)
+        self.assertEqual(first, themes.load(settings.DEFAULTS["theme"]))
+        self.assertEqual((first["terminal"]["separate_colors"], first["terminal"]["bg"]), (True, "#2B2B2B"))
+
     def test_first_apply_and_revert_for_a_new_user(self):
         # xl_cheese's fresh-user test, 23 Nov: on Mint-Y, the first Apply failed
         # (no last-good folder for the panel height); Revert didn't bring Mint-Y

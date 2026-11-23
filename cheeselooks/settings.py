@@ -274,12 +274,24 @@ def keep_per_user(new: dict, current: dict) -> dict:
 
 def load(path: Path) -> dict:
     if not path.exists():
-        return copy.deepcopy(DEFAULTS)
+        return first_run()
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise SettingsError([f"{path} is not valid JSON: {exc}"]) from exc
     return from_dict(data)
+
+
+def first_run() -> dict:
+    """No settings saved yet (a new user): the default theme as its file has it.
+    DEFAULTS alone is not that theme (xl_cheese, 23 Nov: a new user's first
+    Apply of "xl-Cheeselooks" gave a white terminal, a different panel and title
+    bar...: the bare defaults, not the theme; picking it again fixed it)."""
+    from . import themes          # here: themes imports this module
+    try:
+        return themes.load(DEFAULTS["theme"])
+    except Exception:             # the theme file missing or unreadable: the bare defaults
+        return copy.deepcopy(DEFAULTS)
 
 
 def save(settings: dict, path: Path) -> None:
