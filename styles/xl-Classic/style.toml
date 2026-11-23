@@ -2,15 +2,15 @@
 # Light top and left edges, a faint dark bottom and right, the background
 # pressed in round each button (a recess); sunken fields; flat toolbar and
 # title buttons that rise on hover; boxed tabs; close hovers like the others.
-# Styled after GNOME 2's Clearlooks, as it looked before GNOME 2.20: its widgets and
-# colors were the model; no code or images were taken from it.
+# Styled after ClearlooksClassic, GNOME 2's Clearlooks as it looked before 2.20: its
+# widgets and colors were the model; no code or images were taken from it.
 #
 # Alpha values are written for Depth 50. alpha_dark is used on dark surfaces
 # (dark themes, dark title bars).
 
 name = "xl-Classic"
 author = "Wesley Hayslip"
-description = "A traditional bevel with a recess, sunken fields, boxed tabs. Styled after GNOME 2's Clearlooks."
+description = "A traditional bevel with a recess, sunken fields, boxed tabs. Styled after ClearlooksClassic."
 
 adapt_strength = 0.6
 

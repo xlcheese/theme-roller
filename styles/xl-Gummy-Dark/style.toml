@@ -4,15 +4,16 @@
 # borders that brighten toward the text, a stronger drop shadow, faint glints
 # instead of bright highlights, and a recess that still shows on dark grey.
 # By Wesley Hayslip.
-# Styled after Clearlooks Gummy, GNOME 2's look from 2.20 on: its widgets and colors
-# were the model; no code or images were taken from it.
+# Styled after GNOME 2.20's Clearlooks, known as Gummy while it was made (the
+# engine's style = GUMMY): its widgets and colors were the model; no code or images
+# were taken from it.
 #
 # Alpha values are written for Depth 50. alpha_dark is what dark colours use;
 # alpha is the fallback if you pair this style with light colours.
 
 name = "xl-Gummy-Dark"
 author = "Wesley Hayslip"
-description = "Bright, crisp glass buttons, sunken fields, boxed tabs with an accent glow. xl-Gummy for dark colours. Styled after Clearlooks Gummy."
+description = "Bright, crisp glass buttons, sunken fields, boxed tabs with an accent glow. xl-Gummy for dark colours. Styled after GNOME 2.20's Clearlooks (Gummy)."
 
 adapt_strength = 0.6
 dividers = "lift(bg, 0.95)"
