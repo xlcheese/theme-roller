@@ -18,8 +18,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/hero.png" alt="One Linux Mint desktop cut into six slices, each in a different Theme Roller theme: the panel, menu, terminal, file manager, calculator and window borders all change">
-  <br><i>One desktop, six themes: the panel, the menu, every app and the window borders change together.</i>
+  <img src="docs/images/hero.png" alt="One Linux Mint desktop cut into slices, each in a different Theme Roller theme: the panel, menu, terminal, file manager, calculator and window borders all change">
+  <br><i>One desktop: the panel, the menu, every app and the window borders change together.</i>
 </p>
 
 Remember when customizing the theme on your Linux desktop was easy? There were hundreds of GTK2 themes available on sites like gnome-look.org, rated, reviewed, and shared by the people who made them. You could download a theme or edit the gtkrc file to make your own without a lot of time invested. At one point, we had a tool in Ubuntu and GNOME 2 which allowed effortless changes to the color and style of your theme without ever opening a gtkrc file. You could instantly make your theme as ugly as can be. That was one part of using Linux on my personal computer that I found fun.
