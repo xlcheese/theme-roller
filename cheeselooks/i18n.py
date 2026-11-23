@@ -70,6 +70,23 @@ def read_po(path: Path) -> dict[str, str]:
     return table
 
 
+def read_po_ids(path: Path) -> list[str]:
+    """Every msgid in a .po or .pot file, in the file's order (translated or not)."""
+    ids: list[str] = []
+    cur = None
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if line.startswith("msgid "):
+            cur = _unquote(line[6:])
+        elif line.startswith('"') and cur is not None:
+            cur += _unquote(line)
+        elif line.startswith("msgstr "):
+            if cur:
+                ids.append(cur)
+            cur = None
+    return ids
+
+
 def _candidates() -> list[str]:
     forced = os.environ.get("THEME_ROLLER_LANG")
     if forced:
