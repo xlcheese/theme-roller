@@ -39,6 +39,14 @@ Other things to watch:
 - **Use the same words as the buttons and tabs.** Notes refer to them by name: "click **Apply**", "the Integration tab".
 - **Keep labels short.** A setting's name sits beside a slider, and a long one widens the whole window. Aim for no longer than the English "Notification opacity".
 
+## Review pages for native speakers
+
+`po/review/<code>.md` shows every text as a numbered table: English beside the translation, with an introduction in that language and a screenshot. It's readable on GitHub without an account. `po/review/posts.md` has a short post in each language asking for a review, linking to its page. Rebuild the pages after translations change:
+
+```bash
+tools/make-review.py
+```
+
 ## Adding a language
 
 ```bash
