@@ -80,7 +80,15 @@ for i in range(40):
     f = random.random()
     o.append(f'<path d="{path(curve(f * 2 * math.pi, 1.0 + random.gauss(0, 0.05), 2.4))}" stroke="#FFFFFF" '
              f'stroke-width="{random.uniform(0.4, 1.2):.1f}" opacity="{random.uniform(0.25, 0.6):.2f}"/>')
-o += ['</g><rect width="256" height="256" fill="url(#eye)"/></g></svg>']
+o += ['</g><rect width="256" height="256" fill="url(#eye)"/></g>']
+# a thin edge so the shape holds on any panel (xl_cheese, 23 Nov: on the panel the
+# swirl's bright edge ran into it): a soft dark outer line for light panels,
+# a faint light inner one for dark panels
+o += ['<rect x="8.75" y="8.75" width="238.5" height="238.5" rx="51.25" fill="none" '
+      'stroke="#000000" stroke-opacity="0.38" stroke-width="1.5"/>',
+      '<rect x="10.5" y="10.5" width="235" height="235" rx="49.5" fill="none" '
+      'stroke="#FFFFFF" stroke-opacity="0.30" stroke-width="1.5"/>',
+      '</svg>']
 
 
 def main() -> None:

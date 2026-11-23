@@ -224,6 +224,10 @@ def build(out_dir: Path) -> Path:
         write(pkg / "usr/share/metainfo" / f"{APP_ID}.metainfo.xml", METAINFO)
         write(pkg / "etc/xdg/autostart/theme-roller-watch.desktop", AUTOSTART)
         icons = pkg / "usr/share/icons/hicolor"
+        for small in sorted((ROOT / "data/icons/app").glob("*.png")):     # 16-64px, a crisp 1px edge each
+            n = small.stem
+            (icons / f"{n}x{n}/apps").mkdir(parents=True)
+            shutil.copy2(small, icons / f"{n}x{n}/apps/{APP_ID}.png")
         (icons / "256x256/apps").mkdir(parents=True)
         shutil.copy2(ROOT / "data/icons/xl-cheeselooks-256.png", icons / f"256x256/apps/{APP_ID}.png")
         (icons / "scalable/apps").mkdir(parents=True)
