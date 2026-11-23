@@ -13,10 +13,9 @@
   &nbsp;·&nbsp; Free and open source
 </p>
 
-<!-- HERO: the same Mint desktop in several themes (desktop screenshots to come); until then, the app in eight of its themes -->
 <p align="center">
-  <img src="docs/images/themes-grid.png" alt="Theme Roller's window in eight built-in themes: xl-Cheeselooks, xl-Cheeselooks Dark, xl-Gummy, Claude Dark, xl-Pigeon, xl-Organ Harvest, xl-Vintage and xl-Classic Dark">
-  <br><i>One app, eight of its built-in themes. Every picture is Theme Roller itself, wearing the theme it made.</i>
+  <img src="docs/images/hero.png" alt="One Linux Mint desktop cut into six slices, each in a different Theme Roller theme: the panel, menu, terminal, file manager, calculator and window borders all change">
+  <br><i>One desktop, six themes: the panel, the menu, every app and the window borders change together.</i>
 </p>
 
 Remember when customizing the theme on your Linux desktop was easy? There were hundreds of GTK2 themes available on sites like gnome-look.org, rated, reviewed, and shared by the people who made them. You could download a theme or edit the gtkrc file to make your own without a lot of time invested. At one point, we had a tool in Ubuntu and GNOME 2 which allowed effortless changes to the color and style of your theme without ever opening a gtkrc file. You could instantly make your theme as ugly as can be. That was one part of using Linux on my personal computer that I found fun.
@@ -26,6 +25,21 @@ Somewhere along the way this got lost. Today you get an accent color, a light or
 Theme Roller brings it back. Choose your colors, turn some knobs and dials, then click **Apply**. Your entire desktop theme changes within a second. You can make endless color and style changes from just living on the first few tabs of Theme Roller. If you want to dive deeper just click through the rest of the tabs which include the Cinnamon panel and menu, Window borders, Terminal, Icons, and other widgets if you want them.
 
 > **Status:** getting ready for its first release. Install the `.deb` package (below), or run it from a copy of this repository.
+
+## Your colors, everywhere
+
+Change one color and the whole desktop follows: the panel, the menu, selections, buttons, window borders, even the folders in your file manager. Here is xl-Cheeselooks Dark with nothing changed but its accent:
+
+<p align="center">
+  <img src="docs/images/accents.png" alt="The same desktop in xl-Cheeselooks Dark four times, with a turquoise, pink, green and camo accent">
+</p>
+
+And some of the themes that come with it, light and dark:
+
+<p align="center">
+  <img src="docs/images/desktops.png" alt="The same desktop in nine built-in themes: xl-Cheeselooks, xl-Cheeselooks Dark, xl-Classic, xl-Classic Dark, xl-Gummy, xl-Gummy Dark, Claude, Claude Dark and xl-Pigeon">
+  <br><i>Click any picture for full size. Full-size screenshots are in <a href="docs/screenshots">docs/screenshots</a>.</i>
+</p>
 
 ## Customization Options
 
