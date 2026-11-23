@@ -31,7 +31,7 @@ from . import editor, gtk4, paths, qt, reload, tokens
 
 SCHEMA, KEY = "org.cinnamon.desktop.interface", "gtk-theme"
 SETTLE = 2.0                  # seconds a change must last before we act on it
-AUTOSTART_NAME = "xl-cheeselooks-watch.desktop"
+AUTOSTART_NAME = "theme-roller-watch.desktop"
 WATCH_PATTERN = "(theme-roller|cheeselooks) watch"   # the old name too, started before the rename
 
 
@@ -90,7 +90,7 @@ def restore() -> list[str]:
     """Write the extra files again, from your saved settings."""
     from . import cli, settings
     data = settings.load(paths.settings_file())
-    style = cli._load_style(data["style"]["name"], None)
+    style, _missing = cli.style_or_stand_in(data)
     table = tokens.build(data, style)
     log = cli._libadwaita(data, table)
     if set_aside_file().exists():
@@ -116,6 +116,9 @@ def _act(theme: str | None) -> None:
 
 def run() -> int:
     """Watch the GTK theme setting until logout. Returns an exit code."""
+    if not paths.settings_file().exists() or off_file().exists():
+        return 0           # never used Theme Roller, or took it off the desktop (the package
+                           # starts this for everyone): nothing to watch; Apply starts it (enable)
     if not reload.available() or shutil.which("gsettings") is None:
         print("gsettings not found: nothing to watch", file=sys.stderr)
         return 1
@@ -133,6 +136,20 @@ def run() -> int:
 
 def autostart_file() -> Path:
     return paths._xdg("XDG_CONFIG_HOME", paths.HOME / ".config") / "autostart" / AUTOSTART_NAME
+
+
+def system_autostart_file() -> Path:
+    """Installed from the package: starts the watcher for every user at login,
+    and goes away when the package is removed (a file in your home folder
+    would be left behind, pointing at a program that's gone)."""
+    return Path(os.environ.get("THEME_ROLLER_SYSTEM_AUTOSTART", "/etc/xdg/autostart")) / AUTOSTART_NAME
+
+
+def off_file() -> Path:
+    """Installed, the package's entry starts the watcher for everyone; this
+    marker (written by remove) keeps it off for you, until your next Apply.
+    It lives with your settings, so uninstalling leaves nothing in autostart."""
+    return paths.config_dir() / "watcher-off"
 
 
 def command() -> list[str]:
@@ -164,11 +181,17 @@ def running() -> bool:
 
 
 def enable() -> list[str]:
-    """Start at login, and now if it isn't running yet."""
+    """Start at login, and now if it isn't running yet. Installed, the
+    package's own entry starts it: only a hidden or old one of yours goes."""
     f = autostart_file()
     text = autostart_text()
     log = []
-    if not f.exists() or f.read_text(encoding="utf-8") != text:
+    if off_file().exists():
+        off_file().unlink()
+    if system_autostart_file().exists():
+        if f.exists():
+            f.unlink()       # yours would win over the package's (a checkout's, from before)
+    elif not f.exists() or f.read_text(encoding="utf-8") != text:
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(text, encoding="utf-8")
         log.append("the theme watcher starts at login")
@@ -185,7 +208,14 @@ def enable() -> list[str]:
 def disable() -> list[str]:
     log = []
     f = autostart_file()
-    if f.exists():
+    if system_autostart_file().exists():
+        if f.exists():
+            f.unlink()
+        if not off_file().exists():
+            off_file().parent.mkdir(parents=True, exist_ok=True)
+            off_file().write_text("", encoding="utf-8")   # the package's entry stays off for you
+            log.append("the theme watcher no longer starts at login")
+    elif f.exists():
         f.unlink()
         log.append("the theme watcher no longer starts at login")
     try:

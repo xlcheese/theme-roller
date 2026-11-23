@@ -48,11 +48,11 @@ WIDGET_KEYS = {
     "pressed_color",
 }
 # keys only some widgets use so far (others accept them but ignore them)
-WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item"),
+WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item", "tab"),
                     "pressed_color": ("scrollbar",),
                     "selected_border": ("panel_button",), "padding": ("panel_button",),
                     "spacing": ("panel_button",),
-                    "hover_fg": ("menu_item", "menubar_item", "tab"), "selected_fg": ("panel_button",)}
+                    "hover_fg": ("menu_item", "menubar_item", "tab"), "selected_fg": ("panel_button", "tab")}
 # a text color belongs to its face: a widget that sets its own face doesn't
 # inherit the text color of the widget it is "like"
 FACE_FG = {"hover_color": "hover_fg", "selected_color": "selected_fg", "pressed_color": "pressed_fg"}
@@ -188,6 +188,7 @@ class Style:
     title_bar: dict[str, Any] = field(default_factory=dict)
     title_buttons: dict[str, Any] = field(default_factory=dict)
     dividers: str = ""                 # the lines between sections ("" = as Mint-Y: mixed toward the text)
+    spin_gap: int = 0                  # px between a spin button's field and its − + (0 = joined, Mint-Y)
     extra_css: str = ""
     warnings: list[str] = field(default_factory=list)
 
@@ -226,7 +227,7 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                         "Style list (longer names are cut off there)")
     for key in data:
         if key not in ("name", "author", "description", "defaults", "edges", "widgets", "panel", "notification",
-                       "title_bar", "title_buttons", "dividers",
+                       "title_bar", "title_buttons", "dividers", "spin_gap",
                        "adapt_strength", "gradient_shape", "split_step", "glass_return"):
             warnings.append(f"unknown top-level key '{key}' is ignored")
 
@@ -286,6 +287,10 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
             elif isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 <= v <= 1:
                 errors.append(f"title_bar.{k} must be a number from 0 to 1")
 
+    if "spin_gap" in data:
+        v = data["spin_gap"]
+        if isinstance(v, bool) or not isinstance(v, int) or not 0 <= v <= 12:
+            errors.append(f"spin_gap must be a whole number of pixels from 0 to 12 (got {v!r})")
     if "dividers" in data and not _is_color_ref(data["dividers"], names):
         errors.append(f"dividers must be a palette color name, #RRGGBB or an expression (got {data['dividers']!r})")
 
@@ -457,6 +462,7 @@ def load(path: Path) -> Style:
         title_bar=copy.deepcopy(data.get("title_bar", {})),
         title_buttons=copy.deepcopy(data.get("title_buttons", {})),
         dividers=data.get("dividers", "") or "",
+        spin_gap=int(data.get("spin_gap", 0)),
         extra_css=extra.read_text(encoding="utf-8") if extra.exists() else "",
         warnings=warnings,
     )

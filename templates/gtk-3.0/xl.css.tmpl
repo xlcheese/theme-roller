@@ -513,6 +513,10 @@ window.csd decoration {
 window.background.csd {
   border-bottom-left-radius: {{wb.r_bottom}}px;
   border-bottom-right-radius: {{wb.r_bottom}}px; }
+/* ...but popups (menus, combo box lists) are rounded like the menu inside
+   them: a square window background showed past the menu's rounded corners */
+window.background.csd.popup {
+  border-radius: {{r}}px; }
 {{wb.bottom3.css}}
 window.csd.maximized decoration, window.csd.tiled decoration, window.csd.fullscreen decoration,
 window.background.csd.maximized, window.background.csd.tiled, window.background.csd.fullscreen {
@@ -597,8 +601,8 @@ row.activatable:hover:not(:selected), row.activatable.has-open-popup:not(:select
 .sidebar row:selected, placessidebar row:selected, .sidebar .view:selected,
 .nemo-window .sidebar .view:selected {
   color: {{accent_fg}};
-  background-color: {{select}};
-  background-image: {{select_grad}}; }
+  background-color: {{sidebar_select}};
+  background-image: {{sidebar_select_grad}}; }
 placessidebar row:selected image, placessidebar row:selected label { color: {{accent_fg}}; }
 
 /* Stack sidebars (a settings window's page list, e.g. this theme's own app):
@@ -629,6 +633,8 @@ entry:focus, spinbutton:focus:not(.vertical), spinbutton.vertical > entry:focus 
 spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > entry:focus,
 spinbutton:not(.vertical) > button, combobox entry {
   box-shadow: none; }
+/* Spin buttons apart from their field, if the style asks (spin_gap; cheeselooks/spin.py) */
+{{spin.css}}
 
 /* --------------------------------------------------------------------------
    Notebook tabs

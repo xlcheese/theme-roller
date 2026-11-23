@@ -1,6 +1,6 @@
 """User settings: defaults, loading, validation and presets.
 
-Stored as JSON in ~/.config/xl-cheeselooks/settings.json. A value of None
+Stored as JSON in ~/.config/theme-roller/settings.json. A value of None
 means "follow Global" (docs/design-spec.md, section 2).
 """
 
@@ -206,6 +206,8 @@ def validate(data: dict) -> list[str]:
 
 
 OLD_FOLDER_STYLES = {"xl-80s": "xl-rad"}
+# styles renamed: saved settings and themes with the old name still find them
+OLD_STYLE_NAMES = {"xl-Claude": "Claude", "xl-Claude-Dark": "Claude-Dark"}
 
 
 def from_dict(data: dict) -> dict:
@@ -235,6 +237,9 @@ def from_dict(data: dict) -> dict:
                                    else "full" if old.get("libadwaita_full") else "colors")
         for key in ("libadwaita_colors", "libadwaita_accent", "libadwaita_full", "watch_theme"):
             integ.pop(key, None)
+    st = merged.get("style")
+    if isinstance(st, dict) and st.get("name") in OLD_STYLE_NAMES:
+        st["name"] = OLD_STYLE_NAMES[st["name"]]
     ic = merged.get("icons")
     if isinstance(ic, dict) and isinstance(ic.get("style"), str):
         # a folder style renamed (xl-80s became xl-Rad) or retired (Adwaita):
@@ -269,12 +274,24 @@ def keep_per_user(new: dict, current: dict) -> dict:
 
 def load(path: Path) -> dict:
     if not path.exists():
-        return copy.deepcopy(DEFAULTS)
+        return first_run()
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise SettingsError([f"{path} is not valid JSON: {exc}"]) from exc
     return from_dict(data)
+
+
+def first_run() -> dict:
+    """No settings saved yet (a new user): the default theme as its file has it.
+    DEFAULTS alone is not that theme (xl_cheese, 23 Nov: a new user's first
+    Apply of "xl-Cheeselooks" gave a white terminal, a different panel and title
+    bar...: the bare defaults, not the theme; picking it again fixed it)."""
+    from . import themes          # here: themes imports this module
+    try:
+        return themes.load(DEFAULTS["theme"])
+    except Exception:             # the theme file missing or unreadable: the bare defaults
+        return copy.deepcopy(DEFAULTS)
 
 
 def save(settings: dict, path: Path) -> None:

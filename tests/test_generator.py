@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -589,6 +589,28 @@ class TokenTests(unittest.TestCase):
         with self.assertRaises(styles.StyleError):
             styles.load(d)
 
+    def test_spin_gap(self):
+        # xl_cheese: raised buttons beside a recessed field look better apart
+        s = defaults()
+        for name, gap in (("xl-Cheeselooks", 5), ("xl-Cheeselooks-Dark", 5), ("Claude", 5),
+                          ("Claude-Dark", 5), ("xl-Vintage", 5), ("xl-Classic", 0), ("xl-Gummy", 0)):
+            st = styles.find(name, [REPO / "styles"])
+            self.assertEqual(st.spin_gap, gap, name)
+            t = tokens.build(s, st)
+            for key, field in (("spin.css", "entry"), ("spin4.css", "text")):
+                if gap:
+                    self.assertIn(f"> {field}, ", t[key], name)
+                    self.assertIn(f"margin-right: {gap}px", t[key], name)
+                    self.assertIn(f"{spin.STRONG} > button + button {{", t[key], name)   # the + keeps its shadow
+                else:      # joined: only the disabled button, solid so the field can't show through
+                    self.assertNotIn("margin-right", t[key], name)
+                    self.assertIn("button:disabled", t[key], name)
+        self.assertIn("{{spin.css}}", (REPO / "templates" / "gtk-3.0" / "xl.css.tmpl").read_text())
+        self.assertIn("{{spin4.css}}", (REPO / "templates" / "gtk-4.0" / "xl.css.tmpl").read_text())
+        for bad in ("5", -1, 13, True):
+            errors, _w = styles.check({"name": "T", "spin_gap": bad})
+            self.assertTrue(any("spin_gap" in e for e in errors), bad)
+
     def test_tab_kinds_and_markers(self):
         s = defaults()
         css = tokens.build(s, self.style)["tabs.css"]
@@ -604,6 +626,14 @@ class TokenTests(unittest.TestCase):
         st = styles.Style(name="T", path=None, widgets={"tab": {"tab_kind": "pills", "active_marker": "glow"}})
         t = tokens.build(s, st)
         self.assertIn(f"padding: 3px;\n  background-color: {t['header']}", t["tabs.css"])  # trough = toolbar color
+        # a whole pill in the accent, its text the theme's text-on-accent
+        st = styles.Style(name="T", path=None,
+                          widgets={"tab": {"tab_kind": "pills", "selected_color": "accent"}})
+        t = tokens.build(s, st)
+        checked = t["tabs.css"].split("tab:checked {")[1]
+        self.assertIn(f"background-color: {t['accent']}", checked)
+        self.assertIn(f"color: {t['accent_fg']}", checked)
+        self.assertIn(f"background-color: {t['accent']}", tabs.adw_css(t))      # libadwaita's tab bar too
         self.assertIn("inset 0 1px 0", t["tabs.css"])      # glow edge line is 1px
 
     def test_layout_and_accent_name(self):
@@ -806,7 +836,7 @@ class RenderAndInstallTests(unittest.TestCase):
 
     def test_settings_app_preview_css(self):
         from cheeselooks import app
-        t = tokens.build(defaults(), styles.load(REPO / "styles" / "xl-Claude"))
+        t = tokens.build(defaults(), styles.load(REPO / "styles" / "Claude"))
         css = app.SettingsWindow._extra_css(None, t)          # the drawn panel and terminal sample
         self.assertIn(t["panel.w.panel_button.selected_color"], css)
         self.assertEqual(css.count("{"), css.count("}"))              # balanced rules
@@ -817,10 +847,12 @@ class RenderAndInstallTests(unittest.TestCase):
         import os, zipfile
         from unittest import mock
         names = [n for n, _f, _b in themes.list_themes()]
-        self.assertEqual(names[:4], ["xl-Cheeselooks", "xl-Classic", "xl-Gummy", "Claude"])
+        self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
+                                 "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Pigeon",
+                                 "xl-Vintage", "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),
-                         ("Claude", "xl-Claude", "#B85A38"))
+                         ("Claude", "Claude", "#B85A38"))
         self.assertEqual(claude["global"]["roundness"], 35)          # the style's [defaults] apply
         with tempfile.TemporaryDirectory() as home, tempfile.TemporaryDirectory() as home2:
             def use(h):
@@ -1230,6 +1262,251 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertFalse(qt.kdeglobals_file("org.videolan.VLC").exists())
         self.assertTrue(settings.DEFAULTS["integration"]["qt_colors"])                  # on by default
 
+    def test_renamed_claude_styles(self):
+        # xl-Claude and xl-Claude-Dark lost their xl- (xl_cheese): settings and
+        # themes saved with the old names still find them
+        for old, new in (("xl-Claude", "Claude"), ("xl-Claude-Dark", "Claude-Dark")):
+            data = settings.from_dict({"style": {"name": old}})
+            self.assertEqual(data["style"]["name"], new)
+            self.assertEqual(cli._load_style(new, None).name, new)
+
+    def test_a_new_user_starts_from_the_theme_file(self):
+        # no settings yet: the default theme as its file has it, not the bare
+        # defaults (xl_cheese: the first Apply gave a white terminal)
+        missing = Path(tempfile.mkdtemp()) / "settings.json"
+        first = settings.load(missing)
+        self.assertEqual(first, themes.load(settings.DEFAULTS["theme"]))
+        self.assertEqual((first["terminal"]["separate_colors"], first["terminal"]["bg"]), (True, "#2B2B2B"))
+
+    def test_first_apply_and_revert_for_a_new_user(self):
+        # xl_cheese's fresh-user test, 23 Nov: on Mint-Y, the first Apply failed
+        # (no last-good folder for the panel height); Revert didn't bring Mint-Y
+        # back; Revert from Dark to light kept dark title bars (no restart)
+        import os
+        from unittest import mock
+        from cheeselooks import paths, watch, flatpak
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            env = {"XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(home / ".local/share"),
+                   "XDG_CACHE_HOME": str(home / ".cache")}
+            gs = {("org.cinnamon.theme", "name"): "Mint-Y-Dark-Aqua",
+                  ("org.cinnamon.desktop.interface", "gtk-theme"): "Mint-Y-Aqua",
+                  ("org.cinnamon.desktop.wm.preferences", "theme"): "Mint-Y",
+                  ("org.cinnamon.desktop.interface", "icon-theme"): "Mint-Y-Sand",
+                  ("org.cinnamon.desktop.wm.preferences", "button-layout"): ":minimize,maximize,close"}
+            restarts = []
+            r = cli.reload
+            with mock.patch.dict(os.environ, env), mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(r, "available", return_value=True), \
+                    mock.patch.object(r, "get", side_effect=lambda sc, k: gs.get((sc, k))), \
+                    mock.patch.object(r, "set_value", side_effect=lambda sc, k, v: gs.__setitem__((sc, k), v) or True), \
+                    mock.patch.object(r, "_run", return_value=""), \
+                    mock.patch.object(r, "panel_heights_raw", return_value="['1:40']"), \
+                    mock.patch.object(r, "panel_height", return_value=40), \
+                    mock.patch.object(r, "set_panel_height", return_value="panel height set"), \
+                    mock.patch.object(r, "restore_panel_heights", return_value="panel height back"), \
+                    mock.patch.object(r, "overlay_scrollbars", return_value=None), \
+                    mock.patch.object(r, "set_adw_accent", return_value=None), \
+                    mock.patch.object(r, "restart_cinnamon", side_effect=lambda: restarts.append(1) or "restarted"), \
+                    mock.patch.object(r.time, "sleep"), \
+                    mock.patch.object(watch, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "available", return_value=False):
+                def apply(name):
+                    data = themes.load(name)
+                    data["panel"]["panel_height"] = 44          # a chosen height: saved for Revert
+                    return cli.apply_to_desktop(data, cli.style_or_stand_in(data)[0], activate=True)
+                apply("xl-Cheeselooks")                             # the first Apply: no error
+                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                data, log = cli.revert_desktop()                    # Mint-Y comes back
+                self.assertIsNone(data)
+                self.assertEqual(gs[cli.THEME_KEY], "Mint-Y-Aqua")
+                self.assertEqual(gs[("org.cinnamon.theme", "name")], "Mint-Y-Dark-Aqua")
+                self.assertEqual(gs[("org.cinnamon.desktop.wm.preferences", "theme")], "Mint-Y")
+                self.assertIn("panel height back", log)
+                self.assertTrue(watch.set_aside_file().exists())    # our colors out of apps
+                apply("xl-Cheeselooks")
+                apply("xl-Cheeselooks Dark")                         # over ours: no desktop.json
+                self.assertFalse((paths.last_good_dir() / cli.DESKTOP_FILE).exists())
+                restarts.clear()
+                data, log = cli.revert_desktop()                    # back to xl-Cheeselooks...
+                self.assertEqual(data["theme"], "xl-Cheeselooks")
+                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                self.assertEqual(restarts, [1])                      # ...and its window borders
+
+    def test_remove_from_desktop(self):
+        # theme-roller remove (before uninstalling): our theme settings back to
+        # Mint's defaults, our files and colors gone, the watcher off; your
+        # settings and your own themes kept
+        import os
+        from unittest import mock
+        from cheeselooks import remove, watch, gtk4, paths
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            env = {"XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(home / ".local/share"),
+                   "XDG_CACHE_HOME": str(home / ".cache")}
+            gs = {("org.cinnamon.theme", "name"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.interface", "gtk-theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.wm.preferences", "theme"): "Mint-Y-Aqua"}       # someone else's: kept
+            resets = []
+
+            def run(*args):
+                if args[0] == "reset":
+                    resets.append(args[1:])
+                    gs[args[1:]] = "Mint-Y"
+                return ""
+            with mock.patch.dict(os.environ, env), mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(remove.reload, "available", return_value=True), \
+                    mock.patch.object(remove.reload, "get", side_effect=lambda sc, k: gs.get((sc, k))), \
+                    mock.patch.object(remove.reload, "_run", side_effect=run), \
+                    mock.patch.object(watch.subprocess, "run"), \
+                    mock.patch.object(remove.flatpak, "disable", return_value=False):
+                (paths.theme_dir() / "gtk-3.0").mkdir(parents=True)
+                paths.last_good_dir().mkdir(parents=True)
+                watch.autostart_file().parent.mkdir(parents=True)
+                watch.autostart_file().write_text("[Desktop Entry]\n")
+                paths.gtk4_css().parent.mkdir(parents=True)
+                paths.gtk4_css().write_text("/* mine */\n")
+                gtk4.write(paths.gtk4_css(), gtk4.block(paths.templates_dir(),
+                           tokens.build(defaults(), styles.load(DEFAULT_STYLE)), css_variables=True))
+                self.assertIn("accent", paths.gtk4_css().read_text())
+                settings.save(defaults(), paths.settings_file())
+                mine = home / ".local/share/theme-roller/themes/Mine.json"
+                mine.parent.mkdir(parents=True)
+                mine.write_text("{}")
+                remove.remove()
+                self.assertFalse(paths.theme_dir().exists())
+                self.assertFalse(paths.cache_dir().exists())
+                self.assertFalse(watch.autostart_file().exists())
+                self.assertEqual(paths.gtk4_css().read_text().strip(), "/* mine */")    # yours kept, ours gone
+                self.assertEqual(sorted(resets), [("org.cinnamon.desktop.interface", "gtk-theme"),
+                                                  ("org.cinnamon.theme", "name")])
+                self.assertEqual(gs[("org.cinnamon.desktop.wm.preferences", "theme")], "Mint-Y-Aqua")
+                self.assertTrue(paths.settings_file().exists() and mine.exists())
+                self.assertEqual(set(remove.leftovers()), {paths.config_dir(), mine.parents[1]})
+
+    def test_watcher_autostart_when_installed(self):
+        # installed, the package's /etc/xdg/autostart entry starts the watcher (and
+        # goes with the package); remove() hides it for you, Apply shows it again
+        import os
+        from unittest import mock
+        from cheeselooks import watch
+        with tempfile.TemporaryDirectory() as tmp:
+            system = Path(tmp) / "xdg-autostart"
+            system.mkdir()
+            (system / watch.AUTOSTART_NAME).write_text("[Desktop Entry]\nExec=theme-roller watch\n")
+            env = {"XDG_CONFIG_HOME": str(Path(tmp) / "config"), "THEME_ROLLER_SYSTEM_AUTOSTART": str(system)}
+            with mock.patch.dict(os.environ, env), mock.patch.object(watch.subprocess, "run"), \
+                    mock.patch.object(watch.subprocess, "Popen"), \
+                    mock.patch.object(watch, "running", return_value=True):
+                watch.enable()
+                self.assertFalse(watch.autostart_file().exists())          # the package's entry does it
+                watch.disable()
+                self.assertFalse(watch.autostart_file().exists())          # nothing left in autostart
+                self.assertTrue(watch.off_file().exists())                 # the watcher stays off for you
+                with mock.patch.object(watch.paths, "settings_file", return_value=watch.off_file()):
+                    self.assertEqual(watch.run(), 0)
+                watch.enable()                                            # the next Apply
+                self.assertFalse(watch.off_file().exists())
+            # a user who never applied: the watcher started at login just exits
+            with mock.patch.object(watch.paths, "settings_file", return_value=Path(tmp) / "none.json"):
+                self.assertEqual(watch.run(), 0)
+
+    def test_translations(self):
+        # every language file: readable, complete, and its {placeholders} and
+        # <markup> match the English (a broken one would crash or garble the app)
+        import importlib.util, os
+        from unittest import mock
+        from cheeselooks import i18n
+        spec = importlib.util.spec_from_file_location("update_po", REPO / "tools" / "update-po.py")
+        upd = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(upd)
+        wanted = set(upd.marked()) | set(upd.built_labels())
+        wanted.discard("")
+        langs = sorted(p.stem for p in (REPO / "po").glob("*.po"))
+        self.assertEqual(langs, ["de", "es", "fr", "it", "nl", "pt_BR", "ru"])
+        for lang in langs:
+            table = i18n.read_po(REPO / "po" / f"{lang}.po")
+            self.assertEqual(wanted - set(table), set(), f"{lang}: untranslated")
+            for msgid, msgstr in table.items():
+                self.assertEqual(upd.problems(msgid, msgstr), [], f"{lang}: {msgid[:40]}")
+                if "{" in msgid:       # the app's .format() calls work on the translation
+                    names = dict.fromkeys(upd.PLACEHOLDER.findall(msgid))
+                    msgstr.format(**{n.strip("{}"): "x" for n in names})
+        # the language comes from the environment: region and encoding are ignored,
+        # pt_BR before pt, and anything without a file (or English) is English
+        cases = {"de_DE.UTF-8": "de", "pt_BR.UTF-8": "pt_BR", "fr_CA": "fr", "en_US.UTF-8": "en",
+                 "ja_JP.UTF-8": "en", "C": "en"}
+        for value, code in cases.items():
+            with mock.patch.dict(os.environ, {"LANG": value, "LANGUAGE": "", "LC_ALL": "",
+                                              "LC_MESSAGES": "", "THEME_ROLLER_LANG": ""}):
+                self.assertEqual(i18n.language(), code, value)
+        with mock.patch.dict(os.environ, {"LANGUAGE": "ja:nl:de", "THEME_ROLLER_LANG": ""}):
+            self.assertEqual(i18n.language(), "nl")         # the first in LANGUAGE that we have
+        # the command line stays English
+        saved = i18n._TABLE
+        try:
+            i18n._TABLE = i18n.read_po(REPO / "po" / "de.po")
+            self.assertEqual(i18n._("Apply"), "Anwenden")
+            i18n.use_english()
+            self.assertEqual(i18n._("Apply"), "Apply")
+        finally:
+            i18n._TABLE = saved
+
+    def test_missing_style_stands_in(self):
+        # xl_cheese renamed his style's folder and name; the theme still named the
+        # old one. Preview, Apply and the watcher use the default style instead.
+        data = defaults()
+        data["style"]["name"] = "xl-Gone"
+        style, note = cli.style_or_stand_in(data)
+        self.assertEqual(style.name, "xl-Cheeselooks")
+        self.assertIn("xl-Gone", note)
+        data["global"].update(bg="#2B2B2A", text="#E6E6E6")
+        self.assertEqual(cli.style_or_stand_in(data)[0].name, "xl-Cheeselooks-Dark")
+        data["style"]["name"] = "xl-Classic"
+        style, note = cli.style_or_stand_in(data)            # a style that's there: used, no note
+        self.assertEqual((style.name, note), ("xl-Classic", ""))
+
+    def test_selection_stands_out(self):
+        # Cobalt: selected rows, icons and text were the accent, about as light as
+        # the list behind them. Now darker, away from the list, the window and the
+        # sidebar, with white text still reading.
+        t = palette.derive("#3D5278", "#5C6E8C", "#E6E6E6")
+        for surface in ("base", "bg"):
+            self.assertGreaterEqual(palette.contrast(t["select"], t[surface]), 1.5, surface)
+        # the sidebar is lighter: the accent already stands out there, and stays
+        self.assertEqual(t["sidebar_select"], "#3D5278")
+        self.assertGreaterEqual(palette.contrast(t["accent_fg"], t["select"]), 2.6)
+        self.assertEqual(t["accent"], "#3D5278")                 # the accent itself is kept
+        # a pale accent on a pale theme goes the other way only if its text still reads
+        t = palette.derive("#F2F2F0", "#F0F0EE", "#303030")
+        self.assertGreaterEqual(palette.contrast(t["accent_fg"], t["select"]), 2.6)
+        self.assertGreater(min(palette.contrast(t["select"], t[k]) for k in ("base", "bg", "sidebar")),
+                           palette.contrast("#F2F2F0", t["base"]))
+        # every built-in theme keeps its selection colors
+        for f in sorted((REPO / "data" / "themes").glob("*.json")):
+            g = json.loads(f.read_text())["settings"]["global"]
+            t = palette.derive(g["accent"], g["bg"], g.get("text", "#303030"))
+            self.assertEqual(palette.stand_out(t["select"], (t["base"], t["bg"], t["sidebar"]), t["accent_fg"]),
+                             t["select"], f.name)
+            if f.name == "09-xl-pigeon.json":
+                # the theme this was made for: the list's selection goes darker,
+                # the sidebar (lighter) keeps the accent
+                self.assertNotEqual(t["select"], t["accent"])
+                self.assertEqual(t["sidebar_select"], t["accent"])
+            else:
+                self.assertEqual(t["sidebar_select"], t["select"], f.name)
+
+    def test_editor_selection_stands_out(self):
+        # Cobalt (xl_cheese): a dark blue accent about as light as the blue-grey
+        # background. The usual tint barely showed; now the selection goes past
+        # the accent, darker, away from the background, and the text still reads.
+        t = palette.derive("#3D5278", "#5C6E8C", "#E6E6E6")
+        c = editor.colours(t)
+        self.assertGreaterEqual(palette.contrast(c["select"], c["bg"]), 1.5)
+        self.assertLess(palette.luminance(c["select"]), palette.luminance(t["accent"]))
+        self.assertGreaterEqual(palette.contrast(c["select_fg"], c["select"]), 4.5)
+
     def test_editor_colors(self):
         import xml.etree.ElementTree as ET
         from unittest import mock
@@ -1246,6 +1523,8 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertGreaterEqual(palette.contrast(c[k], c["bg"]), 4.5, f"{f.name}: {k}")
             self.assertGreaterEqual(palette.contrast(c["comment"], c["bg"]), 3.0, f.name)
             self.assertGreaterEqual(palette.contrast(c["line_numbers"], c["gutter"]), 3.0, f.name)
+            self.assertGreaterEqual(palette.contrast(c["select"], c["bg"]), 1.2, f.name)
+            self.assertGreaterEqual(palette.contrast(c["select_fg"], c["select"]), 4.5, f.name)
         # on: written to every GtkSourceView folder, Xed switched; off: Xed's own back, files gone
         gs = {("org.x.editor.preferences.editor", "scheme"): "classic"}
         with tempfile.TemporaryDirectory() as tmp, \
@@ -1307,6 +1586,15 @@ class RenderAndInstallTests(unittest.TestCase):
             gtk4.remove_assets(css)
             self.assertFalse((css.parent / gtk4.ASSETS).exists())
         self.assertEqual(settings.DEFAULTS["integration"]["libadwaita"], "colors")   # full is opt-in
+
+    def test_every_style_with_every_button_style(self):
+        """xl_cheese, 22 Nov: xl-Gummy with the Gargantuan buttons crashed the preview
+        (spacing values taken for gradient colours). Every pairing must build."""
+        for st in [p.name for p in (REPO / "styles").iterdir() if (p / "style.toml").exists()]:
+            for bs in titlebuttons.STYLES:
+                d = defaults()
+                d["style"]["name"], d["window_borders"]["button_style"] = st, bs
+                tokens.build(d, styles.load(REPO / "styles" / st))
 
     def test_scan_my_apps(self):
         """Scan my apps: an app's kind, read from files, nothing run."""

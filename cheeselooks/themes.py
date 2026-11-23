@@ -6,13 +6,13 @@ changing anything afterwards turns it into "Custom", which keeps your latest
 changes until you pick another theme or save Custom under a name of its own.
 
     built-in themes   data/themes/*.json in the repository
-    your themes       ~/.local/share/xl-cheeselooks/themes/*.json
-    Custom            ~/.config/xl-cheeselooks/custom.json
+    your themes       ~/.local/share/theme-roller/themes/*.json
+    Custom            ~/.config/theme-roller/custom.json
 
 A theme file holds only what differs from the defaults plus the style's own
 [defaults], so a theme stays small and follows improvements to its style:
 
-    {"format": 1, "name": "Claude", "settings": {"style": {"name": "xl-Claude"},
+    {"format": 1, "name": "Claude", "settings": {"style": {"name": "Claude"},
                                                  "global": {"accent": "#B85A38", ...}}}
 
 Export packs a theme into one compressed file (<name>.xltheme, a zip) with
@@ -29,6 +29,7 @@ import zipfile
 from pathlib import Path
 
 from . import __version__, paths, settings, styles
+from .i18n import _
 
 FORMAT = 1                 # theme file format; a newer one on import gets a warning
 CUSTOM = "Custom"
@@ -41,7 +42,7 @@ def builtin_dir() -> Path:
 
 
 def user_dir() -> Path:
-    return paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "xl-cheeselooks" / "themes"
+    return paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / paths.APP_DIR / "themes"
 
 
 def custom_file() -> Path:
@@ -53,7 +54,11 @@ def slug(name: str) -> str:
 
 
 class ThemeError(ValueError):
-    pass
+    """A problem with a theme, said for the person (translated in the app).
+    exists: the name is already one of your themes (Save offers to replace it)."""
+    def __init__(self, message: str, exists: bool = False):
+        super().__init__(message)
+        self.exists = exists
 
 
 def _read(path: Path) -> dict:
@@ -170,14 +175,15 @@ def save(name: str, data: dict, overwrite: bool = False) -> Path:
     overwrite, an existing theme of yours."""
     name = name.strip()
     if not name or name == CUSTOM:
-        raise ThemeError("give the theme a name (not \"Custom\")")
+        raise ThemeError(_("give the theme a name (not “Custom”)"))
     if len(name) > MAX_NAME:
-        raise ThemeError(f"a theme's name can be up to {MAX_NAME} characters ({len(name)} given)")
+        raise ThemeError(_("a theme's name can be up to {count} characters ({given} given)").format(
+            count=MAX_NAME, given=len(name)))
     for n, f, builtin in list_themes():
         if n == name and builtin:
-            raise ThemeError(f"'{name}' is a built-in theme: choose another name")
+            raise ThemeError(_("“{theme}” is a built-in theme: choose another name").format(theme=name))
         if n == name and not overwrite:
-            raise ThemeError(f"you already have a theme called '{name}'")
+            raise ThemeError(_("you already have a theme called “{theme}”").format(theme=name), exists=True)
     f = user_dir() / f"{slug(name)}.json"
     f.parent.mkdir(parents=True, exist_ok=True)
     doc = {"format": FORMAT, "name": name, "tool_version": __version__, "settings": _minimal(data)}
@@ -189,11 +195,12 @@ def check_new_name(name: str) -> str:
     """A name a new or renamed theme can take (stripped), or ThemeError saying why not."""
     name = name.strip()
     if not name or name == CUSTOM:
-        raise ThemeError("give the theme a name (not \"Custom\")")
+        raise ThemeError(_("give the theme a name (not “Custom”)"))
     if len(name) > MAX_NAME:
-        raise ThemeError(f"a theme's name can be up to {MAX_NAME} characters ({len(name)} given)")
+        raise ThemeError(_("a theme's name can be up to {count} characters ({given} given)").format(
+            count=MAX_NAME, given=len(name)))
     if any(n == name for n, _f, _b in list_themes()):
-        raise ThemeError(f"there's already a theme called '{name}'")
+        raise ThemeError(_("there's already a theme called “{theme}”").format(theme=name))
     return name
 
 
@@ -205,7 +212,7 @@ def copy_name(name: str) -> str:
         candidate = name[:MAX_NAME - len(suffix)].rstrip() + suffix
         if candidate not in taken:
             return candidate
-    raise ThemeError("couldn't find a free name for the copy")
+    raise ThemeError(_("couldn't find a free name for the copy"))
 
 
 def duplicate(name: str, new_name: str | None = None) -> str:
@@ -220,7 +227,7 @@ def rename(old: str, new: str) -> str:
     follows the rename too."""
     f, builtin = find(old)
     if builtin:
-        raise ThemeError("built-in themes can't be renamed: duplicate it instead")
+        raise ThemeError(_("built-in themes can't be renamed: duplicate it instead"))
     new = check_new_name(new)
     doc = _read(f)
     doc["name"] = new
@@ -240,7 +247,7 @@ def rename(old: str, new: str) -> str:
 def delete(name: str) -> None:
     f, builtin = find(name)
     if builtin:
-        raise ThemeError("built-in themes can't be deleted")
+        raise ThemeError(_("built-in themes can't be deleted"))
     f.unlink()
 
 
@@ -275,30 +282,31 @@ def import_file(src: Path) -> tuple[str, list[str]]:
     with zipfile.ZipFile(src) as z:
         names = z.namelist()
         if "theme.json" not in names:
-            raise ThemeError(f"{Path(src).name} isn't an xl-Cheeselooks theme file")
+            raise ThemeError(_("{file} isn't a Theme Roller theme file").format(file=Path(src).name))
         doc = json.loads(z.read("theme.json"))
         if doc.get("format", 1) > FORMAT:
-            notes.append(f"This theme was made with a newer xl-Cheeselooks ({doc.get('tool_version', '?')}). "
-                         "Some of it may not show as intended; updating xl-Cheeselooks is recommended.")
+            notes.append(_("This theme was made with a newer Theme Roller ({version}). Some of it may "
+                           "not show as intended; updating Theme Roller is recommended.").format(
+                version=doc.get("tool_version", "?")))
         style_name = doc["settings"].get("style", {}).get("name")
         if doc.get("style_included") and style_name:
             target = paths.style_dirs()[0] / slug(style_name)
             if target.exists():
-                notes.append(f"You already have a style folder '{target.name}': kept yours, "
-                             "so the theme uses your copy of that style.")
+                notes.append(_("You already have a style folder “{folder}”: kept yours, so the theme "
+                               "uses your copy of that style.").format(folder=target.name))
             else:
                 for n in names:
                     if n.startswith("style/") and not n.endswith("/"):
                         rel = Path(n).relative_to("style")
                         if ".." in rel.parts:
-                            raise ThemeError("the theme file contains an unsafe path")
+                            raise ThemeError(_("the theme file contains an unsafe path"))
                         out = target / rel
                         out.parent.mkdir(parents=True, exist_ok=True)
                         out.write_bytes(z.read(n))
     name = doc["name"]
     if len(name) > MAX_NAME:
-        notes.append(f"The theme's name was longer than {MAX_NAME} characters: shortened to "
-                     f"'{name[:MAX_NAME].rstrip()}'.")
+        notes.append(_("The theme's name was longer than {count} characters: shortened to “{theme}”.")
+                     .format(count=MAX_NAME, theme=name[:MAX_NAME].rstrip()))
         name = name[:MAX_NAME].rstrip()
     existing = {n for n, _f, _b in list_themes()}
     final = name
@@ -307,7 +315,8 @@ def import_file(src: Path) -> tuple[str, list[str]]:
         final = f"{name} ({i})"
         i += 1
     if final != name:
-        notes.append(f"A theme called '{name}' already exists: imported as '{final}'.")
+        notes.append(_("A theme called “{theme}” already exists: imported as “{copy}”.").format(
+            theme=name, copy=final))
     f = user_dir() / f"{slug(final)}.json"
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(json.dumps({**doc, "name": final}, indent=2) + "\n", encoding="utf-8")

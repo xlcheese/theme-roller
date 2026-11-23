@@ -20,14 +20,14 @@ import dataclasses
 from . import palette as pal
 from . import render, shape
 from . import styles as sty
-from . import gtk4, metacity, titlebuttons, panelmarker, tabs
+from . import gtk4, metacity, titlebuttons, panelmarker, spin, tabs
 
 THEME_NAME = "xl-Cheeselooks"
 SCROLL_SLIDER_BORDER = 4   # px, Mint-Y's transparent border around the scrollbar thumb
 HOVER_CALIBRATION = 0.8
 
 GRADIENT_COLORS = (
-    "button", "button_hover", "accent", "accent_hover", "select", "hover",
+    "button", "button_hover", "accent", "accent_hover", "select", "sidebar_select", "hover",
     "sidebar_hover", "menu_hover", "fav_hover", "menubar_hover", "panel",
     "pb_rest", "pb_hover", "pb_focus", "pb_attention", "destructive", "pressed",
 )
@@ -102,7 +102,10 @@ def _add_face_gradients(t: dict[str, str], style: sty.Style) -> None:
     title bar and Cinnamon (two-colour gradients only) use the plain pair."""
     for key in [k for k in t if k.endswith("_top")]:
         base = key[: -len("_top")]
-        if base + "_bottom" in t and not key.endswith("_rgb"):
+        # colours only: wb.button_pad_top / _bottom are spacings (xl-Gummy with the
+        # Gargantuan buttons crashed the preview: "not a hex color: '1'", xl_cheese)
+        if (base + "_bottom" in t and not key.endswith("_rgb")
+                and str(t[key]).startswith("#") and str(t[base + "_bottom"]).startswith("#")):
             t[base + "_grad"] = pal.gradient_css(t[key], t[base + "_bottom"],
                                                  style.gradient_shape, style.split_step,
                                                  style.glass_return)
@@ -199,6 +202,8 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["tabs.css"] = tabs.css(t)
     t["tabs4.css"] = tabs.css(t, gtk4=True)
     t["tabs_adw.css"] = tabs.adw_css(t)
+    t["spin.css"] = spin.css(t, style.spin_gap)
+    t["spin4.css"] = spin.css(t, style.spin_gap, gtk4=True)
     t.update(gtk4.tokens(t))
 
     # --- Panel & Menu: shared colors, separate shapes

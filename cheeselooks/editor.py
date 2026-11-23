@@ -5,7 +5,7 @@ Xed, gedit, Meld and other GTK text editors colour their text area with a
 GtkSourceView colour scheme, not the GTK theme. A scheme made for light
 themes (Xed's Classic) on a dark theme gave white line numbers on a fixed
 light gutter and dark-blue comments on dark. So at each Apply we write an
-"xl-Cheeselooks" scheme from the theme: the editor background and text, the
+"Theme Roller" scheme from the theme: the editor background and text, the
 gutter and line numbers, the current line, selection and cursor, matching
 brackets and search results in the accent, and syntax colours worked out to
 read on the editor background (light or dark), keyed to the accent's hue.
@@ -26,9 +26,11 @@ from xml.sax.saxutils import quoteattr
 
 from . import palette as pal
 from . import paths, reload
+from .i18n import _
 
-SCHEME_ID = "xl-cheeselooks"
-SCHEME_NAME = "xl-Cheeselooks"
+SCHEME_ID = "xl-cheeselooks"          # the id editors store: kept, so a saved choice still works
+SCHEME_NAME = "Theme Roller"           # the name editors show (xl_cheese, 22 Nov): made by the tool,
+                                       # from whichever theme is applied
 STYLE_DIRS = ("gtksourceview-3.0", "gtksourceview-4", "gtksourceview-5", "libgedit-gtksourceview-300")
 # (schema, key): the editors we switch to the scheme, if installed
 EDITORS = (("org.x.editor.preferences.editor", "scheme", "Xed"),
@@ -78,8 +80,14 @@ def colours(t: dict[str, str]) -> dict[str, str]:
     c["line_numbers"] = _readable(pal.mix(text, bg, 0.5), c["gutter"], 3.0)
     c["current_line"] = pal.mix(bg, text, 0.06 if dark else 0.04)
     c["current_number"] = text
-    c["select"] = pal.mix(bg, accent, 0.35 if dark else 0.28)
+    # a tint of the accent; when the accent is about as light as the background
+    # (Cobalt) the tint barely shows, so it's moved until it stands out (palette.stand_out)
+    c["select"] = pal.stand_out(pal.mix(bg, accent, 0.35 if dark else 0.28), (bg,), text, least=1.2)
+    # the text keeps its color on the selection, unless the theme's text-on-accent reads better
     c["select_fg"] = text
+    if pal.contrast(text, c["select"]) < 4.5 and \
+            pal.contrast(t["accent_fg"], c["select"]) > pal.contrast(text, c["select"]):
+        c["select_fg"] = t["accent_fg"]
     c["bracket"] = pal.mix(bg, accent, 0.45)
     c["search"] = pal.mix(bg, accent, 0.30) if dark else pal.mix(bg, "#F5C211", 0.45)
     c["right_margin"] = pal.mix(bg, text, 0.12)
@@ -158,10 +166,10 @@ def scheme_xml(t: dict[str, str]) -> str:
         ("sh:variable-definition", dict(foreground=c["type"])),
     ]
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
-             "<!-- Written by xl-Cheeselooks from your theme at each Apply (Integration: Text editors). -->",
+             "<!-- Written by Theme Roller from your theme at each Apply (Integration: Text editors). -->",
              f'<style-scheme id="{SCHEME_ID}" name="{SCHEME_NAME}" version="1.0">',
-             "  <author>xl-Cheeselooks</author>",
-             "  <description>Your xl-Cheeselooks theme's colors, made by the xl-Cheeselooks tool.</description>"]
+             "  <author>Theme Roller</author>",
+             "  <description>Your theme's colors, made by Theme Roller.</description>"]
     for name, attrs in rows:
         a = " ".join(f"{k}={quoteattr(v)}" for k, v in attrs.items())
         lines.append(f'  <style name="{name}" {a}/>')
@@ -212,7 +220,7 @@ def enable(t: dict[str, str]) -> list[str]:
             if current != SCHEME_ID and reload.set_value(schema, key, SCHEME_ID):
                 switched.append(name)
     _save_state(state)
-    log = ["Text editors: xl-Cheeselooks color scheme written"]
+    log = ["Text editors: Theme Roller color scheme written"]
     if switched:
         log.append(f"Text editors: {', '.join(switched)} switched to it")
     return log
@@ -232,11 +240,12 @@ def disable() -> list[str]:
         if f.exists():
             f.unlink()
     _save_state({})
-    return ["Text editors: xl-Cheeselooks color scheme removed, your previous schemes back"]
+    return ["Text editors: Theme Roller color scheme removed, your previous schemes back"]
 
 
 def active() -> bool:
     return bool(_load_state())
 
 
-NOTE = "Xed, gedit and Meld get your theme colors."
+NOTE = _("Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and "
+         "highlights. Most editors' own schemes follow your theme too. Reopen them to see changes.")

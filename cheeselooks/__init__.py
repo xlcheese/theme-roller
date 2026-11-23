@@ -1,3 +1,3 @@
-"""xl-Cheeselooks: a Linux Mint Cinnamon theme you style yourself."""
+"""Theme Roller: style your Linux Mint Cinnamon desktop (it makes the xl-Cheeselooks theme)."""
 
-__version__ = "0.1.0.dev0"
+__version__ = "0.9.0"

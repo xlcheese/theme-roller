@@ -163,6 +163,33 @@ def title_gradient(color: str, amount: float) -> tuple[str, str]:
 # Palette
 # --------------------------------------------------------------------------
 
+def stand_out(select: str, surfaces: tuple[str, ...], fg: str,
+              least: float = 1.3, target: float = 1.5) -> str:
+    """The selection color, moved until it stands out from the surfaces it's
+    drawn on. An accent about as light as the background (xl_cheese's Cobalt:
+    a dark blue on blue-grey) made selections hard to see. Below `least` it
+    steps away from the surfaces (darker if it's darker than them, else
+    lighter) to `target`, keeping the text on it (fg) readable at 2.6:1; only
+    if that can't work does it try the other way. Every built-in theme is above
+    `least` and keeps its color. Used for GTK selections and the editor scheme."""
+    def worst(c: str) -> float:
+        return min(contrast(c, s) for s in surfaces)
+    if worst(select) >= least:
+        return select
+    below = luminance(select) <= sum(luminance(s) for s in surfaces) / len(surfaces)
+    best = select
+    for move in ((darker, lighter) if below else (lighter, darker)):
+        for step in range(1, 26):
+            c = move(select, step * 0.03)
+            if contrast(c, fg) < 2.6:
+                break
+            if worst(c) >= target:
+                return c
+            if worst(c) > worst(best):
+                best = c
+    return best
+
+
 def derive(accent: str, bg: str, text: str, hover: float = 1.0,
            button_face: str | None = None) -> dict[str, str]:
     """Work out the full palette from the three picks.
@@ -198,13 +225,19 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
                 break
             select = darker(select, 0.04)
 
+    base = pick(mix(bg, WHITE, 0.75), darker(bg, 0.18))
+    # each surface gets its own check: a list darker than the sidebar can need a
+    # stronger selection while the sidebar's already stands out (Cobalt)
+    sidebar = pick(mix(bg, text, 0.035), mix(bg, text, 0.03))
+    sidebar_select = stand_out(select, (sidebar,), accent_fg)
+    select = stand_out(select, (base, bg), accent_fg)
+
     header = mix(bg, text, 0.066)   # Mint-Y's toolbar shade: #E8E8E8 on the default colors
     # light buttons rest a little below white so hover has room to go lighter
     button = pick(mix(bg, WHITE, 0.30), mix(bg, text, 0.08))
     if button_face:      # a style's button color: the face, and the hover worked out from it
         button = normalize(button_face)
     border_strong = pick(mix(bg, text, 0.30), mix(bg, text, 0.26))
-    base = pick(mix(bg, WHITE, 0.75), darker(bg, 0.18))
     menu_bg = base                                             # GTK menus: content color, as Mint-Y
     shell_menu_bg = pick(mix(bg, text, 0.03), mix(bg, text, 0.04))  # Cinnamon menus and popups
     fav_bg = pick(mix(bg, text, 0.075), mix(bg, text, 0.09))
@@ -225,7 +258,8 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
         # hover for buttons that aren't drawn at rest (toolbar, title buttons) and
         # unselected tabs: lighter than the toolbar, but not as bright as a full button hover
         "flat_hover": pick(lift(header, 0.50), lift(header, 0.08)),
-        "sidebar": pick(mix(bg, text, 0.035), mix(bg, text, 0.03)),
+        "sidebar": sidebar,
+        "sidebar_select": sidebar_select,
         "sidebar_hover": pick(mix(bg, text, 0.035 + 0.105 * hover), mix(bg, text, 0.03 + 0.10 * hover)),
         "hover": pick(mix(bg, text, 0.07 * hover), mix(bg, text, 0.08 * hover)),
         # pressed and toggled: darker on light themes; on dark ones too, into a

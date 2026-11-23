@@ -1,0 +1,62 @@
+{
+  "format": 1,
+  "name": "xl-Pigeon",
+  "settings": {
+    "global": {
+      "accent": "#3D5278",
+      "bg": "#546788",
+      "text": "#FAFFEC",
+      "gradient": 0,
+      "hover_in_ms": 45,
+      "hover_out_ms": 100
+    },
+    "panel": {
+      "separate_colors": true,
+      "label_weight": "regular",
+      "panel_height": 44,
+      "panel_shape": {
+        "gradient": 6
+      },
+      "menu_shape": {
+        "roundness": 15,
+        "item_roundness": 15
+      }
+    },
+    "window_borders": {
+      "separate_colors": true,
+      "border": "#3D5278",
+      "title_bar_height": 40,
+      "title_gradient": 1,
+      "window_roundness": 100,
+      "button_style": "gargantuan"
+    },
+    "terminal": {
+      "separate_colors": true,
+      "bg": "#2B2B2B",
+      "text": "#E4E4E4"
+    },
+    "details": {
+      "tooltips": {
+        "custom": true,
+        "bg": "#BBCFF0",
+        "text": "#324564"
+      },
+      "scrollbars": {
+        "custom": true
+      },
+      "sliders": {
+        "custom": true
+      },
+      "switches": {
+        "custom": true
+      }
+    },
+    "icons": {
+      "folder_color": "#DDE1E7",
+      "second_color": "#8DA2C4"
+    },
+    "style": {
+      "name": "xl-Pigeon"
+    }
+  }
+}

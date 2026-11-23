@@ -8,6 +8,10 @@ from pathlib import Path
 from .tokens import THEME_NAME
 
 HOME = Path.home()
+# the app's own folders (settings, your themes and styles, cache): Theme Roller's
+# (22 Nov; xl-cheeselooks before). What's named for the theme keeps its name:
+# ~/.themes/xl-Cheeselooks, ~/.icons/xl-Cheeselooks.
+APP_DIR = "theme-roller"
 
 
 def _xdg(var: str, default: Path) -> Path:
@@ -27,7 +31,7 @@ def data_dir() -> Path:
     repo = Path(__file__).resolve().parents[1]
     if (repo / "templates").is_dir():
         return repo
-    return Path("/usr/share/xl-cheeselooks")
+    return Path("/usr/share") / APP_DIR
 
 
 def templates_dir() -> Path:
@@ -35,7 +39,7 @@ def templates_dir() -> Path:
 
 
 def config_dir() -> Path:
-    return _xdg("XDG_CONFIG_HOME", HOME / ".config") / "xl-cheeselooks"
+    return _xdg("XDG_CONFIG_HOME", HOME / ".config") / APP_DIR
 
 
 def gtk4_css() -> Path:
@@ -57,7 +61,7 @@ def builtin_presets_dir() -> Path:
 
 def style_dirs() -> list[Path]:
     """User styles first, so a user style can replace a built-in one."""
-    return [_xdg("XDG_DATA_HOME", HOME / ".local" / "share") / "xl-cheeselooks" / "styles",
+    return [_xdg("XDG_DATA_HOME", HOME / ".local" / "share") / APP_DIR / "styles",
             data_dir() / "styles"]
 
 
@@ -66,7 +70,7 @@ def theme_dir() -> Path:
 
 
 def cache_dir() -> Path:
-    return _xdg("XDG_CACHE_HOME", HOME / ".cache") / "xl-cheeselooks"
+    return _xdg("XDG_CACHE_HOME", HOME / ".cache") / APP_DIR
 
 
 def last_good_dir() -> Path:

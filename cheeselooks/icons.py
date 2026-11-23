@@ -26,6 +26,7 @@ from pathlib import Path
 
 from . import palette as pal
 from . import paths, reload
+from .i18n import N_
 
 THEME = "xl-Cheeselooks"
 KEY = ("org.cinnamon.desktop.interface", "icon-theme")
@@ -58,19 +59,19 @@ STYLES = {
     # (tools/make-xl-binder.py; Mint-Y's pictures on it, CC BY-SA 4.0)
     "xl-big-baddy": {"name": "xl-Big Baddy", "dir": "xl-big-baddy", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
                      "source": {"folder": "ff0a01", "frontedge": "ff0a02", "backfolder": "ff0a03", "emblem": "ff0a04"},
-                     "second_label": "Racing stripes", "second_optional": True,
-                     "note": "Binders in your colors: the folder color follows your accent. Racing stripes "
-                             "are off until you pick a color for them; No stripes takes them off "
-                             "again. Every other icon stays as in your current icon theme. Apply to use them."},
+                     "second_label": N_("Racing stripes"), "second_optional": True,
+                     "note": N_("Binders in your colors: the folder color follows your accent. Racing stripes "
+                                "are off until you pick a color for them; No stripes takes them off "
+                                "again. Every other icon stays as in your current icon theme. Apply to use them.")},
     # ours (xl_cheese's mockup): xl-Rad, the 80s binder, a checkerboard band between
     # wavy lines in the second color (tools/make-xl-binder.py)
     "xl-rad": {"name": "xl-Rad", "dir": "xl-rad", "sizes": (16, 22, 24, 32, 48, 64, 96, 128),
                "source": {"folder": "ff0a01", "frontedge": "ff0a02", "backfolder": "ff0a03", "emblem": "ff0a04"},
-               "second_label": "Wavy lines",
-               "note": "Binders in your colors: the folder color follows your accent, and the wavy lines "
-                       "a darker shade of it. Choose either and both keep their colors from then on; Reset "
-                       "Icons follows the theme again. Every other icon stays as in your current icon theme. "
-                       "Apply to use them."},
+               "second_label": N_("Wavy lines"),
+               "note": N_("Binders in your colors: the folder color follows your accent, and the wavy lines "
+                          "a darker shade of it. Choose either and both keep their colors from then on; Reset "
+                          "Icons follows the theme again. Every other icon stays as in your current icon theme. "
+                          "Apply to use them.")},
 }
 # a style may name the second color for what it colours ("second_label":
 # "Racing stripes" for a binder without a back to colour)

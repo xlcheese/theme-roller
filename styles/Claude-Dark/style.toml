@@ -1,5 +1,5 @@
-# xl-Claude-Dark: designed by Claude, for dark colours.
-# The same calm as xl-Claude, rethought for a dark background: warm charcoal
+# Claude-Dark: designed by Claude, for dark colours.
+# The same calm as Claude, rethought for a dark background: warm charcoal
 # like paper at night. Light-theme habits don't carry over, so:
 #   - outlines are dark ink (darker than the surface), not light grey lines,
 #     which look like wireframes on dark;
@@ -17,9 +17,12 @@
 # alpha_dark is what dark colours use, alpha is a fallback if you pair this
 # style with light colours.
 
-name = "xl-Claude-Dark"
+name = "Claude-Dark"
 author = "Claude"
-description = "Warm charcoal, ink outlines, terracotta accents. xl-Claude for dark colours. Designed by Claude."
+description = "Warm charcoal, ink outlines, terracotta accents. Claude for dark colours. Designed by Claude."
+
+# A gap between a spin button's field and its − + buttons (raised buttons, recessed fields)
+spin_gap = 5
 
 adapt_strength = 0.6
 gradient_shape = "smooth"

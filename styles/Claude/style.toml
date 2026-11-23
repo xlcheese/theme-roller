@@ -1,4 +1,4 @@
-# xl-Claude: designed by Claude.
+# Claude: designed by Claude.
 # Calm and warm, like good paper: soft buttons with only a faint top light and
 # almost no shadow, a slightly warmer border on hover; gently sunken fields with
 # a terracotta focus ring; flat toolbar and title buttons that lift softly (lift()
@@ -8,13 +8,16 @@
 # buttons whose borders disappear into their face.
 #
 # Made to go with the Claude preset (presets/global/claude.json), but any colours
-# work:  cheeselooks apply --style xl-Claude --preset claude
+# work:  theme-roller apply --style Claude --preset claude
 #
 # Alpha values are written for Depth 50. alpha_dark is used on dark themes.
 
-name = "xl-Claude"
+name = "Claude"
 author = "Claude"
 description = "Soft paper buttons, terracotta accents, calm tabs. Designed by Claude."
+
+# A gap between a spin button's field and its − + buttons (raised buttons, recessed fields)
+spin_gap = 5
 
 adapt_strength = 0.6
 gradient_shape = "smooth"
