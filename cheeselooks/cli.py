@@ -194,6 +194,7 @@ def _apply_panel_height(data: dict, last_good: Path) -> list[str]:
     if chosen is None or raw is None or reload.panel_height(DEFAULT_PANEL_HEIGHT) == chosen \
             and "," not in raw:
         return []
+    last_good.mkdir(parents=True, exist_ok=True)     # the first Apply: nothing saved there yet
     (last_good / PANEL_HEIGHT_FILE).write_text(raw + "\n", encoding="utf-8")
     line = reload.set_panel_height(chosen, raw)
     return [line] if line else []
@@ -248,6 +249,8 @@ def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
         if line:
             log.append(line)
     was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
+    if activate and reload.available() and not was_ours:
+        _remember_desktop(paths.last_good_dir())    # Revert goes back to it (Mint-Y, say)
     log += reload.apply(tokens.THEME_NAME, layout, activate=activate, theme_dir=theme_dir)
     log += _window_borders(table, was_ours, force=restart)
     return log
@@ -379,52 +382,92 @@ def _cmd_apply(args: argparse.Namespace) -> int:
     return 0
 
 
+DESKTOP_FILE = "desktop.json"      # in the last-good folder: the theme the desktop had before ours
+
+
+def _desktop_keys() -> list[tuple[str, str]]:
+    return [(schema, key) for schema, key, _f, _p in reload.THEME_KEYS] + [icons.KEY]
+
+
+def _remember_desktop(last_good: Path) -> None:
+    """The desktop's theme settings just before an Apply switches them to ours
+    (xl_cheese, 23 Nov: Revert after the first Apply should bring Mint-Y back,
+    not an earlier Theme Roller theme)."""
+    before = {f"{schema} {key}": reload.get(schema, key) for schema, key in _desktop_keys()}
+    before = {k: v for k, v in before.items() if v and not watch.is_ours(v)}
+    if before:
+        last_good.mkdir(parents=True, exist_ok=True)
+        (last_good / DESKTOP_FILE).write_text(json.dumps(before, indent=2) + "\n", encoding="utf-8")
+
+
+def _back_to_desktop(last_good: Path) -> list[str] | None:
+    """Revert after an Apply that switched to our theme: the desktop's own theme
+    back, our colors out of apps (as picking it in Mint's settings does). None
+    if the theme before was ours (then the files are restored instead)."""
+    f = last_good / DESKTOP_FILE
+    if not f.exists():
+        return None
+    before = json.loads(f.read_text(encoding="utf-8"))
+    log = _restore_panel_height(last_good)
+    if reload.available():
+        with watch.applying():
+            for name, value in before.items():
+                schema, key = name.split(" ", 1)
+                if watch.is_ours(reload.get(schema, key)) and reload.set_value(schema, key, value):
+                    log.append(f"{schema} {key}: back to {value}")
+    log += watch.set_aside()
+    f.unlink()
+    return log
+
+
 def revert_desktop() -> tuple[dict | None, list[str]]:
     """Put the previous theme back on the desktop (the one before the last
-    Apply). Returns the restored settings and the log lines; the settings app
-    keeps its own settings as they are."""
+    Apply): the desktop's own (Mint-Y...) if that Apply switched to ours, else
+    the previous Theme Roller theme. Returns the restored settings (None for
+    the desktop's own) and the log lines; the settings app keeps its own
+    settings as they are."""
+    back = _back_to_desktop(paths.last_good_dir())
+    if back is not None:
+        return None, back
     log = _restore_panel_height(paths.last_good_dir())
     data = install.revert(paths.theme_dir(), paths.last_good_dir())
+    table = None
     if data:
         data = settings.from_dict(data)
         settings.save(data, paths.settings_file())
         try:
             style = _load_style(data["style"]["name"], None)
-            log += _libadwaita(data, tokens.build(data, style))
+            table = tokens.build(data, style, panel_height=_panel_height(data))
+            log += _libadwaita(data, table)
         except styles.StyleError as exc:
             log.append(f"libadwaita colors left as they were: {exc}")
-    log += reload.apply(tokens.THEME_NAME, theme_dir=paths.theme_dir())
+    with watch.applying():
+        log += reload.apply(tokens.THEME_NAME, theme_dir=paths.theme_dir())
+    # window borders: Muffin keeps the copy it loaded, so a restart when they differ
+    # (xl_cheese: Dark back to light kept dark title bars, and glyphs went missing);
+    # without the restored settings to compare, restart to be sure
+    if table is not None:
+        log += _window_borders(table, True)
+    elif reload.available():
+        log.append(reload.restart_cinnamon())
     return data, log
 
 
 def cmd_revert(args: argparse.Namespace) -> int:
-    height_lines = [] if args.no_reload else _restore_panel_height(paths.last_good_dir())
-    data = install.revert(paths.theme_dir(), paths.last_good_dir())
-    if data:
-        data = settings.from_dict(data)
-        settings.save(data, paths.settings_file())
-    print("Restored the previous theme.")
-    for line in height_lines:
+    if args.no_reload:            # the files only (scripts, tests)
+        data = install.revert(paths.theme_dir(), paths.last_good_dir())
+        if data:
+            settings.save(settings.from_dict(data), paths.settings_file())
+        print("Restored the previous theme's files.")
+        return 0
+    try:
+        data, log = revert_desktop()       # as the app's Revert: the desktop's own theme, or ours
+    except install.InstallError as exc:
+        _err(str(exc))
+        return 1
+    print("Restored the previous theme." if data is not None else "Back to the desktop's previous theme.")
+    for line in log:
         print(f"  {line}")
-    if data:
-        # the libadwaita colours live outside the theme folder: rewrite them to match
-        try:
-            style = _load_style(data["style"]["name"], None)
-            for line in _libadwaita(data, tokens.build(data, style)):
-                print(f"  {line}")
-        except styles.StyleError as exc:
-            _err(f"libadwaita colors left as they were: {exc}")
-    if not args.no_reload:
-        was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
-        for line in reload.apply(tokens.THEME_NAME, theme_dir=paths.theme_dir()):
-            print(f"  {line}")
-        if data:       # the restored theme's window borders, as Apply does
-            try:
-                table = tokens.build(data, _load_style(data["style"]["name"], None))
-                for line in _window_borders(table, was_ours):
-                    print(f"  {line}")
-            except styles.StyleError:
-                pass
     return 0
 
 

@@ -1270,6 +1270,62 @@ class RenderAndInstallTests(unittest.TestCase):
             self.assertEqual(data["style"]["name"], new)
             self.assertEqual(cli._load_style(new, None).name, new)
 
+    def test_first_apply_and_revert_for_a_new_user(self):
+        # xl_cheese's fresh-user test, 23 Nov: on Mint-Y, the first Apply failed
+        # (no last-good folder for the panel height); Revert didn't bring Mint-Y
+        # back; Revert from Dark to light kept dark title bars (no restart)
+        import os
+        from unittest import mock
+        from cheeselooks import paths, watch, flatpak
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            env = {"XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(home / ".local/share"),
+                   "XDG_CACHE_HOME": str(home / ".cache")}
+            gs = {("org.cinnamon.theme", "name"): "Mint-Y-Dark-Aqua",
+                  ("org.cinnamon.desktop.interface", "gtk-theme"): "Mint-Y-Aqua",
+                  ("org.cinnamon.desktop.wm.preferences", "theme"): "Mint-Y",
+                  ("org.cinnamon.desktop.interface", "icon-theme"): "Mint-Y-Sand",
+                  ("org.cinnamon.desktop.wm.preferences", "button-layout"): ":minimize,maximize,close"}
+            restarts = []
+            r = cli.reload
+            with mock.patch.dict(os.environ, env), mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(r, "available", return_value=True), \
+                    mock.patch.object(r, "get", side_effect=lambda sc, k: gs.get((sc, k))), \
+                    mock.patch.object(r, "set_value", side_effect=lambda sc, k, v: gs.__setitem__((sc, k), v) or True), \
+                    mock.patch.object(r, "_run", return_value=""), \
+                    mock.patch.object(r, "panel_heights_raw", return_value="['1:40']"), \
+                    mock.patch.object(r, "panel_height", return_value=40), \
+                    mock.patch.object(r, "set_panel_height", return_value="panel height set"), \
+                    mock.patch.object(r, "restore_panel_heights", return_value="panel height back"), \
+                    mock.patch.object(r, "overlay_scrollbars", return_value=None), \
+                    mock.patch.object(r, "set_adw_accent", return_value=None), \
+                    mock.patch.object(r, "restart_cinnamon", side_effect=lambda: restarts.append(1) or "restarted"), \
+                    mock.patch.object(r.time, "sleep"), \
+                    mock.patch.object(watch, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "available", return_value=False):
+                def apply(name):
+                    data = themes.load(name)
+                    data["panel"]["panel_height"] = 44          # a chosen height: saved for Revert
+                    return cli.apply_to_desktop(data, cli.style_or_stand_in(data)[0], activate=True)
+                apply("xl-Cheeselooks")                             # the first Apply: no error
+                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                data, log = cli.revert_desktop()                    # Mint-Y comes back
+                self.assertIsNone(data)
+                self.assertEqual(gs[cli.THEME_KEY], "Mint-Y-Aqua")
+                self.assertEqual(gs[("org.cinnamon.theme", "name")], "Mint-Y-Dark-Aqua")
+                self.assertEqual(gs[("org.cinnamon.desktop.wm.preferences", "theme")], "Mint-Y")
+                self.assertIn("panel height back", log)
+                self.assertTrue(watch.set_aside_file().exists())    # our colors out of apps
+                apply("xl-Cheeselooks")
+                apply("xl-Cheeselooks Dark")                         # over ours: no desktop.json
+                self.assertFalse((paths.last_good_dir() / cli.DESKTOP_FILE).exists())
+                restarts.clear()
+                data, log = cli.revert_desktop()                    # back to xl-Cheeselooks...
+                self.assertEqual(data["theme"], "xl-Cheeselooks")
+                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                self.assertEqual(restarts, [1])                      # ...and its window borders
+
     def test_remove_from_desktop(self):
         # theme-roller remove (before uninstalling): our theme settings back to
         # Mint's defaults, our files and colors gone, the watcher off; your

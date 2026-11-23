@@ -258,6 +258,13 @@ def _needs_apply(data: dict, applied: dict) -> bool:
     return not _same(data, applied) or mine or data["theme"] != applied["theme"]
 
 
+def _on_desktop() -> bool:
+    """Is the desktop on our theme? (Without gsettings there's no telling: yes.)"""
+    if not reload.available():
+        return True
+    return watch.is_ours(reload.get(*cli.THEME_KEY))
+
+
 def _short_name(name: str, most: int = 24) -> str:
     """A file name for a one-line message: long ones (pictures saved from the
     web) keep their start and their end, e.g. "W1siZiIsIjQ…dXQ.jpg"."""
@@ -362,6 +369,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
             self._styles_seen = now
             self.fill_style_list()
             self.update_preview()
+        self.update_buttons()          # another theme picked in Mint's settings meanwhile: Apply
         return False
 
     # ------------------------------------------------------------------ tabs
@@ -1580,7 +1588,10 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             else:
                 b.set_tooltip_text(_("Put {tab} back to {theme} (other tabs stay as they are)")
                                    .format(tab=dict(TABS)[section], theme=self.base))
-        self.apply_btn.set_sensitive(_needs_apply(self.data, self.applied))
+        # also when the desktop isn't on our theme: a new user's first open, after
+        # Revert to Mint-Y, or another theme picked in Mint's settings (xl_cheese:
+        # Apply was greyed out, though nothing of ours was on the desktop)
+        self.apply_btn.set_sensitive(_needs_apply(self.data, self.applied) or not _on_desktop())
         self.save_btn.set_sensitive(self.data["theme"] == themes.CUSTOM)
         row = self.theme_list.get_selected_row()
         yours = bool(row) and not row.builtin and row.theme_name != themes.CUSTOM
