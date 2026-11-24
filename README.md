@@ -158,8 +158,8 @@ From a copy of the repository, run them as `./bin/theme-roller …`.
 
 Theme Roller only writes inside your home folder:
 
-- the theme: `~/.themes/xl-Cheeselooks`
-- folder icons, if you turn them on: `~/.icons/xl-Cheeselooks`
+- the theme: `~/.themes/Theme-Roller` (Mint's Themes settings lists it as Theme-Roller)
+- folder icons, if you turn them on: `~/.icons/Theme-Roller`
 - your settings and your own themes: `~/.config/theme-roller/` and `~/.local/share/theme-roller/`
 - for other apps: a marked block in `~/.config/gtk-4.0/gtk.css`, a Qt color scheme (qt5ct), a text editor scheme, and read access to your theme for Flatpak apps.
 

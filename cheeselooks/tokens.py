@@ -22,7 +22,9 @@ from . import render, shape
 from . import styles as sty
 from . import gtk4, metacity, titlebuttons, panelmarker, spin, tabs
 
-THEME_NAME = "xl-Cheeselooks"
+THEME_NAME = "Theme-Roller"   # the theme as Mint's Themes settings lists it, and its folder (xl_cheese,
+                              # 24 Nov: it says which tool to open to change it)
+OLD_THEME_NAMES = ("xl-Cheeselooks",)   # 0.9.0 and before: still ours, moved to the new name at Apply
 SCROLL_SLIDER_BORDER = 4   # px, Mint-Y's transparent border around the scrollbar thumb
 HOVER_CALIBRATION = 0.8
 

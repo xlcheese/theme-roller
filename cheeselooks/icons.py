@@ -28,7 +28,8 @@ from . import palette as pal
 from . import paths, reload
 from .i18n import N_
 
-THEME = "xl-Cheeselooks"
+THEME = "Theme-Roller"   # as Mint's Themes settings lists it (xl_cheese, 24 Nov)
+OLD_THEMES = ("xl-Cheeselooks",)   # 0.9.0 and before: ours, moved to the new name
 KEY = ("org.cinnamon.desktop.interface", "icon-theme")
 # folder styles: where their SVGs are, their sizes, and which placeholder
 # colour in them is which part (Mint-Y and Yaru CC BY-SA 4.0, Breeze LGPL 3+;
@@ -102,6 +103,16 @@ def theme_dir() -> Path:
 def old_theme_dir() -> Path:
     """Where the first version wrote it: removed when the theme is rebuilt."""
     return paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "icons" / THEME
+
+
+def old_theme_dirs() -> list[Path]:
+    """Every earlier place and name of ours (removed when the theme is rebuilt)."""
+    data_icons = paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share") / "icons"
+    return [old_theme_dir()] + [d for n in OLD_THEMES for d in (paths.HOME / ".icons" / n, data_icons / n)]
+
+
+def _ours(name: str | None) -> bool:
+    return name == THEME or name in OLD_THEMES
 
 
 def state_file() -> Path:
@@ -240,17 +251,20 @@ def enable(t: dict[str, str], icons: dict) -> list[str]:
     """Build the icon theme from your colors and make it Cinnamon's, remembering yours."""
     state = _load_state()
     current = reload.get(*KEY) if reload.available() else None
-    if "previous" not in state and current and current != THEME:
+    if "previous" not in state and current and not _ours(current):
         state["previous"] = current
     previous = state.get("previous")
     inherits = ([previous] if previous else []) + [n for n in FALLBACK if n != previous]
-    if old_theme_dir().exists() and old_theme_dir() != theme_dir():
-        shutil.rmtree(old_theme_dir())
+    for old in old_theme_dirs():
+        if old.exists() and old != theme_dir():
+            shutil.rmtree(old)
     n = build(t, icons, inherits, theme_dir())
     state["on"] = True
     _save_state(state)
     log = [f"Icons: {n} folder and places icons in your colors ({theme_dir()})"]
-    if current is not None and current != THEME and reload.set_value(*KEY, THEME):
+    if current is not None and current in OLD_THEMES and reload.set_value(*KEY, THEME):
+        log.append(f"Icons: now {THEME} (was {current})")
+    elif current is not None and current != THEME and reload.set_value(*KEY, THEME):
         log.append(f"Icons: Cinnamon now uses {THEME} (yours, {previous}, fills in the rest)")
     elif current == THEME and _reload():
         log.append("Icons: reloaded")
@@ -282,9 +296,9 @@ def disable() -> list[str]:
     if not state:
         return []
     previous = state.get("previous") or "Mint-Y"
-    if reload.available() and reload.get(*KEY) == THEME:
+    if reload.available() and _ours(reload.get(*KEY)):
         reload.set_value(*KEY, previous)
-    for d in (theme_dir(), old_theme_dir()):
+    for d in [theme_dir()] + old_theme_dirs():
         if d.exists():
             shutil.rmtree(d)
     _save_state({})

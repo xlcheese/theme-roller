@@ -69,6 +69,12 @@ def theme_dir() -> Path:
     return HOME / ".themes" / THEME_NAME
 
 
+def old_theme_dirs() -> list[Path]:
+    """The theme's folders under its earlier names (0.9.0: xl-Cheeselooks)."""
+    from .tokens import OLD_THEME_NAMES
+    return [HOME / ".themes" / n for n in OLD_THEME_NAMES]
+
+
 def cache_dir() -> Path:
     return _xdg("XDG_CACHE_HOME", HOME / ".cache") / APP_DIR
 

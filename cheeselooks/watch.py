@@ -37,7 +37,8 @@ WATCH_PATTERN = "(theme-roller|cheeselooks) watch"   # the old name too, started
 
 def is_ours(theme: str | None) -> bool:
     """Our theme, or the short-lived name Apply reloads through."""
-    return bool(theme) and theme in (tokens.THEME_NAME, f".{tokens.THEME_NAME}-reloading")
+    names = (tokens.THEME_NAME,) + tokens.OLD_THEME_NAMES
+    return bool(theme) and theme in names + tuple(f".{n}-reloading" for n in names)
 
 
 def lock_file() -> Path:

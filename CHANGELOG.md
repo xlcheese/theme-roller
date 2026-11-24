@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- **The theme is called Theme-Roller** in Mint's Themes settings (Applications, Desktop and Icons), not xl-Cheeselooks, so it says which tool to open to change it. Its folders are `~/.themes/Theme-Roller` and `~/.icons/Theme-Roller`. If you used 0.9.0, your next **Apply** moves everything over by itself and removes the old folders; **Revert** still goes back to what you had. The built-in themes and styles keep their xl- names.
+
 ## 0.9.0: the first release
 
 Good ol' fashioned Linux desktop theming for your Linux Mint Cinnamon desktop.

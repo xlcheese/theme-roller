@@ -1317,7 +1317,7 @@ class RenderAndInstallTests(unittest.TestCase):
                     data["panel"]["panel_height"] = 44          # a chosen height: saved for Revert
                     return cli.apply_to_desktop(data, cli.style_or_stand_in(data)[0], activate=True)
                 apply("xl-Cheeselooks")                             # the first Apply: no error
-                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                self.assertEqual(gs[cli.THEME_KEY], "Theme-Roller")
                 data, log = cli.revert_desktop()                    # Mint-Y comes back
                 self.assertIsNone(data)
                 self.assertEqual(gs[cli.THEME_KEY], "Mint-Y-Aqua")
@@ -1331,8 +1331,64 @@ class RenderAndInstallTests(unittest.TestCase):
                 restarts.clear()
                 data, log = cli.revert_desktop()                    # back to xl-Cheeselooks...
                 self.assertEqual(data["theme"], "xl-Cheeselooks")
-                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                self.assertEqual(gs[cli.THEME_KEY], "Theme-Roller")
                 self.assertEqual(restarts, [1])                      # ...and its window borders
+
+    def test_upgrade_from_the_xl_cheeselooks_name(self):
+        # 0.9.0 named the theme and icons xl-Cheeselooks; now Theme-Roller (Mint's
+        # Themes settings says which tool made it). The next Apply moves over:
+        # settings to the new name, the old theme kept for Revert, old folders gone
+        import os
+        from unittest import mock
+        from cheeselooks import paths, watch, flatpak, icons
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            env = {"XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(home / ".local/share"),
+                   "XDG_CACHE_HOME": str(home / ".cache")}
+            gs = {("org.cinnamon.theme", "name"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.interface", "gtk-theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.wm.preferences", "theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.interface", "icon-theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.wm.preferences", "button-layout"): ":minimize,maximize,close"}
+            r = cli.reload
+            with mock.patch.dict(os.environ, env), mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(r, "available", return_value=True), \
+                    mock.patch.object(r, "get", side_effect=lambda sc, k: gs.get((sc, k))), \
+                    mock.patch.object(r, "set_value", side_effect=lambda sc, k, v: gs.__setitem__((sc, k), v) or True), \
+                    mock.patch.object(r, "_run", return_value=""), \
+                    mock.patch.object(r, "panel_heights_raw", return_value="['1:40']"), \
+                    mock.patch.object(r, "panel_height", return_value=40), \
+                    mock.patch.object(r, "overlay_scrollbars", return_value=None), \
+                    mock.patch.object(r, "set_adw_accent", return_value=None), \
+                    mock.patch.object(r, "restart_cinnamon", return_value="restarted"), \
+                    mock.patch.object(r.time, "sleep"), \
+                    mock.patch.object(icons, "_reload", return_value=True), \
+                    mock.patch.object(watch, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "available", return_value=False):
+                self.assertTrue(watch.is_ours("xl-Cheeselooks"))           # the watcher leaves it alone meanwhile
+                old = home / ".themes" / "xl-Cheeselooks"                  # what 0.9.0 left
+                (old / "gtk-3.0").mkdir(parents=True)
+                (old / "gtk-3.0" / "gtk.css").write_text("/* 0.9.0 */")
+                (old.parent / ".xl-Cheeselooks.settings.json").write_text(json.dumps(themes.load("xl-Gummy")))
+                old_icons = home / ".icons" / "xl-Cheeselooks"
+                old_icons.mkdir(parents=True)
+                icons._save_state({"on": True, "previous": "Mint-Y-Sand"})
+                data = themes.load("xl-Cheeselooks")
+                data["icons"]["enabled"] = True
+                cli.apply_to_desktop(data, cli.style_or_stand_in(data)[0], activate=True)
+                for key in [(sc, k) for sc, k, _f, _p in r.THEME_KEYS]:
+                    self.assertEqual(gs[key], "Theme-Roller", key)
+                self.assertEqual(gs[icons.KEY], "Theme-Roller")
+                self.assertTrue((home / ".themes" / "Theme-Roller" / "gtk-3.0").is_dir())
+                self.assertFalse(old.exists())
+                self.assertFalse((old.parent / ".xl-Cheeselooks.settings.json").exists())
+                self.assertFalse(old_icons.exists())
+                self.assertEqual(icons._load_state()["previous"], "Mint-Y-Sand")   # your icons still remembered
+                self.assertEqual((paths.last_good_dir() / "theme" / "gtk-3.0" / "gtk.css").read_text(), "/* 0.9.0 */")
+                data, _log = cli.revert_desktop()                          # Revert: the 0.9.0 theme
+                self.assertEqual(data["theme"], "xl-Gummy")
+                self.assertEqual(gs[cli.THEME_KEY], "Theme-Roller")
 
     def test_remove_from_desktop(self):
         # theme-roller remove (before uninstalling): our theme settings back to
