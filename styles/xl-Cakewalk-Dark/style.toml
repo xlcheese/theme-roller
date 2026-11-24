@@ -1,0 +1,96 @@
+# xl-Cakewalk Dark: easy as a breeze. Flat-looking buttons with a soft shadow
+# that pick up an accent edge and glow on hover, fields set into the window
+# with an accent edge, boxed tabs with an accent line, and outlined hovers in
+# menus, sidebars and the Cinnamon main menu (see-through, as the menu is).
+# By Wesley Hayslip.
+#
+# Alpha values are written for Depth 50. alpha_dark is used on dark surfaces
+# (dark themes, dark title bars).
+
+name = "xl-Cakewalk-Dark"
+author = "Wesley Hayslip"
+description = "Flat buttons with an accent ring on hover, fields set into the window, boxed tabs."
+
+# A gap between a spin button's field and its − + buttons (raised buttons, recessed fields)
+spin_gap = 5
+
+adapt_strength = 0.6
+dividers = "darker(bg, 0.35)"
+
+[defaults]
+roundness = 34
+gradient = 5
+depth = 50
+panel_opacity = 80
+panel_roundness = 0
+
+[edges.raised]
+border    = "darker(bg, 0.23)"
+shadow    = { y = 2, blur = 2, color = "black", alpha = 0.05, alpha_dark = 0.09 }
+
+# Hover: an accent border and a soft accent glow
+[edges.raised_hover]
+border    = "accent"
+shadow    = { y = 1, blur = 3, color = "accent", alpha = 0.5, alpha_dark = 0.5 }
+
+[edges.sunken]
+border = "accent"
+inner  = { y = 1, blur = 2, color = "black", alpha = 0.05, alpha_dark = 0.30 }
+recess = { color = "black", alpha = 0.08, light = "white", light_alpha = 0.35, light_alpha_dark = 0.1 }
+
+# Text fields and check boxes at rest: sunken with a quiet border (accent on hover)
+[edges.entry_sunken]
+border = "darker(bg, 0.45)"
+inner  = { y = 1, blur = 2, color = "black", alpha = 0.05, alpha_dark = 0.30 }
+recess = { color = "black", alpha = 0.08, light = "white", light_alpha = 0.35, light_alpha_dark = 0.1 }
+
+[edges.focus]
+border = "accent"
+ring   = { width = 1, color = "accent", alpha = 0.5 }
+inner  = { y = 1, blur = 2, color = "black", alpha = 0.10, alpha_dark = 0.30 }
+
+[edges.flat]
+border = "none"
+
+[edges.accent_line]
+border = "accent"
+
+[edges.panel_raised]
+border = "darker(button, 0.09)"
+shade  = { y = -4, blur = 9, color = "black", alpha = 0.03 }
+
+[edges.panel_hover]
+border = "button"
+shade  = { y = -1, color = "black", alpha = 0.08 }
+
+[widgets]
+button         = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "lift(button, 0.25)" }
+linked         = { like = "button", hover_edge = "raised_hover"  }
+suggested      = { like = "button", border = "accent_press", hover_color = "accent_hover" }
+toolbar_button = { edge = "flat", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "lift(header, 0.55)" }
+title_button   = { like = "toolbar_button" }
+close_button   = { like = "title_button", hover_color = "accent" }
+entry          = { edge = "entry_sunken", hover_edge = "sunken", focus_edge = "focus" }
+check          = { edge = "entry_sunken", hover_edge = "sunken", focus_edge = "focus" }
+combo          = { like = "button" }
+tab            = { tab_kind = "boxed", active_marker = "line", hover_color = "mix(header, accent, 0.25)" }
+menu_item      = { hover_color = "mix(menu_bg, accent, 0.25)", hover_edge = "accent_line" }
+menubar_item   = { hover_color = "accent" }
+panel_button   = { edge = "panel_raised", hover_edge = "panel_hover", color = "darker(button, 0.04)", hover_color = "mix(button, accent, 0.25)", selected_color = "mix(button, accent, 0.25)", selected_border = "mix(button, accent, 0.25)", spacing = 3, active_marker = "line"}
+sidebar_row    = { hover_color = "mix(sidebar, accent, 0.18)", selected_color = "mix(sidebar, accent, 0.35)", hover_edge = "accent_line", selected_border = "accent" }
+
+[title_bar]
+highlight      = 0.15   # light title bars (the default)
+highlight_dark = 0.25   # dark title bars, i.e. light title text
+
+[panel]
+color              = "darker(bg, 0.11)"
+menu_hover         = "mix(menu_bg, accent, 0.35)"
+menu_hover_edge    = "accent_line"
+menu_category_edge = "accent_line"
+menu_see_through   = true
+menu_category      = "mix(menu_bg, accent, 0.35)"   # the main menu's selected category
+
+[notification]
+kind               = "bordered"        # "line" (Mint-Y's look), "flat" or "bordered"
+color              = "darker(bg, 0.2)"     # optional: the line or border colour

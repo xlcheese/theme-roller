@@ -313,7 +313,8 @@ popover.menu modelbutton {
 popover.menu modelbutton:hover, popover.menu modelbutton:selected {
   color: {{w.menu_item.hover_fg}};
   background-color: {{w.menu_item.hover_color}};
-  background-image: {{w.menu_item.hover_grad}}; }
+  background-image: {{w.menu_item.hover_grad}};
+  box-shadow: {{w.menu_item.hover_g4_ring}}; }
 menubar > item:hover, menubar > item:selected {
   color: {{w.menubar_item.hover_fg}};
   box-shadow: none;
@@ -340,12 +341,15 @@ selection, text selection, label > selection, entry > text > selection {
   border-radius: {{r}}px; }
 .navigation-sidebar > row:hover:not(:selected), placessidebar row:hover:not(:selected),
 stacksidebar row:hover:not(:selected) {
+  color: {{sidebar_hover_fg}};
   background-color: {{sidebar_hover}};
-  background-image: {{sidebar_hover_grad}}; }
+  background-image: {{sidebar_hover_grad}};
+  box-shadow: {{w.sidebar_row.hover_g4_ring}}; }
 .navigation-sidebar > row:selected, placessidebar row:selected, stacksidebar row:selected {
-  color: {{accent_fg}};
+  color: {{sidebar_select_fg}};
   background-color: {{sidebar_select}};
-  background-image: {{sidebar_select_grad}}; }
+  background-image: {{sidebar_select_grad}};
+  box-shadow: {{w.sidebar_row.selected_ring}}; }
 
 /* Stack sidebars (a settings window's page list, e.g. this theme's own app):
    the sidebar colour, no divider lines (they'd stick out past rounded
@@ -373,6 +377,9 @@ entry, spinbutton:not(.vertical), spinbutton.vertical > text {
   border-style: solid;
   border-color: {{w.entry.border}};
   box-shadow: {{w.entry.g4_shadow}}; }
+entry:hover:not(:focus-within):not(:disabled), spinbutton:hover:not(:focus-within):not(.vertical):not(:disabled) {
+  border-color: {{w.entry.hover_border}};
+  box-shadow: {{w.entry.hover_g4_shadow}}; }
 entry:focus-within, spinbutton:focus-within:not(.vertical) {
   border-color: {{w.entry.focus_border}};
   box-shadow: {{w.entry.focus_g4_shadow}}; }
@@ -412,6 +419,9 @@ check, radio {
   -gtk-icon-source: none; }
 radio { border-radius: 50%; }
 check:hover, radio:hover { border-color: {{accent}}; }
+check:checked:hover, radio:checked:hover, check:indeterminate:hover, radio:indeterminate:hover {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 check:checked, radio:checked, check:indeterminate, radio:indeterminate {
   color: {{accent_fg}};
   border-color: {{accent_press}};
@@ -440,6 +450,11 @@ switch:checked {
   border-color: {{accent_press}};
   background-color: {{accent}};
   background-image: {{accent_grad}}; }
+switch:hover:not(:checked):not(:disabled) {
+  background-color: {{trough_hover}}; }
+switch:checked:hover:not(:disabled) {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 switch:disabled { opacity: 0.5; }
 switch > image { color: transparent; }
 switch > slider {

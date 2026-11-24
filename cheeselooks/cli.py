@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -233,6 +234,7 @@ def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
     table = tokens.build(data, style, panel_height=height,
                          overlay_scrollbars=reload.overlay_scrollbars())
     theme_dir = paths.theme_dir()
+    _adopt_old_theme(theme_dir)            # 0.9.0's xl-Cheeselooks: Revert's previous theme
     written = install.install(paths.templates_dir(), table, theme_dir, paths.last_good_dir(), data)
     log += _apply_panel_height(data, paths.last_good_dir())
     if save:
@@ -248,10 +250,12 @@ def _apply_to_desktop(data: dict, style: styles.Style, activate: bool,
         line = reload.set_overlay_scrollbars(sb["mode"] == "overlay")
         if line:
             log.append(line)
-    was_ours = reload.available() and reload.get(*THEME_KEY) == tokens.THEME_NAME
+    was_ours = reload.available() and watch.is_ours(reload.get(*THEME_KEY))
     if activate and reload.available() and not was_ours:
         _remember_desktop(paths.last_good_dir())    # Revert goes back to it (Mint-Y, say)
+    log += _to_new_name()
     log += reload.apply(tokens.THEME_NAME, layout, activate=activate, theme_dir=theme_dir)
+    log += _remove_old_theme()
     log += _window_borders(table, was_ours, force=restart)
     return log
 
@@ -380,6 +384,50 @@ def _cmd_apply(args: argparse.Namespace) -> int:
         for line in _window_borders(table, was_ours, force=getattr(args, "restart", False)):
             print(f"  {line}")
     return 0
+
+
+def _adopt_old_theme(theme_dir: Path) -> None:
+    """The theme under its 0.9.0 name (xl-Cheeselooks) and none under the new
+    one yet: copied across first, so this Apply keeps it as the theme Revert
+    goes back to, as it would have under one name."""
+    if theme_dir.exists():
+        return
+    for old in paths.old_theme_dirs():
+        if old.is_dir():
+            shutil.copytree(old, theme_dir, symlinks=True)
+            saved = old.parent / f".{old.name}.settings.json"
+            if saved.exists():
+                shutil.copy2(saved, theme_dir.parent / f".{theme_dir.name}.settings.json")
+            return
+
+
+def _to_new_name() -> list[str]:
+    """Cinnamon's theme settings still on an earlier name of ours: to the new one
+    (Mint's Themes settings then lists it as Theme Roller)."""
+    if not reload.available():
+        return []
+    log = []
+    for schema, key, _f, _p in reload.THEME_KEYS:
+        if reload.get(schema, key) in tokens.OLD_THEME_NAMES:
+            reload.set_value(schema, key, tokens.THEME_NAME)
+            log.append(f"{schema} {key}: now {tokens.THEME_NAME} (was {', '.join(tokens.OLD_THEME_NAMES)})")
+    return log
+
+
+def _remove_old_theme() -> list[str]:
+    """The theme's folders under earlier names, once nothing uses them."""
+    if reload.available() and any(reload.get(s, k) in tokens.OLD_THEME_NAMES
+                                  for s, k, _f, _p in reload.THEME_KEYS):
+        return []
+    log = []
+    for old in paths.old_theme_dirs():
+        saved = old.parent / f".{old.name}.settings.json"
+        if old.exists():
+            shutil.rmtree(old, ignore_errors=True)
+            log.append(f"removed {old} (now {paths.theme_dir()})")
+        if saved.exists():
+            saved.unlink()
+    return log
 
 
 DESKTOP_FILE = "desktop.json"      # in the last-good folder: the theme the desktop had before ours

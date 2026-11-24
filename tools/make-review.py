@@ -46,16 +46,16 @@ INTRO = {
          "Cinnamon, GNOME, Flatpak, Qt bleiben."],
         ("Nr.", "Englisch", "Deutsch")),
  "es": ("Theme Roller en español: ayuda para revisarlo",
-        "Theme Roller es una aplicación gratuita que personaliza el escritorio Cinnamon de Linux Mint. "
-        "La traducción al español se hizo sin un hablante nativo. Si algo suena mal, raro o poco "
+        "Theme Roller es una aplicación gratuita para personalizar el escritorio Cinnamon de Linux Mint. "
+        "La traducción al español se hizo sin un hablante nativo. Si notas algo forzado, raro o poco "
         "natural, avísanos, por favor. Con diez minutos ya ayudas mucho.",
-        ["**Con la aplicación:** si tu Mint está en español, instala Theme Roller "
-         "([descarga]({release})) y recorre las pestañas.",
-         "**Sin instalar nada:** lee la tabla de abajo.",
-         "**Cómo responder:** en la publicación donde encontraste esta página, o en GitHub: el número y "
-         "tu mejor redacción, por ejemplo «#94: … en vez de …»."],
-        ["Por favor, conserva: las palabras entre `{llaves}` tal cual, y las marcas como `<b>`; las "
-         "etiquetas cortas (✂) deben seguir siendo cortas, o la ventana se ensancha; los nombres como "
+        ["**Con la aplicación:** si tienes Mint en español, instala Theme Roller "
+         "([descarga]({release})) y revisa las pestañas.",
+         "**Sin instalar nada:** revisa la tabla de abajo.",
+         "**Cómo responder:** en la publicación donde viste esta página, o en GitHub: indica el número y "
+         "tu propuesta, por ejemplo «#94: … en vez de …»."],
+        ["Por favor, conserva: las palabras entre `{llaves}` tal cual y las etiquetas como `<b>`; las "
+         "etiquetas cortas (✂) deben seguir siendo breves para que no se ensanche la ventana; los nombres como "
          "Theme Roller, Cinnamon, GNOME, Flatpak y Qt no se traducen."],
         ("N.º", "Inglés", "Español")),
  "fr": ("Theme Roller en français : aidez-nous à le relire",

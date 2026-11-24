@@ -31,6 +31,7 @@ WIDGET_FACE = {
     "toolbar_button": "header", "title_button": "header",
     "close_button": "header", "entry": "base", "combo": "button", "tab": "header",
     "menu_item": "menu_bg", "menubar_item": "header", "panel_button": "pb_rest",
+    "sidebar_row": "sidebar",
     "check": "base", "switch": "trough", "scrollbar": "scroll_slider",
 }
 EDGE_KEYS = {"border", *LAYER_KINDS}
@@ -38,7 +39,7 @@ EDGE_KEYS = {"border", *LAYER_KINDS}
 WIDGETS = (
     "button", "suggested", "destructive", "linked", "toolbar_button", "title_button", "close_button",
     "entry", "combo", "tab", "menu_item", "menubar_item", "panel_button",
-    "check", "switch", "scrollbar",
+    "sidebar_row", "check", "switch", "scrollbar",
 )
 STATES = ("rest", "hover", "pressed", "focus")
 WIDGET_KEYS = {
@@ -48,11 +49,12 @@ WIDGET_KEYS = {
     "pressed_color",
 }
 # keys only some widgets use so far (others accept them but ignore them)
-WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item", "tab"),
+WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item", "tab", "sidebar_row"),
                     "pressed_color": ("scrollbar",),
-                    "selected_border": ("panel_button",), "padding": ("panel_button",),
+                    "selected_border": ("panel_button", "sidebar_row"), "padding": ("panel_button",),
                     "spacing": ("panel_button",),
-                    "hover_fg": ("menu_item", "menubar_item", "tab"), "selected_fg": ("panel_button", "tab")}
+                    "hover_fg": ("menu_item", "menubar_item", "tab", "sidebar_row"),
+                    "selected_fg": ("panel_button", "tab", "sidebar_row")}
 # a text color belongs to its face: a widget that sets its own face doesn't
 # inherit the text color of the widget it is "like"
 FACE_FG = {"hover_color": "hover_fg", "selected_color": "selected_fg", "pressed_color": "pressed_fg"}
@@ -71,7 +73,15 @@ PANEL_KEYS = ("color",
               "menu_hover", "menu_hover_fg",
               # the favorites column's hover (default: menu_hover moved by as much
               # as the column is darker than the menu, so it reads alike there)
-              "menu_fav_hover")
+              "menu_fav_hover",
+              # edges around the main menu's hovered item and its selected
+              # category (an edge name; only the border is drawn, as a 1px line
+              # inside the item, so nothing moves), default flat
+              "menu_hover_edge", "menu_category_edge",
+              # true: the main menu's hovers and selected category are as
+              # see-through as the menu itself (Menu opacity)
+              "menu_see_through")
+PANEL_EDGE_KEYS = ("menu_hover_edge", "menu_category_edge")
 # [notification]: Cinnamon's notification popups. kind: "line" (an accent line
 # along the top, Mint-Y's look), "flat" (no accent) or "bordered" (a thin
 # border all round); color: the line / border color (default accent).
@@ -156,6 +166,11 @@ BUILTIN_WIDGETS: dict[str, dict[str, Any]] = {
                      "focus_edge": "raised", "color": "pb_rest", "hover_color": "pb_hover",
                      "selected_color": "pb_focus", "selected_border": "accent_press",
                      "active_marker": "none", "padding": 4, "spacing": 2},
+    # sidebar rows (Nemo, file dialogs, settings-style sidebars): the theme's
+    # sidebar hover and selection unless the style sets hover_color /
+    # selected_color (and hover_fg / selected_fg); hover_edge and selected_border
+    # are drawn as a 1px line inside the row
+    "sidebar_row": {"edge": "flat", "hover_edge": "flat", "pressed_edge": "flat", "focus_edge": "flat"},
     "check": {"edge": "sunken", "hover_edge": "sunken", "pressed_edge": "sunken", "focus_edge": "focus"},
     "switch": {"like": "check"},
     # scrollbar thumb: colors only (no edges); border, if set, is a 1px outline
@@ -257,6 +272,11 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
             if k not in PANEL_KEYS:
                 warnings.append(f"panel.{k} is not a known panel setting and is ignored "
                                 f"(known: {', '.join(PANEL_KEYS)})")
+            elif k == "menu_see_through":
+                if not isinstance(v, bool):
+                    errors.append(f"panel.menu_see_through must be true or false (got {v!r})")
+            elif k in PANEL_EDGE_KEYS:
+                pass                                   # checked with the edges, below
             elif not _is_color_ref(v, names):
                 errors.append(f"panel.{k} must be a palette color name or #RRGGBB (got {v!r})")
 
@@ -371,6 +391,10 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                     errors.append(f"{where} needs a color")
 
     all_edges = set(BUILTIN_EDGES) | set(edges)
+    if isinstance(panel, dict):
+        for k in PANEL_EDGE_KEYS:
+            if k in panel and panel[k] not in all_edges:
+                errors.append(f"panel.{k} refers to an edge that doesn't exist: {panel[k]!r}")
     widgets = data.get("widgets", {})
     if not isinstance(widgets, dict):
         errors.append("'widgets' must be a table")
@@ -654,6 +678,27 @@ def edge_css(edge: dict[str, Any], palette: dict[str, str], depth: float,
     }
 
 
+def ring_css(css: dict[str, str]) -> tuple[str, str, str]:
+    """An edge drawn inside a widget that has no border of its own (menu items,
+    sidebar rows, the main menu's items): its border as a 1px inset line plus its
+    inner layers, so nothing moves. (GTK 3, GTK 4, Cinnamon: one layer, the line)"""
+    line = f"inset 0 0 0 1px {css['border']}" if css["border"] != "transparent" else None
+
+    def join(inner: str) -> str:
+        parts = [x for x in (line, inner if inner != "none" else None) if x]
+        return ", ".join(parts) or "none"
+    st = line or (css["st_shadow"] if css["st_shadow"].startswith("inset") else "none")
+    return join(css["inset_shadow"]), join(css["g4_inset_shadow"]), st
+
+
+def _lines(border: str) -> str:
+    """Only the top and bottom of a ring: for tree-view rows (Nemo's sidebar),
+    whose cells each draw the row's shadow, so sides would show between them."""
+    if border == "transparent":
+        return "none"
+    return f"inset 0 1px {border}, inset 0 -1px {border}"
+
+
 def resolved_widgets(style: Style) -> dict[str, dict[str, Any]]:
     """Each widget's settings with 'like' and built-in fallbacks applied."""
     raw = {w: {**BUILTIN_WIDGETS.get(w, {}), **style.widgets.get(w, {})} for w in WIDGETS}
@@ -705,6 +750,9 @@ def widget_tokens(style: Style, palette: dict[str, str], depth: float) -> dict[s
             tokens[prefix + "seam_shadow"] = (seam if css["inset_shadow"] == "none"
                                               else f"{seam}, {css['inset_shadow']}")
             tokens[prefix + "st_shadow"] = css["st_shadow"]
+            ring = ring_css(css)
+            tokens[prefix + "ring"], tokens[prefix + "g4_ring"], tokens[prefix + "st_ring"] = ring
+            tokens[prefix + "lines"] = _lines(css["border"])
             tokens[prefix + "outer"] = css["outer"]
             tokens[prefix + "g4_outer"] = css["g4_outer"]
         hover_color = spec.get("hover_color")
@@ -719,6 +767,10 @@ def widget_tokens(style: Style, palette: dict[str, str], depth: float) -> dict[s
             tokens["w.scrollbar.outline"] = (_resolve_color(spec["border"], palette)
                                              if spec.get("border") not in (None, "none", "transparent")
                                              else "transparent")
+        sel = spec.get("selected_border") if wname == "sidebar_row" else None
+        sel = _resolve_color(sel, palette) if sel not in (None, "none", "transparent") else None
+        tokens[f"w.{wname}.selected_ring"] = f"inset 0 0 0 1px {sel}" if sel else "none"
+        tokens[f"w.{wname}.selected_lines"] = _lines(sel or "transparent")
         for k in ("padding", "spacing"):
             if k in spec:
                 tokens[f"w.{wname}.{k}"] = str(spec[k])

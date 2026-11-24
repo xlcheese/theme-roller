@@ -32,6 +32,8 @@ POT = PO / "theme-roller.pot"
 SOURCES = sorted((ROOT / "cheeselooks").glob("*.py"))
 LANG_NAMES = {"de": "German", "es": "Spanish", "fr": "French", "it": "Italian", "nl": "Dutch",
               "pt_BR": "Portuguese (Brazil)", "ru": "Russian"}
+# who revised each language (the file's header says so)
+REVIEWERS = {"es": "axrusar (Linux Mint forums)"}
 PLURAL_FORMS = {"ru": "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);",
                 "fr": "nplurals=2; plural=(n > 1);", "pt_BR": "nplurals=2; plural=(n > 1);"}
 
@@ -97,7 +99,8 @@ def header(lang: str | None) -> str:
     plural = PLURAL_FORMS.get(lang or "", "nplurals=2; plural=(n != 1);")
     return (f"# {name} translation of Theme Roller.\n"
             "# This file is distributed under the same license as Theme Roller (GPL-3.0-or-later).\n"
-            "#\n"
+            + (f"# Revised by {REVIEWERS[lang]}.\n" if lang in REVIEWERS else "")
+            + "#\n"
             'msgid ""\n'
             'msgstr ""\n'
             '"Project-Id-Version: theme-roller\\n"\n'

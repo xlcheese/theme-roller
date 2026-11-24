@@ -57,12 +57,13 @@ def remove() -> list[str]:
     if icons.active() or icons.theme_dir().exists():
         log += icons.disable()
     # 4. the files Theme Roller made (not your settings or your own themes)
-    for d in (paths.theme_dir(), paths.last_good_dir(), paths.cache_dir()):
+    for d in [paths.theme_dir(), paths.last_good_dir(), paths.cache_dir()] + paths.old_theme_dirs():
         if d.exists():
             shutil.rmtree(d, ignore_errors=True)
             log.append(f"removed {d}")
-    saved = paths.theme_dir().parent / f".{paths.theme_dir().name}.settings.json"   # beside the theme
-    for f in (watch.set_aside_file(), saved):
+    saved = [d.parent / f".{d.name}.settings.json"               # beside the theme
+             for d in [paths.theme_dir()] + paths.old_theme_dirs()]
+    for f in [watch.set_aside_file()] + saved:
         if f.exists():
             f.unlink()
     # files Theme Roller created and has now emptied (a real ~/.profile has more in it)

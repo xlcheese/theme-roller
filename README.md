@@ -158,10 +158,10 @@ From a copy of the repository, run them as `./bin/theme-roller …`.
 
 Theme Roller only writes inside your home folder:
 
-- the theme: `~/.themes/xl-Cheeselooks`
-- folder icons, if you turn them on: `~/.icons/xl-Cheeselooks`
+- the theme: `~/.themes/Theme-Roller` (Mint's Themes settings lists it as Theme-Roller)
+- folder icons, if you turn them on: `~/.icons/Theme-Roller`
 - your settings and your own themes: `~/.config/theme-roller/` and `~/.local/share/theme-roller/`
-- for other apps: a marked block in `~/.config/gtk-4.0/gtk.css`, a Qt color scheme (qt5ct), a text editor scheme, and read access to your theme for Flatpak apps.
+- for other apps: a marked block in `~/.config/gtk-4.0/gtk.css`, a Qt color scheme (qt5ct, named Theme-Roller), a text editor scheme, and read access to your theme for Flatpak apps.
 
 ## Requirements
 
@@ -181,6 +181,7 @@ Linux Mint 22.x with Cinnamon 6.x. Everything uses the Python 3 and GTK that Min
 - Built on [Linux Mint](https://github.com/linuxmint/mint-themes)'s Mint-Y theme.
 - Inspired by GNOME 2's Clearlooks theme and the GNOME Color Chooser. The xl-Classic styles are styled after ClearlooksClassic, the Clearlooks look from before GNOME 2.20, and the xl-Gummy styles after GNOME 2.20's Clearlooks, known as Gummy while it was being made. No code or images were taken from them.
 - Folder icons from [Mint-Y](https://github.com/linuxmint/mint-y-icons) (CC BY-SA 4.0, Sam Hewitt and Alexey Varfolomeev), [Yaru](https://github.com/ubuntu/yaru) (CC BY-SA 4.0, Canonical and the Yaru contributors) and [Breeze](https://github.com/KDE/breeze-icons) (LGPL 3+, the KDE contributors). Each style's licence is in its folder under `data/icons/`.
+- Spanish revised by axrusar of the Linux Mint forums.
 - xl-Big Baddy and xl-Rad are Wesley Hayslip's designs; the Claude folders and the Claude themes were designed by Claude.
 
 ## License

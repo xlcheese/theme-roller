@@ -22,7 +22,9 @@ from . import render, shape
 from . import styles as sty
 from . import gtk4, metacity, titlebuttons, panelmarker, spin, tabs
 
-THEME_NAME = "xl-Cheeselooks"
+THEME_NAME = "Theme-Roller"   # the theme as Mint's Themes settings lists it, and its folder (xl_cheese,
+                              # 24 Nov: it says which tool to open to change it)
+OLD_THEME_NAMES = ("xl-Cheeselooks",)   # 0.9.0 and before: still ours, moved to the new name at Apply
 SCROLL_SLIDER_BORDER = 4   # px, Mint-Y's transparent border around the scrollbar thumb
 HOVER_CALIBRATION = 0.8
 
@@ -72,6 +74,18 @@ def _add_gradients(tokens: dict[str, str], prefix: str, palette: dict[str, str],
         _add_colors(tokens, prefix, {name + "_top": top, name + "_bottom": bottom})
 
 
+def _entry_hover(t: dict[str, str], style: sty.Style, theme: dict[str, str], hover: float) -> None:
+    """Text fields hovered (xl_cheese, 24 Nov: they had no hover; buttons do): the
+    style's entry hover_edge if it gives one (e.g. an accent border, as KDE's
+    Breeze), else the resting border a step toward the text, as a button's hover
+    border is. Focus (the accent) still wins."""
+    if "hover_edge" in (style.widgets.get("entry") or {}):
+        return
+    rest = t["w.entry.border"]
+    t["w.entry.hover_border"] = (pal.mix(rest, theme["text"], min(1.0, 0.22 * hover)) if rest.startswith("#")
+                                 else theme["border_hover"])
+
+
 def _add_widgets(tokens: dict[str, str], prefix: str, style: sty.Style,
                  palette: dict[str, str], depth: float, amount: float) -> None:
     wt = sty.widget_tokens(style, palette, depth)
@@ -111,6 +125,27 @@ def _add_face_gradients(t: dict[str, str], style: sty.Style) -> None:
                                                  style.glass_return)
 
 
+def _sidebar_colors(style: sty.Style, theme: dict[str, str]) -> tuple[dict[str, str], tuple[str, str]]:
+    """sidebar_row's hover_color / selected_color in place of the theme's
+    sidebar_hover / sidebar_select, and the text on each (hover_fg / selected_fg,
+    else whichever of text / text-on-accent reads better on a face the style chose)."""
+    spec = style.widgets.get("sidebar_row") or {}
+    theme = dict(theme)
+    fgs = []
+    for face_key, fg_key, token, default_fg in (("hover_color", "hover_fg", "sidebar_hover", theme["text"]),
+                                                ("selected_color", "selected_fg", "sidebar_select",
+                                                 theme["accent_fg"])):
+        if spec.get(face_key):
+            theme[token] = sty._resolve_color(spec[face_key], theme)
+        if spec.get(fg_key):
+            fgs.append(sty._resolve_color(spec[fg_key], theme))
+        elif spec.get(face_key) and theme[token] != theme["accent"]:
+            fgs.append(max((theme["text"], theme["accent_fg"]), key=lambda c: pal.contrast(c, theme[token])))
+        else:
+            fgs.append(default_fg)
+    return theme, (fgs[0], fgs[1])
+
+
 def _derive(style: sty.Style, accent: str, bg: str, text: str, hover: float) -> dict[str, str]:
     """The palette, with the style's button color (widgets.button.color) as the
     button face when it sets one. The expression is read against the plain
@@ -148,6 +183,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     hover = g["hover_strength"] / 50 * HOVER_CALIBRATION
     render.LIFT_SCALE = g["hover_strength"] / 50     # style lift() hovers follow the slider too
     theme = _derive(style, g["accent"], g["bg"], g["text"], hover)
+    theme, sidebar_fg = _sidebar_colors(style, theme)
     # the button color is in the palette now; widget tokens use the style without it
     face_style, style = style, _without_button_color(style)
     t: dict[str, str] = {}
@@ -159,6 +195,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
 
     # --- Global palette, gradients, shape, timing, style edges
     _add_colors(t, "", theme)
+    t["sidebar_hover_fg"], t["sidebar_select_fg"] = sidebar_fg
     # hovered list rows (activatable rows on a list): a text tint that follows
     # Hover strength (Mint-Y's is a fixed 3%)
     t["row_hover"] = pal.rgba(theme["text"], 0.075 * hover)
@@ -177,6 +214,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["hover_in_ms"] = str(g["hover_in_ms"])
     t["hover_out_ms"] = str(g["hover_out_ms"])
     _add_widgets(t, "", style, theme, depth, amount)
+    _entry_hover(t, style, theme, hover)
     # joined buttons whose container draws no CSS (Nemo's path bar): each
     # button carries its share of the group's outer layers (recess, shadow)
     for state in ("", "hover_", "pressed_"):
@@ -284,6 +322,23 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # lightened top washed out (xl-Classic Dark), so the top is the hover itself
     t["menu.fav_main_hover_top"] = fav_h
     t["menu.fav_main_hover_bottom"] = pal.gradient(fav_h, m_grad / 100)[1]
+    # [panel] menu_hover_edge / menu_category_edge: a 1px line inside the item
+    edges = {**sty.BUILTIN_EDGES, **style.edges}
+    for key, name, surface in (("menu_hover_edge", "main_hover", mh), ("menu_category_edge", "category", cat)):
+        ename = style.panel.get(key, "flat")
+        css = sty.edge_css(edges[ename], mcolors, depth, None, surface, style.adapt_strength)
+        t[f"menu.{name}_ring"] = sty.ring_css(css)[2]
+    t["menu.fav_hover_ring"] = t["menu.side_hover_ring"] = t["menu.main_hover_ring"]
+    # [panel] menu_see_through: the main menu's hovers and selected category as
+    # see-through as the menu (Menu opacity), so the desktop shows through them too
+    # (each as the most see-through tint that looks the same on the menu)
+    if style.panel.get("menu_see_through"):
+        unders = {"main_hover": mcolors["menu_bg"], "category": mcolors["menu_bg"],
+                  "fav_main_hover": mcolors["fav_bg"], "side_hover": side_bg}
+        for base, under in unders.items():
+            for k in (base, base + "_top", base + "_bottom"):
+                if f"menu.{k}" in t:
+                    t[f"menu.{k}"] = pal.overlay(t[f"menu.{k}"], under)
     m_r = shape.radius(m_round, ctl)
     t["menu.r"] = str(m_r)
     t["menu.r2"] = str(shape.window_radius(m_r))
@@ -391,10 +446,14 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # --- Details
     d = settings["details"]
     tip = d["tooltips"]
-    _add_colors(t, "tooltip.", {
-        "bg": tip["bg"] if tip["custom"] and tip["bg"] else theme["menu_bg"],
-        "text": tip["text"] if tip["custom"] and tip["text"] else theme["text"],
-    })
+    tip_bg = tip["bg"] if tip["custom"] and tip["bg"] else theme["menu_bg"]
+    # a tooltip color of your own with the text left to the theme: the theme's
+    # text if it reads there, else its background color (a light tooltip on a
+    # dark theme kept the light text, and the tooltip went blank: xl-Cakewalk Dark)
+    tip_text = (tip["text"] if tip["custom"] and tip["text"] else
+                max((theme["text"], theme["bg"]), key=lambda c: pal.contrast(c, tip_bg))
+                if pal.contrast(theme["text"], tip_bg) < 4.5 else theme["text"])
+    _add_colors(t, "tooltip.", {"bg": tip_bg, "text": tip_text})
     sb = d["scrollbars"]
     if sb["custom"]:
         mode = sb["mode"]
@@ -436,7 +495,9 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["adw.accent_name"] = nearest_adw_accent(theme["accent"])
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
-    t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"])
+    t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"],
+                                                 (t["w.sidebar_row.hover_ring"], t["w.sidebar_row.selected_ring"]),
+                                                 (t["w.sidebar_row.hover_g4_ring"], t["w.sidebar_row.selected_ring"]))
     # the destructive button's border: the style's own (destructive = { border = ... }),
     # else a step darker than its face, as Mint-Y
     d_border = style.widgets.get("destructive", {}).get("border")
@@ -532,7 +593,8 @@ def _round_bottom(r: str, gtk: int) -> str:
     return "\n".join(out)
 
 
-def _lists_css(roundness: float, r: int, line: str) -> tuple[str, str]:
+def _lists_css(roundness: float, r: int, line: str, rings3: tuple[str, str] = ("none", "none"),
+               rings4: tuple[str, str] = ("none", "none")) -> tuple[str, str]:
     """GTK 3 and GTK 4 rules for menu items (not Cinnamon's) and sidebar rows:
     stack sidebars, and the places sidebar of file dialogs (GTK 3's
     placessidebar, GTK 4's navigation-sidebar). Square and edge to edge up to
@@ -564,6 +626,17 @@ def _lists_css(roundness: float, r: int, line: str) -> tuple[str, str]:
         g4 = (f"popover.menu > contents {{ padding-left: 8px; padding-right: 8px; }}\n"
               f"popover.menu modelbutton {{ margin: 0 2px; border-radius: {r}px; }}\n" + rows + "\n"
               + places4 + f" {{ margin: 1px 6px; border-radius: {r}px; }}")
+    # a stack sidebar's hovered and selected rows: the style's sidebar_row line
+    # too (with the divider, when square)
+    def ringed(rings: tuple[str, str]) -> str:
+        out = []
+        for state, ring in zip(("hover:not(:selected)", "selected"), rings):
+            parts = [x for x in ((f"inset 0 -1px {line}" if roundness <= SQUARE_LISTS_AT else None),
+                                 (ring if ring != "none" else None)) if x]
+            out.append(f"stacksidebar.sidebar row:{state}, stacksidebar row:{state} "
+                       f"{{ box-shadow: {', '.join(parts) or 'none'}; }}")
+        return "\n".join(out)
+    g3, g4 = g3 + "\n" + ringed(rings3), g4 + "\n" + ringed(rings4)
     note = "/* Menu items and sidebar rows: square below Roundness " + str(SQUARE_LISTS_AT + 1) + " (tokens._lists_css) */\n"
     return note + g3 + "\n", note + g4 + "\n"
 

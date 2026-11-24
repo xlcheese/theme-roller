@@ -199,6 +199,7 @@
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.w.menu_item.hover_top}};
   background-gradient-end: {{menu.w.menu_item.hover_bottom}};
+  box-shadow: {{menu.w.menu_item.hover_st_ring}};
   transition-duration: {{hover_in_ms}}; }
 
 /* Main menu: favorites column, categories and apps share one hover step */
@@ -213,6 +214,7 @@
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.fav_main_hover_top}};
   background-gradient-end: {{menu.fav_main_hover_bottom}};
+  box-shadow: {{menu.fav_hover_ring}};
   transition-duration: {{hover_in_ms}}; }
 
 .menu-application-button, .menu-category-button, .menu-category-button-greyed {
@@ -225,6 +227,7 @@
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.main_hover_top}};
   background-gradient-end: {{menu.main_hover_bottom}};
+  box-shadow: {{menu.main_hover_ring}};
   transition-duration: {{hover_in_ms}}; }
 .menu-category-button-selected, .menu-category-button-selected:hover {
   color: {{menu.category_fg}};
@@ -232,7 +235,8 @@
   background-color: {{menu.category}};
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.category_top}};
-  background-gradient-end: {{menu.category_bottom}}; }
+  background-gradient-end: {{menu.category_bottom}};
+  box-shadow: {{menu.category_ring}}; }
 .menu-category-button-selected .menu-category-button-label { color: {{menu.category_fg}}; }
 .menu-application-button-selected .menu-application-button-label,
 .menu-category-button:hover .menu-category-button-label { color: {{menu.main_hover_fg}}; }
@@ -248,6 +252,7 @@
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.main_hover_top}};
   background-gradient-end: {{menu.main_hover_bottom}};
+  box-shadow: {{menu.main_hover_ring}};
   transition-duration: {{hover_in_ms}}; }
 /* its sidebar: the same step from the sidebar's own background, shaded
    downward only (a lightened top washed out on dark themes) */
@@ -258,6 +263,7 @@
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.side_hover}};
   background-gradient-end: {{menu.side_hover_bottom}};
+  box-shadow: {{menu.side_hover_ring}};
   transition-duration: {{hover_in_ms}}; }
 .appmenu-sidebar-button:hover StLabel { color: {{menu.side_hover_fg}}; }
 .appmenu-category-button-selected, .appmenu-category-button-selected:hover {
@@ -265,7 +271,8 @@
   background-color: {{menu.category}};
   background-gradient-direction: vertical;
   background-gradient-start: {{menu.category_top}};
-  background-gradient-end: {{menu.category_bottom}}; }
+  background-gradient-end: {{menu.category_bottom}};
+  box-shadow: {{menu.category_ring}}; }
 .appmenu-category-button-selected .appmenu-category-button-label { color: {{menu.category_fg}}; }
 .appmenu-application-button-selected .appmenu-application-button-label,
 .appmenu-category-button:hover .appmenu-category-button-label { color: {{menu.main_hover_fg}}; }

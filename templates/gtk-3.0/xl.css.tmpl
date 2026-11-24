@@ -554,12 +554,14 @@ menu menuitem, .menu menuitem {
 menu menuitem:hover, .menu menuitem:hover, .context-menu menuitem:hover {
   color: {{w.menu_item.hover_fg}};
   background-color: {{w.menu_item.hover_color}};
-  background-image: {{w.menu_item.hover_grad}}; }
+  background-image: {{w.menu_item.hover_grad}};
+  box-shadow: {{w.menu_item.hover_ring}}; }
 popover modelbutton.flat:hover, popover modelbutton.flat:selected,
 menuitem.button.flat:hover, menuitem.button.flat:selected {
   color: {{w.menu_item.hover_fg}};
   background-color: {{w.menu_item.hover_color}};
-  background-image: {{w.menu_item.hover_grad}}; }
+  background-image: {{w.menu_item.hover_grad}};
+  box-shadow: {{w.menu_item.hover_ring}}; }
 menubar > menuitem:hover, .menubar > menuitem:hover {
   color: {{w.menubar_item.hover_fg}};
   box-shadow: none;
@@ -596,14 +598,26 @@ row.activatable:hover:not(:selected), row.activatable.has-open-popup:not(:select
   background-color: {{row_hover}}; }
 .sidebar row:hover:not(:selected), placessidebar row:hover:not(:selected),
 .sidebar .view:hover:not(:selected), .nemo-window .sidebar .view:hover:not(:selected) {
+  color: {{sidebar_hover_fg}};
   background-color: {{sidebar_hover}};
-  background-image: {{sidebar_hover_grad}}; }
+  background-image: {{sidebar_hover_grad}};
+  box-shadow: {{w.sidebar_row.hover_ring}}; }
+/* tree-view sidebars (Nemo) draw each cell on its own: a line along the top
+   and bottom only, or sides would show between the icon and the name */
+.sidebar .view:hover:not(:selected), .nemo-window .sidebar .view:hover:not(:selected) {
+  box-shadow: {{w.sidebar_row.hover_lines}}; }
 .sidebar row:selected, placessidebar row:selected, .sidebar .view:selected,
-.nemo-window .sidebar .view:selected {
-  color: {{accent_fg}};
+.nemo-window .sidebar .view:selected, .sidebar treeview.view:selected,
+.sidebar treeview.view:selected:focus {
+  color: {{sidebar_select_fg}};
   background-color: {{sidebar_select}};
-  background-image: {{sidebar_select_grad}}; }
-placessidebar row:selected image, placessidebar row:selected label { color: {{accent_fg}}; }
+  background-image: {{sidebar_select_grad}};
+  box-shadow: {{w.sidebar_row.selected_ring}}; }
+.sidebar .view:selected, .nemo-window .sidebar .view:selected, .sidebar treeview.view:selected,
+.sidebar treeview.view:selected:focus {
+  box-shadow: {{w.sidebar_row.selected_lines}}; }
+placessidebar row:selected image, placessidebar row:selected label,
+.sidebar row:selected label, .sidebar row:selected image { color: {{sidebar_select_fg}}; }
 
 /* Stack sidebars (a settings window's page list, e.g. this theme's own app):
    the sidebar colour, no divider lines (they'd stick out past rounded
@@ -630,6 +644,8 @@ entry, spinbutton:not(.vertical), spinbutton.vertical > entry {
 entry:focus, spinbutton:focus:not(.vertical), spinbutton.vertical > entry:focus {
   border-color: {{w.entry.focus_border}};
   box-shadow: {{w.entry.focus_shadow}}; }
+/* No hover: GTK 3 never marks a text field as hovered (only GTK 4 does), so
+   entry:hover can't match here */
 spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > entry:focus,
 spinbutton:not(.vertical) > button, combobox entry {
   box-shadow: none; }
@@ -658,6 +674,11 @@ check, radio, treeview.check, treeview.radio {
   -gtk-icon-source: none; }
 radio, treeview.radio { border-radius: 50%; }
 check:hover, radio:hover { border-color: {{accent}}; }
+/* checked and hovered: brighter, as an accent button's hover (xl_cheese, 24 Nov) */
+check:checked:hover, radio:checked:hover, check:indeterminate:hover, radio:indeterminate:hover,
+treeview.check:checked:hover, treeview.radio:checked:hover {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 check:checked, radio:checked, check:indeterminate, radio:indeterminate,
 treeview.check:checked, treeview.radio:checked {
   color: {{accent_fg}};
@@ -707,6 +728,12 @@ switch:checked {
   border-color: {{accent_press}};
   background-color: {{accent}};
   background-image: {{accent_grad}}; }
+/* hovered, on or off: the track brightens as a button does */
+switch:hover:not(:checked):not(:disabled) {
+  background-color: {{trough_hover}}; }
+switch:checked:hover:not(:disabled) {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 switch:disabled { opacity: 0.5; }
 switch slider {
   min-width: 18px;

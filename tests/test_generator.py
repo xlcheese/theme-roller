@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, paths, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -200,6 +200,77 @@ class StyleTests(unittest.TestCase):
         self.assertNotEqual(t["w.panel_button.selected_color"], p["accent"])
         table = tokens.build(defaults(), st)
         self.assertEqual(table["panel.w.panel_button.selected_fg"], table["panel.text"])
+
+    def test_default_hovers(self):
+        """Text fields, checked checks and switches answer the pointer in every theme."""
+        t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
+        self.assertNotEqual(t["w.entry.hover_border"], t["w.entry.border"])
+        self.assertNotEqual(t["trough_hover"], t["trough"])
+        st = styles.Style(name="Fixture", path=None,
+                          widgets={"entry": {"edge": "sunken", "hover_edge": "focus"}})
+        self.assertNotEqual(tokens.build(defaults(), st)["w.entry.hover_border"], t["w.entry.border"])
+        for gtk in ("gtk-3.0", "gtk-4.0"):
+            css = (paths.templates_dir() / gtk / "xl.css.tmpl").read_text()
+            for token in ("trough_hover", "accent_hover_grad"):
+                self.assertIn("{{" + token + "}}", css, gtk)
+        self.assertIn("{{w.entry.hover_border}}", (paths.templates_dir() / "gtk-4.0" / "xl.css.tmpl").read_text())
+
+    def test_outlined_hovers(self):
+        """menu_item / sidebar_row edges and the main menu's [panel] edges: a line
+        inside the item; flat (the default) draws nothing."""
+        plain = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
+        for k in ("w.menu_item.hover_ring", "w.sidebar_row.hover_ring", "w.sidebar_row.selected_ring",
+                  "menu.w.menu_item.hover_st_ring", "menu.main_hover_ring", "menu.category_ring"):
+            self.assertEqual(plain[k], "none", k)
+        d = Path(tempfile.mkdtemp())
+        (d / "style.toml").write_text(
+            'name = "T"\n[edges.line]\nborder = "accent"\n'
+            '[widgets]\nmenu_item = { hover_edge = "line" }\n'
+            'sidebar_row = { hover_edge = "line", selected_border = "accent" }\n'
+            '[panel]\nmenu_hover_edge = "line"\nmenu_category_edge = "line"\nmenu_see_through = true\n')
+        st = styles.load(d)
+        t = tokens.build(defaults(), st)
+        line = f"inset 0 0 0 1px {t['accent']}"
+        for k in ("w.menu_item.hover_ring", "w.menu_item.hover_g4_ring", "w.sidebar_row.hover_ring",
+                  "w.sidebar_row.selected_ring", "menu.main_hover_ring", "menu.category_ring"):
+            self.assertTrue(t[k].startswith(line), k)
+        self.assertEqual(t["sidebar_hover"], plain["sidebar_hover"])      # colors: the theme's unless set
+        self.assertEqual(t["sidebar_select_fg"], t["accent_fg"])
+        st = styles.Style(name="F", path=None, widgets={"sidebar_row": {
+            "hover_color": "mix(sidebar, accent, 0.2)", "selected_color": "mix(sidebar, accent, 0.3)"}})
+        c = tokens.build(defaults(), st)
+        self.assertEqual(c["sidebar_hover"], palette.mix(c["sidebar"], c["accent"], 0.2))
+        self.assertEqual(c["sidebar_select"], palette.mix(c["sidebar"], c["accent"], 0.3))
+        self.assertEqual(c["sidebar_select_fg"], c["text"])              # light face: the text reads
+        self.assertIn("{{sidebar_select_fg}}", (paths.templates_dir() / "gtk-3.0" / "xl.css.tmpl").read_text())
+        self.assertTrue(t["menu.main_hover"].startswith("rgba("))
+        self.assertTrue(t["menu.category"].startswith("rgba("))
+        (d / "style.toml").write_text('name = "T"\n[panel]\nmenu_hover_edge = "nope"\n')
+        with self.assertRaises(styles.StyleError):
+            styles.load(d)
+        (d / "style.toml").write_text('name = "T"\n[panel]\nmenu_see_through = "yes"\n')
+        with self.assertRaises(styles.StyleError):
+            styles.load(d)
+
+    def test_overlay(self):
+        """A see-through tint looks exactly like the color over its background."""
+        for color, under in (("#E0E0E0", "#F5F5F5"), ("#4A4A4A", "#303030"), ("#FA8562", "#303030")):
+            m = __import__("re").match(r"rgba\((\d+), (\d+), (\d+), ([\d.]+)\)", palette.overlay(color, under))
+            r, g, b, a = int(m[1]), int(m[2]), int(m[3]), float(m[4])
+            got = [round(c * a + u * (1 - a)) for c, u in zip((r, g, b), palette.to_rgb(under))]
+            for x, y in zip(got, palette.to_rgb(color)):
+                self.assertLessEqual(abs(x - y), 2)
+
+    def test_tooltip_text_reads(self):
+        """A tooltip color of your own, text left to the theme: readable on it
+        (xl-Cakewalk Dark's light tooltip kept the light text)."""
+        s = defaults()
+        s["global"].update(bg="#211F21", text="#F5F5F5")
+        s["details"]["tooltips"].update(custom=True, bg="#FAEEEB")
+        t = tokens.build(s, styles.Style(name="Fixture", path=None))
+        self.assertGreaterEqual(palette.contrast(t["tooltip.text"], t["tooltip.bg"]), 4.5)
+        s["details"]["tooltips"]["text"] = "#FF0000"                  # yours stays yours
+        self.assertEqual(tokens.build(s, styles.Style(name="Fixture", path=None))["tooltip.text"], "#FF0000")
 
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
@@ -849,7 +920,7 @@ class RenderAndInstallTests(unittest.TestCase):
         names = [n for n, _f, _b in themes.list_themes()]
         self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
                                  "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Pigeon",
-                                 "xl-Vintage", "xl-Organ Harvest"])
+                                 "xl-Cakewalk", "xl-Cakewalk Dark", "xl-Vintage", "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),
                          ("Claude", "Claude", "#B85A38"))
@@ -1317,7 +1388,7 @@ class RenderAndInstallTests(unittest.TestCase):
                     data["panel"]["panel_height"] = 44          # a chosen height: saved for Revert
                     return cli.apply_to_desktop(data, cli.style_or_stand_in(data)[0], activate=True)
                 apply("xl-Cheeselooks")                             # the first Apply: no error
-                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                self.assertEqual(gs[cli.THEME_KEY], "Theme-Roller")
                 data, log = cli.revert_desktop()                    # Mint-Y comes back
                 self.assertIsNone(data)
                 self.assertEqual(gs[cli.THEME_KEY], "Mint-Y-Aqua")
@@ -1331,8 +1402,100 @@ class RenderAndInstallTests(unittest.TestCase):
                 restarts.clear()
                 data, log = cli.revert_desktop()                    # back to xl-Cheeselooks...
                 self.assertEqual(data["theme"], "xl-Cheeselooks")
-                self.assertEqual(gs[cli.THEME_KEY], "xl-Cheeselooks")
+                self.assertEqual(gs[cli.THEME_KEY], "Theme-Roller")
                 self.assertEqual(restarts, [1])                      # ...and its window borders
+
+    def test_upgrade_from_the_xl_cheeselooks_name(self):
+        # 0.9.0 named the theme and icons xl-Cheeselooks; now Theme-Roller (Mint's
+        # Themes settings says which tool made it). The next Apply moves over:
+        # settings to the new name, the old theme kept for Revert, old folders gone
+        import os
+        from unittest import mock
+        from cheeselooks import paths, watch, flatpak, icons
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            env = {"XDG_CONFIG_HOME": str(home / ".config"), "XDG_DATA_HOME": str(home / ".local/share"),
+                   "XDG_CACHE_HOME": str(home / ".cache")}
+            gs = {("org.cinnamon.theme", "name"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.interface", "gtk-theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.wm.preferences", "theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.interface", "icon-theme"): "xl-Cheeselooks",
+                  ("org.cinnamon.desktop.wm.preferences", "button-layout"): ":minimize,maximize,close"}
+            r = cli.reload
+            with mock.patch.dict(os.environ, env), mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(r, "available", return_value=True), \
+                    mock.patch.object(r, "get", side_effect=lambda sc, k: gs.get((sc, k))), \
+                    mock.patch.object(r, "set_value", side_effect=lambda sc, k, v: gs.__setitem__((sc, k), v) or True), \
+                    mock.patch.object(r, "_run", return_value=""), \
+                    mock.patch.object(r, "panel_heights_raw", return_value="['1:40']"), \
+                    mock.patch.object(r, "panel_height", return_value=40), \
+                    mock.patch.object(r, "overlay_scrollbars", return_value=None), \
+                    mock.patch.object(r, "set_adw_accent", return_value=None), \
+                    mock.patch.object(r, "restart_cinnamon", return_value="restarted"), \
+                    mock.patch.object(r.time, "sleep"), \
+                    mock.patch.object(icons, "_reload", return_value=True), \
+                    mock.patch.object(watch, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "enable", return_value=[]), \
+                    mock.patch.object(flatpak, "available", return_value=False):
+                self.assertTrue(watch.is_ours("xl-Cheeselooks"))           # the watcher leaves it alone meanwhile
+                old = home / ".themes" / "xl-Cheeselooks"                  # what 0.9.0 left
+                (old / "gtk-3.0").mkdir(parents=True)
+                (old / "gtk-3.0" / "gtk.css").write_text("/* 0.9.0 */")
+                (old.parent / ".xl-Cheeselooks.settings.json").write_text(json.dumps(themes.load("xl-Gummy")))
+                old_icons = home / ".icons" / "xl-Cheeselooks"
+                old_icons.mkdir(parents=True)
+                icons._save_state({"on": True, "previous": "Mint-Y-Sand"})
+                data = themes.load("xl-Cheeselooks")
+                data["icons"]["enabled"] = True
+                cli.apply_to_desktop(data, cli.style_or_stand_in(data)[0], activate=True)
+                for key in [(sc, k) for sc, k, _f, _p in r.THEME_KEYS]:
+                    self.assertEqual(gs[key], "Theme-Roller", key)
+                self.assertEqual(gs[icons.KEY], "Theme-Roller")
+                self.assertTrue((home / ".themes" / "Theme-Roller" / "gtk-3.0").is_dir())
+                self.assertFalse(old.exists())
+                self.assertFalse((old.parent / ".xl-Cheeselooks.settings.json").exists())
+                self.assertFalse(old_icons.exists())
+                self.assertEqual(icons._load_state()["previous"], "Mint-Y-Sand")   # your icons still remembered
+                self.assertEqual((paths.last_good_dir() / "theme" / "gtk-3.0" / "gtk.css").read_text(), "/* 0.9.0 */")
+                data, _log = cli.revert_desktop()                          # Revert: the 0.9.0 theme
+                self.assertEqual(data["theme"], "xl-Gummy")
+                self.assertEqual(gs[cli.THEME_KEY], "Theme-Roller")
+
+    def test_qt_scheme_renamed_from_xl_cheeselooks(self):
+        # 0.9.0's Qt scheme was xl-Cheeselooks; now Theme-Roller. The next Apply:
+        # one ~/.profile block (the new one), the old files gone, qt5ct pointed at the new
+        import os
+        from unittest import mock
+        from cheeselooks import paths
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(home / ".config"),
+                                              "XDG_DATA_HOME": str(home / ".local/share")}), \
+                    mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(qt, "qt5ct_installed", return_value=True), \
+                    mock.patch.object(qt, "flatpak_qt_apps", return_value=[]):
+                old_start, old_end = qt.OLD_PROFILE_STARTS[0], qt.OLD_PROFILE_ENDS[0]
+                qt.profile_file().write_text(f"# mine\nexport EDITOR=xed\n\n{old_start}\n{qt.PROFILE_LINE}\n"
+                                             f"unset {qt.STYLE_ENV}\n{old_end}\n")
+                old_conf = qt.qt5ct_dir() / "colors" / "xl-Cheeselooks.conf"
+                old_qss = qt.qt5ct_dir() / "qss" / "xl-Cheeselooks.qss"
+                for f, text in ((old_conf, "# Written by xl-Cheeselooks (Integration: Qt apps).\n"),
+                                (old_qss, "/* # Written by xl-Cheeselooks (Integration: Qt apps). */\n")):
+                    f.parent.mkdir(parents=True, exist_ok=True)
+                    f.write_text(text)
+                qt._save_state({"files": {str(old_conf): "created", str(old_qss): "created"}})
+                qt.enable(tokens.build(defaults(), styles.load(DEFAULT_STYLE)))
+                profile = qt.profile_file().read_text()
+                self.assertEqual(profile.count(qt.PROFILE_LINE), 1)
+                self.assertIn(qt.PROFILE_START, profile)
+                self.assertNotIn(old_start, profile)
+                self.assertIn("export EDITOR=xed", profile)                        # yours kept
+                self.assertFalse(old_conf.exists() or old_qss.exists())
+                self.assertTrue(qt.scheme_file().name == "Theme-Roller.conf" and qt.scheme_file().exists())
+                self.assertIn("Theme-Roller.conf", (qt.qt5ct_dir() / "qt5ct.conf").read_text())
+                qt.disable()                                                         # off: nothing of ours left
+                self.assertNotIn(qt.PROFILE_START, qt.profile_file().read_text())
+                self.assertFalse(qt.scheme_file().exists())
 
     def test_remove_from_desktop(self):
         # theme-roller remove (before uninstalling): our theme settings back to

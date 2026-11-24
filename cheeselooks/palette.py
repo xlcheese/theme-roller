@@ -83,6 +83,18 @@ def rgba(color: str, alpha: float) -> str:
     return f"rgba({rgb_triplet(color)}, {round(alpha, 3):g})"
 
 
+def overlay(color: str, under: str) -> str:
+    """The most see-through rgba() that, laid over under, looks exactly like
+    color: what's behind a translucent surface keeps showing through it."""
+    c, u = to_rgb(color), to_rgb(under)
+    need = max([(x - y) / (255 - y) if x > y else (y - x) / y if x < y else 0.0
+                for x, y in zip(c, u) if (x > y and y < 255) or (x < y and y > 0)] or [0.0])
+    if need <= 0:
+        return rgba(color, 0)
+    rgb = [round(min(255, max(0, y + (x - y) / need))) for x, y in zip(c, u)]
+    return f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {round(need, 3):g})"
+
+
 # --------------------------------------------------------------------------
 # Gradients (spec section 4)
 # --------------------------------------------------------------------------
@@ -270,6 +282,9 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
         # hovered borders: darker on light themes, lighter on dark (both toward text)
         "border_hover": mix(border_strong, text, 0.15 * hover),
         "trough": pick(mix(bg, text, 0.12), mix(bg, text, 0.14)),
+        # an off switch hovered: its track a step lighter, as a button's face is
+        "trough_hover": pick(mix(mix(bg, text, 0.12), WHITE, min(1.0, 0.45 * hover)),
+                             mix(mix(bg, text, 0.14), text, 0.10 * hover)),
         # scrollbar thumb at rest and hovered (Mint-Y's; dragging uses the accent)
         "scroll_slider": mix(bg, text, 0.421),
         "scroll_hover": mix(bg, text, 0.31),
