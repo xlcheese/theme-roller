@@ -5,7 +5,7 @@ its GTK 3 platform theme, which brings GTK's file dialogs and fonts but not
 the colours, so they stay Qt's light grey and blue. Two routes, both tried
 on xl_cheese's desktop with VLC (regular and Flatpak):
 
-  regular Qt apps   a qt5ct colour scheme (~/.config/qt5ct/colors/xl-Cheeselooks.conf),
+  regular Qt apps   a qt5ct colour scheme (~/.config/qt5ct/colors/Theme-Roller.conf),
                     qt5ct.conf pointed at it, and QT_QPA_PLATFORMTHEME=qt5ct in
                     ~/.profile (from the next login; every Qt 5 app). Needs the
                     qt5ct package; file dialogs stay GTK's (standard_dialogs=gtk3).
@@ -32,11 +32,15 @@ from . import palette as pal
 from .i18n import _
 from . import paths
 
-SCHEME_NAME = "xl-Cheeselooks"
+SCHEME_NAME = "Theme-Roller"          # as qt5ct lists it (xl_cheese, 24 Nov: the name says which tool)
+OLD_SCHEME_NAMES = ("xl-Cheeselooks",)  # 0.9.0: still ours, replaced at the next Apply
 BACKUP = ".xl-backup"
-MARK = "# Written by xl-Cheeselooks (Integration: Qt apps). Turning the switch off removes it."
-PROFILE_START = "# >>> xl-Cheeselooks: Qt apps use the theme's colors (Integration tab) >>>"
-PROFILE_END = "# <<< xl-Cheeselooks <<<"
+MARK = "# Written by Theme Roller (Integration: Qt apps). Turning the switch off removes it."
+OLD_MARKS = ("# Written by xl-Cheeselooks",)
+PROFILE_START = "# >>> Theme Roller: Qt apps use the theme's colors (Integration tab) >>>"
+PROFILE_END = "# <<< Theme Roller <<<"
+OLD_PROFILE_STARTS = ("# >>> xl-Cheeselooks: Qt apps use the theme's colors (Integration tab) >>>",)
+OLD_PROFILE_ENDS = ("# <<< xl-Cheeselooks <<<",)
 PROFILE_LINE = "export QT_QPA_PLATFORMTHEME=qt5ct"
 ENV = "QT_QPA_PLATFORMTHEME"
 STYLE_ENV = "QT_STYLE_OVERRIDE"
@@ -237,8 +241,9 @@ def _save_state(state: dict) -> None:
 def _is_ours(text: str) -> bool:
     """A file we wrote: marked, or (from earlier versions and the experiment
     script) pointing at our scheme or naming it."""
-    return (MARK in text or str(scheme_file()) in text or f"{SCHEME_NAME}.conf" in text
-            or f"ColorScheme={SCHEME_NAME}" in text)
+    names = (SCHEME_NAME,) + OLD_SCHEME_NAMES
+    return (any(m in text for m in (MARK,) + OLD_MARKS) or str(scheme_file()) in text
+            or any(f"{n}.conf" in text or f"ColorScheme={n}" in text for n in names))
 
 
 def _write(path: Path, text: str, state: dict) -> None:
@@ -261,11 +266,11 @@ def _write(path: Path, text: str, state: dict) -> None:
 def _profile_without_ours(text: str) -> str:
     out, skipping = [], False
     for line in text.splitlines():
-        if line.strip() == PROFILE_START:
+        if line.strip() in (PROFILE_START,) + OLD_PROFILE_STARTS:
             skipping = True
             continue
         if skipping:
-            if line.strip() == PROFILE_END:
+            if line.strip() in (PROFILE_END,) + OLD_PROFILE_ENDS:
                 skipping = False
             continue
         out.append(line)
@@ -284,6 +289,9 @@ def _set_profile(on: bool) -> str | None:
     f = profile_file()
     text = f.read_text(encoding="utf-8") if f.exists() else ""
     has = PROFILE_START in text
+    if on and not has and any(old in text for old in OLD_PROFILE_STARTS):
+        text = _profile_without_ours(text)       # 0.9.0's block: replaced by today's
+        f.write_text(text, encoding="utf-8")
     if on and not has:
         block = f"\n{PROFILE_START}\n{PROFILE_LINE}\nunset {STYLE_ENV}\n{PROFILE_END}\n"
         f.write_text(text.rstrip("\n") + "\n" + block if text else block.lstrip("\n"), encoding="utf-8")
@@ -390,7 +398,7 @@ def _flatpak_app_off(app: str, before: dict[str, str | None]) -> None:
 def _yours_qt5ct(text: str) -> bool:
     """qt5ct settings of yours: your own colours or Kvantum. Settings pointing at
     our scheme are left from an earlier time the switch was on: ours."""
-    if str(scheme_file()) in text or f"{SCHEME_NAME}.conf" in text:
+    if str(scheme_file()) in text or any(f"{n}.conf" in text for n in (SCHEME_NAME,) + OLD_SCHEME_NAMES):
         return False
     return "custom_palette=true" in text or "kvantum" in text.lower()
 
@@ -412,6 +420,20 @@ def _found_setup() -> list[str]:
     return found
 
 
+def _remove_old_names(state: dict) -> list[str]:
+    """The scheme and stylesheet under 0.9.0's name, now written under the new
+    one (qt5ct.conf points at the new ones): removed, and no longer tracked."""
+    log = []
+    for name in OLD_SCHEME_NAMES:
+        for f in (qt5ct_dir() / "colors" / f"{name}.conf", qt5ct_dir() / "qss" / f"{name}.qss"):
+            if f.exists() and _is_ours(f.read_text(encoding="utf-8", errors="replace")):
+                f.unlink()
+                log.append(f"Qt apps: removed {f.name} (now {SCHEME_NAME})")
+            if state.get("files", {}).get(str(f)) == "created":
+                del state["files"][str(f)]
+    return log
+
+
 def enable(t: dict[str, str]) -> list[str]:
     """Write (or rewrite) the colour schemes from the theme's tokens. Our own
     files are simply rewritten at each Apply; anything of yours is moved
@@ -430,6 +452,7 @@ def enable(t: dict[str, str]) -> list[str]:
         line = _set_profile(True)
         if line:
             log.append(line)
+        log += _remove_old_names(state)
         log.append("Qt apps: colors written for qt5ct")
     else:
         log.append("Qt apps: qt5ct isn't installed (sudo apt install qt5ct), so regular Qt apps "

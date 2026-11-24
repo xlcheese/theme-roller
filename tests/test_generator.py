@@ -1390,6 +1390,42 @@ class RenderAndInstallTests(unittest.TestCase):
                 self.assertEqual(data["theme"], "xl-Gummy")
                 self.assertEqual(gs[cli.THEME_KEY], "Theme-Roller")
 
+    def test_qt_scheme_renamed_from_xl_cheeselooks(self):
+        # 0.9.0's Qt scheme was xl-Cheeselooks; now Theme-Roller. The next Apply:
+        # one ~/.profile block (the new one), the old files gone, qt5ct pointed at the new
+        import os
+        from unittest import mock
+        from cheeselooks import paths
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(home / ".config"),
+                                              "XDG_DATA_HOME": str(home / ".local/share")}), \
+                    mock.patch.object(paths, "HOME", home), \
+                    mock.patch.object(qt, "qt5ct_installed", return_value=True), \
+                    mock.patch.object(qt, "flatpak_qt_apps", return_value=[]):
+                old_start, old_end = qt.OLD_PROFILE_STARTS[0], qt.OLD_PROFILE_ENDS[0]
+                qt.profile_file().write_text(f"# mine\nexport EDITOR=xed\n\n{old_start}\n{qt.PROFILE_LINE}\n"
+                                             f"unset {qt.STYLE_ENV}\n{old_end}\n")
+                old_conf = qt.qt5ct_dir() / "colors" / "xl-Cheeselooks.conf"
+                old_qss = qt.qt5ct_dir() / "qss" / "xl-Cheeselooks.qss"
+                for f, text in ((old_conf, "# Written by xl-Cheeselooks (Integration: Qt apps).\n"),
+                                (old_qss, "/* # Written by xl-Cheeselooks (Integration: Qt apps). */\n")):
+                    f.parent.mkdir(parents=True, exist_ok=True)
+                    f.write_text(text)
+                qt._save_state({"files": {str(old_conf): "created", str(old_qss): "created"}})
+                qt.enable(tokens.build(defaults(), styles.load(DEFAULT_STYLE)))
+                profile = qt.profile_file().read_text()
+                self.assertEqual(profile.count(qt.PROFILE_LINE), 1)
+                self.assertIn(qt.PROFILE_START, profile)
+                self.assertNotIn(old_start, profile)
+                self.assertIn("export EDITOR=xed", profile)                        # yours kept
+                self.assertFalse(old_conf.exists() or old_qss.exists())
+                self.assertTrue(qt.scheme_file().name == "Theme-Roller.conf" and qt.scheme_file().exists())
+                self.assertIn("Theme-Roller.conf", (qt.qt5ct_dir() / "qt5ct.conf").read_text())
+                qt.disable()                                                         # off: nothing of ours left
+                self.assertNotIn(qt.PROFILE_START, qt.profile_file().read_text())
+                self.assertFalse(qt.scheme_file().exists())
+
     def test_remove_from_desktop(self):
         # theme-roller remove (before uninstalling): our theme settings back to
         # Mint's defaults, our files and colors gone, the watcher off; your
