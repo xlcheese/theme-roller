@@ -10,7 +10,7 @@
   - `[panel]` `menu_hover_edge` and `menu_category_edge` for the Cinnamon main menu, and `menu_see_through = true` to let the desktop show through its hovers as it does through the menu.
 
   The lines are drawn inside the item, so nothing shifts. The starter style sheet has examples.
-- **Spanish reads naturally now**, thanks to a native speaker on the Linux Mint forums who reworded about half of it.
+- **Spanish reads naturally now**, thanks to axrusar on the Linux Mint forums, who reworded about half of it.
 - **Qt apps' color scheme is called Theme-Roller** too (qt5ct lists it). The next Apply replaces 0.9.0's xl-Cheeselooks scheme and its lines in `~/.profile`.
 
 ## 0.9.0: the first release
