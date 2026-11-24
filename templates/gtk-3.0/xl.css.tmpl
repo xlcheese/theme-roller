@@ -78,6 +78,16 @@ button:disabled {
   box-shadow: none; }
 button:disabled:checked, button:disabled:active {
   background-image: image({{alpha(pressed, 0.6)}}); }
+/* ...but flat ones (toolbars, header bars) stay flat: the dimmed face above
+   outranked "flat until hovered" in header bars, so a greyed-out button there
+   showed a faint box (GNOME Screenshot's Save and Copy; xl_cheese) */
+headerbar button:disabled:not(:checked):not(.suggested-action):not(.destructive-action),
+.primary-toolbar button:disabled:not(:checked):not(.suggested-action):not(.destructive-action),
+toolbar button:disabled:not(:checked) {
+  border-color: {{w.toolbar_button.border}};
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none; }
 
 /* Flat buttons and toolbar / headerbar buttons: flat until hovered */
 button.flat, button.sidebar-button, button.flat:disabled,

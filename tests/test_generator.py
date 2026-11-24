@@ -272,6 +272,14 @@ class StyleTests(unittest.TestCase):
         s["details"]["tooltips"]["text"] = "#FF0000"                  # yours stays yours
         self.assertEqual(tokens.build(s, styles.Style(name="Fixture", path=None))["tooltip.text"], "#FF0000")
 
+    def test_disabled_header_buttons_stay_flat(self):
+        """A greyed-out header bar button stays flat (the dimmed button face
+        outranked "flat until hovered": a faint box in GNOME Screenshot)."""
+        for gtk, sel in (("gtk-3.0", "headerbar button:disabled"), ("gtk-4.0", "headerbar button:not(.osd):disabled")):
+            css = (paths.templates_dir() / gtk / "xl.css.tmpl").read_text()
+            i = css.index(sel)
+            self.assertIn("background-image: none;", css[i:css.index("; }", i) + 3], gtk)
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")
