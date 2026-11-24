@@ -211,8 +211,9 @@ class StyleTests(unittest.TestCase):
         self.assertNotEqual(tokens.build(defaults(), st)["w.entry.hover_border"], t["w.entry.border"])
         for gtk in ("gtk-3.0", "gtk-4.0"):
             css = (paths.templates_dir() / gtk / "xl.css.tmpl").read_text()
-            for token in ("w.entry.hover_border", "trough_hover", "accent_hover_grad"):
+            for token in ("trough_hover", "accent_hover_grad"):
                 self.assertIn("{{" + token + "}}", css, gtk)
+        self.assertIn("{{w.entry.hover_border}}", (paths.templates_dir() / "gtk-4.0" / "xl.css.tmpl").read_text())
 
     def test_outlined_hovers(self):
         """menu_item / sidebar_row edges and the main menu's [panel] edges: a line

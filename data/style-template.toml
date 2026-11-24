@@ -143,7 +143,8 @@ title_button   = { like = "toolbar_button" }
 close_button   = { like = "title_button", hover_color = "accent" }
 entry          = { edge = "sunken", focus_edge = "focus" }
 #entry         = { edge = "sunken", hover_edge = "entry_hover", focus_edge = "focus" }   # instead of the line above: a hover border of
-#                 your own (left out: the border a step toward the text, set by Hover strength)
+#                 your own (left out: the border a step toward the text, set by Hover strength). GTK 4 apps only:
+#                 GTK 3 never tells a theme its text fields are hovered
 combo          = { like = "button" }
 #button        = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "button_hover", color = "darker(button, 0.03)" }   # instead of the button line above: a resting face of your own
 #destructive   = { like = "button", hover_color = "lift(destructive, 0.2)", border = "darker(destructive, 0.4)" }   # border left out: a step darker than the face

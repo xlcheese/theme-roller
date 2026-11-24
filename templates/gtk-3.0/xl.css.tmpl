@@ -637,10 +637,8 @@ entry, spinbutton:not(.vertical), spinbutton.vertical > entry {
 entry:focus, spinbutton:focus:not(.vertical), spinbutton.vertical > entry:focus {
   border-color: {{w.entry.focus_border}};
   box-shadow: {{w.entry.focus_shadow}}; }
-/* hovered (not focused): the style's hover edge, or the border a step toward the text */
-entry:hover:not(:focus):not(:disabled), spinbutton:hover:not(:focus):not(.vertical):not(:disabled) {
-  border-color: {{w.entry.hover_border}};
-  box-shadow: {{w.entry.hover_shadow}}; }
+/* No hover: GTK 3 never marks a text field as hovered (only GTK 4 does), so
+   entry:hover can't match here */
 spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > entry:focus,
 spinbutton:not(.vertical) > button, combobox entry {
   box-shadow: none; }
