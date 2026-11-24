@@ -82,7 +82,7 @@ def _entry_hover(t: dict[str, str], style: sty.Style, theme: dict[str, str], hov
     if "hover_edge" in (style.widgets.get("entry") or {}):
         return
     rest = t["w.entry.border"]
-    t["w.entry.hover_border"] = (pal.mix(rest, theme["text"], min(1.0, 0.22 * hover)) if rest.startswith("#")
+    t["w.entry.hover_border"] = (pal.mix(rest, theme["text"], min(0.85, 0.5 * hover)) if rest.startswith("#")
                                  else theme["border_hover"])
 
 

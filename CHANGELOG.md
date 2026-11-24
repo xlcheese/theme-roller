@@ -3,7 +3,7 @@
 ## Next
 
 - **The theme is called Theme-Roller** in Mint's Themes settings (Applications, Desktop and Icons), not xl-Cheeselooks, so it says which tool to open to change it. Its folders are `~/.themes/Theme-Roller` and `~/.icons/Theme-Roller`. If you used 0.9.0, your next **Apply** moves everything over by itself and removes the old folders; **Revert** still goes back to what you had. The built-in themes and styles keep their xl- names.
-- **More things answer the pointer** in every theme: text fields' borders darken a step on hover, a checked checkbox or radio button lightens like a button does, and switches lighten on and off.
+- **More things answer the pointer** in every theme: text fields' borders darken on hover (more with Hover strength, or a border of your own with `entry` `hover_edge`), a checked checkbox or radio button lightens like a button does, and switches lighten on and off.
 - **Style sheets can outline hovers and selections**, as KDE's Breeze does:
   - `menu_item` `hover_edge`: a line around the hovered item in apps' menus and in Cinnamon's right-click, applet and panel launcher menus;
   - `sidebar_row` (new): `hover_color`, `selected_color`, `hover_edge` and `selected_border` for Nemo's sidebar, file dialogs and settings-style page lists;

@@ -124,6 +124,10 @@ border = "none"
 # Just a line, for outlined hovers and selections (KDE Breeze's look):
 #[edges.accent_line]
 #border = "accent"
+# A text field's hover: sunken, with a border of your own (KDE Breeze's: "accent")
+#[edges.entry_hover]
+#border = "mix(border_strong, accent, 0.6)"
+#inner  = { y = 1, blur = 2, color = "black", alpha = 0.10, alpha_dark = 0.30 }
 
 # ---------------------------------------------------------------------------
 # Widgets: which edge each one uses at rest, on hover, pressed and focused
@@ -138,6 +142,8 @@ toolbar_button = { edge = "flat", hover_edge = "raised", pressed_edge = "sunken"
 title_button   = { like = "toolbar_button" }
 close_button   = { like = "title_button", hover_color = "accent" }
 entry          = { edge = "sunken", focus_edge = "focus" }
+#entry         = { edge = "sunken", hover_edge = "entry_hover", focus_edge = "focus" }   # instead of the line above: a hover border of
+#                 your own (left out: the border a step toward the text, set by Hover strength)
 combo          = { like = "button" }
 #button        = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "button_hover", color = "darker(button, 0.03)" }   # instead of the button line above: a resting face of your own
 #destructive   = { like = "button", hover_color = "lift(destructive, 0.2)", border = "darker(destructive, 0.4)" }   # border left out: a step darker than the face
