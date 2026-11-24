@@ -341,11 +341,12 @@ selection, text selection, label > selection, entry > text > selection {
   border-radius: {{r}}px; }
 .navigation-sidebar > row:hover:not(:selected), placessidebar row:hover:not(:selected),
 stacksidebar row:hover:not(:selected) {
+  color: {{sidebar_hover_fg}};
   background-color: {{sidebar_hover}};
   background-image: {{sidebar_hover_grad}};
   box-shadow: {{w.sidebar_row.hover_g4_ring}}; }
 .navigation-sidebar > row:selected, placessidebar row:selected, stacksidebar row:selected {
-  color: {{accent_fg}};
+  color: {{sidebar_select_fg}};
   background-color: {{sidebar_select}};
   background-image: {{sidebar_select_grad}};
   box-shadow: {{w.sidebar_row.selected_ring}}; }

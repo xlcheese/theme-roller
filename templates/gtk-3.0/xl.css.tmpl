@@ -598,16 +598,19 @@ row.activatable:hover:not(:selected), row.activatable.has-open-popup:not(:select
   background-color: {{row_hover}}; }
 .sidebar row:hover:not(:selected), placessidebar row:hover:not(:selected),
 .sidebar .view:hover:not(:selected), .nemo-window .sidebar .view:hover:not(:selected) {
+  color: {{sidebar_hover_fg}};
   background-color: {{sidebar_hover}};
   background-image: {{sidebar_hover_grad}};
   box-shadow: {{w.sidebar_row.hover_ring}}; }
 .sidebar row:selected, placessidebar row:selected, .sidebar .view:selected,
-.nemo-window .sidebar .view:selected {
-  color: {{accent_fg}};
+.nemo-window .sidebar .view:selected, .sidebar treeview.view:selected,
+.sidebar treeview.view:selected:focus {
+  color: {{sidebar_select_fg}};
   background-color: {{sidebar_select}};
   background-image: {{sidebar_select_grad}};
   box-shadow: {{w.sidebar_row.selected_ring}}; }
-placessidebar row:selected image, placessidebar row:selected label { color: {{accent_fg}}; }
+placessidebar row:selected image, placessidebar row:selected label,
+.sidebar row:selected label, .sidebar row:selected image { color: {{sidebar_select_fg}}; }
 
 /* Stack sidebars (a settings window's page list, e.g. this theme's own app):
    the sidebar colour, no divider lines (they'd stick out past rounded

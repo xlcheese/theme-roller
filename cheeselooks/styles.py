@@ -49,11 +49,12 @@ WIDGET_KEYS = {
     "pressed_color",
 }
 # keys only some widgets use so far (others accept them but ignore them)
-WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item", "tab"),
+WIDGET_ONLY_KEYS = {"color": ("button", "panel_button", "scrollbar"), "selected_color": ("panel_button", "menu_item", "tab", "sidebar_row"),
                     "pressed_color": ("scrollbar",),
                     "selected_border": ("panel_button", "sidebar_row"), "padding": ("panel_button",),
                     "spacing": ("panel_button",),
-                    "hover_fg": ("menu_item", "menubar_item", "tab"), "selected_fg": ("panel_button", "tab")}
+                    "hover_fg": ("menu_item", "menubar_item", "tab", "sidebar_row"),
+                    "selected_fg": ("panel_button", "tab", "sidebar_row")}
 # a text color belongs to its face: a widget that sets its own face doesn't
 # inherit the text color of the widget it is "like"
 FACE_FG = {"hover_color": "hover_fg", "selected_color": "selected_fg", "pressed_color": "pressed_fg"}
@@ -165,9 +166,10 @@ BUILTIN_WIDGETS: dict[str, dict[str, Any]] = {
                      "focus_edge": "raised", "color": "pb_rest", "hover_color": "pb_hover",
                      "selected_color": "pb_focus", "selected_border": "accent_press",
                      "active_marker": "none", "padding": 4, "spacing": 2},
-    # sidebar rows (Nemo, file dialogs, settings-style sidebars): their colors
-    # are the theme's sidebar hover and selection; a style adds edges (hover_edge)
-    # and a selected_border, drawn as a 1px line inside the row
+    # sidebar rows (Nemo, file dialogs, settings-style sidebars): the theme's
+    # sidebar hover and selection unless the style sets hover_color /
+    # selected_color (and hover_fg / selected_fg); hover_edge and selected_border
+    # are drawn as a 1px line inside the row
     "sidebar_row": {"edge": "flat", "hover_edge": "flat", "pressed_edge": "flat", "focus_edge": "flat"},
     "check": {"edge": "sunken", "hover_edge": "sunken", "pressed_edge": "sunken", "focus_edge": "focus"},
     "switch": {"like": "check"},

@@ -170,10 +170,12 @@ menubar_item   = { hover_color = "menubar_hover" }
 # focused window ("none", "line" or "glow").
 #panel_button  = { edge = "panel_raised", hover_edge = "panel_hover", color = "darker(button, 0.09)", hover_color = "button", selected_color = "button", selected_border = "button", spacing = 3 }
 
-# Sidebar rows (Nemo, file dialogs, settings-style page lists): hover_edge for
-# a line around the hovered row, selected_border for one around the selected
-# row. Their colors are the theme's sidebar hover and selection.
-#sidebar_row   = { hover_edge = "accent_line", selected_border = "accent" }
+# Sidebar rows (Nemo, file dialogs, settings-style page lists): hover_color
+# and selected_color (left out: the theme's sidebar hover and accent
+# selection), hover_fg / selected_fg for their text (left out: picked to read),
+# hover_edge for a line around the hovered row, selected_border for one around
+# the selected row.
+#sidebar_row   = { hover_color = "mix(sidebar, accent, 0.18)", selected_color = "mix(sidebar, accent, 0.35)", hover_edge = "accent_line", selected_border = "accent" }
 
 # The scrollbar thumb: color, hover_color, pressed_color (while dragging), border.
 #scrollbar     = { color = "scroll_slider", hover_color = "scroll_hover", pressed_color = "accent_press" }

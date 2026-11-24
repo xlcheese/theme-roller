@@ -125,6 +125,27 @@ def _add_face_gradients(t: dict[str, str], style: sty.Style) -> None:
                                                  style.glass_return)
 
 
+def _sidebar_colors(style: sty.Style, theme: dict[str, str]) -> tuple[dict[str, str], tuple[str, str]]:
+    """sidebar_row's hover_color / selected_color in place of the theme's
+    sidebar_hover / sidebar_select, and the text on each (hover_fg / selected_fg,
+    else whichever of text / text-on-accent reads better on a face the style chose)."""
+    spec = style.widgets.get("sidebar_row") or {}
+    theme = dict(theme)
+    fgs = []
+    for face_key, fg_key, token, default_fg in (("hover_color", "hover_fg", "sidebar_hover", theme["text"]),
+                                                ("selected_color", "selected_fg", "sidebar_select",
+                                                 theme["accent_fg"])):
+        if spec.get(face_key):
+            theme[token] = sty._resolve_color(spec[face_key], theme)
+        if spec.get(fg_key):
+            fgs.append(sty._resolve_color(spec[fg_key], theme))
+        elif spec.get(face_key) and theme[token] != theme["accent"]:
+            fgs.append(max((theme["text"], theme["accent_fg"]), key=lambda c: pal.contrast(c, theme[token])))
+        else:
+            fgs.append(default_fg)
+    return theme, (fgs[0], fgs[1])
+
+
 def _derive(style: sty.Style, accent: str, bg: str, text: str, hover: float) -> dict[str, str]:
     """The palette, with the style's button color (widgets.button.color) as the
     button face when it sets one. The expression is read against the plain
@@ -162,6 +183,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     hover = g["hover_strength"] / 50 * HOVER_CALIBRATION
     render.LIFT_SCALE = g["hover_strength"] / 50     # style lift() hovers follow the slider too
     theme = _derive(style, g["accent"], g["bg"], g["text"], hover)
+    theme, sidebar_fg = _sidebar_colors(style, theme)
     # the button color is in the palette now; widget tokens use the style without it
     face_style, style = style, _without_button_color(style)
     t: dict[str, str] = {}
@@ -173,6 +195,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
 
     # --- Global palette, gradients, shape, timing, style edges
     _add_colors(t, "", theme)
+    t["sidebar_hover_fg"], t["sidebar_select_fg"] = sidebar_fg
     # hovered list rows (activatable rows on a list): a text tint that follows
     # Hover strength (Mint-Y's is a fixed 3%)
     t["row_hover"] = pal.rgba(theme["text"], 0.075 * hover)
@@ -468,7 +491,9 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["adw.accent_name"] = nearest_adw_accent(theme["accent"])
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     _title_gradient(t, style)
-    t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"])
+    t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"],
+                                                 (t["w.sidebar_row.hover_ring"], t["w.sidebar_row.selected_ring"]),
+                                                 (t["w.sidebar_row.hover_g4_ring"], t["w.sidebar_row.selected_ring"]))
     # the destructive button's border: the style's own (destructive = { border = ... }),
     # else a step darker than its face, as Mint-Y
     d_border = style.widgets.get("destructive", {}).get("border")
@@ -564,7 +589,8 @@ def _round_bottom(r: str, gtk: int) -> str:
     return "\n".join(out)
 
 
-def _lists_css(roundness: float, r: int, line: str) -> tuple[str, str]:
+def _lists_css(roundness: float, r: int, line: str, rings3: tuple[str, str] = ("none", "none"),
+               rings4: tuple[str, str] = ("none", "none")) -> tuple[str, str]:
     """GTK 3 and GTK 4 rules for menu items (not Cinnamon's) and sidebar rows:
     stack sidebars, and the places sidebar of file dialogs (GTK 3's
     placessidebar, GTK 4's navigation-sidebar). Square and edge to edge up to
@@ -596,6 +622,17 @@ def _lists_css(roundness: float, r: int, line: str) -> tuple[str, str]:
         g4 = (f"popover.menu > contents {{ padding-left: 8px; padding-right: 8px; }}\n"
               f"popover.menu modelbutton {{ margin: 0 2px; border-radius: {r}px; }}\n" + rows + "\n"
               + places4 + f" {{ margin: 1px 6px; border-radius: {r}px; }}")
+    # a stack sidebar's hovered and selected rows: the style's sidebar_row line
+    # too (with the divider, when square)
+    def ringed(rings: tuple[str, str]) -> str:
+        out = []
+        for state, ring in zip(("hover:not(:selected)", "selected"), rings):
+            parts = [x for x in ((f"inset 0 -1px {line}" if roundness <= SQUARE_LISTS_AT else None),
+                                 (ring if ring != "none" else None)) if x]
+            out.append(f"stacksidebar.sidebar row:{state}, stacksidebar row:{state} "
+                       f"{{ box-shadow: {', '.join(parts) or 'none'}; }}")
+        return "\n".join(out)
+    g3, g4 = g3 + "\n" + ringed(rings3), g4 + "\n" + ringed(rings4)
     note = "/* Menu items and sidebar rows: square below Roundness " + str(SQUARE_LISTS_AT + 1) + " (tokens._lists_css) */\n"
     return note + g3 + "\n", note + g4 + "\n"
 

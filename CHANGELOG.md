@@ -6,7 +6,7 @@
 - **More things answer the pointer** in every theme: text fields' borders darken a step on hover, a checked checkbox or radio button lightens like a button does, and switches lighten on and off.
 - **Style sheets can outline hovers and selections**, as KDE's Breeze does:
   - `menu_item` `hover_edge`: a line around the hovered item in apps' menus and in Cinnamon's right-click, applet and panel launcher menus;
-  - `sidebar_row` (new): `hover_edge` and `selected_border` for Nemo's sidebar, file dialogs and settings-style page lists;
+  - `sidebar_row` (new): `hover_color`, `selected_color`, `hover_edge` and `selected_border` for Nemo's sidebar, file dialogs and settings-style page lists;
   - `[panel]` `menu_hover_edge` and `menu_category_edge` for the Cinnamon main menu, and `menu_see_through = true` to let the desktop show through its hovers as it does through the menu.
 
   The lines are drawn inside the item, so nothing shifts. The starter style sheet has examples.

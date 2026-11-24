@@ -233,6 +233,15 @@ class StyleTests(unittest.TestCase):
         for k in ("w.menu_item.hover_ring", "w.menu_item.hover_g4_ring", "w.sidebar_row.hover_ring",
                   "w.sidebar_row.selected_ring", "menu.main_hover_ring", "menu.category_ring"):
             self.assertTrue(t[k].startswith(line), k)
+        self.assertEqual(t["sidebar_hover"], plain["sidebar_hover"])      # colors: the theme's unless set
+        self.assertEqual(t["sidebar_select_fg"], t["accent_fg"])
+        st = styles.Style(name="F", path=None, widgets={"sidebar_row": {
+            "hover_color": "mix(sidebar, accent, 0.2)", "selected_color": "mix(sidebar, accent, 0.3)"}})
+        c = tokens.build(defaults(), st)
+        self.assertEqual(c["sidebar_hover"], palette.mix(c["sidebar"], c["accent"], 0.2))
+        self.assertEqual(c["sidebar_select"], palette.mix(c["sidebar"], c["accent"], 0.3))
+        self.assertEqual(c["sidebar_select_fg"], c["text"])              # light face: the text reads
+        self.assertIn("{{sidebar_select_fg}}", (paths.templates_dir() / "gtk-3.0" / "xl.css.tmpl").read_text())
         self.assertTrue(t["menu.main_hover"].startswith("rgba("))
         self.assertTrue(t["menu.category"].startswith("rgba("))
         (d / "style.toml").write_text('name = "T"\n[panel]\nmenu_hover_edge = "nope"\n')
