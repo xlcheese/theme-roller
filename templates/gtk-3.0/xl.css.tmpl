@@ -602,6 +602,10 @@ row.activatable:hover:not(:selected), row.activatable.has-open-popup:not(:select
   background-color: {{sidebar_hover}};
   background-image: {{sidebar_hover_grad}};
   box-shadow: {{w.sidebar_row.hover_ring}}; }
+/* tree-view sidebars (Nemo) draw each cell on its own: a line along the top
+   and bottom only, or sides would show between the icon and the name */
+.sidebar .view:hover:not(:selected), .nemo-window .sidebar .view:hover:not(:selected) {
+  box-shadow: {{w.sidebar_row.hover_lines}}; }
 .sidebar row:selected, placessidebar row:selected, .sidebar .view:selected,
 .nemo-window .sidebar .view:selected, .sidebar treeview.view:selected,
 .sidebar treeview.view:selected:focus {
@@ -609,6 +613,9 @@ row.activatable:hover:not(:selected), row.activatable.has-open-popup:not(:select
   background-color: {{sidebar_select}};
   background-image: {{sidebar_select_grad}};
   box-shadow: {{w.sidebar_row.selected_ring}}; }
+.sidebar .view:selected, .nemo-window .sidebar .view:selected, .sidebar treeview.view:selected,
+.sidebar treeview.view:selected:focus {
+  box-shadow: {{w.sidebar_row.selected_lines}}; }
 placessidebar row:selected image, placessidebar row:selected label,
 .sidebar row:selected label, .sidebar row:selected image { color: {{sidebar_select_fg}}; }
 

@@ -691,6 +691,14 @@ def ring_css(css: dict[str, str]) -> tuple[str, str, str]:
     return join(css["inset_shadow"]), join(css["g4_inset_shadow"]), st
 
 
+def _lines(border: str) -> str:
+    """Only the top and bottom of a ring: for tree-view rows (Nemo's sidebar),
+    whose cells each draw the row's shadow, so sides would show between them."""
+    if border == "transparent":
+        return "none"
+    return f"inset 0 1px {border}, inset 0 -1px {border}"
+
+
 def resolved_widgets(style: Style) -> dict[str, dict[str, Any]]:
     """Each widget's settings with 'like' and built-in fallbacks applied."""
     raw = {w: {**BUILTIN_WIDGETS.get(w, {}), **style.widgets.get(w, {})} for w in WIDGETS}
@@ -744,6 +752,7 @@ def widget_tokens(style: Style, palette: dict[str, str], depth: float) -> dict[s
             tokens[prefix + "st_shadow"] = css["st_shadow"]
             ring = ring_css(css)
             tokens[prefix + "ring"], tokens[prefix + "g4_ring"], tokens[prefix + "st_ring"] = ring
+            tokens[prefix + "lines"] = _lines(css["border"])
             tokens[prefix + "outer"] = css["outer"]
             tokens[prefix + "g4_outer"] = css["g4_outer"]
         hover_color = spec.get("hover_color")
@@ -759,8 +768,9 @@ def widget_tokens(style: Style, palette: dict[str, str], depth: float) -> dict[s
                                              if spec.get("border") not in (None, "none", "transparent")
                                              else "transparent")
         sel = spec.get("selected_border") if wname == "sidebar_row" else None
-        tokens[f"w.{wname}.selected_ring"] = (f"inset 0 0 0 1px {_resolve_color(sel, palette)}"
-                                             if sel not in (None, "none", "transparent") else "none")
+        sel = _resolve_color(sel, palette) if sel not in (None, "none", "transparent") else None
+        tokens[f"w.{wname}.selected_ring"] = f"inset 0 0 0 1px {sel}" if sel else "none"
+        tokens[f"w.{wname}.selected_lines"] = _lines(sel or "transparent")
         for k in ("padding", "spacing"):
             if k in spec:
                 tokens[f"w.{wname}.{k}"] = str(spec[k])
