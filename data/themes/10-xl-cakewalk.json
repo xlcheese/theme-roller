@@ -4,7 +4,7 @@
   "settings": {
     "global": {
       "accent": "#B0DA88",
-      "bg": "#F3EEF3",
+      "bg": "#F6F1F6",
       "hover_in_ms": 45,
       "hover_out_ms": 102
     },
