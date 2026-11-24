@@ -446,10 +446,14 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # --- Details
     d = settings["details"]
     tip = d["tooltips"]
-    _add_colors(t, "tooltip.", {
-        "bg": tip["bg"] if tip["custom"] and tip["bg"] else theme["menu_bg"],
-        "text": tip["text"] if tip["custom"] and tip["text"] else theme["text"],
-    })
+    tip_bg = tip["bg"] if tip["custom"] and tip["bg"] else theme["menu_bg"]
+    # a tooltip color of your own with the text left to the theme: the theme's
+    # text if it reads there, else its background color (a light tooltip on a
+    # dark theme kept the light text, and the tooltip went blank: xl-Cakewalk Dark)
+    tip_text = (tip["text"] if tip["custom"] and tip["text"] else
+                max((theme["text"], theme["bg"]), key=lambda c: pal.contrast(c, tip_bg))
+                if pal.contrast(theme["text"], tip_bg) < 4.5 else theme["text"])
+    _add_colors(t, "tooltip.", {"bg": tip_bg, "text": tip_text})
     sb = d["scrollbars"]
     if sb["custom"]:
         mode = sb["mode"]

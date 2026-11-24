@@ -261,6 +261,17 @@ class StyleTests(unittest.TestCase):
             for x, y in zip(got, palette.to_rgb(color)):
                 self.assertLessEqual(abs(x - y), 2)
 
+    def test_tooltip_text_reads(self):
+        """A tooltip color of your own, text left to the theme: readable on it
+        (xl-Cakewalk Dark's light tooltip kept the light text)."""
+        s = defaults()
+        s["global"].update(bg="#211F21", text="#F5F5F5")
+        s["details"]["tooltips"].update(custom=True, bg="#FAEEEB")
+        t = tokens.build(s, styles.Style(name="Fixture", path=None))
+        self.assertGreaterEqual(palette.contrast(t["tooltip.text"], t["tooltip.bg"]), 4.5)
+        s["details"]["tooltips"]["text"] = "#FF0000"                  # yours stays yours
+        self.assertEqual(tokens.build(s, styles.Style(name="Fixture", path=None))["tooltip.text"], "#FF0000")
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")
@@ -909,7 +920,7 @@ class RenderAndInstallTests(unittest.TestCase):
         names = [n for n, _f, _b in themes.list_themes()]
         self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
                                  "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Pigeon",
-                                 "xl-Vintage", "xl-Organ Harvest"])
+                                 "xl-Cakewalk", "xl-Cakewalk Dark", "xl-Vintage", "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),
                          ("Claude", "Claude", "#B85A38"))
