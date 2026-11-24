@@ -630,6 +630,10 @@ entry, spinbutton:not(.vertical), spinbutton.vertical > entry {
 entry:focus, spinbutton:focus:not(.vertical), spinbutton.vertical > entry:focus {
   border-color: {{w.entry.focus_border}};
   box-shadow: {{w.entry.focus_shadow}}; }
+/* hovered (not focused): the style's hover edge, or the border a step toward the text */
+entry:hover:not(:focus):not(:disabled), spinbutton:hover:not(:focus):not(.vertical):not(:disabled) {
+  border-color: {{w.entry.hover_border}};
+  box-shadow: {{w.entry.hover_shadow}}; }
 spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > entry:focus,
 spinbutton:not(.vertical) > button, combobox entry {
   box-shadow: none; }
@@ -658,6 +662,11 @@ check, radio, treeview.check, treeview.radio {
   -gtk-icon-source: none; }
 radio, treeview.radio { border-radius: 50%; }
 check:hover, radio:hover { border-color: {{accent}}; }
+/* checked and hovered: brighter, as an accent button's hover (xl_cheese, 24 Nov) */
+check:checked:hover, radio:checked:hover, check:indeterminate:hover, radio:indeterminate:hover,
+treeview.check:checked:hover, treeview.radio:checked:hover {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 check:checked, radio:checked, check:indeterminate, radio:indeterminate,
 treeview.check:checked, treeview.radio:checked {
   color: {{accent_fg}};
@@ -707,6 +716,12 @@ switch:checked {
   border-color: {{accent_press}};
   background-color: {{accent}};
   background-image: {{accent_grad}}; }
+/* hovered, on or off: the track brightens as a button does */
+switch:hover:not(:checked):not(:disabled) {
+  background-color: {{trough_hover}}; }
+switch:checked:hover:not(:disabled) {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 switch:disabled { opacity: 0.5; }
 switch slider {
   min-width: 18px;

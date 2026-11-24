@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, paths, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -200,6 +200,19 @@ class StyleTests(unittest.TestCase):
         self.assertNotEqual(t["w.panel_button.selected_color"], p["accent"])
         table = tokens.build(defaults(), st)
         self.assertEqual(table["panel.w.panel_button.selected_fg"], table["panel.text"])
+
+    def test_default_hovers(self):
+        """Text fields, checked checks and switches answer the pointer in every theme."""
+        t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
+        self.assertNotEqual(t["w.entry.hover_border"], t["w.entry.border"])
+        self.assertNotEqual(t["trough_hover"], t["trough"])
+        st = styles.Style(name="Fixture", path=None,
+                          widgets={"entry": {"edge": "sunken", "hover_edge": "focus"}})
+        self.assertNotEqual(tokens.build(defaults(), st)["w.entry.hover_border"], t["w.entry.border"])
+        for gtk in ("gtk-3.0", "gtk-4.0"):
+            css = (paths.templates_dir() / gtk / "xl.css.tmpl").read_text()
+            for token in ("w.entry.hover_border", "trough_hover", "accent_hover_grad"):
+                self.assertIn("{{" + token + "}}", css, gtk)
 
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))

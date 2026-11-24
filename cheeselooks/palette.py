@@ -270,6 +270,9 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
         # hovered borders: darker on light themes, lighter on dark (both toward text)
         "border_hover": mix(border_strong, text, 0.15 * hover),
         "trough": pick(mix(bg, text, 0.12), mix(bg, text, 0.14)),
+        # an off switch hovered: its track a step lighter, as a button's face is
+        "trough_hover": pick(mix(mix(bg, text, 0.12), WHITE, min(1.0, 0.45 * hover)),
+                             mix(mix(bg, text, 0.14), text, 0.10 * hover)),
         # scrollbar thumb at rest and hovered (Mint-Y's; dragging uses the accent)
         "scroll_slider": mix(bg, text, 0.421),
         "scroll_hover": mix(bg, text, 0.31),

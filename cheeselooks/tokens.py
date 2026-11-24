@@ -74,6 +74,18 @@ def _add_gradients(tokens: dict[str, str], prefix: str, palette: dict[str, str],
         _add_colors(tokens, prefix, {name + "_top": top, name + "_bottom": bottom})
 
 
+def _entry_hover(t: dict[str, str], style: sty.Style, theme: dict[str, str], hover: float) -> None:
+    """Text fields hovered (xl_cheese, 24 Nov: they had no hover; buttons do): the
+    style's entry hover_edge if it gives one (e.g. an accent border, as KDE's
+    Breeze), else the resting border a step toward the text, as a button's hover
+    border is. Focus (the accent) still wins."""
+    if "hover_edge" in (style.widgets.get("entry") or {}):
+        return
+    rest = t["w.entry.border"]
+    t["w.entry.hover_border"] = (pal.mix(rest, theme["text"], min(1.0, 0.22 * hover)) if rest.startswith("#")
+                                 else theme["border_hover"])
+
+
 def _add_widgets(tokens: dict[str, str], prefix: str, style: sty.Style,
                  palette: dict[str, str], depth: float, amount: float) -> None:
     wt = sty.widget_tokens(style, palette, depth)
@@ -179,6 +191,7 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["hover_in_ms"] = str(g["hover_in_ms"])
     t["hover_out_ms"] = str(g["hover_out_ms"])
     _add_widgets(t, "", style, theme, depth, amount)
+    _entry_hover(t, style, theme, hover)
     # joined buttons whose container draws no CSS (Nemo's path bar): each
     # button carries its share of the group's outer layers (recess, shadow)
     for state in ("", "hover_", "pressed_"):

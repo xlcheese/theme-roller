@@ -373,6 +373,9 @@ entry, spinbutton:not(.vertical), spinbutton.vertical > text {
   border-style: solid;
   border-color: {{w.entry.border}};
   box-shadow: {{w.entry.g4_shadow}}; }
+entry:hover:not(:focus-within):not(:disabled), spinbutton:hover:not(:focus-within):not(.vertical):not(:disabled) {
+  border-color: {{w.entry.hover_border}};
+  box-shadow: {{w.entry.hover_g4_shadow}}; }
 entry:focus-within, spinbutton:focus-within:not(.vertical) {
   border-color: {{w.entry.focus_border}};
   box-shadow: {{w.entry.focus_g4_shadow}}; }
@@ -412,6 +415,9 @@ check, radio {
   -gtk-icon-source: none; }
 radio { border-radius: 50%; }
 check:hover, radio:hover { border-color: {{accent}}; }
+check:checked:hover, radio:checked:hover, check:indeterminate:hover, radio:indeterminate:hover {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 check:checked, radio:checked, check:indeterminate, radio:indeterminate {
   color: {{accent_fg}};
   border-color: {{accent_press}};
@@ -440,6 +446,11 @@ switch:checked {
   border-color: {{accent_press}};
   background-color: {{accent}};
   background-image: {{accent_grad}}; }
+switch:hover:not(:checked):not(:disabled) {
+  background-color: {{trough_hover}}; }
+switch:checked:hover:not(:disabled) {
+  background-color: {{accent_hover}};
+  background-image: {{accent_hover_grad}}; }
 switch:disabled { opacity: 0.5; }
 switch > image { color: transparent; }
 switch > slider {

@@ -3,6 +3,7 @@
 ## Next
 
 - **The theme is called Theme-Roller** in Mint's Themes settings (Applications, Desktop and Icons), not xl-Cheeselooks, so it says which tool to open to change it. Its folders are `~/.themes/Theme-Roller` and `~/.icons/Theme-Roller`. If you used 0.9.0, your next **Apply** moves everything over by itself and removes the old folders; **Revert** still goes back to what you had. The built-in themes and styles keep their xl- names.
+- **More things answer the pointer** in every theme: text fields' borders darken a step on hover, a checked checkbox or radio button lightens like a button does, and switches lighten on and off.
 - **Qt apps' color scheme is called Theme-Roller** too (qt5ct lists it). The next Apply replaces 0.9.0's xl-Cheeselooks scheme and its lines in `~/.profile`.
 
 ## 0.9.0: the first release
