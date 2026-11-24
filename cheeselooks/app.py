@@ -296,6 +296,14 @@ class SettingsWindow(Gtk.ApplicationWindow):
         self.theme_css = Gtk.CssProvider()
         self.extra_css = Gtk.CssProvider()
         screen = Gdk.Screen.get_default()
+        # Under the preview, nothing of the desktop's own theme: the preview is
+        # the whole theme, so whatever it doesn't set must look as it will on
+        # the desktop (GTK's defaults), not as the current theme draws it.
+        # Adwaita underneath showed light borders on dark previews (slider
+        # tracks, the tab box, color swatches; xl_cheese).
+        self.reset_css = Gtk.CssProvider()
+        self.reset_css.load_from_data(b"* { all: unset; }")
+        Gtk.StyleContext.add_provider_for_screen(screen, self.reset_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION - 1)
         Gtk.StyleContext.add_provider_for_screen(screen, self.theme_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         Gtk.StyleContext.add_provider_for_screen(screen, self.extra_css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
 
