@@ -214,6 +214,43 @@ class StyleTests(unittest.TestCase):
             for token in ("w.entry.hover_border", "trough_hover", "accent_hover_grad"):
                 self.assertIn("{{" + token + "}}", css, gtk)
 
+    def test_outlined_hovers(self):
+        """menu_item / sidebar_row edges and the main menu's [panel] edges: a line
+        inside the item; flat (the default) draws nothing."""
+        plain = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
+        for k in ("w.menu_item.hover_ring", "w.sidebar_row.hover_ring", "w.sidebar_row.selected_ring",
+                  "menu.w.menu_item.hover_st_ring", "menu.main_hover_ring", "menu.category_ring"):
+            self.assertEqual(plain[k], "none", k)
+        d = Path(tempfile.mkdtemp())
+        (d / "style.toml").write_text(
+            'name = "T"\n[edges.line]\nborder = "accent"\n'
+            '[widgets]\nmenu_item = { hover_edge = "line" }\n'
+            'sidebar_row = { hover_edge = "line", selected_border = "accent" }\n'
+            '[panel]\nmenu_hover_edge = "line"\nmenu_category_edge = "line"\nmenu_see_through = true\n')
+        st = styles.load(d)
+        t = tokens.build(defaults(), st)
+        line = f"inset 0 0 0 1px {t['accent']}"
+        for k in ("w.menu_item.hover_ring", "w.menu_item.hover_g4_ring", "w.sidebar_row.hover_ring",
+                  "w.sidebar_row.selected_ring", "menu.main_hover_ring", "menu.category_ring"):
+            self.assertTrue(t[k].startswith(line), k)
+        self.assertTrue(t["menu.main_hover"].startswith("rgba("))
+        self.assertTrue(t["menu.category"].startswith("rgba("))
+        (d / "style.toml").write_text('name = "T"\n[panel]\nmenu_hover_edge = "nope"\n')
+        with self.assertRaises(styles.StyleError):
+            styles.load(d)
+        (d / "style.toml").write_text('name = "T"\n[panel]\nmenu_see_through = "yes"\n')
+        with self.assertRaises(styles.StyleError):
+            styles.load(d)
+
+    def test_overlay(self):
+        """A see-through tint looks exactly like the color over its background."""
+        for color, under in (("#E0E0E0", "#F5F5F5"), ("#4A4A4A", "#303030"), ("#FA8562", "#303030")):
+            m = __import__("re").match(r"rgba\((\d+), (\d+), (\d+), ([\d.]+)\)", palette.overlay(color, under))
+            r, g, b, a = int(m[1]), int(m[2]), int(m[3]), float(m[4])
+            got = [round(c * a + u * (1 - a)) for c, u in zip((r, g, b), palette.to_rgb(under))]
+            for x, y in zip(got, palette.to_rgb(color)):
+                self.assertLessEqual(abs(x - y), 2)
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")

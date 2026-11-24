@@ -83,6 +83,18 @@ def rgba(color: str, alpha: float) -> str:
     return f"rgba({rgb_triplet(color)}, {round(alpha, 3):g})"
 
 
+def overlay(color: str, under: str) -> str:
+    """The most see-through rgba() that, laid over under, looks exactly like
+    color: what's behind a translucent surface keeps showing through it."""
+    c, u = to_rgb(color), to_rgb(under)
+    need = max([(x - y) / (255 - y) if x > y else (y - x) / y if x < y else 0.0
+                for x, y in zip(c, u) if (x > y and y < 255) or (x < y and y > 0)] or [0.0])
+    if need <= 0:
+        return rgba(color, 0)
+    rgb = [round(min(255, max(0, y + (x - y) / need))) for x, y in zip(c, u)]
+    return f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {round(need, 3):g})"
+
+
 # --------------------------------------------------------------------------
 # Gradients (spec section 4)
 # --------------------------------------------------------------------------

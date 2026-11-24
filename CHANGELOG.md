@@ -4,6 +4,12 @@
 
 - **The theme is called Theme-Roller** in Mint's Themes settings (Applications, Desktop and Icons), not xl-Cheeselooks, so it says which tool to open to change it. Its folders are `~/.themes/Theme-Roller` and `~/.icons/Theme-Roller`. If you used 0.9.0, your next **Apply** moves everything over by itself and removes the old folders; **Revert** still goes back to what you had. The built-in themes and styles keep their xl- names.
 - **More things answer the pointer** in every theme: text fields' borders darken a step on hover, a checked checkbox or radio button lightens like a button does, and switches lighten on and off.
+- **Style sheets can outline hovers and selections**, as KDE's Breeze does:
+  - `menu_item` `hover_edge`: a line around the hovered item in apps' menus and in Cinnamon's right-click, applet and panel launcher menus;
+  - `sidebar_row` (new): `hover_edge` and `selected_border` for Nemo's sidebar, file dialogs and settings-style page lists;
+  - `[panel]` `menu_hover_edge` and `menu_category_edge` for the Cinnamon main menu, and `menu_see_through = true` to let the desktop show through its hovers as it does through the menu.
+
+  The lines are drawn inside the item, so nothing shifts. The starter style sheet has examples.
 - **Qt apps' color scheme is called Theme-Roller** too (qt5ct lists it). The next Apply replaces 0.9.0's xl-Cheeselooks scheme and its lines in `~/.profile`.
 
 ## 0.9.0: the first release

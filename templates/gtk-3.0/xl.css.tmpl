@@ -554,12 +554,14 @@ menu menuitem, .menu menuitem {
 menu menuitem:hover, .menu menuitem:hover, .context-menu menuitem:hover {
   color: {{w.menu_item.hover_fg}};
   background-color: {{w.menu_item.hover_color}};
-  background-image: {{w.menu_item.hover_grad}}; }
+  background-image: {{w.menu_item.hover_grad}};
+  box-shadow: {{w.menu_item.hover_ring}}; }
 popover modelbutton.flat:hover, popover modelbutton.flat:selected,
 menuitem.button.flat:hover, menuitem.button.flat:selected {
   color: {{w.menu_item.hover_fg}};
   background-color: {{w.menu_item.hover_color}};
-  background-image: {{w.menu_item.hover_grad}}; }
+  background-image: {{w.menu_item.hover_grad}};
+  box-shadow: {{w.menu_item.hover_ring}}; }
 menubar > menuitem:hover, .menubar > menuitem:hover {
   color: {{w.menubar_item.hover_fg}};
   box-shadow: none;
@@ -597,12 +599,14 @@ row.activatable:hover:not(:selected), row.activatable.has-open-popup:not(:select
 .sidebar row:hover:not(:selected), placessidebar row:hover:not(:selected),
 .sidebar .view:hover:not(:selected), .nemo-window .sidebar .view:hover:not(:selected) {
   background-color: {{sidebar_hover}};
-  background-image: {{sidebar_hover_grad}}; }
+  background-image: {{sidebar_hover_grad}};
+  box-shadow: {{w.sidebar_row.hover_ring}}; }
 .sidebar row:selected, placessidebar row:selected, .sidebar .view:selected,
 .nemo-window .sidebar .view:selected {
   color: {{accent_fg}};
   background-color: {{sidebar_select}};
-  background-image: {{sidebar_select_grad}}; }
+  background-image: {{sidebar_select_grad}};
+  box-shadow: {{w.sidebar_row.selected_ring}}; }
 placessidebar row:selected image, placessidebar row:selected label { color: {{accent_fg}}; }
 
 /* Stack sidebars (a settings window's page list, e.g. this theme's own app):

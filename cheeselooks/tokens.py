@@ -299,6 +299,23 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     # lightened top washed out (xl-Classic Dark), so the top is the hover itself
     t["menu.fav_main_hover_top"] = fav_h
     t["menu.fav_main_hover_bottom"] = pal.gradient(fav_h, m_grad / 100)[1]
+    # [panel] menu_hover_edge / menu_category_edge: a 1px line inside the item
+    edges = {**sty.BUILTIN_EDGES, **style.edges}
+    for key, name, surface in (("menu_hover_edge", "main_hover", mh), ("menu_category_edge", "category", cat)):
+        ename = style.panel.get(key, "flat")
+        css = sty.edge_css(edges[ename], mcolors, depth, None, surface, style.adapt_strength)
+        t[f"menu.{name}_ring"] = sty.ring_css(css)[2]
+    t["menu.fav_hover_ring"] = t["menu.side_hover_ring"] = t["menu.main_hover_ring"]
+    # [panel] menu_see_through: the main menu's hovers and selected category as
+    # see-through as the menu (Menu opacity), so the desktop shows through them too
+    # (each as the most see-through tint that looks the same on the menu)
+    if style.panel.get("menu_see_through"):
+        unders = {"main_hover": mcolors["menu_bg"], "category": mcolors["menu_bg"],
+                  "fav_main_hover": mcolors["fav_bg"], "side_hover": side_bg}
+        for base, under in unders.items():
+            for k in (base, base + "_top", base + "_bottom"):
+                if f"menu.{k}" in t:
+                    t[f"menu.{k}"] = pal.overlay(t[f"menu.{k}"], under)
     m_r = shape.radius(m_round, ctl)
     t["menu.r"] = str(m_r)
     t["menu.r2"] = str(shape.window_radius(m_r))

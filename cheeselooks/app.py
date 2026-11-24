@@ -1298,10 +1298,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
 .xl-prev-fav {{ min-width: 22px; min-height: 22px; color: {pal.rgba(t['menu.text'], 0.55)}; }}
 .xl-prev-mitem {{ padding: 4px 10px; min-width: 96px; border-radius: {t['menu.item_r']}px; }}
 .xl-prev-mitem.hover {{ background-color: {t['menu.main_hover']};
-  background-image: linear-gradient(to bottom, {t['menu.main_hover_top']}, {t['menu.main_hover_bottom']}); }}
+  background-image: linear-gradient(to bottom, {t['menu.main_hover_top']}, {t['menu.main_hover_bottom']});
+  box-shadow: {t['menu.main_hover_ring']}; }}
 .xl-prev-mitem.hover label, label.xl-prev-mitem.hover {{ color: {t['menu.main_hover_fg']}; }}
 .xl-prev-mitem.selected {{ color: {t['menu.category_fg']}; background-color: {t['menu.category']};
-  background-image: linear-gradient(to bottom, {t['menu.category_top']}, {t['menu.category_bottom']}); }}
+  background-image: linear-gradient(to bottom, {t['menu.category_top']}, {t['menu.category_bottom']});
+  box-shadow: {t['menu.category_ring']}; }}
 .xl-prev-mitem.selected label, label.xl-prev-mitem.selected {{ color: {t['menu.category_fg']}; }}
 button.xl-prev-pb {{ min-height: {max(14, int(t['panel.height']) - 14)}px; padding: 0 {t[pb + 'padding']}px; margin-right: {t[pb + 'spacing']}px;
   border: 1px solid {t[pb + 'border']}; border-radius: {t['panel.r']}px;
