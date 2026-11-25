@@ -18,6 +18,10 @@
       "separate_colors": true,
       "title_bar": "#222226",
       "title_gradient": 0
+    },
+    "icons": {
+      "folder_color": "#F9C470",
+      "second_color": "#E0A84F"
     }
   }
 }
