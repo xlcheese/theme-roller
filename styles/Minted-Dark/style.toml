@@ -12,6 +12,9 @@ description = "After Mint-Y by Clement Lefebvre and the Linux Mint team: flat an
 
 adapt_strength = 0.6
 
+# the lines between sections (panes, toolbars, the sidebar), dark as Mint-Y Dark's
+dividers = "darker(bg, 0.35)"
+
 [defaults]
 roundness = 20          # Mint-Y's 3px corners
 gradient = 0
