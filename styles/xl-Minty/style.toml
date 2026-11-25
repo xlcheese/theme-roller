@@ -1,7 +1,7 @@
 # xl-Minty: Linux Mint's Mint-Y look, plain on purpose so every app looks
 # alike. Flat buttons with a thin border and no shadow, a white face on hover
 # and a grey tint when pressed; plain white fields with an accent border when
-# focused; title bar buttons hidden until hovered; open tabs (only the chosen one drawn). Theme Roller's
+# focused; title bar buttons hidden until hovered; tabs as Claude's (only the chosen one drawn, in Theme Roller's tab strip). Theme Roller's
 # fixes stay (readable selections, spin buttons, disabled header buttons).
 # By Wesley Hayslip.
 
@@ -47,7 +47,7 @@ close_button   = { like = "title_button", hover_color = "accent" }
 entry          = { edge = "field", focus_edge = "focus" }
 check          = { edge = "field", hover_edge = "focus", focus_edge = "focus" }
 combo          = { like = "button" }
-tab            = { tab_kind = "open", active_marker = "none" }
+tab            = { tab_kind = "claude", active_marker = "none", hover_color = "lift(header, 0.5)" }
 menu_item      = { hover_color = "menu_hover" }
 menubar_item   = { hover_color = "menubar_hover" }
 
