@@ -1,0 +1,70 @@
+# Minted Dark: after Mint-Y, Linux Mint's own theme, by Clement Lefebvre and the
+# Linux Mint team: plain on purpose, so every app looks alike. Flat buttons
+# with a thin border and no shadow, a white face on hover and a grey tint
+# when pressed; plain fields with an accent border when focused; title bar
+# buttons hidden until hovered; only the chosen tab drawn. Theme Roller's
+# fixes stay (readable selections, spin buttons, disabled header buttons,
+# the tab strip). Style sheet by Wesley Hayslip.
+
+name = "Minted-Dark"
+author = "Wesley Hayslip"
+description = "After Mint-Y by Clement Lefebvre and the Linux Mint team: flat and plain, thin borders, no shadows."
+
+adapt_strength = 0.6
+
+# the lines between sections (panes, toolbars, the sidebar), dark as Mint-Y Dark's
+dividers = "darker(bg, 0.35)"
+
+[defaults]
+roundness = 20          # Mint-Y's 3px corners
+gradient = 0
+depth = 50
+
+# Mint-Y Dark's button border (#202023 on its #2E2E33 window)
+# Mint-Y Dark's surfaces, worked out from your colors: the menu bar, toolbars
+# and title bar one dark band (#222226 on #2E2E33), file views and pages in
+# the window color, the sidebar a touch darker than them
+[palette]
+header  = "darker(bg, 0.26)"
+base    = "bg"
+sidebar = "darker(bg, 0.04)"
+
+[edges.raised]
+border = "darker(bg, 0.3)"
+
+[edges.raised_hover]
+border = "darker(bg, 0.3)"
+
+# pressed: Mint-Y Dark's near-black border (#080808), no shadow
+[edges.sunken]
+border = "darker(bg, 0.8)"
+
+# text fields and check boxes: a plain border, nothing inside. Mint-Y Dark's
+# fields are lighter than the window, so its dark border shows; Theme Roller's
+# are darker, so a dark one vanished: the theme's own field border instead
+[edges.field]
+border = "border_strong"
+
+[edges.focus]
+border = "accent"
+
+[edges.flat]
+border = "none"
+
+[widgets]
+button         = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "base" }
+linked         = { like = "button" }
+suggested      = { like = "button", border = "accent", hover_color = "accent_hover" }
+toolbar_button = { edge = "flat", hover_edge = "raised", pressed_edge = "sunken", hover_color = "base" }
+title_button   = { like = "toolbar_button" }
+close_button   = { like = "title_button", hover_color = "accent" }
+entry          = { edge = "field", focus_edge = "focus" }
+check          = { edge = "field", hover_edge = "focus", focus_edge = "focus" }
+combo          = { like = "button" }
+tab            = { tab_kind = "open", active_marker = "none", hover_color = "lift(header, 0.5)" }
+menu_item      = { hover_color = "menu_hover" }
+menubar_item   = { hover_color = "menubar_hover" }
+
+[title_bar]
+highlight      = 0
+highlight_dark = 0

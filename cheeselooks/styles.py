@@ -82,6 +82,12 @@ PANEL_KEYS = ("color",
               # see-through as the menu itself (Menu opacity)
               "menu_see_through")
 PANEL_EDGE_KEYS = ("menu_hover_edge", "menu_category_edge")
+# [palette]: the surfaces a style can work out in its own way, from your colors
+# (expressions such as "darker(bg, 0.26)"; a fixed #RRGGBB isn't allowed, it
+# wouldn't follow the color choosers). base: fields, lists and pages; header:
+# menu bars, toolbars and the title bar (unless Window Borders sets one);
+# sidebar: sidebars. Everything worked out from them follows.
+PALETTE_KEYS = ("base", "header", "sidebar")
 # [notification]: Cinnamon's notification popups. kind: "line" (an accent line
 # along the top, Mint-Y's look), "flat" (no accent) or "bordered" (a thin
 # border all round); color: the line / border color (default accent).
@@ -202,6 +208,7 @@ class Style:
     notification: dict[str, Any] = field(default_factory=dict)
     title_bar: dict[str, Any] = field(default_factory=dict)
     title_buttons: dict[str, Any] = field(default_factory=dict)
+    palette: dict[str, str] = field(default_factory=dict)
     dividers: str = ""                 # the lines between sections ("" = as Mint-Y: mixed toward the text)
     spin_gap: int = 0                  # px between a spin button's field and its − + (0 = joined, Mint-Y)
     extra_css: str = ""
@@ -242,7 +249,7 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                         "Style list (longer names are cut off there)")
     for key in data:
         if key not in ("name", "author", "description", "defaults", "edges", "widgets", "panel", "notification",
-                       "title_bar", "title_buttons", "dividers", "spin_gap",
+                       "title_bar", "title_buttons", "palette", "dividers", "spin_gap",
                        "adapt_strength", "gradient_shape", "split_step", "glass_return"):
             warnings.append(f"unknown top-level key '{key}' is ignored")
 
@@ -279,6 +286,21 @@ def check(data: dict[str, Any]) -> tuple[list[str], list[str]]:
                 pass                                   # checked with the edges, below
             elif not _is_color_ref(v, names):
                 errors.append(f"panel.{k} must be a palette color name or #RRGGBB (got {v!r})")
+
+    # [palette]: surfaces worked out from your colors in another way than the
+    # usual (expressions only, so they follow the color choosers)
+    palette_sec = data.get("palette", {})
+    if not isinstance(palette_sec, dict):
+        errors.append("'palette' must be a table")
+    else:
+        for k, v in palette_sec.items():
+            if k not in PALETTE_KEYS:
+                warnings.append(f"palette.{k} is not a surface a style can set and is ignored "
+                                f"(known: {', '.join(PALETTE_KEYS)})")
+            elif not isinstance(v, str) or v.strip().startswith("#") or not _is_color_ref(v, names):
+                errors.append(f"palette.{k} must be worked out from your colors, e.g. \"darker(bg, 0.2)\" "
+                              f"or \"bg\", not a fixed color (got {v!r}): a fixed one wouldn't follow "
+                              f"the color choosers")
 
     notification = data.get("notification", {})
     if not isinstance(notification, dict):
@@ -484,6 +506,7 @@ def load(path: Path) -> Style:
         panel=copy.deepcopy(data.get("panel", {})),
         notification=copy.deepcopy(data.get("notification", {})),
         title_bar=copy.deepcopy(data.get("title_bar", {})),
+        palette={k: v for k, v in (data.get("palette") or {}).items() if k in PALETTE_KEYS},
         title_buttons=copy.deepcopy(data.get("title_buttons", {})),
         dividers=data.get("dividers", "") or "",
         spin_gap=int(data.get("spin_gap", 0)),

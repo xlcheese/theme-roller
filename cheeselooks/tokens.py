@@ -154,9 +154,12 @@ def _derive(style: sty.Style, accent: str, bg: str, text: str, hover: float) -> 
     and gradients follow it."""
     plain = pal.derive(accent, bg, text, hover)
     face = style.widgets.get("button", {}).get("color")
-    if not face:
+    # [palette]: surfaces read against the plain palette too
+    surfaces = {k: sty._resolve_color(v, plain) for k, v in style.palette.items()}
+    if not face and not surfaces:
         return plain
-    return pal.derive(accent, bg, text, hover, button_face=sty._resolve_color(face, plain))
+    return pal.derive(accent, bg, text, hover, button_face=sty._resolve_color(face, plain) if face else None,
+                      surfaces=surfaces)
 
 
 def _without_button_color(style: sty.Style) -> sty.Style:

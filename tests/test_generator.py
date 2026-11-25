@@ -272,6 +272,33 @@ class StyleTests(unittest.TestCase):
         s["details"]["tooltips"]["text"] = "#FF0000"                  # yours stays yours
         self.assertEqual(tokens.build(s, styles.Style(name="Fixture", path=None))["tooltip.text"], "#FF0000")
 
+    def test_disabled_header_buttons_stay_flat(self):
+        """A greyed-out header bar button stays flat (the dimmed button face
+        outranked "flat until hovered": a faint box in GNOME Screenshot)."""
+        for gtk, sel in (("gtk-3.0", "headerbar button:disabled"), ("gtk-4.0", "headerbar button:not(.osd):disabled")):
+            css = (paths.templates_dir() / gtk / "xl.css.tmpl").read_text()
+            i = css.index(sel)
+            self.assertIn("background-image: none;", css[i:css.index("; }", i) + 3], gtk)
+
+    def test_style_palette(self):
+        """[palette]: surfaces worked out from your colors (Minted Dark's header,
+        base and sidebar), following the background; a fixed color is refused."""
+        d = Path(tempfile.mkdtemp())
+        (d / "style.toml").write_text('name = "T"\n[palette]\nheader = "darker(bg, 0.26)"\n'
+                                      'base = "bg"\nsidebar = "darker(bg, 0.04)"\n')
+        st = styles.load(d)
+        s = defaults()
+        s["global"].update(bg="#2E2E33", text="#DADADA")
+        t = tokens.build(s, st)
+        self.assertEqual((t["header"], t["base"], t["sidebar"]), ("#222226", "#2E2E33", "#2C2C31"))
+        s["global"]["bg"] = "#3A2E33"                       # another background: they follow
+        t = tokens.build(s, st)
+        self.assertEqual(t["base"], "#3A2E33")
+        self.assertEqual(t["header"], palette.darker("#3A2E33", 0.26))
+        (d / "style.toml").write_text('name = "T"\n[palette]\nheader = "#222226"\n')
+        with self.assertRaises(styles.StyleError):
+            styles.load(d)
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")
@@ -920,7 +947,8 @@ class RenderAndInstallTests(unittest.TestCase):
         names = [n for n, _f, _b in themes.list_themes()]
         self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
                                  "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Pigeon",
-                                 "xl-Cakewalk", "xl-Cakewalk Dark", "xl-Vintage", "xl-Organ Harvest"])
+                                 "xl-Cakewalk", "xl-Cakewalk Dark", "Minted", "Minted Dark",
+                                 "xl-Vintage", "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),
                          ("Claude", "Claude", "#B85A38"))

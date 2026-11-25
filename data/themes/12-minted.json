@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "name": "Minted",
+  "settings": {
+    "global": {
+      "accent": "#1F9EDE",
+      "bg": "#F8F8F9",
+      "text": "#303030",
+      "roundness": 20,
+      "gradient": 0,
+      "hover_in_ms": 45,
+      "hover_out_ms": 100
+    },
+    "style": {
+      "name": "Minted"
+    },
+    "icons": {
+      "folder_color": "#F9C470",
+      "second_color": "#E0A84F"
+    },
+    "window_borders": {
+      "title_gradient": 0,
+      "button_style": "unpretentious-flat",
+      "button_roundness": 100,
+      "button_spacing": 0,
+      "button_glyphs": "regular"
+    }
+  }
+}

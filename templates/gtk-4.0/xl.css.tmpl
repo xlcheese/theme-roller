@@ -85,6 +85,14 @@ button.flat:not(.osd), button.flat:not(.osd):disabled, headerbar button:not(.osd
   background-color: transparent;
   background-image: none;
   box-shadow: {{w.toolbar_button.g4_shadow}}; }
+/* greyed out there too: flat (button:not(.osd):disabled outranked the rule
+   above, a faint box round disabled header bar buttons; xl_cheese) */
+headerbar button:not(.osd):disabled:not(:checked):not(.suggested-action):not(.destructive-action),
+.toolbar button:not(.osd):disabled:not(:checked), actionbar button:not(.osd):disabled:not(:checked) {
+  border-color: {{w.toolbar_button.border}};
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none; }
 button.flat:not(.osd):hover, headerbar button:not(.osd):hover, .toolbar button:not(.osd):hover,
 actionbar button:not(.osd):hover, popover button.flat:not(.osd):hover {
   border-color: {{w.toolbar_button.hover_border}};
