@@ -1,13 +1,14 @@
-# xl-Minty Dark: Linux Mint's Mint-Y look, plain on purpose so every app looks
-# alike. Flat buttons with a thin border and no shadow, a white face on hover
-# and a grey tint when pressed; plain white fields with an accent border when
-# focused; title bar buttons hidden until hovered; tabs as Claude's (only the chosen one drawn, in Theme Roller's tab strip). Theme Roller's
-# fixes stay (readable selections, spin buttons, disabled header buttons).
-# By Wesley Hayslip.
+# Minted Dark: after Mint-Y, Linux Mint's own theme, by Clement Lefebvre and the
+# Linux Mint team: plain on purpose, so every app looks alike. Flat buttons
+# with a thin border and no shadow, a white face on hover and a grey tint
+# when pressed; plain fields with an accent border when focused; title bar
+# buttons hidden until hovered; only the chosen tab drawn. Theme Roller's
+# fixes stay (readable selections, spin buttons, disabled header buttons,
+# the tab strip). Style sheet by Wesley Hayslip.
 
-name = "xl-Minty-Dark"
+name = "Minted-Dark"
 author = "Wesley Hayslip"
-description = "Linux Mint's Mint-Y look: flat and plain, thin borders, no shadows."
+description = "After Mint-Y by Clement Lefebvre and the Linux Mint team: flat and plain, thin borders, no shadows."
 
 adapt_strength = 0.6
 
