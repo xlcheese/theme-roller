@@ -1,0 +1,23 @@
+{
+  "format": 1,
+  "name": "Minted Dark",
+  "settings": {
+    "global": {
+      "accent": "#1F9EDE",
+      "bg": "#2E2E33",
+      "text": "#DADADA",
+      "roundness": 20,
+      "gradient": 0,
+      "hover_in_ms": 45,
+      "hover_out_ms": 100
+    },
+    "style": {
+      "name": "Minted-Dark"
+    },
+    "window_borders": {
+      "separate_colors": true,
+      "title_bar": "#222226",
+      "title_gradient": 0
+    }
+  }
+}

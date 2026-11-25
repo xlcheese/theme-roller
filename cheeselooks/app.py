@@ -172,6 +172,11 @@ INTEGRATION_MISSING = {
 }
 SORTS = (("az", _("A–Z")), ("za", _("Z–A")), ("new", _("Newest")), ("old", _("Oldest")))
 SORT_DEFAULTS = {"theme_sort": "new"}    # themes: yours first, then the built-in ones in their set order
+# Linux Mint's Mint-Y accent colors (mint-themes' constants.py), Mint-Y's own
+# green first: the accent chooser offers them as quick picks
+MINT_ACCENTS = (("Green", "#35A854"), ("Aqua", "#1F9EDE"), ("Blue", "#0C75DE"), ("Teal", "#199CA8"),
+                ("Grey", "#70737A"), ("Sand", "#C5A07C"), ("Orange", "#FF7139"), ("Red", "#E82127"),
+                ("Pink", "#E54980"), ("Purple", "#8C5DD9"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 
 
@@ -479,6 +484,12 @@ class SettingsWindow(Gtk.ApplicationWindow):
         if kind in ("color", "color?"):
             box = Gtk.Box(spacing=10)
             button = Gtk.ColorButton(use_alpha=False, show_editor=True)   # straight to the editor
+            if path[-1] == "accent":
+                # accents open on Linux Mint's own Mint-Y colors (the Minted
+                # themes' quick picks), with + for any other color
+                button.set_property("show-editor", False)
+                button.add_palette(Gtk.Orientation.HORIZONTAL, len(MINT_ACCENTS),
+                                   [_rgba(c) for _n, c in MINT_ACCENTS])
             button.connect("color-set", lambda b: self.changed(path, _hex(b.get_rgba())))
             value = Gtk.Label(xalign=0, selectable=True)
             box.pack_start(button, False, False, 0)

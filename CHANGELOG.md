@@ -10,6 +10,8 @@
   - `[panel]` `menu_hover_edge` and `menu_category_edge` for the Cinnamon main menu, and `menu_see_through = true` to let the desktop show through its hovers as it does through the menu.
 
   The lines are drawn inside the item, so nothing shifts. The starter style sheet has examples.
+- **Minted and Minted Dark**, after Mint-Y, Linux Mint's own theme: flat and plain, matched against Mint-Y built from Mint's source, with Theme Roller's fixes. In Mint's default Aqua.
+- **Mint's colors one click away:** the accent color chooser opens on Mint-Y's ten accent colors, with + for any other.
 - **Spanish reads naturally now**, thanks to axrusar on the Linux Mint forums, who reworded about half of it.
 - **Qt apps' color scheme is called Theme-Roller** too (qt5ct lists it). The next Apply replaces 0.9.0's xl-Cheeselooks scheme and its lines in `~/.profile`.
 
