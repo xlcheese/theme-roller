@@ -10,7 +10,7 @@
   - `[panel]` `menu_hover_edge` and `menu_category_edge` for the Cinnamon main menu, and `menu_see_through = true` to let the desktop show through its hovers as it does through the menu.
 
   The lines are drawn inside the item, so nothing shifts. The starter style sheet has examples.
-- **Glossy panel buttons and menu hovers in Cinnamon**, with the step across the middle that glass and split styles have in apps (xl-Gummy). This needs a Cinnamon that can draw a gradient with a step: a patch for that has been offered to Linux Mint. Older Cinnamon draws the same smooth fade as before.
+- **A glossy panel, panel buttons and menu hovers in Cinnamon**, with the step across the middle that glass and split styles have in apps (xl-Gummy). This needs a Cinnamon that can draw a gradient with a step: a patch for that has been offered to Linux Mint. Older Cinnamon draws the same smooth fade as before.
 - **Minted and Minted Dark**, after Mint-Y, Linux Mint's own theme: flat and plain, matched against Mint-Y built from Mint's source, with Theme Roller's fixes. In Mint's default Aqua.
 - **Style sheets can set the main surfaces** in `[palette]`: `base` (fields, lists, pages), `header` (menu bars, toolbars, title bar) and `sidebar`, as expressions of your colors, so they still follow the color choosers. Minted Dark uses it to match Mint-Y Dark.
 - **Mint's colors one click away:** the accent color chooser opens on Mint-Y's ten accent colors, with + for any other.

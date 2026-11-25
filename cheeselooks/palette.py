@@ -167,13 +167,16 @@ def gradient_css(top: str, bottom: str, shape: str = "smooth", step: float = 0.4
 
 
 def st_gradient(top: str, bottom: str, shape: str = "smooth", step: float = 0.4,
-                glass_return: float = 0.4) -> str:
+                glass_return: float = 0.4, alpha: float | None = None) -> str:
     """The face as St (Cinnamon) background-gradient-* declarations. Cinnamon
     with the middle-stop patch draws split and glass with the step; older
     Cinnamon ignores the -middle- properties without a warning and draws a
     smooth fade from the first stop to the last. Smooth faces write only start
-    and end, exactly as before."""
+    and end, exactly as before. With alpha, every stop is rgba() at that
+    opacity (the panel)."""
     stops = gradient_stops(top, bottom, shape, step, glass_return)
+    if alpha is not None:
+        stops = [(o, rgba(c, alpha)) for o, c in stops]
     lines = [f"background-gradient-start: {stops[0][1]};"]
     if len(stops) == 4:
         lines += [f"background-gradient-middle-start: {stops[1][1]};",

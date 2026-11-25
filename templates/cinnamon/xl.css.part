@@ -17,8 +17,7 @@
   color: {{panel.text}};
   background-color: rgba({{panel.panel_rgb}}, {{panel.opacity}});
   background-gradient-direction: vertical;
-  background-gradient-start: rgba({{panel.panel_top_rgb}}, {{panel.opacity}});
-  background-gradient-end: rgba({{panel.panel_bottom_rgb}}, {{panel.opacity}}); }
+  {{panel.bar_st}} }
 .panel-left, .panel-right {
   background-gradient-direction: horizontal; }
 .panel-top { box-shadow: 0 1px {{alpha(panel.border, 0.8)}}; }

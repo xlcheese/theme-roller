@@ -2269,6 +2269,10 @@ class RenderAndInstallTests(unittest.TestCase):
             css = (out / "cinnamon" / "cinnamon.css").read_text()
         self.assertIn(t["panel.w.panel_button.hover_st"], css)
         self.assertIn("background-gradient-middle-start:", t["panel.w.panel_button.hover_st"])
+        # the panel bar too, at the panel's opacity
+        self.assertIn(t["panel.bar_st"], css)
+        self.assertIn(f"background-gradient-middle-start: rgba(", t["panel.bar_st"])
+        self.assertIn(f", {t['panel.opacity']});", t["panel.bar_st"])
 
     def test_menu_style(self):
         s = defaults()
