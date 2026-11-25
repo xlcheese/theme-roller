@@ -18,6 +18,14 @@ gradient = 0
 depth = 50
 
 # Mint-Y Dark's button border (#202023 on its #2E2E33 window)
+# Mint-Y Dark's surfaces, worked out from your colors: the menu bar, toolbars
+# and title bar one dark band (#222226 on #2E2E33), file views and pages in
+# the window color, the sidebar a touch darker than them
+[palette]
+header  = "darker(bg, 0.26)"
+base    = "bg"
+sidebar = "darker(bg, 0.04)"
+
 [edges.raised]
 border = "darker(bg, 0.3)"
 

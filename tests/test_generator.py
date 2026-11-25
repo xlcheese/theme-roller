@@ -280,6 +280,25 @@ class StyleTests(unittest.TestCase):
             i = css.index(sel)
             self.assertIn("background-image: none;", css[i:css.index("; }", i) + 3], gtk)
 
+    def test_style_palette(self):
+        """[palette]: surfaces worked out from your colors (Minted Dark's header,
+        base and sidebar), following the background; a fixed color is refused."""
+        d = Path(tempfile.mkdtemp())
+        (d / "style.toml").write_text('name = "T"\n[palette]\nheader = "darker(bg, 0.26)"\n'
+                                      'base = "bg"\nsidebar = "darker(bg, 0.04)"\n')
+        st = styles.load(d)
+        s = defaults()
+        s["global"].update(bg="#2E2E33", text="#DADADA")
+        t = tokens.build(s, st)
+        self.assertEqual((t["header"], t["base"], t["sidebar"]), ("#222226", "#2E2E33", "#2C2C31"))
+        s["global"]["bg"] = "#3A2E33"                       # another background: they follow
+        t = tokens.build(s, st)
+        self.assertEqual(t["base"], "#3A2E33")
+        self.assertEqual(t["header"], palette.darker("#3A2E33", 0.26))
+        (d / "style.toml").write_text('name = "T"\n[palette]\nheader = "#222226"\n')
+        with self.assertRaises(styles.StyleError):
+            styles.load(d)
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")

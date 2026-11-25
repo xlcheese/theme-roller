@@ -203,6 +203,15 @@ menubar_item   = { hover_color = "menubar_hover" }
 #menu_see_through   = true           # hovers and the selected category as see-through as the menu
                                       # (Menu opacity), so the desktop shows through them too
 
+# Surfaces worked out your own way, from your colors (expressions only: a
+# fixed #RRGGBB wouldn't follow the color choosers). base: fields, lists and
+# pages; header: menu bars, toolbars and the title bar (unless Window Borders
+# sets one); sidebar: sidebars.
+#[palette]
+#header  = "darker(bg, 0.26)"         # toolbars one dark band with the title bar (Mint-Y Dark)
+#base    = "bg"                       # file views and pages in the window color
+#sidebar = "darker(bg, 0.04)"
+
 #[notification]
 #kind  = "line"                      # "line" (an accent line on top), "flat" or "bordered"
 #color = "accent"                    # the line or border color

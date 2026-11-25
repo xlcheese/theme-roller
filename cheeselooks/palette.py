@@ -203,7 +203,7 @@ def stand_out(select: str, surfaces: tuple[str, ...], fg: str,
 
 
 def derive(accent: str, bg: str, text: str, hover: float = 1.0,
-           button_face: str | None = None) -> dict[str, str]:
+           button_face: str | None = None, surfaces: dict[str, str] | None = None) -> dict[str, str]:
     """Work out the full palette from the three picks.
 
     hover scales every hover step together (Hover strength slider / 50):
@@ -241,10 +241,12 @@ def derive(accent: str, bg: str, text: str, hover: float = 1.0,
     # each surface gets its own check: a list darker than the sidebar can need a
     # stronger selection while the sidebar's already stands out (Cobalt)
     sidebar = pick(mix(bg, text, 0.035), mix(bg, text, 0.03))
+    surfaces = {k: normalize(v) for k, v in (surfaces or {}).items()}   # a style's [palette]
+    base, sidebar = surfaces.get("base", base), surfaces.get("sidebar", sidebar)
     sidebar_select = stand_out(select, (sidebar,), accent_fg)
     select = stand_out(select, (base, bg), accent_fg)
 
-    header = mix(bg, text, 0.066)   # Mint-Y's toolbar shade: #E8E8E8 on the default colors
+    header = surfaces.get("header", mix(bg, text, 0.066))   # Mint-Y's toolbar shade: #E8E8E8 on the default colors
     # light buttons rest a little below white so hover has room to go lighter
     button = pick(mix(bg, WHITE, 0.30), mix(bg, text, 0.08))
     if button_face:      # a style's button color: the face, and the hover worked out from it
