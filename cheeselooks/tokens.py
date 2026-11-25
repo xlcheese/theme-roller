@@ -113,16 +113,23 @@ def _add_widgets(tokens: dict[str, str], prefix: str, style: sty.Style,
 def _add_face_gradients(t: dict[str, str], style: sty.Style) -> None:
     """X_grad for every X_top / X_bottom pair: the whole CSS gradient, smooth or
     split (glossy) as the style says. GTK templates use these for faces; the
-    title bar and Cinnamon (two-colour gradients only) use the plain pair."""
+    title bar uses the plain pair. X_st is the same face as St
+    background-gradient-* declarations, for Cinnamon."""
     for key in [k for k in t if k.endswith("_top")]:
         base = key[: -len("_top")]
         # colours only: wb.button_pad_top / _bottom are spacings (xl-Gummy with the
         # Gargantuan buttons crashed the preview: "not a hex color: '1'", xl_cheese)
-        if (base + "_bottom" in t and not key.endswith("_rgb")
-                and str(t[key]).startswith("#") and str(t[base + "_bottom"]).startswith("#")):
-            t[base + "_grad"] = pal.gradient_css(t[key], t[base + "_bottom"],
-                                                 style.gradient_shape, style.split_step,
-                                                 style.glass_return)
+        if base + "_bottom" not in t or key.endswith("_rgb"):
+            continue
+        top, bottom = str(t[key]), str(t[base + "_bottom"])
+        if top.startswith("#") and bottom.startswith("#"):
+            t[base + "_grad"] = pal.gradient_css(top, bottom, style.gradient_shape,
+                                                 style.split_step, style.glass_return)
+            t[base + "_st"] = pal.st_gradient(top, bottom, style.gradient_shape,
+                                              style.split_step, style.glass_return)
+        elif top.startswith(("#", "rgb")) and bottom.startswith(("#", "rgb")):
+            # translucent (rgba) faces, such as some menu hovers: a plain fade
+            t[base + "_st"] = pal.st_gradient(top, bottom)
 
 
 def _sidebar_colors(style: sty.Style, theme: dict[str, str]) -> tuple[dict[str, str], tuple[str, str]]:

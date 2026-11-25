@@ -59,8 +59,7 @@
   border-color: {{panel.w.panel_button.hover_border}};
   background-color: {{panel.w.panel_button.hover_color}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{panel.w.panel_button.hover_top}};
-  background-gradient-end: {{panel.w.panel_button.hover_bottom}};
+  {{panel.w.panel_button.hover_st}}
   box-shadow: {{panel.w.panel_button.hover_st_shadow}};
   transition-duration: {{hover_in_ms}}; }
 .applet-box:checked, .applet-box:checked:hover {
@@ -95,8 +94,7 @@
   border-radius: {{panel.r}}px;
   background-color: {{panel.w.panel_button.color}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{panel.w.panel_button.color_top}};
-  background-gradient-end: {{panel.w.panel_button.color_bottom}};
+  {{panel.w.panel_button.color_st}}
   box-shadow: {{panel.w.panel_button.st_shadow}};
   transition-duration: {{hover_out_ms}}; }
 .grouped-window-list-item-box.top, .grouped-window-list-item-box.bottom,
@@ -110,8 +108,7 @@
   border-color: {{panel.w.panel_button.hover_border}};
   background-color: {{panel.w.panel_button.hover_color}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{panel.w.panel_button.hover_top}};
-  background-gradient-end: {{panel.w.panel_button.hover_bottom}};
+  {{panel.w.panel_button.hover_st}}
   box-shadow: {{panel.w.panel_button.hover_st_shadow}};
   transition-duration: {{hover_in_ms}}; }
 
@@ -122,8 +119,7 @@
   border-color: {{panel.w.panel_button.selected_border}};
   background-color: {{panel.w.panel_button.selected_color}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{panel.w.panel_button.selected_top}};
-  background-gradient-end: {{panel.w.panel_button.selected_bottom}};
+  {{panel.w.panel_button.selected_st}}
   box-shadow: {{panel.w.panel_button.st_shadow}}; }
 .grouped-window-list-item-box:focus .grouped-window-list-item-label,
 .window-list-item-box:focus StLabel {
@@ -137,8 +133,7 @@
   border-color: {{panel.pb_attention_edge}};
   background-color: {{panel.pb_attention}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{panel.pb_attention_top}};
-  background-gradient-end: {{panel.pb_attention_bottom}}; }
+  {{panel.pb_attention_st}} }
 
 .grouped-window-list-item-box .progress, .window-list-item-box .progress {
   border-radius: {{panel.r}}px;
@@ -160,8 +155,7 @@
   box-shadow: inset 0 0 0 1px {{panel.w.panel_button.hover_border}};
   background-color: {{panel.w.panel_button.hover_color}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{panel.w.panel_button.hover_top}};
-  background-gradient-end: {{panel.w.panel_button.hover_bottom}};
+  {{panel.w.panel_button.hover_st}}
   transition-duration: {{hover_in_ms}}; }
 
 /* Workspace switcher: current workspace in the accent */
@@ -197,8 +191,7 @@
   color: {{menu.w.menu_item.hover_fg}};
   background-color: {{menu.w.menu_item.hover_color}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.w.menu_item.hover_top}};
-  background-gradient-end: {{menu.w.menu_item.hover_bottom}};
+  {{menu.w.menu_item.hover_st}}
   box-shadow: {{menu.w.menu_item.hover_st_ring}};
   transition-duration: {{hover_in_ms}}; }
 
@@ -212,8 +205,7 @@
 .menu-favorites-button:hover {
   background-color: {{menu.fav_main_hover}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.fav_main_hover_top}};
-  background-gradient-end: {{menu.fav_main_hover_bottom}};
+  {{menu.fav_main_hover_st}}
   box-shadow: {{menu.fav_hover_ring}};
   transition-duration: {{hover_in_ms}}; }
 
@@ -225,8 +217,7 @@
   border-radius: {{menu.item_r}}px;
   background-color: {{menu.main_hover}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.main_hover_top}};
-  background-gradient-end: {{menu.main_hover_bottom}};
+  {{menu.main_hover_st}}
   box-shadow: {{menu.main_hover_ring}};
   transition-duration: {{hover_in_ms}}; }
 .menu-category-button-selected, .menu-category-button-selected:hover {
@@ -234,8 +225,7 @@
   border-radius: {{menu.item_r}}px;
   background-color: {{menu.category}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.category_top}};
-  background-gradient-end: {{menu.category_bottom}};
+  {{menu.category_st}}
   box-shadow: {{menu.category_ring}}; }
 .menu-category-button-selected .menu-category-button-label { color: {{menu.category_fg}}; }
 .menu-application-button-selected .menu-application-button-label,
@@ -250,8 +240,7 @@
   color: {{menu.main_hover_fg}};
   background-color: {{menu.main_hover}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.main_hover_top}};
-  background-gradient-end: {{menu.main_hover_bottom}};
+  {{menu.main_hover_st}}
   box-shadow: {{menu.main_hover_ring}};
   transition-duration: {{hover_in_ms}}; }
 /* its sidebar: the same step from the sidebar's own background, shaded
@@ -270,8 +259,7 @@
   color: {{menu.category_fg}};
   background-color: {{menu.category}};
   background-gradient-direction: vertical;
-  background-gradient-start: {{menu.category_top}};
-  background-gradient-end: {{menu.category_bottom}};
+  {{menu.category_st}}
   box-shadow: {{menu.category_ring}}; }
 .appmenu-category-button-selected .appmenu-category-button-label { color: {{menu.category_fg}}; }
 .appmenu-application-button-selected .appmenu-application-button-label,

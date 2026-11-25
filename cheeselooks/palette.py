@@ -166,6 +166,22 @@ def gradient_css(top: str, bottom: str, shape: str = "smooth", step: float = 0.4
     return f"linear-gradient(to bottom, {', '.join(parts)})"
 
 
+def st_gradient(top: str, bottom: str, shape: str = "smooth", step: float = 0.4,
+                glass_return: float = 0.4) -> str:
+    """The face as St (Cinnamon) background-gradient-* declarations. Cinnamon
+    with the middle-stop patch draws split and glass with the step; older
+    Cinnamon ignores the -middle- properties without a warning and draws a
+    smooth fade from the first stop to the last. Smooth faces write only start
+    and end, exactly as before."""
+    stops = gradient_stops(top, bottom, shape, step, glass_return)
+    lines = [f"background-gradient-start: {stops[0][1]};"]
+    if len(stops) == 4:
+        lines += [f"background-gradient-middle-start: {stops[1][1]};",
+                  f"background-gradient-middle-end: {stops[2][1]};"]
+    lines.append(f"background-gradient-end: {stops[-1][1]};")
+    return "\n  ".join(lines)
+
+
 def title_gradient(color: str, amount: float) -> tuple[str, str]:
     """Title bar: lighter top, bottom exactly the menubar/toolbar color."""
     return lighter(color, 1.00 * amount), color

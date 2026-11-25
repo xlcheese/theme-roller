@@ -2249,6 +2249,27 @@ class RenderAndInstallTests(unittest.TestCase):
         out = settings.apply_style_defaults(defaults(), {"unfocused_depth": 40})
         self.assertEqual(out["style"]["unfocused_depth"], 40)
 
+    def test_cinnamon_middle_stops(self):
+        # smooth faces write only start and end, exactly as before
+        self.assertEqual(palette.st_gradient("#ffffff", "#000000"),
+                         "background-gradient-start: #ffffff;\n  background-gradient-end: #000000;")
+        # split and glass add the two middle stops (St with the middle-stop patch
+        # draws the step; older Cinnamon ignores them and fades start to end)
+        for shape in ("split", "glass"):
+            stops = palette.gradient_stops("#ffffff", "#000000", shape, 0.7, 0.7)
+            st = palette.st_gradient("#ffffff", "#000000", shape, 0.7, 0.7)
+            self.assertIn(f"background-gradient-middle-start: {stops[1][1]};", st)
+            self.assertIn(f"background-gradient-middle-end: {stops[2][1]};", st)
+            self.assertTrue(st.endswith(f"background-gradient-end: {stops[3][1]};"))
+        gummy = styles.load(REPO / "styles" / "xl-Gummy")
+        t = tokens.build(defaults(), gummy)
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "theme"
+            install.build(REPO / "templates", t, out)
+            css = (out / "cinnamon" / "cinnamon.css").read_text()
+        self.assertIn(t["panel.w.panel_button.hover_st"], css)
+        self.assertIn("background-gradient-middle-start:", t["panel.w.panel_button.hover_st"])
+
     def test_menu_style(self):
         s = defaults()
         s["global"].update(roundness=40, gradient=60)
