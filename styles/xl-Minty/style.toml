@@ -1,0 +1,56 @@
+# xl-Minty: Linux Mint's Mint-Y look, plain on purpose so every app looks
+# alike. Flat buttons with a thin border and no shadow, a white face on hover
+# and a grey tint when pressed; plain white fields with an accent border when
+# focused; title bar buttons hidden until hovered; open tabs (only the chosen one drawn). Theme Roller's
+# fixes stay (readable selections, spin buttons, disabled header buttons).
+# By Wesley Hayslip.
+
+name = "xl-Minty"
+author = "Wesley Hayslip"
+description = "Linux Mint's Mint-Y look: flat and plain, thin borders, no shadows."
+
+adapt_strength = 0.6
+
+[defaults]
+roundness = 20          # Mint-Y's 3px corners
+gradient = 0
+depth = 50
+
+# Mint-Y's button border (#C8C8CE on its #F8F8F9 window)
+[edges.raised]
+border = "mix(bg, text, 0.24)"
+
+[edges.raised_hover]
+border = "mix(bg, text, 0.24)"
+
+# pressed: Mint-Y's darker border (#ADADB5), no shadow
+[edges.sunken]
+border = "mix(bg, text, 0.33)"
+
+# text fields and check boxes: a plain border (#BABABA), nothing inside
+[edges.field]
+border = "border_strong"
+
+[edges.focus]
+border = "accent"
+
+[edges.flat]
+border = "none"
+
+[widgets]
+button         = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "base" }
+linked         = { like = "button" }
+suggested      = { like = "button", border = "accent", hover_color = "accent_hover" }
+toolbar_button = { edge = "flat", hover_edge = "raised", pressed_edge = "sunken", hover_color = "base" }
+title_button   = { like = "toolbar_button" }
+close_button   = { like = "title_button", hover_color = "accent" }
+entry          = { edge = "field", focus_edge = "focus" }
+check          = { edge = "field", hover_edge = "focus", focus_edge = "focus" }
+combo          = { like = "button" }
+tab            = { tab_kind = "open", active_marker = "none" }
+menu_item      = { hover_color = "menu_hover" }
+menubar_item   = { hover_color = "menubar_hover" }
+
+[title_bar]
+highlight      = 0
+highlight_dark = 0

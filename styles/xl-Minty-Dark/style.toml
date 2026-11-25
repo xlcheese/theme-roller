@@ -1,0 +1,58 @@
+# xl-Minty Dark: Linux Mint's Mint-Y look, plain on purpose so every app looks
+# alike. Flat buttons with a thin border and no shadow, a white face on hover
+# and a grey tint when pressed; plain white fields with an accent border when
+# focused; title bar buttons hidden until hovered; open tabs (only the chosen one drawn). Theme Roller's
+# fixes stay (readable selections, spin buttons, disabled header buttons).
+# By Wesley Hayslip.
+
+name = "xl-Minty-Dark"
+author = "Wesley Hayslip"
+description = "Linux Mint's Mint-Y look: flat and plain, thin borders, no shadows."
+
+adapt_strength = 0.6
+
+[defaults]
+roundness = 20          # Mint-Y's 3px corners
+gradient = 0
+depth = 50
+
+# Mint-Y Dark's button border (#202023 on its #2E2E33 window)
+[edges.raised]
+border = "darker(bg, 0.3)"
+
+[edges.raised_hover]
+border = "darker(bg, 0.3)"
+
+# pressed: Mint-Y Dark's near-black border (#080808), no shadow
+[edges.sunken]
+border = "darker(bg, 0.8)"
+
+# text fields and check boxes: a plain border, nothing inside. Mint-Y Dark's
+# fields are lighter than the window, so its dark border shows; Theme Roller's
+# are darker, so a dark one vanished: the theme's own field border instead
+[edges.field]
+border = "border_strong"
+
+[edges.focus]
+border = "accent"
+
+[edges.flat]
+border = "none"
+
+[widgets]
+button         = { edge = "raised", hover_edge = "raised_hover", pressed_edge = "sunken", hover_color = "base" }
+linked         = { like = "button" }
+suggested      = { like = "button", border = "accent", hover_color = "accent_hover" }
+toolbar_button = { edge = "flat", hover_edge = "raised", pressed_edge = "sunken", hover_color = "base" }
+title_button   = { like = "toolbar_button" }
+close_button   = { like = "title_button", hover_color = "accent" }
+entry          = { edge = "field", focus_edge = "focus" }
+check          = { edge = "field", hover_edge = "focus", focus_edge = "focus" }
+combo          = { like = "button" }
+tab            = { tab_kind = "open", active_marker = "none" }
+menu_item      = { hover_color = "menu_hover" }
+menubar_item   = { hover_color = "menubar_hover" }
+
+[title_bar]
+highlight      = 0
+highlight_dark = 0
