@@ -312,6 +312,16 @@ class StyleTests(unittest.TestCase):
             os.environ.pop("WAYLAND_DISPLAY", None)
             self.assertFalse(reload.wayland())
 
+    def test_gtk_drawn_title_bars(self):
+        """Title bars GTK draws itself (windows without a header bar on Wayland)
+        get the title bar height and our button sizes (Mint-Y's base gave them
+        32x24 buttons with a more specific rule)."""
+        css = (paths.templates_dir() / "gtk-3.0" / "xl.css.tmpl").read_text()
+        self.assertIn(".csd headerbar.default-decoration, .csd .titlebar.default-decoration {\n"
+                      "  min-height: {{wb.height_inner}}px; }", css)
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        self.assertIn(".csd headerbar.default-decoration button.titlebutton", t["titlebuttons.css"])
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")

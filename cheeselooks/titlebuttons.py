@@ -994,8 +994,15 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
         bases = ["windowcontrols > button:not(.osd)"]
         img = "windowcontrols > button > image"
     else:
-        bases = ["headerbar button.titlebutton", ".titlebar button.titlebutton"]
-        img = "headerbar button.titlebutton image, .titlebar button.titlebutton image"
+        # ...and title bars GTK draws itself for windows without a header bar
+        # (every such app on Wayland, the Mint 23 beta's default): Mint-Y's base
+        # sizes their buttons 32x24 with a more specific rule, which beat ours,
+        # so our faces and glyphs sat off centre (xl_cheese). .csd only: on X11
+        # Cinnamon draws these from the .ssd rules (_muffin_css)
+        bases = ["headerbar button.titlebutton", ".titlebar button.titlebutton",
+                 ".csd headerbar.default-decoration button.titlebutton",
+                 ".csd .titlebar.default-decoration button.titlebutton"]
+        img = ", ".join(f"{b} image" for b in bases)
 
     def sel(cls: str, pseudo: str) -> str:
         return ", ".join(f"{b}{cls}{pseudo}" for b in bases)

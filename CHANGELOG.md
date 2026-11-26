@@ -13,7 +13,7 @@
 - **Minted and Minted Dark**, after Mint-Y, Linux Mint's own theme: flat and plain, matched against Mint-Y built from Mint's source, with Theme Roller's fixes. In Mint's default Aqua.
 - **Style sheets can set the main surfaces** in `[palette]`: `base` (fields, lists, pages), `header` (menu bars, toolbars, title bar) and `sidebar`, as expressions of your colors, so they still follow the color choosers. Minted Dark uses it to match Mint-Y Dark.
 - **Mint's colors one click away:** the accent color chooser opens on Mint-Y's ten accent colors, with + for any other.
-- **Wayland sessions** (the Linux Mint 23 beta's default): Cinnamon can't restart itself there, so Theme Roller no longer tries and says that window borders change at your next login.
+- **Wayland sessions** (the Linux Mint 23 beta's default): Cinnamon can't restart itself there, so Theme Roller no longer tries and says that window borders change at your next login. Apps without their own header bar get a title bar drawn by GTK there; it now follows Title bar height and your window button style, with the symbols centred.
 - **Spanish reads naturally now**, thanks to axrusar on the Linux Mint forums, who reworded about half of it.
 - **Qt apps' color scheme is called Theme-Roller** too (qt5ct lists it). The next Apply replaces 0.9.0's xl-Cheeselooks scheme and its lines in `~/.profile`.
 
