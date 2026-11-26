@@ -25,7 +25,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from . import editor, flatpak, gtk4, icons, paths, qt, reload, watch
+from . import editor, flatpak, gtk4, icons, paths, qt, reload, velocitty, watch
 
 
 def _ours(value: str | None) -> bool:
@@ -52,6 +52,8 @@ def remove() -> list[str]:
         log += qt.disable()
     if editor.active():
         log += editor.disable()
+    if velocitty.active():
+        log += velocitty.disable()
     if flatpak.disable():
         log.append("Flatpak apps no longer read the theme")
     if icons.active() or icons.theme_dir().exists():

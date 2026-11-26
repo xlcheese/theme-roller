@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, paths, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, paths, velocitty, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -356,6 +356,39 @@ class StyleTests(unittest.TestCase):
             install.install(paths.templates_dir(), t1, theme, good)
             install.install(paths.templates_dir(), t2, theme, good)     # X11: Cinnamon restarts
             self.assertEqual(assets(), only_now)
+
+    def test_velocitty_palette(self):
+        """Velocitty (Mint 23's terminal): a Theme Roller palette from the theme,
+        switched to the first time, kept when you pick another, your previous
+        palette back when our colors come out. Velocitty reads it as it reads
+        its own (a [Palette] section used for light and dark)."""
+        import os
+        from unittest import mock
+        home = Path(tempfile.mkdtemp())
+        store = {"palette": "Espresso"}
+        def get(schema, key):
+            return f"'{store[key]}'" if schema == velocitty.SCHEMA else None
+        def set_value(schema, key, value):
+            store[key] = value
+            return True
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(home / "data"), "XDG_CONFIG_HOME": str(home / "cfg")}), \
+                mock.patch.object(reload, "available", return_value=True), \
+                mock.patch.object(reload, "get", side_effect=get), \
+                mock.patch.object(reload, "set_value", side_effect=set_value):
+            velocitty.enable(t)
+            self.assertEqual(store["palette"], "Theme Roller")
+            text = velocitty.palette_file().read_text()
+            for key in ("Foreground", "Background", "Titlebar", "Color16", "Admin", "Remote", "Yellow"):
+                self.assertIn(f"\n{key}=", text)
+            self.assertIn(f"Titlebar={t['wb.title']}", text)
+            store["palette"] = "Nord"                     # you pick another: kept
+            velocitty.enable(t)
+            self.assertEqual(store["palette"], "Nord")
+            store["palette"] = "Theme Roller"
+            velocitty.disable()                           # colors out: yours back
+            self.assertEqual(store["palette"], "Espresso")
+            self.assertFalse(velocitty.palette_file().exists())
 
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))

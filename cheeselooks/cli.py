@@ -10,7 +10,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import __version__, editor, palette, flatpak, gtk4, icons, install, paths, qt, reload, watch, settings, styles, themes, tokens
+from . import __version__, editor, velocitty, palette, flatpak, gtk4, icons, install, paths, qt, reload, watch, settings, styles, themes, tokens
 from .shape import DEFAULT_PANEL_HEIGHT
 
 
@@ -146,6 +146,8 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
         log += editor.enable(table)
     elif editor.active():
         log += editor.disable()
+    # Velocitty (Mint 23's terminal): a palette from the theme, while it's installed
+    log += velocitty.enable(table)
     return [line for line in log if line]
 
 

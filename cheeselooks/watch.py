@@ -27,7 +27,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import editor, gtk4, paths, qt, reload, tokens
+from . import editor, gtk4, paths, qt, reload, tokens, velocitty
 
 SCHEMA, KEY = "org.cinnamon.desktop.interface", "gtk-theme"
 SETTLE = 2.0                  # seconds a change must last before we act on it
@@ -81,6 +81,8 @@ def set_aside() -> list[str]:
         log += qt.disable(set_aside=True)
     if editor.active():
         log += editor.disable()
+    if velocitty.active():
+        log += velocitty.disable()
     f = set_aside_file()
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text("", encoding="utf-8")
