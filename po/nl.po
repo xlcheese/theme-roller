@@ -1145,8 +1145,9 @@ msgstr ""
 "‘{theme}’ staat op het bureaublad. Terugdraaien zet het vorige thema terug."
 
 #: cheeselooks/app.py:1894
-msgid "Window borders change at your next login."
-msgstr "De vensterranden veranderen bij de volgende keer aanmelden."
+msgid "Some older apps' title bars change at your next login."
+msgstr ""
+"Bij sommige oudere apps veranderen de titelbalken pas bij de volgende keer aanmelden."
 
 #: cheeselooks/app.py:1898
 msgid "Qt apps now match your theme"

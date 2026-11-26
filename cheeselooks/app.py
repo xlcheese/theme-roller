@@ -1891,7 +1891,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
     @staticmethod
     def _login_note(log: list[str]) -> str:
         """On Wayland window borders can't reload until the next login: say so."""
-        return (" " + _("Window borders change at your next login.")) if reload.LOGIN_NEEDED in log else ""
+        return (" " + _("Some older apps' title bars change at your next login.")) if reload.LOGIN_NEEDED in log else ""
 
     def _qt_notice(self, text: str) -> bool:
         d = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.INFO,

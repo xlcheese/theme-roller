@@ -322,6 +322,41 @@ class StyleTests(unittest.TestCase):
         t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
         self.assertIn(".csd headerbar.default-decoration button.titlebutton", t["titlebuttons.css"])
 
+    def test_wayland_keeps_login_button_images(self):
+        """On Wayland, Muffin draws older apps' title bars from the theme loaded at
+        login: an Apply keeps the earlier button images until the next login."""
+        import os
+        from unittest import mock
+        root = Path(tempfile.mkdtemp())
+        theme, good = root / "themes" / "Theme-Roller", root / "last-good"
+        s = defaults()
+        s["window_borders"]["button_style"] = "classic"
+        t1 = tokens.build(s, styles.load(DEFAULT_STYLE))
+        s2 = copy.deepcopy(s)
+        s2["global"]["accent"] = "#3366CC"
+        s2["window_borders"]["button_style"] = "drawn"
+        t2 = tokens.build(s2, styles.load(DEFAULT_STYLE))
+        assets = lambda: {f.name for f in (theme / "gtk-3.0" / "assets").iterdir()}
+        env = {"XDG_SESSION_TYPE": "wayland", "XDG_SESSION_ID": "c1"}
+        with mock.patch.dict(os.environ, env):
+            install.install(paths.templates_dir(), t1, theme, good)
+            first = assets()
+            install.install(paths.templates_dir(), t2, theme, good)     # same login
+            self.assertTrue(first <= assets())
+        with mock.patch.dict(os.environ, {**env, "XDG_SESSION_ID": "c2"}):   # a new login
+            install.install(paths.templates_dir(), t2, theme, good)
+            install.install(paths.templates_dir(), t2, theme, good)
+            only_now = assets()
+        clean = root / "clean"
+        install.build(paths.templates_dir(), t2, clean)
+        self.assertEqual(only_now, {f.name for f in (clean / "gtk-3.0" / "assets").iterdir()})
+        self.assertTrue(first - only_now)              # the earlier images are gone after a login
+        with mock.patch.dict(os.environ, {"XDG_SESSION_TYPE": "x11", "XDG_SESSION_ID": "c3"}):
+            os.environ.pop("WAYLAND_DISPLAY", None)
+            install.install(paths.templates_dir(), t1, theme, good)
+            install.install(paths.templates_dir(), t2, theme, good)     # X11: Cinnamon restarts
+            self.assertEqual(assets(), only_now)
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")

@@ -267,7 +267,7 @@ O Theme Roller é um aplicativo gratuito que personaliza a área de trabalho Cin
 | 253 | Applying… the desktop flickers once while it reloads. | Aplicando… a área de trabalho pisca uma vez enquanto recarrega. |
 | 254 ✂ | Apply failed: {problem} | Falha ao aplicar: {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | “{theme}” está na área de trabalho. Reverter traz de volta o tema anterior. |
-| 256 | Window borders change at your next login. | As bordas de janela mudarão no próximo login. |
+| 256 | Some older apps' title bars change at your next login. | Em alguns apps mais antigos, as barras de título mudarão no próximo login. |
 | 257 ✂ | Qt apps now match your theme | Os aplicativos Qt agora combinam com seu tema |
 | 258 | Reverting… the desktop flickers once while it reloads. | Revertendo… a área de trabalho pisca uma vez enquanto recarrega. |
 | 259 ✂ | Revert failed: {problem} | Falha ao reverter: {problem} |

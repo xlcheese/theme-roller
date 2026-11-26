@@ -267,7 +267,7 @@ Theme Roller — бесплатная программа для оформлен
 | 253 | Applying… the desktop flickers once while it reloads. | Применение… рабочий стол один раз мигнёт при перезагрузке. |
 | 254 ✂ | Apply failed: {problem} | Не удалось применить: {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | «{theme}» на рабочем столе. «Вернуть» вернёт предыдущую тему. |
-| 256 | Window borders change at your next login. | Рамки окон изменятся при следующем входе в систему. |
+| 256 | Some older apps' title bars change at your next login. | У некоторых старых приложений заголовки окон изменятся при следующем входе в систему. |
 | 257 ✂ | Qt apps now match your theme | Приложения Qt теперь совпадают с вашей темой |
 | 258 | Reverting… the desktop flickers once while it reloads. | Возврат… рабочий стол один раз мигнёт при перезагрузке. |
 | 259 ✂ | Revert failed: {problem} | Не удалось вернуть: {problem} |

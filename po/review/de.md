@@ -267,7 +267,7 @@ Theme Roller ist ein kostenloses Programm, das den Cinnamon-Desktop von Linux Mi
 | 253 | Applying… the desktop flickers once while it reloads. | Wird angewendet… der Desktop flackert einmal beim Neuladen. |
 | 254 ✂ | Apply failed: {problem} | Anwenden fehlgeschlagen: {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | „{theme}“ ist auf dem Desktop. Rückgängig holt das vorherige Thema zurück. |
-| 256 | Window borders change at your next login. | Die Fensterrahmen ändern sich bei der nächsten Anmeldung. |
+| 256 | Some older apps' title bars change at your next login. | Bei einigen älteren Apps ändern sich die Titelleisten erst bei der nächsten Anmeldung. |
 | 257 ✂ | Qt apps now match your theme | Qt-Anwendungen passen jetzt zu deinem Thema |
 | 258 | Reverting… the desktop flickers once while it reloads. | Wird rückgängig gemacht… der Desktop flackert einmal beim Neuladen. |
 | 259 ✂ | Revert failed: {problem} | Rückgängig fehlgeschlagen: {problem} |

@@ -267,7 +267,7 @@ Theme Roller is een gratis programma dat het Cinnamon-bureaublad van Linux Mint 
 | 253 | Applying… the desktop flickers once while it reloads. | Bezig met toepassen… het bureaublad knippert één keer tijdens het herladen. |
 | 254 ✂ | Apply failed: {problem} | Toepassen mislukt: {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | ‘{theme}’ staat op het bureaublad. Terugdraaien zet het vorige thema terug. |
-| 256 | Window borders change at your next login. | De vensterranden veranderen bij de volgende keer aanmelden. |
+| 256 | Some older apps' title bars change at your next login. | Bij sommige oudere apps veranderen de titelbalken pas bij de volgende keer aanmelden. |
 | 257 ✂ | Qt apps now match your theme | Qt-apps passen nu bij je thema |
 | 258 | Reverting… the desktop flickers once while it reloads. | Bezig met terugdraaien… het bureaublad knippert één keer tijdens het herladen. |
 | 259 ✂ | Revert failed: {problem} | Terugdraaien mislukt: {problem} |

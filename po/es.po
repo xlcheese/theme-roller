@@ -1143,8 +1143,9 @@ msgstr ""
 "«{theme}» está aplicado en el escritorio. Revertir recupera el tema anterior."
 
 #: cheeselooks/app.py:1894
-msgid "Window borders change at your next login."
-msgstr "Los bordes de ventana cambiarán al volver a iniciar sesión."
+msgid "Some older apps' title bars change at your next login."
+msgstr ""
+"En algunas apps antiguas, las barras de título cambiarán al volver a iniciar sesión."
 
 #: cheeselooks/app.py:1898
 msgid "Qt apps now match your theme"

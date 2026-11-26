@@ -267,7 +267,7 @@ Theme Roller est une application gratuite qui personnalise le bureau Cinnamon de
 | 253 | Applying… the desktop flickers once while it reloads. | Application… le bureau clignote une fois pendant le rechargement. |
 | 254 ✂ | Apply failed: {problem} | Échec d'Appliquer : {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | « {theme} » est sur le bureau. Annuler remet le thème précédent. |
-| 256 | Window borders change at your next login. | Les bordures de fenêtre changeront à la prochaine connexion. |
+| 256 | Some older apps' title bars change at your next login. | Les barres de titre de certaines anciennes applications changeront à la prochaine connexion. |
 | 257 ✂ | Qt apps now match your theme | Les applications Qt s'accordent maintenant avec votre thème |
 | 258 | Reverting… the desktop flickers once while it reloads. | Annulation… le bureau clignote une fois pendant le rechargement. |
 | 259 ✂ | Revert failed: {problem} | Échec d'Annuler : {problem} |

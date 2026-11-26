@@ -1104,7 +1104,7 @@ msgid "“{theme}” is on the desktop. Revert puts the previous theme back."
 msgstr ""
 
 #: cheeselooks/app.py:1894
-msgid "Window borders change at your next login."
+msgid "Some older apps' title bars change at your next login."
 msgstr ""
 
 #: cheeselooks/app.py:1898

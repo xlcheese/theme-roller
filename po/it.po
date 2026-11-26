@@ -1142,8 +1142,9 @@ msgstr ""
 "«{theme}» è sul desktop. Ripristina precedente rimette il tema di prima."
 
 #: cheeselooks/app.py:1894
-msgid "Window borders change at your next login."
-msgstr "I bordi delle finestre cambieranno al prossimo accesso."
+msgid "Some older apps' title bars change at your next login."
+msgstr ""
+"In alcune app meno recenti, le barre del titolo cambieranno al prossimo accesso."
 
 #: cheeselooks/app.py:1898
 msgid "Qt apps now match your theme"
