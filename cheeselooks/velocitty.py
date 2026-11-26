@@ -131,3 +131,122 @@ def disable() -> list[str]:
 
 def active() -> bool:
     return bool(_load_state()) or palette_file().exists()
+
+
+# ---------------------------------------------------------------- its window, in the GTK 4 file
+
+# Velocitty's session classes on its window and tabs (velocitty/palette.py:
+# STATES, CUSTOM_COLORS), and the palette keys for their colors
+_STATE_KEYS = {"admin": "Admin", "remote": "Remote", **{f"custom-{c.lower()}": c for c in _TAB_COLORS}}
+
+
+def _palette_dirs() -> list[Path]:
+    data = paths._xdg("XDG_DATA_HOME", paths.HOME / ".local" / "share")
+    return [data / "velocitty" / "palettes", Path("/usr/share/velocitty/palettes")]
+
+
+def _read_palette(name: str, dark: bool) -> dict[str, str] | None:
+    """The colors of a palette as Velocitty reads them: its [Dark] or [Light]
+    section, else [Palette]."""
+    import configparser
+    for d in _palette_dirs():
+        f = d / f"{name}.palette"
+        if not f.is_file():
+            continue
+        cp = configparser.ConfigParser(interpolation=None)
+        cp.optionxform = str
+        try:
+            cp.read(f, encoding="utf-8")
+        except (configparser.Error, OSError):
+            return None
+        section = "Dark" if dark and cp.has_section("Dark") else "Light" if cp.has_section("Light") else "Palette"
+        return dict(cp[section]) if cp.has_section(section) else None
+    return None
+
+
+def _readable(bg: str) -> str:
+    return "#ffffff" if pal.contrast("#ffffff", bg) >= pal.contrast("#1e1e1e", bg) else "#1e1e1e"
+
+
+def scope_to_velocitty(css: str) -> str:
+    """Window button rules for Velocitty's windows only: each selector starts
+    from its window (window.maximized ... becomes window.terminal.maximized ...,
+    headerbar windowcontrols becomes window.terminal headerbar windowcontrols)."""
+    import re
+
+    def one(selector: str) -> str:
+        s = selector.strip()
+        m = re.match(r"window((?:\.[\w-]+)*)\s+(.*)", s)
+        if m:
+            return f"window.terminal{m.group(1)} {m.group(2)}"
+        return f"window.terminal {s}"
+
+    def rule(m: re.Match) -> str:
+        return ",\n".join(one(p) for p in m.group(1).split(",")) + " {"
+    return re.sub(r"(?m)^([^{}/\n][^{}]*?)\s*\{", rule, css)
+
+
+def gtk4_css(t: dict[str, str], titlebuttons: str = "") -> str:
+    """Velocitty's window in the theme's style, on top of its own palette CSS
+    (this file outranks an app's CSS): the header bar keeps the palette's color
+    for each session (root red, remote blue, a tab's own color), with the
+    theme's title bar gradient over it as a see-through highlight; the tab
+    strip a step away from the header bar, so the header bar is clearly the
+    place to grab (xl_cheese); the window buttons and rounded top corners of
+    the theme. The running and bell shades and the colored lines under tabs
+    stay. Empty when Velocitty isn't installed."""
+    if not installed():
+        return ""
+    name = _current() or "Espresso"
+    scheme = (reload.get(SCHEMA, "color-scheme") or "'dark'").strip("'\"")
+    dark_ui = scheme == "dark" or (scheme == "system" and pal.luminance(t["bg"]) < pal.luminance(t["text"]))
+    p = _read_palette(name, dark_ui)
+    if not p or not all(k in p for k in ("Foreground", "Background", "Titlebar")):
+        return ""
+    bg, fg, title = p["Background"], p["Foreground"], p["Titlebar"]
+    title_fg = fg if pal.contrast(fg, title) >= 4.5 else _readable(title)
+    shade = "rgba(255, 255, 255, 0.16)" if pal.luminance(bg) < 0.179 else "rgba(0, 0, 0, 0.10)"
+    # the theme's title bar gradient: its top is the color lightened by this much
+    amount = 0.0
+    try:
+        top, base = pal.to_rgb(t["wb.title_top"]), pal.to_rgb(t["wb.title"])
+        amount = max(0.0, min(1.0, max((a - b) / (255 - b) for a, b in zip(top, base) if b < 255)))
+    except (KeyError, ValueError):
+        pass
+    gloss = f"linear-gradient(to bottom, rgba(255, 255, 255, {amount:.3f}), rgba(255, 255, 255, 0))" \
+        if amount > 0.005 else "none"
+    strip = pal.mix(title, bg, 0.45)
+    strip_fg = fg if pal.contrast(fg, strip) >= 4.5 else _readable(strip)
+    r = t.get("wb.r", "0")
+    head = "window.terminal headerbar, window.terminal headerbar:backdrop"
+    out = ["/* Velocitty (Linux Mint's terminal): its window in your theme, on its own colors (velocitty.py) */",
+           f"{head} {{\n  background-color: {title};\n  color: {title_fg};\n  background-image: {gloss}; }}"]
+    for cls, key in _STATE_KEYS.items():
+        if key in p:
+            c = p[key]
+            out.append(f"window.{cls} headerbar, window.{cls} headerbar:backdrop {{\n"
+                       f"  background-color: {c};\n  color: {_readable(c)}; }}")
+            out.append(f"window.terminal tabbar tab.{cls} {{ box-shadow: inset 0 -3px 0 {c}; }}")
+    run = f"linear-gradient({shade}, {shade})"
+    out += [f"window.terminal.running headerbar, window.terminal.running headerbar:backdrop {{\n"
+            f"  background-image: {run}, {gloss}; }}",
+            f"window.terminal.bell headerbar, window.terminal.bell headerbar:backdrop {{\n"
+            f"  background-image: {run}, {run}, {gloss}; }}",
+            # the tab strip: neither the header bar nor the terminal; the open tab joins the terminal
+            f"window.terminal tabbar .box, window.terminal tabbar .box:backdrop {{\n"
+            f"  background-color: {strip};\n  color: {strip_fg};\n  background-image: none; }}",
+            f"window.terminal tabbar tab {{ color: {strip_fg}; background-color: transparent; }}",
+            f"window.terminal tabbar tab:selected, window.terminal tabbar tab:selected:hover {{\n"
+            f"  color: {fg};\n  background-color: {bg}; }}",
+            f"window.terminal tabbar tab.running {{ background-image: {run}; }}",
+            # the tab overview keeps Velocitty's own look
+            f"window.terminal toolbarview.overview headerbar {{\n  background-color: {pal.mix(bg, fg, 0.10)};\n"
+            f"  color: {fg};\n  background-image: none; }}",
+            # rounded top corners, as the theme's windows (not maximized or tiled)
+            f"window.terminal.csd:not(.maximized):not(.tiled):not(.fullscreen) revealer.top-bar > windowhandle,\n"
+            f"window.terminal.csd:not(.maximized):not(.tiled):not(.fullscreen) headerbar {{\n"
+            f"  border-radius: {r}px {r}px 0 0; }}"]
+    if titlebuttons:
+        # the theme's window buttons, on Velocitty's windows only
+        out.append(scope_to_velocitty(titlebuttons))
+    return "\n".join(out) + "\n"

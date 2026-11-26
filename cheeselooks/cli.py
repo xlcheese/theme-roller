@@ -127,12 +127,13 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     new = (gtk4.block(paths.templates_dir(), table, css_variables=True, full=full)
            if colors else None)
     log.append(gtk4.write(paths.gtk4_css(), new))
-    if full:
+    if new and gtk4.asset_names(new):          # full styling, or Velocitty's window buttons
         gtk4.copy_assets(new, paths.theme_dir(), paths.gtk4_css())
-        log.append("libadwaita apps: full styling (buttons, title buttons, tabs) in "
-                   f"{paths.gtk4_css()}; reopen open ones")
     else:
         gtk4.remove_assets(paths.gtk4_css())
+    if full:
+        log.append("libadwaita apps: full styling (buttons, title buttons, tabs) in "
+                   f"{paths.gtk4_css()}; reopen open ones")
     if colors:                     # GNOME's own accent setting, to match (part of colors)
         log.append(reload.set_adw_accent(table["adw.accent_name"]) or "")
     log += _flatpak_access(integ.get("flatpak_access", False))

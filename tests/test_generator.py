@@ -390,6 +390,38 @@ class StyleTests(unittest.TestCase):
             self.assertEqual(store["palette"], "Espresso")
             self.assertFalse(velocitty.palette_file().exists())
 
+    def test_velocitty_window_css(self):
+        """Velocitty's window in the theme's style, in the GTK 4 file: the
+        palette's session colors kept (root red, remote blue), the theme's
+        gradient over them, a tab strip apart from the header bar, and the
+        theme's window buttons only on Velocitty in Colors mode."""
+        import os
+        from unittest import mock
+        home = Path(tempfile.mkdtemp())
+        s = defaults()
+        s["window_borders"]["title_gradient"] = 30
+        t = tokens.build(s, styles.load(DEFAULT_STYLE))
+        store = {"palette": "Theme Roller", "color-scheme": "dark"}
+        with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(home)}), \
+                mock.patch.object(reload, "available", return_value=True), \
+                mock.patch.object(reload, "get", side_effect=lambda sc, k: f"'{store[k]}'" if sc == velocitty.SCHEMA else None):
+            f = velocitty.palette_file()
+            f.parent.mkdir(parents=True)
+            f.write_text(velocitty.palette_text(t))
+            css = velocitty.gtk4_css(t, t["titlebuttons4.css"])
+            block = gtk4.block(paths.templates_dir(), t, css_variables=False)
+        self.assertIn("window.admin headerbar", css)
+        self.assertIn("window.remote headerbar", css)
+        self.assertIn("linear-gradient(to bottom, rgba(255, 255, 255, 0.3", css)   # the gradient, see-through
+        self.assertIn("window.terminal tabbar .box", css)
+        self.assertIn("window.terminal windowcontrols", css)
+        self.assertNotIn("\nwindowcontrols", css)                    # Velocitty's windows only
+        self.assertNotIn("window.maximized window.terminal", css)
+        self.assertEqual(velocitty.scope_to_velocitty("window.maximized windowcontrols > button,\nheaderbar windowcontrols {"),
+                         "window.terminal.maximized windowcontrols > button,\nwindow.terminal headerbar windowcontrols {")
+        self.assertIn("window.terminal headerbar", block)
+        self.assertEqual(velocitty.gtk4_css(t), "")                  # not installed: nothing
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")
