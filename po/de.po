@@ -11,661 +11,661 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cheeselooks/app.py:49 cheeselooks/app.py:73
+#: cheeselooks/app.py:50 cheeselooks/app.py:74
 msgid "Global"
 msgstr "Global"
 
-#: cheeselooks/app.py:49
+#: cheeselooks/app.py:50
 msgid "Panel & Menu"
 msgstr "Leiste & Menü"
 
-#: cheeselooks/app.py:49 cheeselooks/app.py:69 cheeselooks/app.py:643
+#: cheeselooks/app.py:50 cheeselooks/app.py:70 cheeselooks/app.py:665
 msgid "Theme"
 msgstr "Thema"
 
-#: cheeselooks/app.py:50 cheeselooks/app.py:91 cheeselooks/app.py:1264 cheeselooks/app.py:1286
+#: cheeselooks/app.py:51 cheeselooks/app.py:92 cheeselooks/app.py:1286 cheeselooks/app.py:1308
 msgid "Terminal"
 msgstr "Terminal"
 
-#: cheeselooks/app.py:50 cheeselooks/app.py:87
+#: cheeselooks/app.py:51 cheeselooks/app.py:88
 msgid "Window Borders"
 msgstr "Fensterrahmen"
 
-#: cheeselooks/app.py:51 cheeselooks/app.py:93
+#: cheeselooks/app.py:52 cheeselooks/app.py:94
 msgid "Details"
 msgstr "Details"
 
-#: cheeselooks/app.py:51 cheeselooks/app.py:95
+#: cheeselooks/app.py:52 cheeselooks/app.py:96
 msgid "Icons"
 msgstr "Symbole"
 
-#: cheeselooks/app.py:51 cheeselooks/app.py:99
+#: cheeselooks/app.py:52 cheeselooks/app.py:100
 msgid "Integration"
 msgstr "Integration"
 
-#: cheeselooks/app.py:52
+#: cheeselooks/app.py:53
 msgid "About"
 msgstr "Info"
 
-#: cheeselooks/app.py:52
+#: cheeselooks/app.py:53
 msgid "Documentation"
 msgstr "Dokumentation"
 
-#: cheeselooks/app.py:52
+#: cheeselooks/app.py:53
 msgid "Import & Export"
 msgstr "Import & Export"
 
-#: cheeselooks/app.py:55
+#: cheeselooks/app.py:56
 msgid ""
 "Folders recolored: the folder color (the front) follows your accent, and the second color (the back) a darker shade of it. Choose either and both keep their colors from then on; Reset Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to use them."
 msgstr ""
 "Ordner neu eingefärbt: Die Ordnerfarbe (die Vorderseite) folgt deiner Akzentfarbe, die zweite Farbe (die Rückseite) einem dunkleren Ton davon. Wählst du eine davon, behalten beide ab dann ihre Farben; Symbole zurücksetzen folgt wieder dem Thema. Alle anderen Symbole bleiben wie in deinem aktuellen Symbolthema. Mit Anwenden übernehmen."
 
-#: cheeselooks/app.py:64
+#: cheeselooks/app.py:65
 msgid "Themes and styles"
 msgstr "Themen und Stile"
 
-#: cheeselooks/app.py:65
+#: cheeselooks/app.py:66
 msgid ""
 "A <b>theme</b> is your colors and settings: everything on these tabs. A <b>style</b> is how things are drawn: edges, hovers, tabs and panel buttons. Any theme can use any style. Everything shows in the preview first; nothing changes on your desktop until you click <b>Apply</b>, and <b>Revert</b> puts your previous theme back."
 msgstr ""
 "Ein <b>Thema</b> sind deine Farben und Einstellungen: alles auf diesen Reitern. Ein <b>Stil</b> legt fest, wie alles gezeichnet wird: Kanten, Hover-Effekte, Reiter und Leistenknöpfe. Jedes Thema kann jeden Stil nutzen. Alles erscheint zuerst in der Vorschau; auf deinem Desktop ändert sich nichts, bis du <b>Anwenden</b> klickst, und <b>Rückgängig</b> holt dein vorheriges Thema zurück."
 
-#: cheeselooks/app.py:70
+#: cheeselooks/app.py:71
 msgid ""
 "Start from a built-in theme, one shared by someone else, or one of your own. Change anything and it becomes <b>Custom</b>; <b>Save Theme…</b> keeps your changes under a name. Your own themes can be duplicated, renamed and deleted."
 msgstr ""
 "Beginne mit einem mitgelieferten Thema, einem von jemand anderem geteilten oder einem eigenen. Änderst du etwas, wird es zu <b>Eigenes</b>; <b>Speichern…</b> behält deine Änderungen unter einem Namen. Eigene Themen lassen sich duplizieren, umbenennen und löschen."
 
-#: cheeselooks/app.py:74
+#: cheeselooks/app.py:75
 msgid ""
 "Three colors make a complete light or dark theme: accent, background and text. Then the shape of everything: Size, Roundness, Gradient, and how hovers fade. <b>Colors from</b> picks an accent from your wallpaper or any picture."
 msgstr ""
 "Drei Farben ergeben ein vollständiges helles oder dunkles Thema: Akzent, Hintergrund und Text. Dann die Form von allem: Größe, Rundung, Verlauf und wie Hover-Effekte ein- und ausblenden. <b>Farben aus</b> holt eine Akzentfarbe aus deinem Hintergrundbild oder einem beliebigen Bild."
 
-#: cheeselooks/app.py:78
+#: cheeselooks/app.py:79
 msgid ""
 "Pick how things are drawn, and set its Depth (how strong edges and shadows are) and Unfocused depth (how much of that unfocused windows keep). You can also make your own: a style is one style.toml file, in ~/.local/share/theme-roller/styles/&lt;name&gt;/. <b>Create a starter style…</b> makes one with every option explained: the essentials are on, the rest switched off with a #, each with a short note. Edit it, then pick it on the Style tab. <b>Check a style sheet for issues…</b> tells you if anything in it needs fixing."
 msgstr ""
 "Wähle, wie alles gezeichnet wird, und stelle die Tiefe (wie kräftig Kanten und Schatten sind) und die Tiefe ohne Fokus (wie viel davon Fenster ohne Fokus behalten) ein. Du kannst auch eigene Stile erstellen: Ein Stil ist eine style.toml-Datei in ~/.local/share/theme-roller/styles/&lt;Name&gt;/. <b>Startstil erstellen…</b> legt einen an, in dem jede Option erklärt ist: das Wichtigste ist aktiv, der Rest mit # abgeschaltet, jeweils mit einer kurzen Notiz. Bearbeite ihn und wähle ihn dann auf dem Reiter Stil. <b>Stildatei auf Fehler prüfen…</b> sagt dir, ob darin etwas korrigiert werden muss."
 
-#: cheeselooks/app.py:84
+#: cheeselooks/app.py:85
 msgid "Panel &amp; Menu"
 msgstr "Leiste &amp; Menü"
 
-#: cheeselooks/app.py:85
+#: cheeselooks/app.py:86
 msgid ""
 "The Cinnamon panel and its menus: their own colors, label weight, height, roundness, gradient and see-through. Left alone, they follow Global."
 msgstr ""
 "Die Cinnamon-Leiste und ihre Menüs: eigene Farben, Schriftstärke, Höhe, Rundung, Verlauf und Transparenz. Unverändert folgen sie Global."
 
-#: cheeselooks/app.py:88
+#: cheeselooks/app.py:89
 msgid ""
 "Title bars and window buttons: colors, height, gradient, border, roundness, and a choice of button styles and Minimize, Maximize and Close glyphs. When these change, Apply restarts Cinnamon by itself (your windows stay open), as window borders only reload then."
 msgstr ""
 "Titelleisten und Fensterknöpfe: Farben, Höhe, Verlauf, Rahmen, Rundung sowie eine Auswahl an Knopfstilen und Symbolen für Minimieren, Maximieren und Schließen. Ändern sie sich, startet Anwenden Cinnamon selbst neu (deine Fenster bleiben offen), da Fensterrahmen nur dann neu geladen werden."
 
-#: cheeselooks/app.py:92
+#: cheeselooks/app.py:93
 msgid ""
 "The terminal follows the theme, or pick one of the color sets, or your own colors."
 msgstr ""
 "Das Terminal folgt dem Thema, oder wähle eine der Farbzusammenstellungen oder eigene Farben."
 
-#: cheeselooks/app.py:94
+#: cheeselooks/app.py:95
 msgid ""
 "Tooltips, scrollbars (overlay or classic, roundness, width), sliders, switches and the focus ring."
 msgstr ""
 "Kurzinfos, Bildlaufleisten (überlagernd oder klassisch, Rundung, Breite), Schieberegler, Schalter und der Fokusrahmen."
 
-#: cheeselooks/app.py:96
+#: cheeselooks/app.py:97
 msgid ""
 "Folder icons in your colors, in six styles. Only the folders change; other icons stay as they were. The folder color follows your accent unless you pick one; on xl-Big Baddy, the second color is its racing stripes. Off until you switch it on."
 msgstr ""
 "Ordnersymbole in deinen Farben, in sechs Stilen. Nur die Ordner ändern sich; andere Symbole bleiben, wie sie waren. Die Ordnerfarbe folgt deiner Akzentfarbe, außer du wählst eine; bei xl-Big Baddy ist die zweite Farbe seine Rennstreifen. Aus, bis du es einschaltest."
 
-#: cheeselooks/app.py:100
+#: cheeselooks/app.py:101
 msgid ""
 "Linux apps come in a few kinds, and each looks for its colors in its own place. These switches bring your colors to the hodgepodge that doesn't read the theme on its own: GNOME-style apps, Flatpak apps, Qt apps like VLC, and text editors. <b>Scan my apps</b> shows which of your apps are which kind; <b>Take colors out of apps</b> removes them until the next Apply. Pick another theme in Mint's settings and Theme Roller's colors leave your apps by themselves."
 msgstr ""
 "Linux-Anwendungen gibt es in einigen Arten, und jede sucht ihre Farben an einer eigenen Stelle. Diese Schalter bringen deine Farben zu dem Sammelsurium, das das Thema nicht von selbst liest: Anwendungen im GNOME-Stil, Flatpak-Anwendungen, Qt-Anwendungen wie VLC und Texteditoren. <b>Meine Anwendungen prüfen</b> zeigt, welche deiner Anwendungen welcher Art sind; <b>Farben aus Anwendungen entfernen</b> nimmt sie bis zum nächsten Anwenden heraus. Wählst du in Mints Einstellungen ein anderes Thema, verschwinden die Farben von Theme Roller von selbst aus deinen Anwendungen."
 
-#: cheeselooks/app.py:105
+#: cheeselooks/app.py:106
 msgid "Import &amp; Export"
 msgstr "Import &amp; Export"
 
-#: cheeselooks/app.py:106
+#: cheeselooks/app.py:107
 msgid ""
 "Share a theme as one <tt>.xltheme</tt> file, and add themes others shared with you."
 msgstr ""
 "Teile ein Thema als eine einzige <tt>.xltheme</tt>-Datei und füge Themen hinzu, die andere mit dir geteilt haben."
 
-#: cheeselooks/app.py:109
+#: cheeselooks/app.py:110
 msgid "Accent"
 msgstr "Akzent"
 
-#: cheeselooks/app.py:109
+#: cheeselooks/app.py:110
 msgid "Background"
 msgstr "Hintergrund"
 
-#: cheeselooks/app.py:109
+#: cheeselooks/app.py:110
 msgid "Size"
 msgstr "Größe"
 
-#: cheeselooks/app.py:109
+#: cheeselooks/app.py:110
 msgid "Text"
 msgstr "Text"
 
-#: cheeselooks/app.py:110
+#: cheeselooks/app.py:111
 msgid "Gradient"
 msgstr "Verlauf"
 
-#: cheeselooks/app.py:110
+#: cheeselooks/app.py:111
 msgid "Hover in (ms)"
 msgstr "Einblenden (ms)"
 
-#: cheeselooks/app.py:110
+#: cheeselooks/app.py:111
 msgid "Roundness"
 msgstr "Rundung"
 
-#: cheeselooks/app.py:111
+#: cheeselooks/app.py:112
 msgid "Depth"
 msgstr "Tiefe"
 
-#: cheeselooks/app.py:111
+#: cheeselooks/app.py:112
 msgid "Hover out (ms)"
 msgstr "Ausblenden (ms)"
 
-#: cheeselooks/app.py:111
+#: cheeselooks/app.py:112
 msgid "Hover strength"
 msgstr "Hover-Stärke"
 
-#: cheeselooks/app.py:111
+#: cheeselooks/app.py:112
 msgid "Unfocused depth"
 msgstr "Tiefe ohne Fokus"
 
-#: cheeselooks/app.py:112
+#: cheeselooks/app.py:113
 msgid "Label weight"
 msgstr "Schriftstärke"
 
-#: cheeselooks/app.py:112
+#: cheeselooks/app.py:113
 msgid "Opacity"
 msgstr "Deckkraft"
 
-#: cheeselooks/app.py:113
+#: cheeselooks/app.py:114
 msgid "Height"
 msgstr "Höhe"
 
-#: cheeselooks/app.py:113
+#: cheeselooks/app.py:114
 msgid "Notification opacity"
 msgstr "Meldungs-Deckkraft"
 
-#: cheeselooks/app.py:114
+#: cheeselooks/app.py:115
 msgid "Menu-item roundness"
 msgstr "Eintragsrundung"
 
-#: cheeselooks/app.py:115
+#: cheeselooks/app.py:116
 msgid "Border"
 msgstr "Rahmen"
 
-#: cheeselooks/app.py:115
+#: cheeselooks/app.py:116
 msgid "Title bar"
 msgstr "Titelleiste"
 
-#: cheeselooks/app.py:115
+#: cheeselooks/app.py:116
 msgid "Title text"
 msgstr "Titeltext"
 
-#: cheeselooks/app.py:116
+#: cheeselooks/app.py:117
 msgid "Border width"
 msgstr "Rahmenbreite"
 
-#: cheeselooks/app.py:116
+#: cheeselooks/app.py:117
 msgid "Round bottom corners"
 msgstr "Untere Ecken abrunden"
 
-#: cheeselooks/app.py:116
+#: cheeselooks/app.py:117
 msgid "Title bar height"
 msgstr "Höhe der Titelleiste"
 
-#: cheeselooks/app.py:116
+#: cheeselooks/app.py:117
 msgid "Window roundness"
 msgstr "Fensterrundung"
 
-#: cheeselooks/app.py:117
+#: cheeselooks/app.py:118
 msgid "Buttons on the"
 msgstr "Knöpfe"
 
-#: cheeselooks/app.py:117
+#: cheeselooks/app.py:118
 msgid "Title bar gradient"
 msgstr "Verlauf der Titelleiste"
 
-#: cheeselooks/app.py:118
+#: cheeselooks/app.py:119
 msgid "Button roundness"
 msgstr "Knopfrundung"
 
-#: cheeselooks/app.py:118
+#: cheeselooks/app.py:119
 msgid "Button spacing"
 msgstr "Knopfabstand"
 
-#: cheeselooks/app.py:118
+#: cheeselooks/app.py:119
 msgid "Button style"
 msgstr "Knopfstil"
 
-#: cheeselooks/app.py:118
+#: cheeselooks/app.py:119
 msgid "Glyphs"
 msgstr "Symbole"
 
-#: cheeselooks/app.py:119
+#: cheeselooks/app.py:120
 msgid "Color"
 msgstr "Farbe"
 
-#: cheeselooks/app.py:119
+#: cheeselooks/app.py:120
 msgid "Mode"
 msgstr "Modus"
 
-#: cheeselooks/app.py:119 cheeselooks/app.py:49 cheeselooks/app.py:77 cheeselooks/app.py:1078 cheeselooks/app.py:741
+#: cheeselooks/app.py:120 cheeselooks/app.py:50 cheeselooks/app.py:78 cheeselooks/app.py:1100 cheeselooks/app.py:763
 msgid "Style"
 msgstr "Stil"
 
-#: cheeselooks/app.py:119
+#: cheeselooks/app.py:120
 msgid "Width"
 msgstr "Breite"
 
-#: cheeselooks/app.py:120 cheeselooks/app.py:858
+#: cheeselooks/app.py:121 cheeselooks/app.py:880
 msgid "GNOME-style apps"
 msgstr "Anwendungen im GNOME-Stil"
 
-#: cheeselooks/app.py:121
+#: cheeselooks/app.py:122
 msgid "Custom folder style"
 msgstr "Eigener Ordnerstil"
 
-#: cheeselooks/app.py:121
+#: cheeselooks/app.py:122
 msgid "Folder color"
 msgstr "Ordnerfarbe"
 
-#: cheeselooks/app.py:121
+#: cheeselooks/app.py:122
 msgid "Second color"
 msgstr "Zweite Farbe"
 
-#: cheeselooks/app.py:122 cheeselooks/app.py:861
+#: cheeselooks/app.py:123 cheeselooks/app.py:883
 msgid "Flatpak apps"
 msgstr "Flatpak-Anwendungen"
 
-#: cheeselooks/app.py:122
+#: cheeselooks/app.py:123
 msgid "Qt apps (VLC…)"
 msgstr "Qt-Anwendungen (VLC…)"
 
-#: cheeselooks/app.py:122
+#: cheeselooks/app.py:123
 msgid "Text editors (Xed…)"
 msgstr "Texteditoren (Xed…)"
 
-#: cheeselooks/app.py:124
+#: cheeselooks/app.py:125
 msgid "Menu style"
 msgstr "Menüstil"
 
-#: cheeselooks/app.py:124
+#: cheeselooks/app.py:125
 msgid "Panel style"
 msgstr "Leistenstil"
 
-#: cheeselooks/app.py:124
+#: cheeselooks/app.py:125
 msgid "Tooltips"
 msgstr "Kurzinfos"
 
-#: cheeselooks/app.py:125
+#: cheeselooks/app.py:126
 msgid "Scrollbars"
 msgstr "Bildlaufleisten"
 
-#: cheeselooks/app.py:125
+#: cheeselooks/app.py:126
 msgid "Sliders"
 msgstr "Schieberegler"
 
-#: cheeselooks/app.py:125
+#: cheeselooks/app.py:126
 msgid "Switches"
 msgstr "Schalter"
 
-#: cheeselooks/app.py:126
+#: cheeselooks/app.py:127
 msgid "Focus ring"
 msgstr "Fokusrahmen"
 
-#: cheeselooks/app.py:138
+#: cheeselooks/app.py:139
 msgid "Colors left on “Follow theme” use the Global colors."
 msgstr "Farben auf „Thema folgen“ nutzen die Farben von Global."
 
-#: cheeselooks/app.py:139
+#: cheeselooks/app.py:140
 msgid "Colors left on “Follow theme” come from the Global colors."
 msgstr "Farben auf „Thema folgen“ kommen aus den Farben von Global."
 
-#: cheeselooks/app.py:140
+#: cheeselooks/app.py:141
 msgid "Left on “Follow theme”, the terminal uses the theme's content colors."
 msgstr "Auf „Thema folgen“ nutzt das Terminal die Inhaltsfarben des Themas."
 
-#: cheeselooks/app.py:157
+#: cheeselooks/app.py:158
 msgid ""
 "Linux apps come in a few kinds, and each looks for its colors in its own place. Theme Roller brings your theme to all of them. These are already set, so you only need this tab if an app doesn't match."
 msgstr ""
 "Linux-Anwendungen gibt es in einigen Arten, und jede sucht ihre Farben an einer eigenen Stelle. Theme Roller bringt dein Thema zu allen. Das ist bereits eingerichtet; du brauchst diesen Reiter nur, wenn eine Anwendung nicht passt."
 
-#: cheeselooks/app.py:161
+#: cheeselooks/app.py:162
 msgid ""
 "GNOME apps such as Calculator and Text Editor (libadwaita). Colors: your colors, and GNOME's accent to match. Full: also your buttons, title buttons and tabs; this overrides apps' own styling, so some lose colors of their own (Flatpak ones need Flatpak apps on). Reopen apps to see changes."
 msgstr ""
 "GNOME-Anwendungen wie Rechner und Texteditor (libadwaita). Farben: deine Farben und die passende GNOME-Akzentfarbe. Vollständig: auch deine Knöpfe, Titelknöpfe und Reiter; das überschreibt das eigene Aussehen der Anwendungen, sodass manche eigene Farben verlieren (Flatpak-Anwendungen brauchen dazu Flatpak-Anwendungen an). Öffne die Anwendungen neu, um die Änderungen zu sehen."
 
-#: cheeselooks/app.py:165
+#: cheeselooks/app.py:166
 msgid ""
 "Lets Flatpak apps read your theme, so they get its colors. Reopen open apps to see them."
 msgstr ""
 "Lässt Flatpak-Anwendungen dein Thema lesen, damit sie seine Farben bekommen. Öffne offene Anwendungen neu, um sie zu sehen."
 
-#: cheeselooks/app.py:170
+#: cheeselooks/app.py:171
 msgid "Flatpak isn't installed."
 msgstr "Flatpak ist nicht installiert."
 
-#: cheeselooks/app.py:173
+#: cheeselooks/app.py:174
 msgid "A–Z"
 msgstr "A–Z"
 
-#: cheeselooks/app.py:173
+#: cheeselooks/app.py:174
 msgid "Newest"
 msgstr "Neueste"
 
-#: cheeselooks/app.py:173
+#: cheeselooks/app.py:174
 msgid "Oldest"
 msgstr "Älteste"
 
-#: cheeselooks/app.py:173
+#: cheeselooks/app.py:174
 msgid "Z–A"
 msgstr "Z–A"
 
-#: cheeselooks/app.py:224 cheeselooks/app.py:1235 cheeselooks/app.py:803 settings._RULES
+#: cheeselooks/app.py:225 cheeselooks/app.py:1257 cheeselooks/app.py:825 settings._RULES
 msgid "Colors"
 msgstr "Farben"
 
-#: cheeselooks/app.py:224 settings._RULES
+#: cheeselooks/app.py:225 settings._RULES
 msgid "Full"
 msgstr "Vollständig"
 
-#: cheeselooks/app.py:224 settings._RULES
+#: cheeselooks/app.py:225 settings._RULES
 msgid "Off"
 msgstr "Aus"
 
-#: cheeselooks/app.py:316
+#: cheeselooks/app.py:326
 msgid "Preview: nothing changes on the desktop until Apply"
 msgstr "Vorschau: Auf dem Desktop ändert sich nichts bis Anwenden"
 
-#: cheeselooks/app.py:317
+#: cheeselooks/app.py:327
 msgid "Apply"
 msgstr "Anwenden"
 
-#: cheeselooks/app.py:322
+#: cheeselooks/app.py:332
 msgid "Revert"
 msgstr "Rückgängig"
 
-#: cheeselooks/app.py:324
+#: cheeselooks/app.py:334
 msgid "Put the previous theme back on the desktop (your settings here stay)"
 msgstr ""
 "Das vorherige Thema auf dem Desktop wiederherstellen (deine Einstellungen hier bleiben)"
 
-#: cheeselooks/app.py:421
+#: cheeselooks/app.py:443
 msgid "Scan my apps"
 msgstr "Meine Anwendungen prüfen"
 
-#: cheeselooks/app.py:422
+#: cheeselooks/app.py:444
 msgid ""
 "Lists the apps on this computer by kind, and whether Theme Roller reaches them: the answer to “why doesn't this app match?”"
 msgstr ""
 "Listet die Anwendungen auf diesem Rechner nach Art auf und ob Theme Roller sie erreicht: die Antwort auf „Warum passt diese Anwendung nicht?“"
 
-#: cheeselooks/app.py:469
+#: cheeselooks/app.py:491
 #, python-brace-format
 msgid "Reset {tab}"
 msgstr "{tab} zurücksetzen"
 
-#: cheeselooks/app.py:474
+#: cheeselooks/app.py:496
 msgid "Reset All to Theme Defaults"
 msgstr "Alles zurücksetzen"
 
-#: cheeselooks/app.py:499
+#: cheeselooks/app.py:521
 msgid "No stripes"
 msgstr "Keine Streifen"
 
-#: cheeselooks/app.py:655
+#: cheeselooks/app.py:677
 msgid "Save Theme…"
 msgstr "Speichern…"
 
-#: cheeselooks/app.py:656
+#: cheeselooks/app.py:678
 msgid "Keep your Custom settings as a theme with its own name"
 msgstr "Deine Einstellungen aus Eigenes als Thema mit eigenem Namen behalten"
 
-#: cheeselooks/app.py:658 cheeselooks/app.py:1753
+#: cheeselooks/app.py:680 cheeselooks/app.py:1818
 msgid "Duplicate"
 msgstr "Duplizieren"
 
-#: cheeselooks/app.py:659
+#: cheeselooks/app.py:681
 msgid "Save a copy of the selected theme as one of your themes"
 msgstr "Eine Kopie des gewählten Themas als eines deiner Themen speichern"
 
-#: cheeselooks/app.py:661 cheeselooks/app.py:1773
+#: cheeselooks/app.py:683 cheeselooks/app.py:1838
 msgid "Rename"
 msgstr "Umbenennen"
 
-#: cheeselooks/app.py:662
+#: cheeselooks/app.py:684
 msgid "Rename one of your themes (built-in themes keep their names)"
 msgstr ""
 "Eines deiner Themen umbenennen (mitgelieferte Themen behalten ihren Namen)"
 
-#: cheeselooks/app.py:664 cheeselooks/app.py:1195
+#: cheeselooks/app.py:686 cheeselooks/app.py:1217
 msgid "Delete"
 msgstr "Löschen"
 
-#: cheeselooks/app.py:698
+#: cheeselooks/app.py:720
 msgid "Sort:"
 msgstr "Sortieren:"
 
-#: cheeselooks/app.py:718
+#: cheeselooks/app.py:740
 msgid "Your theme"
 msgstr "Dein Thema"
 
-#: cheeselooks/app.py:733
+#: cheeselooks/app.py:755
 msgid "Your latest changes"
 msgstr "Deine letzten Änderungen"
 
-#: cheeselooks/app.py:733
+#: cheeselooks/app.py:755
 #, python-brace-format
 msgid "Your latest changes, based on {theme}"
 msgstr "Deine letzten Änderungen, basierend auf {theme}"
 
-#: cheeselooks/app.py:775
+#: cheeselooks/app.py:797
 msgid "Your style"
 msgstr "Dein Stil"
 
-#: cheeselooks/app.py:786
+#: cheeselooks/app.py:808
 msgid "Theme default"
 msgstr "Vorgabe des Themas"
 
-#: cheeselooks/app.py:855
+#: cheeselooks/app.py:877
 msgid "Off: switch it on in the Integration tab"
 msgstr "Aus: auf dem Reiter Integration einschalten"
 
-#: cheeselooks/app.py:855
+#: cheeselooks/app.py:877
 msgid "On"
 msgstr "An"
 
-#: cheeselooks/app.py:857
+#: cheeselooks/app.py:879
 msgid "Follow the theme on their own"
 msgstr "Folgen dem Thema von selbst"
 
-#: cheeselooks/app.py:857
+#: cheeselooks/app.py:879
 msgid "Nothing to do: they always match."
 msgstr "Nichts zu tun: Sie passen immer."
 
-#: cheeselooks/app.py:859
+#: cheeselooks/app.py:881
 msgid "Colors on"
 msgstr "Farben an"
 
-#: cheeselooks/app.py:859
+#: cheeselooks/app.py:881
 msgid "Off: set GNOME-style apps to Colors in the Integration tab"
 msgstr ""
 "Aus: Anwendungen im GNOME-Stil auf dem Reiter Integration auf Farben stellen"
 
-#: cheeselooks/app.py:860
+#: cheeselooks/app.py:882
 msgid "Colors and full styling on"
 msgstr "Farben und vollständiges Aussehen an"
 
-#: cheeselooks/app.py:863
+#: cheeselooks/app.py:885
 msgid ". GNOME-style ones also need GNOME-style apps set to Colors"
 msgstr ""
 ". Solche im GNOME-Stil brauchen außerdem Anwendungen im GNOME-Stil auf Farben"
 
-#: cheeselooks/app.py:864
+#: cheeselooks/app.py:886
 msgid "Qt apps"
 msgstr "Qt-Anwendungen"
 
-#: cheeselooks/app.py:865
+#: cheeselooks/app.py:887
 msgid "Text editors"
 msgstr "Texteditoren"
 
-#: cheeselooks/app.py:866
+#: cheeselooks/app.py:888
 msgid "Run in a terminal"
 msgstr "Laufen in einem Terminal"
 
-#: cheeselooks/app.py:866
+#: cheeselooks/app.py:888
 msgid "They use the terminal's colors (Terminal tab)."
 msgstr "Sie nutzen die Farben des Terminals (Reiter Terminal)."
 
-#: cheeselooks/app.py:867
+#: cheeselooks/app.py:889
 msgid "They draw their own look; no theme reaches them."
 msgstr "Sie zeichnen ihr eigenes Aussehen; kein Thema erreicht sie."
 
-#: cheeselooks/app.py:867
+#: cheeselooks/app.py:889
 msgid "Web-based apps"
 msgstr "Webbasierte Anwendungen"
 
-#: cheeselooks/app.py:868
+#: cheeselooks/app.py:890
 msgid "Couldn't tell"
 msgstr "Nicht erkennbar"
 
-#: cheeselooks/app.py:868
+#: cheeselooks/app.py:890
 msgid "Many of these draw their own look."
 msgstr "Viele davon zeichnen ihr eigenes Aussehen."
 
-#: cheeselooks/app.py:870
+#: cheeselooks/app.py:892
 msgid "Your apps"
 msgstr "Deine Anwendungen"
 
-#: cheeselooks/app.py:871
+#: cheeselooks/app.py:893
 msgid "Close"
 msgstr "Schließen"
 
-#: cheeselooks/app.py:876
+#: cheeselooks/app.py:898
 #, python-brace-format
 msgid ""
 "{count} apps in your menu, by kind. Changes show after Apply, in apps opened afterwards."
 msgstr ""
 "{count} Anwendungen in deinem Menü, nach Art. Änderungen zeigen sich nach Anwenden, in danach geöffneten Anwendungen."
 
-#: cheeselooks/app.py:901
+#: cheeselooks/app.py:923
 msgid "Take colors out of apps"
 msgstr "Farben aus Anwendungen entfernen"
 
-#: cheeselooks/app.py:905
+#: cheeselooks/app.py:927
 msgid ""
 "Theme Roller's colors are out of your apps. Reopen open apps. The next Apply puts them back."
 msgstr ""
 "Die Farben von Theme Roller sind aus deinen Anwendungen entfernt. Öffne offene Anwendungen neu. Das nächste Anwenden bringt sie zurück."
 
-#: cheeselooks/app.py:908
+#: cheeselooks/app.py:930
 msgid ""
 "Removes Theme Roller's colors from all apps now. Your settings and the theme stay; the next Apply puts the colors back."
 msgstr ""
 "Entfernt die Farben von Theme Roller jetzt aus allen Anwendungen. Deine Einstellungen und das Thema bleiben; das nächste Anwenden bringt die Farben zurück."
 
-#: cheeselooks/app.py:917
+#: cheeselooks/app.py:939
 msgid "Colors from"
 msgstr "Farben aus"
 
-#: cheeselooks/app.py:924
+#: cheeselooks/app.py:946
 msgid "Wallpaper"
 msgstr "Hintergrundbild"
 
-#: cheeselooks/app.py:925
+#: cheeselooks/app.py:947
 msgid "Take an accent from your desktop wallpaper"
 msgstr "Eine Akzentfarbe aus deinem Hintergrundbild nehmen"
 
-#: cheeselooks/app.py:927
+#: cheeselooks/app.py:949
 msgid "Image…"
 msgstr "Bild…"
 
-#: cheeselooks/app.py:928
+#: cheeselooks/app.py:950
 msgid "Take an accent from any picture"
 msgstr "Eine Akzentfarbe aus einem beliebigen Bild nehmen"
 
-#: cheeselooks/app.py:946
+#: cheeselooks/app.py:968
 msgid "Take colors from a picture"
 msgstr "Farben aus einem Bild nehmen"
 
-#: cheeselooks/app.py:947 cheeselooks/app.py:1100 cheeselooks/app.py:1664 cheeselooks/app.py:1722
+#: cheeselooks/app.py:969 cheeselooks/app.py:1122 cheeselooks/app.py:1729 cheeselooks/app.py:1787
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: cheeselooks/app.py:947
+#: cheeselooks/app.py:969
 msgid "Use"
 msgstr "Verwenden"
 
-#: cheeselooks/app.py:949
+#: cheeselooks/app.py:971
 msgid "Pictures"
 msgstr "Bilder"
 
-#: cheeselooks/app.py:961
+#: cheeselooks/app.py:983
 msgid ""
 "Couldn't find your wallpaper (Cinnamon's background setting has no picture)."
 msgstr ""
 "Dein Hintergrundbild wurde nicht gefunden (Cinnamons Hintergrund hat kein Bild)."
 
-#: cheeselooks/app.py:966
+#: cheeselooks/app.py:988
 #, python-brace-format
 msgid "Couldn't read {file}: {problem}"
 msgstr "{file} konnte nicht gelesen werden: {problem}"
 
-#: cheeselooks/app.py:972
+#: cheeselooks/app.py:994
 #, python-brace-format
 msgid "Use {color} as the accent"
 msgstr "{color} als Akzentfarbe verwenden"
 
-#: cheeselooks/app.py:987
+#: cheeselooks/app.py:1009
 #, python-brace-format
 msgid "Accent from {file}. Or click another color."
 msgstr "Akzentfarbe aus {file}. Oder klicke eine andere Farbe an."
 
-#: cheeselooks/app.py:989
+#: cheeselooks/app.py:1011
 #, python-brace-format
 msgid "{file} has no colors vivid enough for an accent."
 msgstr "{file} hat keine Farben, die kräftig genug für eine Akzentfarbe sind."
 
-#: cheeselooks/app.py:1015
+#: cheeselooks/app.py:1037
 msgid ""
 "The xl-Cheeselooks theme maker for Linux Mint and the Cinnamon desktop: your colors and shapes, drawn by a style, for GTK 3 and GTK 4 apps, libadwaita apps, the Cinnamon panel and menus, and the window borders."
 msgstr ""
 "Der Ersteller des Themas xl-Cheeselooks für Linux Mint und den Cinnamon-Desktop: deine Farben und Formen, gezeichnet von einem Stil, für GTK-3- und GTK-4-Anwendungen, libadwaita-Anwendungen, die Cinnamon-Leiste und -Menüs und die Fensterrahmen."
 
-#: cheeselooks/app.py:1019
+#: cheeselooks/app.py:1041
 msgid "Website"
 msgstr "Webseite"
 
-#: cheeselooks/app.py:1023
+#: cheeselooks/app.py:1045
 #, python-brace-format
 msgid "Enjoying {app}? It's free and always will be."
 msgstr "Gefällt dir {app}? Es ist kostenlos und wird es immer bleiben."
 
-#: cheeselooks/app.py:1024
+#: cheeselooks/app.py:1046
 msgid "Leave a tip ☕"
 msgstr "Trinkgeld geben ☕"
 
-#: cheeselooks/app.py:1029
+#: cheeselooks/app.py:1051
 msgid "Developed with the help of Claude, an AI assistant by Anthropic"
 msgstr "Entwickelt mit Hilfe von Claude, einem KI-Assistenten von Anthropic"
 
-#: cheeselooks/app.py:1030
+#: cheeselooks/app.py:1052
 msgid ""
 "This program comes with absolutely no warranty.\n"
 "See the <a href='https://www.gnu.org/licenses/gpl-3.0.html'>GNU General Public License, version 3 or later</a> for details."
@@ -673,495 +673,501 @@ msgstr ""
 "Dieses Programm kommt ohne jegliche Garantie.\n"
 "Einzelheiten in der <a href='https://www.gnu.org/licenses/gpl-3.0.html'>GNU General Public License, Version 3 oder neuer</a>."
 
-#: cheeselooks/app.py:1035
+#: cheeselooks/app.py:1057
 msgid "Remove from my desktop…"
 msgstr "Vom Desktop entfernen…"
 
-#: cheeselooks/app.py:1036
+#: cheeselooks/app.py:1058
 msgid ""
 "Before uninstalling Theme Roller: puts Mint's default theme back and takes Theme Roller's colors out of your apps"
 msgstr ""
 "Vor dem Deinstallieren von Theme Roller: stellt Mints Standardthema wieder her und entfernt die Farben von Theme Roller aus deinen Anwendungen"
 
-#: cheeselooks/app.py:1047
+#: cheeselooks/app.py:1069
 msgid "Remove Theme Roller from your desktop?"
 msgstr "Theme Roller vom Desktop entfernen?"
 
-#: cheeselooks/app.py:1048
+#: cheeselooks/app.py:1070
 msgid ""
 "Mint's default theme comes back, Theme Roller's colors leave your apps, and the theme watcher stops starting at login. Your settings and your own themes stay, so you can pick up where you left off. Do this before uninstalling Theme Roller."
 msgstr ""
 "Mints Standardthema kommt zurück, die Farben von Theme Roller verschwinden aus deinen Anwendungen und der Themenwächter startet nicht mehr bei der Anmeldung. Deine Einstellungen und eigenen Themen bleiben, sodass du weitermachen kannst, wo du aufgehört hast. Tu das vor dem Deinstallieren von Theme Roller."
 
-#: cheeselooks/app.py:1056
+#: cheeselooks/app.py:1078
 msgid "Removing… the desktop flickers once while it reloads."
 msgstr "Wird entfernt… der Desktop flackert einmal beim Neuladen."
 
-#: cheeselooks/app.py:1062
+#: cheeselooks/app.py:1084
 msgid ""
 "Theme Roller is off your desktop. You can uninstall it now; Apply puts it back."
 msgstr ""
 "Theme Roller ist vom Desktop entfernt. Du kannst es jetzt deinstallieren; Anwenden bringt es zurück."
 
-#: cheeselooks/app.py:1065
+#: cheeselooks/app.py:1087
 #, python-brace-format
 msgid "Remove failed: {problem}"
 msgstr "Entfernen fehlgeschlagen: {problem}"
 
-#: cheeselooks/app.py:1080
+#: cheeselooks/app.py:1102
 msgid "Create a starter style…"
 msgstr "Startstil erstellen…"
 
-#: cheeselooks/app.py:1082
+#: cheeselooks/app.py:1104
 msgid "Check a style sheet for issues…"
 msgstr "Stildatei auf Fehler prüfen…"
 
-#: cheeselooks/app.py:1083
+#: cheeselooks/app.py:1105
 msgid ""
 "Pick a style.toml: it's checked as Theme Roller reads it, and any problems are listed with what to fix"
 msgstr ""
 "Wähle eine style.toml: Sie wird so geprüft, wie Theme Roller sie liest, und alle Probleme werden mit dem, was zu korrigieren ist, aufgelistet"
 
-#: cheeselooks/app.py:1090
+#: cheeselooks/app.py:1112
 msgid "Full documentation (online)"
 msgstr "Vollständige Dokumentation (online)"
 
-#: cheeselooks/app.py:1098
+#: cheeselooks/app.py:1120
 msgid "Check a style sheet"
 msgstr "Stildatei prüfen"
 
-#: cheeselooks/app.py:1100 cheeselooks/app.py:1219
+#: cheeselooks/app.py:1122 cheeselooks/app.py:1241
 msgid "Check"
 msgstr "Prüfen"
 
-#: cheeselooks/app.py:1102
+#: cheeselooks/app.py:1124
 msgid "Style sheets (style.toml)"
 msgstr "Stildateien (style.toml)"
 
-#: cheeselooks/app.py:1115
+#: cheeselooks/app.py:1137
 #, python-brace-format
 msgid "“{style}” looks good"
 msgstr "„{style}“ sieht gut aus"
 
-#: cheeselooks/app.py:1116
+#: cheeselooks/app.py:1138
 #, python-brace-format
 msgid "Warning: {problem}"
 msgstr "Warnung: {problem}"
 
-#: cheeselooks/app.py:1118
+#: cheeselooks/app.py:1140
 msgid "No problems found. Pick it on the Style tab to use it."
 msgstr ""
 "Keine Probleme gefunden. Wähle ihn auf dem Reiter Stil, um ihn zu nutzen."
 
-#: cheeselooks/app.py:1120
+#: cheeselooks/app.py:1142
 #, python-brace-format
 msgid "Problems to fix: {count}"
 msgstr "Zu behebende Probleme: {count}"
 
-#: cheeselooks/app.py:1121
+#: cheeselooks/app.py:1143
 msgid "Fix these in the file, then check it again."
 msgstr "Behebe sie in der Datei und prüfe sie dann erneut."
 
-#: cheeselooks/app.py:1133
+#: cheeselooks/app.py:1155
 msgid "the style needs a name"
 msgstr "der Stil braucht einen Namen"
 
-#: cheeselooks/app.py:1135
+#: cheeselooks/app.py:1157
 #, python-brace-format
 msgid "names can be up to {count} characters"
 msgstr "Namen dürfen bis zu {count} Zeichen lang sein"
 
-#: cheeselooks/app.py:1137
+#: cheeselooks/app.py:1159
 msgid "names can't contain / or start with a dot"
 msgstr "Namen dürfen kein / enthalten und nicht mit einem Punkt beginnen"
 
-#: cheeselooks/app.py:1142
+#: cheeselooks/app.py:1164
 #, python-brace-format
 msgid "there's already a style called {name}"
 msgstr "es gibt bereits einen Stil namens {name}"
 
-#: cheeselooks/app.py:1143
+#: cheeselooks/app.py:1165
 msgid "Create Style"
 msgstr "Stil erstellen"
 
-#: cheeselooks/app.py:1143
+#: cheeselooks/app.py:1165
 msgid "Give your new style a good name."
 msgstr "Gib deinem neuen Stil einen guten Namen."
 
-#: cheeselooks/app.py:1143
+#: cheeselooks/app.py:1165
 msgid "My Style"
 msgstr "Mein Stil"
 
-#: cheeselooks/app.py:1144
+#: cheeselooks/app.py:1166
 msgid "Create"
 msgstr "Erstellen"
 
-#: cheeselooks/app.py:1152
+#: cheeselooks/app.py:1174
 #, python-brace-format
 msgid "Created {file}. Edit it, then pick it on the Style tab."
 msgstr ""
 "{file} erstellt. Bearbeite sie und wähle den Stil dann auf dem Reiter Stil."
 
-#: cheeselooks/app.py:1160
+#: cheeselooks/app.py:1182
 msgid ""
 "Share a theme as one file (.xltheme). It holds every setting, the theme's name, the version of Theme Roller it was made with, and your style when the theme uses one of your own, so the person importing it gets exactly your look."
 msgstr ""
 "Teile ein Thema als eine einzige Datei (.xltheme). Sie enthält jede Einstellung, den Namen des Themas, die Version von Theme Roller, mit der es erstellt wurde, und deinen Stil, wenn das Thema einen eigenen nutzt, sodass die importierende Person genau dein Aussehen bekommt."
 
-#: cheeselooks/app.py:1164
+#: cheeselooks/app.py:1186
 msgid "Export the current theme…"
 msgstr "Aktuelles Thema exportieren…"
 
-#: cheeselooks/app.py:1166
+#: cheeselooks/app.py:1188
 msgid "Import a theme…"
 msgstr "Thema importieren…"
 
-#: cheeselooks/app.py:1179
+#: cheeselooks/app.py:1201
 msgid "Preview"
 msgstr "Vorschau"
 
-#: cheeselooks/app.py:1184
+#: cheeselooks/app.py:1206
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: cheeselooks/app.py:1184
+#: cheeselooks/app.py:1206
 msgid "File"
 msgstr "Datei"
 
-#: cheeselooks/app.py:1184
+#: cheeselooks/app.py:1206
 msgid "View"
 msgstr "Ansicht"
 
-#: cheeselooks/app.py:1187
+#: cheeselooks/app.py:1209
 msgid "Open"
 msgstr "Öffnen"
 
-#: cheeselooks/app.py:1187
+#: cheeselooks/app.py:1209
 msgid "Quit"
 msgstr "Beenden"
 
-#: cheeselooks/app.py:1194
+#: cheeselooks/app.py:1216
 msgid "Button"
 msgstr "Knopf"
 
-#: cheeselooks/app.py:1194
+#: cheeselooks/app.py:1216
 msgid "Suggested"
 msgstr "Empfohlen"
 
-#: cheeselooks/app.py:1201 cheeselooks/app.py:1202
+#: cheeselooks/app.py:1223 cheeselooks/app.py:1224
 msgid "Toggled"
 msgstr "Gedrückt"
 
-#: cheeselooks/app.py:1202 cheeselooks/app.py:1197
+#: cheeselooks/app.py:1224 cheeselooks/app.py:1219
 #, python-brace-format
 msgid "A tooltip on {button}"
 msgstr "Eine Kurzinfo zu {button}"
 
-#: cheeselooks/app.py:1207
+#: cheeselooks/app.py:1229
 msgid "Center"
 msgstr "Mitte"
 
-#: cheeselooks/app.py:1207 settings._RULES
+#: cheeselooks/app.py:1229 settings._RULES
 msgid "Left"
 msgstr "Links"
 
-#: cheeselooks/app.py:1207 settings._RULES
+#: cheeselooks/app.py:1229 settings._RULES
 msgid "Right"
 msgstr "Rechts"
 
-#: cheeselooks/app.py:1211
+#: cheeselooks/app.py:1233
 msgid "Some text"
 msgstr "Etwas Text"
 
-#: cheeselooks/app.py:1215
+#: cheeselooks/app.py:1237
 msgid "Tooltip"
 msgstr "Kurzinfo"
 
-#: cheeselooks/app.py:1220
+#: cheeselooks/app.py:1242
 msgid "Radio"
 msgstr "Option"
 
-#: cheeselooks/app.py:1235
+#: cheeselooks/app.py:1257
 msgid "Advanced"
 msgstr "Erweitert"
 
-#: cheeselooks/app.py:1235
+#: cheeselooks/app.py:1257
 msgid "General"
 msgstr "Allgemein"
 
-#: cheeselooks/app.py:1237
+#: cheeselooks/app.py:1259
 msgid "Fifth row"
 msgstr "Fünfte Zeile"
 
-#: cheeselooks/app.py:1237
+#: cheeselooks/app.py:1259
 msgid "First row"
 msgstr "Erste Zeile"
 
-#: cheeselooks/app.py:1237
+#: cheeselooks/app.py:1259
 msgid "Fourth row"
 msgstr "Vierte Zeile"
 
-#: cheeselooks/app.py:1237
+#: cheeselooks/app.py:1259
 msgid "Selected row"
 msgstr "Gewählte Zeile"
 
-#: cheeselooks/app.py:1237
+#: cheeselooks/app.py:1259
 msgid "Third row"
 msgstr "Dritte Zeile"
 
-#: cheeselooks/app.py:1238
+#: cheeselooks/app.py:1260
 msgid "Eighth row"
 msgstr "Achte Zeile"
 
-#: cheeselooks/app.py:1238
+#: cheeselooks/app.py:1260
 msgid "Seventh row"
 msgstr "Siebte Zeile"
 
-#: cheeselooks/app.py:1238
+#: cheeselooks/app.py:1260
 msgid "Sixth row"
 msgstr "Sechste Zeile"
 
-#: cheeselooks/app.py:1246
+#: cheeselooks/app.py:1268
 msgid "Desktop  Documents  Music"
 msgstr "Schreibtisch  Dokumente  Musik"
 
-#: cheeselooks/app.py:1263
+#: cheeselooks/app.py:1285
 msgid "Accessories"
 msgstr "Zubehör"
 
-#: cheeselooks/app.py:1263
+#: cheeselooks/app.py:1285
 msgid "Favorites"
 msgstr "Favoriten"
 
-#: cheeselooks/app.py:1263
+#: cheeselooks/app.py:1285
 msgid "Graphics"
 msgstr "Grafik"
 
-#: cheeselooks/app.py:1264
+#: cheeselooks/app.py:1286
 msgid "Calculator"
 msgstr "Rechner"
 
-#: cheeselooks/app.py:1264 cheeselooks/app.py:1286
+#: cheeselooks/app.py:1286 cheeselooks/app.py:1308
 msgid "Files"
 msgstr "Dateien"
 
-#: cheeselooks/app.py:1275
+#: cheeselooks/app.py:1297
 msgid "Panel and menu (drawn preview)"
 msgstr "Leiste und Menü (gezeichnete Vorschau)"
 
-#: cheeselooks/app.py:1283
+#: cheeselooks/app.py:1305
 msgid "Menu"
 msgstr "Menü"
 
-#: cheeselooks/app.py:1286
+#: cheeselooks/app.py:1308
 msgid "Browser"
 msgstr "Browser"
 
-#: cheeselooks/app.py:1368
+#: cheeselooks/app.py:1433
 #, python-brace-format
 msgid "Can't preview: {problem}"
 msgstr "Keine Vorschau möglich: {problem}"
 
-#: cheeselooks/app.py:1390
+#: cheeselooks/app.py:1455
 #, python-brace-format
 msgid "Preview CSS problem: {problem}"
 msgstr "CSS-Problem in der Vorschau: {problem}"
 
-#: cheeselooks/app.py:1545
+#: cheeselooks/app.py:1610
 msgid "None"
 msgstr "Keine"
 
-#: cheeselooks/app.py:1546
+#: cheeselooks/app.py:1611
 msgid "Follow theme"
 msgstr "Thema folgen"
 
-#: cheeselooks/app.py:1555 settings._RULES
+#: cheeselooks/app.py:1620 settings._RULES
 msgid "Custom"
 msgstr "Eigenes"
 
-#: cheeselooks/app.py:1557
+#: cheeselooks/app.py:1622
 #, python-brace-format
 msgid "<b>{name}</b> folder style"
 msgstr "Ordnerstil <b>{name}</b>"
 
-#: cheeselooks/app.py:1603
+#: cheeselooks/app.py:1668
 #, python-brace-format
 msgid "Put every tab back to {theme}. Your latest changes stay in Custom."
 msgstr ""
 "Alle Reiter auf {theme} zurücksetzen. Deine letzten Änderungen bleiben in Eigenes."
 
-#: cheeselooks/app.py:1606
+#: cheeselooks/app.py:1671
 #, python-brace-format
 msgid ""
 "Put Global back to {theme}. Other tabs keep what you set there, but colors on “Follow theme” and shapes that follow Global change with it."
 msgstr ""
 "Global auf {theme} zurücksetzen. Andere Reiter behalten, was du dort eingestellt hast, aber Farben auf „Thema folgen“ und Formen, die Global folgen, ändern sich mit."
 
-#: cheeselooks/app.py:1610
+#: cheeselooks/app.py:1675
 #, python-brace-format
 msgid "Put {tab} back to {theme} (other tabs stay as they are)"
 msgstr "{tab} auf {theme} zurücksetzen (andere Reiter bleiben, wie sie sind)"
 
-#: cheeselooks/app.py:1640
+#: cheeselooks/app.py:1705
 #, python-brace-format
 msgid "Theme: {theme}"
 msgstr "Thema: {theme}"
 
-#: cheeselooks/app.py:1652
+#: cheeselooks/app.py:1717
 #, python-brace-format
 msgid "Every tab reset to {theme}. Your latest changes are still in Custom."
 msgstr ""
 "Alle Reiter auf {theme} zurückgesetzt. Deine letzten Änderungen sind weiter in Eigenes."
 
-#: cheeselooks/app.py:1659
+#: cheeselooks/app.py:1724
 #, python-brace-format
 msgid "{tab} reset to {theme}."
 msgstr "{tab} auf {theme} zurückgesetzt."
 
-#: cheeselooks/app.py:1663
+#: cheeselooks/app.py:1728
 msgid "Save Theme"
 msgstr "Thema speichern"
 
-#: cheeselooks/app.py:1664 cheeselooks/app.py:1187
+#: cheeselooks/app.py:1729 cheeselooks/app.py:1209
 msgid "Save"
 msgstr "Speichern"
 
-#: cheeselooks/app.py:1669
+#: cheeselooks/app.py:1734
 #, python-brace-format
 msgid ""
 "Name your theme. It uses the style “{style}” and all your current settings."
 msgstr ""
 "Gib deinem Thema einen Namen. Es nutzt den Stil „{style}“ und alle deine aktuellen Einstellungen."
 
-#: cheeselooks/app.py:1687
+#: cheeselooks/app.py:1752
 #, python-brace-format
 msgid "{theme} copy"
 msgstr "{theme} (Kopie)"
 
-#: cheeselooks/app.py:1690
+#: cheeselooks/app.py:1755
 #, python-brace-format
 msgid ""
 "Up to {count} characters. Built-in themes can't be replaced; your own can."
 msgstr ""
 "Bis zu {count} Zeichen. Mitgelieferte Themen lassen sich nicht ersetzen, deine eigenen schon."
 
-#: cheeselooks/app.py:1703
+#: cheeselooks/app.py:1768
 #, python-brace-format
 msgid "Replace your theme “{theme}”?"
 msgstr "Dein Thema „{theme}“ ersetzen?"
 
-#: cheeselooks/app.py:1713
+#: cheeselooks/app.py:1778
 #, python-brace-format
 msgid "Saved the theme “{theme}”."
 msgstr "Thema „{theme}“ gespeichert."
 
-#: cheeselooks/app.py:1722
+#: cheeselooks/app.py:1787
 msgid "OK"
 msgstr "OK"
 
-#: cheeselooks/app.py:1751
+#: cheeselooks/app.py:1816
 msgid "Duplicate Theme"
 msgstr "Thema duplizieren"
 
-#: cheeselooks/app.py:1752
+#: cheeselooks/app.py:1817
 #, python-brace-format
 msgid "A copy of “{theme}”, as one of your themes:"
 msgstr "Eine Kopie von „{theme}“, als eines deiner Themen:"
 
-#: cheeselooks/app.py:1762
+#: cheeselooks/app.py:1827
 #, python-brace-format
 msgid "Duplicated “{theme}” as “{copy}”."
 msgstr "„{theme}“ als „{copy}“ dupliziert."
 
-#: cheeselooks/app.py:1772
+#: cheeselooks/app.py:1837
 #, python-brace-format
 msgid "A new name for “{theme}”:"
 msgstr "Ein neuer Name für „{theme}“:"
 
-#: cheeselooks/app.py:1772
+#: cheeselooks/app.py:1837
 msgid "Rename Theme"
 msgstr "Thema umbenennen"
 
-#: cheeselooks/app.py:1791
+#: cheeselooks/app.py:1856
 #, python-brace-format
 msgid "Renamed “{old}” to “{new}”."
 msgstr "„{old}“ in „{new}“ umbenannt."
 
-#: cheeselooks/app.py:1797
+#: cheeselooks/app.py:1862
 #, python-brace-format
 msgid "Delete your theme “{theme}”? Its style stays installed."
 msgstr "Dein Thema „{theme}“ löschen? Sein Stil bleibt installiert."
 
-#: cheeselooks/app.py:1813 cheeselooks/app.py:1681
+#: cheeselooks/app.py:1878 cheeselooks/app.py:1746
 msgid "My theme"
 msgstr "Mein Thema"
 
-#: cheeselooks/app.py:1815
+#: cheeselooks/app.py:1880
 msgid "Export theme"
 msgstr "Thema exportieren"
 
-#: cheeselooks/app.py:1824
+#: cheeselooks/app.py:1889
 #, python-brace-format
 msgid "Exported “{theme}” to {file}"
 msgstr "„{theme}“ nach {file} exportiert"
 
-#: cheeselooks/app.py:1826
+#: cheeselooks/app.py:1891
 #, python-brace-format
 msgid "Export failed: {problem}"
 msgstr "Export fehlgeschlagen: {problem}"
 
-#: cheeselooks/app.py:1830
+#: cheeselooks/app.py:1895
 msgid "Import theme"
 msgstr "Thema importieren"
 
-#: cheeselooks/app.py:1833
+#: cheeselooks/app.py:1898
 msgid "Theme Roller themes"
 msgstr "Theme-Roller-Themen"
 
-#: cheeselooks/app.py:1843
+#: cheeselooks/app.py:1908
 #, python-brace-format
 msgid "Imported “{theme}”."
 msgstr "„{theme}“ importiert."
 
-#: cheeselooks/app.py:1846
+#: cheeselooks/app.py:1911
 #, python-brace-format
 msgid "Import failed: {problem}"
 msgstr "Import fehlgeschlagen: {problem}"
 
-#: cheeselooks/app.py:1851
+#: cheeselooks/app.py:1916
 msgid "Applying… the desktop flickers once while it reloads."
 msgstr "Wird angewendet… der Desktop flackert einmal beim Neuladen."
 
-#: cheeselooks/app.py:1862
+#: cheeselooks/app.py:1927
 #, python-brace-format
 msgid "Apply failed: {problem}"
 msgstr "Anwenden fehlgeschlagen: {problem}"
 
-#: cheeselooks/app.py:1879
+#: cheeselooks/app.py:1945
 #, python-brace-format
 msgid "“{theme}” is on the desktop. Revert puts the previous theme back."
 msgstr ""
 "„{theme}“ ist auf dem Desktop. Rückgängig holt das vorherige Thema zurück."
 
-#: cheeselooks/app.py:1894
+#: cheeselooks/app.py:1966
 msgid "Some older apps' title bars change at your next login."
 msgstr ""
 "Bei einigen älteren Apps ändern sich die Titelleisten erst bei der nächsten Anmeldung."
 
-#: cheeselooks/app.py:1898
+#: cheeselooks/app.py:1971
+#, python-brace-format
+msgid "These title bars change at your next login: {apps}"
+msgstr ""
+"Diese Titelleisten ändern sich erst bei der nächsten Anmeldung: {apps}"
+
+#: cheeselooks/app.py:1976
 msgid "Qt apps now match your theme"
 msgstr "Qt-Anwendungen passen jetzt zu deinem Thema"
 
-#: cheeselooks/app.py:1911
+#: cheeselooks/app.py:1989
 msgid "Reverting… the desktop flickers once while it reloads."
 msgstr "Wird rückgängig gemacht… der Desktop flackert einmal beim Neuladen."
 
-#: cheeselooks/app.py:1918
+#: cheeselooks/app.py:1996
 #, python-brace-format
 msgid "Revert failed: {problem}"
 msgstr "Rückgängig fehlgeschlagen: {problem}"
 
-#: cheeselooks/app.py:1926
+#: cheeselooks/app.py:2005
 msgid ""
 "The previous theme is back on the desktop. Your settings here are unchanged."
 msgstr ""

@@ -90,6 +90,36 @@ def wayland() -> bool:
     return os.environ.get("XDG_SESSION_TYPE") == "wayland" or bool(os.environ.get("WAYLAND_DISPLAY"))
 
 
+# Cinnamon's own connections to Xwayland (it, its settings services, the desktop
+# icons): not apps with title bars
+_OWN_X_CLIENTS = ("cinnamon", "nemo-desktop", "ibus-x11", "xdg-desktop-portal", "gnome-keyring-daemon")
+
+
+def xwayland_apps() -> list[str] | None:
+    """Programs connected through Xwayland now (on Wayland, the older apps whose
+    title bars Cinnamon still draws, from the theme it loaded at login), by
+    program name, as xlsclients lists them; Cinnamon's own left out. None if
+    that can't be told (xlsclients, in x11-utils, isn't installed)."""
+    if not shutil.which("xlsclients"):
+        return None
+    try:
+        out = subprocess.run(["xlsclients"], capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if out.returncode != 0:
+        return None
+    apps: list[str] = []
+    for line in out.stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        prog = os.path.basename(parts[1])
+        if prog.startswith(_OWN_X_CLIENTS) or prog.startswith("csd-") or prog in apps:
+            continue
+        apps.append(prog)
+    return apps
+
+
 def restart_cinnamon() -> str:
     """Restart Cinnamon (like Ctrl+Alt+Esc): reloads everything, including the
     window borders, which Muffin otherwise only re-reads at the next login.
