@@ -1877,7 +1877,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         self._come_back()
         self.applied = data
         self.status.set_text(_("“{theme}” is on the desktop. Revert puts the previous theme back.")
-                             .format(theme=_(data["theme"]) if data["theme"] == themes.CUSTOM else data["theme"]))
+                             .format(theme=_(data["theme"]) if data["theme"] == themes.CUSTOM else data["theme"])
+                             + self._login_note(log))
         self.revert_btn.set_sensitive(True)
         self.revert_btn.show()
         self.update_buttons()
@@ -1886,6 +1887,11 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             qt.notice_shown()
             GLib.timeout_add(3200, self._qt_notice, notice)   # after the window comes back
         return False
+
+    @staticmethod
+    def _login_note(log: list[str]) -> str:
+        """On Wayland window borders can't reload until the next login: say so."""
+        return (" " + _("Window borders change at your next login.")) if reload.LOGIN_NEEDED in log else ""
 
     def _qt_notice(self, text: str) -> bool:
         d = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.INFO,
@@ -1917,7 +1923,8 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if restored:
             self.applied = restored
         self.revert_btn.hide()
-        self.status.set_text(_("The previous theme is back on the desktop. Your settings here are unchanged."))
+        self.status.set_text(_("The previous theme is back on the desktop. Your settings here are unchanged.")
+                             + self._login_note(log))
         self.update_buttons()
         return False
 

@@ -267,45 +267,46 @@ Theme Roller is een gratis programma dat het Cinnamon-bureaublad van Linux Mint 
 | 253 | Applying… the desktop flickers once while it reloads. | Bezig met toepassen… het bureaublad knippert één keer tijdens het herladen. |
 | 254 ✂ | Apply failed: {problem} | Toepassen mislukt: {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | ‘{theme}’ staat op het bureaublad. Terugdraaien zet het vorige thema terug. |
-| 256 ✂ | Qt apps now match your theme | Qt-apps passen nu bij je thema |
-| 257 | Reverting… the desktop flickers once while it reloads. | Bezig met terugdraaien… het bureaublad knippert één keer tijdens het herladen. |
-| 258 ✂ | Revert failed: {problem} | Terugdraaien mislukt: {problem} |
-| 259 | The previous theme is back on the desktop. Your settings here are unchanged. | Het vorige thema staat weer op het bureaublad. Je instellingen hier zijn niet veranderd. |
-| 260 ✂ | GNOME runtime | GNOME-runtime |
-| 261 ✂ | KDE runtime | KDE-runtime |
-| 262 | Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and highlights. Most editors' own schemes follow your theme too. Reopen them to see changes. | Geeft Xed, gedit en Meld een kleurenschema uit je thema, vooral voor syntaxiskleuren en markeringen. De eigen schema's van de meeste editors volgen je thema ook. Open ze opnieuw om de wijzigingen te zien. |
-| 263 ✂ | Racing stripes | Racestrepen |
-| 264 | Binders in your colors: the folder color follows your accent. Racing stripes are off until you pick a color for them; No stripes takes them off again. Every other icon stays as in your current icon theme. Apply to use them. | Ordners in jouw kleuren: de mapkleur volgt je accent. Racestrepen staan uit tot je er een kleur voor kiest; Geen strepen haalt ze weer weg. Alle andere pictogrammen blijven zoals in je huidige pictogramthema. Pas toe om ze te gebruiken. |
-| 265 ✂ | Wavy lines | Golflijnen |
-| 266 | Binders in your colors: the folder color follows your accent, and the wavy lines a darker shade of it. Choose either and both keep their colors from then on; Reset Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to use them. | Ordners in jouw kleuren: de mapkleur volgt je accent, en de golflijnen een donkerdere tint ervan. Kies er een en beide houden vanaf dan hun kleuren; Pictogrammen herstellen volgt het thema weer. Alle andere pictogrammen blijven zoals in je huidige pictogramthema. Pas toe om ze te gebruiken. |
-| 267 | Your Qt apps now use your theme's colors.<br><br>Your previous Qt setup is saved: {saved}.<br><br>Turning off Integration → Qt apps puts it back. | Je Qt-apps gebruiken nu de kleuren van je thema.<br><br>Je vorige Qt-instelling is bewaard: {saved}.<br><br>Integratie → Qt-apps uitzetten zet die terug. |
-| 268 | The first time, log out and back in to see your colors in Qt apps; after that, reopening them is enough. If you had your own Qt setup, it's saved and comes back when this is off. | Log de eerste keer uit en weer in om je kleuren in Qt-apps te zien; daarna is ze opnieuw openen genoeg. Had je een eigen Qt-instelling, dan wordt die bewaard en komt die terug als dit uit staat. |
-| 269 | Needs qt5ct: sudo apt install qt5ct | Heeft qt5ct nodig: sudo apt install qt5ct |
-| 270 | give the theme a name (not “Custom”) | geef het thema een naam (niet ‘Aangepast’) |
-| 271 | a theme's name can be up to {count} characters ({given} given) | de naam van een thema mag tot {count} tekens lang zijn ({given} opgegeven) |
-| 272 | “{theme}” is a built-in theme: choose another name | ‘{theme}’ is een ingebouwd thema: kies een andere naam |
-| 273 | you already have a theme called “{theme}” | je hebt al een thema met de naam ‘{theme}’ |
-| 274 | there's already a theme called “{theme}” | er is al een thema met de naam ‘{theme}’ |
-| 275 | couldn't find a free name for the copy | geen vrije naam voor de kopie gevonden |
-| 276 | built-in themes can't be renamed: duplicate it instead | ingebouwde thema's kunnen niet hernoemd worden: dupliceer het in plaats daarvan |
-| 277 | built-in themes can't be deleted | ingebouwde thema's kunnen niet verwijderd worden |
-| 278 | {file} isn't a Theme Roller theme file | {file} is geen themabestand van Theme Roller |
-| 279 | This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended. | Dit thema is gemaakt met een nieuwere Theme Roller ({version}). Een deel ervan ziet er misschien niet uit zoals bedoeld; Theme Roller bijwerken wordt aangeraden. |
-| 280 | You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style. | Je hebt al een stijlmap ‘{folder}’: die van jou is behouden, dus het thema gebruikt jouw kopie van die stijl. |
-| 281 | the theme file contains an unsafe path | het themabestand bevat een onveilig pad |
-| 282 | The theme's name was longer than {count} characters: shortened to “{theme}”. | De naam van het thema was langer dan {count} tekens: ingekort tot ‘{theme}’. |
-| 283 | A theme called “{theme}” already exists: imported as “{copy}”. | Er bestaat al een thema met de naam ‘{theme}’: geïmporteerd als ‘{copy}’. |
-| 284 ✂ | Chevrons | Punthaken |
-| 285 ✂ | Regular | Normaal |
-| 286 ✂ | Thin | Dun |
-| 287 ✂ | Icon Theme | Pictogramthema |
-| 288 ✂ | Marks | Tekens |
-| 289 ✂ | Bold | Vet |
-| 290 ✂ | Classic | Klassiek |
-| 291 ✂ | Dashed | Gestreept |
-| 292 ✂ | Dotted | Gestippeld |
-| 293 ✂ | Follow global | Algemeen volgen |
-| 294 ✂ | Light | Licht |
-| 295 ✂ | Overlay | Zwevend |
-| 296 ✂ | Separate colors | Eigen kleuren |
-| 297 ✂ | Solid | Doorgetrokken |
+| 256 | Window borders change at your next login. | De vensterranden veranderen bij de volgende keer aanmelden. |
+| 257 ✂ | Qt apps now match your theme | Qt-apps passen nu bij je thema |
+| 258 | Reverting… the desktop flickers once while it reloads. | Bezig met terugdraaien… het bureaublad knippert één keer tijdens het herladen. |
+| 259 ✂ | Revert failed: {problem} | Terugdraaien mislukt: {problem} |
+| 260 | The previous theme is back on the desktop. Your settings here are unchanged. | Het vorige thema staat weer op het bureaublad. Je instellingen hier zijn niet veranderd. |
+| 261 ✂ | GNOME runtime | GNOME-runtime |
+| 262 ✂ | KDE runtime | KDE-runtime |
+| 263 | Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and highlights. Most editors' own schemes follow your theme too. Reopen them to see changes. | Geeft Xed, gedit en Meld een kleurenschema uit je thema, vooral voor syntaxiskleuren en markeringen. De eigen schema's van de meeste editors volgen je thema ook. Open ze opnieuw om de wijzigingen te zien. |
+| 264 ✂ | Racing stripes | Racestrepen |
+| 265 | Binders in your colors: the folder color follows your accent. Racing stripes are off until you pick a color for them; No stripes takes them off again. Every other icon stays as in your current icon theme. Apply to use them. | Ordners in jouw kleuren: de mapkleur volgt je accent. Racestrepen staan uit tot je er een kleur voor kiest; Geen strepen haalt ze weer weg. Alle andere pictogrammen blijven zoals in je huidige pictogramthema. Pas toe om ze te gebruiken. |
+| 266 ✂ | Wavy lines | Golflijnen |
+| 267 | Binders in your colors: the folder color follows your accent, and the wavy lines a darker shade of it. Choose either and both keep their colors from then on; Reset Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to use them. | Ordners in jouw kleuren: de mapkleur volgt je accent, en de golflijnen een donkerdere tint ervan. Kies er een en beide houden vanaf dan hun kleuren; Pictogrammen herstellen volgt het thema weer. Alle andere pictogrammen blijven zoals in je huidige pictogramthema. Pas toe om ze te gebruiken. |
+| 268 | Your Qt apps now use your theme's colors.<br><br>Your previous Qt setup is saved: {saved}.<br><br>Turning off Integration → Qt apps puts it back. | Je Qt-apps gebruiken nu de kleuren van je thema.<br><br>Je vorige Qt-instelling is bewaard: {saved}.<br><br>Integratie → Qt-apps uitzetten zet die terug. |
+| 269 | The first time, log out and back in to see your colors in Qt apps; after that, reopening them is enough. If you had your own Qt setup, it's saved and comes back when this is off. | Log de eerste keer uit en weer in om je kleuren in Qt-apps te zien; daarna is ze opnieuw openen genoeg. Had je een eigen Qt-instelling, dan wordt die bewaard en komt die terug als dit uit staat. |
+| 270 | Needs qt5ct: sudo apt install qt5ct | Heeft qt5ct nodig: sudo apt install qt5ct |
+| 271 | give the theme a name (not “Custom”) | geef het thema een naam (niet ‘Aangepast’) |
+| 272 | a theme's name can be up to {count} characters ({given} given) | de naam van een thema mag tot {count} tekens lang zijn ({given} opgegeven) |
+| 273 | “{theme}” is a built-in theme: choose another name | ‘{theme}’ is een ingebouwd thema: kies een andere naam |
+| 274 | you already have a theme called “{theme}” | je hebt al een thema met de naam ‘{theme}’ |
+| 275 | there's already a theme called “{theme}” | er is al een thema met de naam ‘{theme}’ |
+| 276 | couldn't find a free name for the copy | geen vrije naam voor de kopie gevonden |
+| 277 | built-in themes can't be renamed: duplicate it instead | ingebouwde thema's kunnen niet hernoemd worden: dupliceer het in plaats daarvan |
+| 278 | built-in themes can't be deleted | ingebouwde thema's kunnen niet verwijderd worden |
+| 279 | {file} isn't a Theme Roller theme file | {file} is geen themabestand van Theme Roller |
+| 280 | This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended. | Dit thema is gemaakt met een nieuwere Theme Roller ({version}). Een deel ervan ziet er misschien niet uit zoals bedoeld; Theme Roller bijwerken wordt aangeraden. |
+| 281 | You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style. | Je hebt al een stijlmap ‘{folder}’: die van jou is behouden, dus het thema gebruikt jouw kopie van die stijl. |
+| 282 | the theme file contains an unsafe path | het themabestand bevat een onveilig pad |
+| 283 | The theme's name was longer than {count} characters: shortened to “{theme}”. | De naam van het thema was langer dan {count} tekens: ingekort tot ‘{theme}’. |
+| 284 | A theme called “{theme}” already exists: imported as “{copy}”. | Er bestaat al een thema met de naam ‘{theme}’: geïmporteerd als ‘{copy}’. |
+| 285 ✂ | Chevrons | Punthaken |
+| 286 ✂ | Regular | Normaal |
+| 287 ✂ | Thin | Dun |
+| 288 ✂ | Icon Theme | Pictogramthema |
+| 289 ✂ | Marks | Tekens |
+| 290 ✂ | Bold | Vet |
+| 291 ✂ | Classic | Klassiek |
+| 292 ✂ | Dashed | Gestreept |
+| 293 ✂ | Dotted | Gestippeld |
+| 294 ✂ | Follow global | Algemeen volgen |
+| 295 ✂ | Light | Licht |
+| 296 ✂ | Overlay | Zwevend |
+| 297 ✂ | Separate colors | Eigen kleuren |
+| 298 ✂ | Solid | Doorgetrokken |

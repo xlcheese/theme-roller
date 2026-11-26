@@ -7,6 +7,7 @@ away for a moment and back. That gives one short flicker.
 
 from __future__ import annotations
 
+import os
 import re
 import shutil
 import subprocess
@@ -80,10 +81,22 @@ def restore_panel_heights(raw: str) -> str | None:
     return f"panel height put back ({raw})"
 
 
+# what restart_cinnamon() says when it can't: window borders wait for the next login
+LOGIN_NEEDED = "window borders change at the next login (Cinnamon can't restart itself on Wayland)"
+
+
+def wayland() -> bool:
+    """A Wayland session (Linux Mint 23 beta's default): Cinnamon can't restart there."""
+    return os.environ.get("XDG_SESSION_TYPE") == "wayland" or bool(os.environ.get("WAYLAND_DISPLAY"))
+
+
 def restart_cinnamon() -> str:
     """Restart Cinnamon (like Ctrl+Alt+Esc): reloads everything, including the
     window borders, which Muffin otherwise only re-reads at the next login.
-    Windows stay open. X11 only (Cinnamon can't restart itself on Wayland)."""
+    Windows stay open. X11 only: on Wayland Cinnamon still offers the command
+    but can't restart (xl_cheese, Mint 23 beta), so it isn't asked."""
+    if wayland():
+        return LOGIN_NEEDED
     if not shutil.which("gdbus"):
         return "could not restart Cinnamon (gdbus not found): press Ctrl+Alt+Esc"
     try:

@@ -267,45 +267,46 @@ Theme Roller ist ein kostenloses Programm, das den Cinnamon-Desktop von Linux Mi
 | 253 | Applying… the desktop flickers once while it reloads. | Wird angewendet… der Desktop flackert einmal beim Neuladen. |
 | 254 ✂ | Apply failed: {problem} | Anwenden fehlgeschlagen: {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | „{theme}“ ist auf dem Desktop. Rückgängig holt das vorherige Thema zurück. |
-| 256 ✂ | Qt apps now match your theme | Qt-Anwendungen passen jetzt zu deinem Thema |
-| 257 | Reverting… the desktop flickers once while it reloads. | Wird rückgängig gemacht… der Desktop flackert einmal beim Neuladen. |
-| 258 ✂ | Revert failed: {problem} | Rückgängig fehlgeschlagen: {problem} |
-| 259 | The previous theme is back on the desktop. Your settings here are unchanged. | Das vorherige Thema ist wieder auf dem Desktop. Deine Einstellungen hier bleiben unverändert. |
-| 260 ✂ | GNOME runtime | GNOME-Laufzeit |
-| 261 ✂ | KDE runtime | KDE-Laufzeit |
-| 262 | Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and highlights. Most editors' own schemes follow your theme too. Reopen them to see changes. | Gibt Xed, gedit und Meld ein Farbschema aus deinem Thema, vor allem für Syntaxfarben und Hervorhebungen. Die eigenen Schemata der meisten Editoren folgen deinem Thema ebenfalls. Öffne sie neu, um die Änderungen zu sehen. |
-| 263 ✂ | Racing stripes | Rennstreifen |
-| 264 | Binders in your colors: the folder color follows your accent. Racing stripes are off until you pick a color for them; No stripes takes them off again. Every other icon stays as in your current icon theme. Apply to use them. | Ringbücher in deinen Farben: Die Ordnerfarbe folgt deiner Akzentfarbe. Rennstreifen sind aus, bis du eine Farbe für sie wählst; Keine Streifen nimmt sie wieder weg. Alle anderen Symbole bleiben wie in deinem aktuellen Symbolthema. Mit Anwenden übernehmen. |
-| 265 ✂ | Wavy lines | Wellenlinien |
-| 266 | Binders in your colors: the folder color follows your accent, and the wavy lines a darker shade of it. Choose either and both keep their colors from then on; Reset Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to use them. | Ringbücher in deinen Farben: Die Ordnerfarbe folgt deiner Akzentfarbe, die Wellenlinien einem dunkleren Ton davon. Wählst du eine davon, behalten beide ab dann ihre Farben; Symbole zurücksetzen folgt wieder dem Thema. Alle anderen Symbole bleiben wie in deinem aktuellen Symbolthema. Mit Anwenden übernehmen. |
-| 267 | Your Qt apps now use your theme's colors.<br><br>Your previous Qt setup is saved: {saved}.<br><br>Turning off Integration → Qt apps puts it back. | Deine Qt-Anwendungen nutzen jetzt die Farben deines Themas.<br><br>Deine bisherige Qt-Einrichtung ist gesichert: {saved}.<br><br>Integration → Qt-Anwendungen auszuschalten bringt sie zurück. |
-| 268 | The first time, log out and back in to see your colors in Qt apps; after that, reopening them is enough. If you had your own Qt setup, it's saved and comes back when this is off. | Beim ersten Mal musst du dich ab- und wieder anmelden, um deine Farben in Qt-Anwendungen zu sehen; danach genügt es, sie neu zu öffnen. Hattest du eine eigene Qt-Einrichtung, wird sie gesichert und kommt zurück, wenn dies aus ist. |
-| 269 | Needs qt5ct: sudo apt install qt5ct | Braucht qt5ct: sudo apt install qt5ct |
-| 270 | give the theme a name (not “Custom”) | gib dem Thema einen Namen (nicht „Eigenes“) |
-| 271 | a theme's name can be up to {count} characters ({given} given) | der Name eines Themas darf bis zu {count} Zeichen lang sein ({given} angegeben) |
-| 272 | “{theme}” is a built-in theme: choose another name | „{theme}“ ist ein mitgeliefertes Thema: wähle einen anderen Namen |
-| 273 | you already have a theme called “{theme}” | du hast bereits ein Thema namens „{theme}“ |
-| 274 | there's already a theme called “{theme}” | es gibt bereits ein Thema namens „{theme}“ |
-| 275 | couldn't find a free name for the copy | kein freier Name für die Kopie gefunden |
-| 276 | built-in themes can't be renamed: duplicate it instead | mitgelieferte Themen können nicht umbenannt werden: dupliziere es stattdessen |
-| 277 | built-in themes can't be deleted | mitgelieferte Themen können nicht gelöscht werden |
-| 278 | {file} isn't a Theme Roller theme file | {file} ist keine Themendatei von Theme Roller |
-| 279 | This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended. | Dieses Thema wurde mit einem neueren Theme Roller ({version}) erstellt. Manches wird vielleicht nicht wie gedacht angezeigt; ein Update von Theme Roller wird empfohlen. |
-| 280 | You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style. | Du hast bereits einen Stilordner „{folder}“: Deiner wurde behalten, das Thema nutzt also deine Kopie dieses Stils. |
-| 281 | the theme file contains an unsafe path | die Themendatei enthält einen unsicheren Pfad |
-| 282 | The theme's name was longer than {count} characters: shortened to “{theme}”. | Der Name des Themas war länger als {count} Zeichen: gekürzt auf „{theme}“. |
-| 283 | A theme called “{theme}” already exists: imported as “{copy}”. | Ein Thema namens „{theme}“ gibt es bereits: als „{copy}“ importiert. |
-| 284 ✂ | Chevrons | Winkel |
-| 285 ✂ | Regular | Normal |
-| 286 ✂ | Thin | Dünn |
-| 287 ✂ | Icon Theme | Symbolthema |
-| 288 ✂ | Marks | Zeichen |
-| 289 ✂ | Bold | Fett |
-| 290 ✂ | Classic | Klassisch |
-| 291 ✂ | Dashed | Gestrichelt |
-| 292 ✂ | Dotted | Gepunktet |
-| 293 ✂ | Follow global | Global folgen |
-| 294 ✂ | Light | Leicht |
-| 295 ✂ | Overlay | Überlagernd |
-| 296 ✂ | Separate colors | Eigene Farben |
-| 297 ✂ | Solid | Durchgezogen |
+| 256 | Window borders change at your next login. | Die Fensterrahmen ändern sich bei der nächsten Anmeldung. |
+| 257 ✂ | Qt apps now match your theme | Qt-Anwendungen passen jetzt zu deinem Thema |
+| 258 | Reverting… the desktop flickers once while it reloads. | Wird rückgängig gemacht… der Desktop flackert einmal beim Neuladen. |
+| 259 ✂ | Revert failed: {problem} | Rückgängig fehlgeschlagen: {problem} |
+| 260 | The previous theme is back on the desktop. Your settings here are unchanged. | Das vorherige Thema ist wieder auf dem Desktop. Deine Einstellungen hier bleiben unverändert. |
+| 261 ✂ | GNOME runtime | GNOME-Laufzeit |
+| 262 ✂ | KDE runtime | KDE-Laufzeit |
+| 263 | Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and highlights. Most editors' own schemes follow your theme too. Reopen them to see changes. | Gibt Xed, gedit und Meld ein Farbschema aus deinem Thema, vor allem für Syntaxfarben und Hervorhebungen. Die eigenen Schemata der meisten Editoren folgen deinem Thema ebenfalls. Öffne sie neu, um die Änderungen zu sehen. |
+| 264 ✂ | Racing stripes | Rennstreifen |
+| 265 | Binders in your colors: the folder color follows your accent. Racing stripes are off until you pick a color for them; No stripes takes them off again. Every other icon stays as in your current icon theme. Apply to use them. | Ringbücher in deinen Farben: Die Ordnerfarbe folgt deiner Akzentfarbe. Rennstreifen sind aus, bis du eine Farbe für sie wählst; Keine Streifen nimmt sie wieder weg. Alle anderen Symbole bleiben wie in deinem aktuellen Symbolthema. Mit Anwenden übernehmen. |
+| 266 ✂ | Wavy lines | Wellenlinien |
+| 267 | Binders in your colors: the folder color follows your accent, and the wavy lines a darker shade of it. Choose either and both keep their colors from then on; Reset Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to use them. | Ringbücher in deinen Farben: Die Ordnerfarbe folgt deiner Akzentfarbe, die Wellenlinien einem dunkleren Ton davon. Wählst du eine davon, behalten beide ab dann ihre Farben; Symbole zurücksetzen folgt wieder dem Thema. Alle anderen Symbole bleiben wie in deinem aktuellen Symbolthema. Mit Anwenden übernehmen. |
+| 268 | Your Qt apps now use your theme's colors.<br><br>Your previous Qt setup is saved: {saved}.<br><br>Turning off Integration → Qt apps puts it back. | Deine Qt-Anwendungen nutzen jetzt die Farben deines Themas.<br><br>Deine bisherige Qt-Einrichtung ist gesichert: {saved}.<br><br>Integration → Qt-Anwendungen auszuschalten bringt sie zurück. |
+| 269 | The first time, log out and back in to see your colors in Qt apps; after that, reopening them is enough. If you had your own Qt setup, it's saved and comes back when this is off. | Beim ersten Mal musst du dich ab- und wieder anmelden, um deine Farben in Qt-Anwendungen zu sehen; danach genügt es, sie neu zu öffnen. Hattest du eine eigene Qt-Einrichtung, wird sie gesichert und kommt zurück, wenn dies aus ist. |
+| 270 | Needs qt5ct: sudo apt install qt5ct | Braucht qt5ct: sudo apt install qt5ct |
+| 271 | give the theme a name (not “Custom”) | gib dem Thema einen Namen (nicht „Eigenes“) |
+| 272 | a theme's name can be up to {count} characters ({given} given) | der Name eines Themas darf bis zu {count} Zeichen lang sein ({given} angegeben) |
+| 273 | “{theme}” is a built-in theme: choose another name | „{theme}“ ist ein mitgeliefertes Thema: wähle einen anderen Namen |
+| 274 | you already have a theme called “{theme}” | du hast bereits ein Thema namens „{theme}“ |
+| 275 | there's already a theme called “{theme}” | es gibt bereits ein Thema namens „{theme}“ |
+| 276 | couldn't find a free name for the copy | kein freier Name für die Kopie gefunden |
+| 277 | built-in themes can't be renamed: duplicate it instead | mitgelieferte Themen können nicht umbenannt werden: dupliziere es stattdessen |
+| 278 | built-in themes can't be deleted | mitgelieferte Themen können nicht gelöscht werden |
+| 279 | {file} isn't a Theme Roller theme file | {file} ist keine Themendatei von Theme Roller |
+| 280 | This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended. | Dieses Thema wurde mit einem neueren Theme Roller ({version}) erstellt. Manches wird vielleicht nicht wie gedacht angezeigt; ein Update von Theme Roller wird empfohlen. |
+| 281 | You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style. | Du hast bereits einen Stilordner „{folder}“: Deiner wurde behalten, das Thema nutzt also deine Kopie dieses Stils. |
+| 282 | the theme file contains an unsafe path | die Themendatei enthält einen unsicheren Pfad |
+| 283 | The theme's name was longer than {count} characters: shortened to “{theme}”. | Der Name des Themas war länger als {count} Zeichen: gekürzt auf „{theme}“. |
+| 284 | A theme called “{theme}” already exists: imported as “{copy}”. | Ein Thema namens „{theme}“ gibt es bereits: als „{copy}“ importiert. |
+| 285 ✂ | Chevrons | Winkel |
+| 286 ✂ | Regular | Normal |
+| 287 ✂ | Thin | Dünn |
+| 288 ✂ | Icon Theme | Symbolthema |
+| 289 ✂ | Marks | Zeichen |
+| 290 ✂ | Bold | Fett |
+| 291 ✂ | Classic | Klassisch |
+| 292 ✂ | Dashed | Gestrichelt |
+| 293 ✂ | Dotted | Gepunktet |
+| 294 ✂ | Follow global | Global folgen |
+| 295 ✂ | Light | Leicht |
+| 296 ✂ | Overlay | Überlagernd |
+| 297 ✂ | Separate colors | Eigene Farben |
+| 298 ✂ | Solid | Durchgezogen |

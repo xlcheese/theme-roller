@@ -299,6 +299,19 @@ class StyleTests(unittest.TestCase):
         with self.assertRaises(styles.StyleError):
             styles.load(d)
 
+    def test_no_restart_on_wayland(self):
+        """On Wayland Cinnamon can't restart (Mint 23 beta): not asked, and the
+        app says window borders change at the next login."""
+        import os
+        from unittest import mock
+        with mock.patch.dict(os.environ, {"XDG_SESSION_TYPE": "wayland"}), \
+                mock.patch("subprocess.run") as run:
+            self.assertEqual(reload.restart_cinnamon(), reload.LOGIN_NEEDED)
+            run.assert_not_called()
+        with mock.patch.dict(os.environ, {"XDG_SESSION_TYPE": "x11"}, clear=False):
+            os.environ.pop("WAYLAND_DISPLAY", None)
+            self.assertFalse(reload.wayland())
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")
