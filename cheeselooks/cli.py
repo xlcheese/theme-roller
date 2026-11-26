@@ -120,6 +120,9 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     GNOME's accent key, each only if switched on in Integration."""
     log = []
     integ = data["integration"]
+    # Velocitty (Mint 23's terminal): its palette first, so the GTK 4 file
+    # below styles its window from the palette it will use
+    log += velocitty.enable(table)
     # CSS variables for libadwaita 1.6+ always: Flatpak apps bring their own,
     # newer libadwaita, and GTK 4.14 accepts the variables without warnings
     colors = integ.get("libadwaita", "colors") != "off"
@@ -147,8 +150,6 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
         log += editor.enable(table)
     elif editor.active():
         log += editor.disable()
-    # Velocitty (Mint 23's terminal): a palette from the theme, while it's installed
-    log += velocitty.enable(table)
     return [line for line in log if line]
 
 
