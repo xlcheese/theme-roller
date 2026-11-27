@@ -309,7 +309,10 @@ def running() -> bool:
     import os
     import subprocess
     try:
-        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", "bin/velocitty"],
+        # Velocitty renames its process to "velocitty" (setproctitle) once it
+        # starts; before that it's /usr/bin/velocitty run by python3 (xl_cheese:
+        # matching only the second missed an open Velocitty)
+        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", r"(^|/)velocitty( |$)"],
                              capture_output=True, text=True, timeout=5).stdout
     except (OSError, subprocess.SubprocessError):
         return False
