@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import re
 import shutil
 import threading
@@ -35,9 +36,9 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
-from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, Pango  # noqa: E402
+from gi.repository import Gdk, GdkPixbuf, Gio, GLib, Gtk, Pango  # noqa: E402
 
-from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, icons, qt, reload, render, settings, styles, themes, titlebuttons, tokens, watch  # noqa: E402
+from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, icons, qt, reload, render, settings, styles, themes, titlebuttons, tokens, velocitty, watch  # noqa: E402
 from . import shape  # noqa: E402
 from .i18n import _, N_  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
@@ -172,11 +173,6 @@ INTEGRATION_MISSING = {
 }
 SORTS = (("az", _("A–Z")), ("za", _("Z–A")), ("new", _("Newest")), ("old", _("Oldest")))
 SORT_DEFAULTS = {"theme_sort": "new"}    # themes: yours first, then the built-in ones in their set order
-# Linux Mint's Mint-Y accent colors (mint-themes' constants.py), Mint-Y's own
-# green first: the accent chooser offers them as quick picks
-MINT_ACCENTS = (("Green", "#35A854"), ("Aqua", "#1F9EDE"), ("Blue", "#0C75DE"), ("Teal", "#199CA8"),
-                ("Grey", "#70737A"), ("Sand", "#C5A07C"), ("Orange", "#FF7139"), ("Red", "#E82127"),
-                ("Pink", "#E54980"), ("Purple", "#8C5DD9"))
 NAME_CHARS = 34            # list rows: longer names end in "…" (the full name is the tooltip)
 
 
@@ -235,6 +231,15 @@ def _set(data: dict, path: tuple[str, ...], value: Any) -> None:
     for k in path[:-1]:
         data = data[k]
     data[path[-1]] = value
+
+
+def _app_name(program: str) -> str:
+    """The name an app has in the menu (xed: Text Editor), else its program name."""
+    for info in Gio.AppInfo.get_all():
+        exe = info.get_executable() or ""
+        if os.path.basename(exe) == program:
+            return info.get_display_name() or program
+    return program
 
 
 def _hex(rgba: Gdk.RGBA) -> str:
@@ -336,11 +341,23 @@ class SettingsWindow(Gtk.ApplicationWindow):
         # wraps inside the window's width and never widens it: breaks inside long
         # words (file names, paths) too, and asks for almost no width of its own
         self.status = Gtk.Label(xalign=0, selectable=True, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR,
-                                max_width_chars=1, margin_start=12, margin_end=12, margin_bottom=6)
-        self.status.get_style_context().add_class("dim-label")
+                                max_width_chars=1)
+        # the status line: an icon for the kind of message (done, needs your
+        # attention, error, information), errors tinted in the theme's red and
+        # attention in its accent; every new message glows briefly, then fades
+        # (xl_cheese: the plain line at the bottom was easy to miss). One row:
+        # the window doesn't grow.
+        self.status_icon = Gtk.Image(valign=Gtk.Align.START)
+        self.status_bar = Gtk.Box(spacing=6, margin_start=8, margin_end=8, margin_bottom=4)
+        self.status_bar.get_style_context().add_class("xl-status")
+        self.status_bar.pack_start(self.status_icon, False, False, 0)
+        self.status_bar.pack_start(self.status, True, True, 0)
+        self._status_kind: str | None = None
+        self._status_glow = 0
+        self.status.connect("notify::label", self._status_changed)
         pages = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         pages.pack_start(self.stack, True, True, 0)
-        pages.pack_start(self.status, False, False, 0)
+        pages.pack_start(self.status_bar, False, False, 0)
         left = Gtk.Box()
         left.pack_start(sidebar, False, False, 0)
         left.pack_start(pages, True, True, 0)
@@ -484,12 +501,6 @@ class SettingsWindow(Gtk.ApplicationWindow):
         if kind in ("color", "color?"):
             box = Gtk.Box(spacing=10)
             button = Gtk.ColorButton(use_alpha=False, show_editor=True)   # straight to the editor
-            if path[-1] == "accent":
-                # accents open on Linux Mint's own Mint-Y colors (the Minted
-                # themes' quick picks), with + for any other color
-                button.set_property("show-editor", False)
-                button.add_palette(Gtk.Orientation.HORIZONTAL, len(MINT_ACCENTS),
-                                   [_rgba(c) for _n, c in MINT_ACCENTS])
             button.connect("color-set", lambda b: self.changed(path, _hex(b.get_rgba())))
             value = Gtk.Label(xalign=0, selectable=True)
             box.pack_start(button, False, False, 0)
@@ -963,7 +974,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
         try:
             found = imagecolors.colors(path)
         except GLib.Error as exc:
-            self.status.set_text(_("Couldn't read {file}: {problem}").format(file=_short_name(path.name), problem=exc.message))
+            self.say(_("Couldn't read {file}: {problem}").format(file=_short_name(path.name), problem=exc.message), "error")
             return
         for child in self.image_swatches.get_children():
             self.image_swatches.remove(child)
@@ -1062,7 +1073,7 @@ class SettingsWindow(Gtk.ApplicationWindow):
                 GLib.idle_add(self.status.set_text, _(
                     "Theme Roller is off your desktop. You can uninstall it now; Apply puts it back."))
             except Exception as exc:  # report anything to the user
-                GLib.idle_add(self.status.set_text, _("Remove failed: {problem}").format(problem=exc))
+                GLib.idle_add(self.say, _("Remove failed: {problem}").format(problem=exc), "error")
         threading.Thread(target=work, daemon=True).start()
 
     def _docs_tab(self, grid: Gtk.Grid) -> Gtk.Grid:
@@ -1295,6 +1306,39 @@ class SettingsWindow(Gtk.ApplicationWindow):
         scroller.add(outer)
         return scroller
 
+    STATUS_ICONS = {"info": "dialog-information-symbolic", "done": "object-select-symbolic",
+                    "attention": "dialog-warning-symbolic", "error": "dialog-error-symbolic"}
+
+    def say(self, text: str, kind: str = "info") -> bool:
+        """Show a message on the status line: kind is info, done, attention or error."""
+        self._status_kind = kind
+        if self.status.get_text() == text:
+            self._status_changed()          # the same words again: still show it as new
+        self.status.set_text(text)
+        return False
+
+    def _status_changed(self, *_args) -> None:
+        kind, self._status_kind = self._status_kind or "info", None
+        ctx = self.status_bar.get_style_context()
+        for k in self.STATUS_ICONS:
+            ctx.remove_class(k)
+        shown = bool(self.status.get_text())
+        self.status_icon.set_visible(shown)
+        if not shown:
+            return
+        ctx.add_class(kind)
+        self.status_icon.set_from_icon_name(self.STATUS_ICONS[kind], Gtk.IconSize.MENU)
+        # the glow: on at once, then off so it fades out (the CSS transition)
+        ctx.add_class("fresh")
+        self._status_glow += 1
+        glow = self._status_glow
+
+        def fade() -> bool:
+            if glow == self._status_glow:
+                ctx.remove_class("fresh")
+            return False
+        GLib.timeout_add(700, fade)
+
     def _extra_css(self, t: dict[str, str]) -> str:
         """The drawn panel and the terminal sample, from the same tokens."""
         pb = "panel.w.panel_button."
@@ -1304,6 +1348,16 @@ class SettingsWindow(Gtk.ApplicationWindow):
             color = t["panel.accent_press"] if t[pb + "selected_color"] == t["panel.accent"] else t["panel.accent"]
             marker = panelmarker.shadow(kind, color, 28)
         return f"""
+.xl-status {{ padding: 3px 8px; border-radius: {t['r']}px;
+  transition: background-color 1200ms ease-out; }}
+.xl-status label {{ color: {pal.mix(t['text'], t['bg'], 0.25)}; }}
+.xl-status.fresh {{ background-color: {pal.rgba(t['accent'], 0.20)}; transition: none; }}
+.xl-status.attention {{ background-color: {pal.rgba(t['accent'], 0.13)}; }}
+.xl-status.attention label {{ color: {t['text']}; }}
+.xl-status.attention image, .xl-status.done image {{ color: {t['accent']}; }}
+.xl-status.error {{ background-color: {pal.rgba(t['destructive'], 0.15)}; }}
+.xl-status.error label {{ color: {t['text']}; }}
+.xl-status.error image {{ color: {t['destructive']}; }}
 .xl-prev-panel {{ background-color: rgba({t['panel.panel_rgb']}, {t['panel.opacity']});
   background-image: linear-gradient(to bottom, rgba({t['panel.panel_top_rgb']}, {t['panel.opacity']}),
   rgba({t['panel.panel_bottom_rgb']}, {t['panel.opacity']}));
@@ -1365,7 +1419,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             ph = self.data["panel"]["panel_height"] or self._int_default(("panel", "panel_height"))
             t = tokens.build(self.data, style, panel_height=ph)
         except (styles.StyleError, settings.SettingsError, KeyError) as exc:
-            self.status.set_text(_("Can't preview: {problem}").format(problem=exc))
+            self.say(_("Can't preview: {problem}").format(problem=exc), "error")
             return False
         if self.preview_dir.exists():
             shutil.rmtree(self.preview_dir)
@@ -1387,7 +1441,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             GLib.idle_add(self._fit_pages)          # measured in the new sizes
             GLib.timeout_add(250, self._fit_pages)  # again once restyled (the sidebar's rows lag a moment)
         except GLib.Error as exc:
-            self.status.set_text(_("Preview CSS problem: {problem}").format(problem=exc.message))
+            self.say(_("Preview CSS problem: {problem}").format(problem=exc.message), "error")
         if missing:
             self.status.set_text(missing)
         if self.data["theme"] == themes.CUSTOM:
@@ -1471,7 +1525,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         try:
             self.data = settings.from_dict(self.data)
         except settings.SettingsError as exc:
-            self.status.set_text("; ".join(exc.problems))
+            self.say("; ".join(exc.problems), "error")
             return
         # unchanged from the theme it started from: still that theme; else Custom
         self.data["theme"] = self.base if _same(self.data, self.base_settings()) else themes.CUSTOM
@@ -1628,7 +1682,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         try:
             data = themes.load(row.theme_name)
         except themes.ThemeError as exc:
-            self.status.set_text(str(exc))
+            self.say(str(exc), "error")
             self.sync_controls()
             return
         if row.theme_name == themes.CUSTOM:
@@ -1703,7 +1757,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                         self._confirm(_("Replace your theme “{theme}”?").format(theme=name)):
                     themes.save(name, self.data, overwrite=True)
                 else:
-                    self.status.set_text(str(exc))
+                    self.say(str(exc), "error")
                     continue
             self.base = name
             self.base_cache.pop(name, None)
@@ -1756,7 +1810,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         try:
             themes.duplicate(row.theme_name, name)
         except themes.ThemeError as exc:
-            self.status.set_text(str(exc))
+            self.say(str(exc), "error")
             return
         self.fill_theme_list()
         self.status.set_text(_("Duplicated “{theme}” as “{copy}”.").format(theme=row.theme_name, copy=name))
@@ -1776,7 +1830,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         try:
             themes.rename(old, name)
         except themes.ThemeError as exc:
-            self.status.set_text(str(exc))
+            self.say(str(exc), "error")
             return
         if self.base == old:
             self.base = name
@@ -1823,7 +1877,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 out = themes.export(label, self.data, dest)
                 self.status.set_text(_("Exported “{theme}” to {file}").format(theme=label, file=out))
             except (themes.ThemeError, styles.StyleError, OSError) as exc:
-                self.status.set_text(_("Export failed: {problem}").format(problem=exc))
+                self.say(_("Export failed: {problem}").format(problem=exc), "error")
         chooser.destroy()
 
     def on_import(self, _button: Gtk.Button) -> None:
@@ -1843,7 +1897,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
                 self.status.set_text(_("Imported “{theme}”.").format(theme=name) +
                                      ("\n" + "\n".join(notes) if notes else ""))
             except (themes.ThemeError, OSError, ValueError) as exc:
-                self.status.set_text(_("Import failed: {problem}").format(problem=exc))
+                self.say(_("Import failed: {problem}").format(problem=exc), "error")
         chooser.destroy()
 
     def on_apply(self, _button: Gtk.Button) -> None:
@@ -1876,8 +1930,12 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
     def applied_ok(self, data: dict, log: list[str]) -> bool:
         self._come_back()
         self.applied = data
-        self.status.set_text(_("“{theme}” is on the desktop. Revert puts the previous theme back.")
-                             .format(theme=_(data["theme"]) if data["theme"] == themes.CUSTOM else data["theme"]))
+        note, apps = self._login_note(log)
+        note += self._reopen_note(data)
+        self.say(_("“{theme}” is on the desktop. Revert puts the previous theme back.")
+                 .format(theme=_(data["theme"]) if data["theme"] == themes.CUSTOM else data["theme"])
+                 + note, "attention" if note else "done")
+        self.status.set_tooltip_text(apps)
         self.revert_btn.set_sensitive(True)
         self.revert_btn.show()
         self.update_buttons()
@@ -1886,6 +1944,29 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             qt.notice_shown()
             GLib.timeout_add(3200, self._qt_notice, notice)   # after the window comes back
         return False
+
+    @staticmethod
+    def _reopen_note(data: dict) -> str:
+        """Velocitty open with full styling: it reads its window's look only
+        when it starts (its palette, all Colors mode gives it, changes at once)."""
+        full = data.get("integration", {}).get("libadwaita") == "full"
+        return (" " + _("Reopen Velocitty to see the changes.")) if full and velocitty.running() else ""
+
+    def _login_note(self, log: list[str]) -> tuple[str, str | None]:
+        """On Wayland, the title bars Cinnamon draws (older apps, through
+        Xwayland) wait for the next login: name the ones open now, if any (no
+        note when there are none). Also the full list, for the tooltip."""
+        if reload.LOGIN_NEEDED not in log:
+            return "", None
+        progs = reload.xwayland_apps()
+        if progs is None:            # can't tell: the general note
+            return " " + _("Some older apps' title bars change at your next login."), None
+        if not progs:
+            return "", None
+        names = [_app_name(p) for p in progs]
+        shown = ", ".join(names[:3]) + (f" +{len(names) - 3}" if len(names) > 3 else "")
+        return (" " + _("These title bars change at your next login: {apps}").format(apps=shown),
+                ", ".join(names))
 
     def _qt_notice(self, text: str) -> bool:
         d = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.INFO,
@@ -1896,7 +1977,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         return False
 
     def applied_failed(self, message: str) -> bool:
-        self.status.set_text(message)
+        self.say(message, "error")
         self.update_buttons()
         return False
 
@@ -1917,7 +1998,11 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         if restored:
             self.applied = restored
         self.revert_btn.hide()
-        self.status.set_text(_("The previous theme is back on the desktop. Your settings here are unchanged."))
+        note, apps = self._login_note(log)
+        note += self._reopen_note(restored or self.data)
+        self.say(_("The previous theme is back on the desktop. Your settings here are unchanged.")
+                 + note, "attention" if note else "done")
+        self.status.set_tooltip_text(apps)
         self.update_buttons()
         return False
 

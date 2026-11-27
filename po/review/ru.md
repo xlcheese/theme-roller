@@ -267,45 +267,48 @@ Theme Roller — бесплатная программа для оформлен
 | 253 | Applying… the desktop flickers once while it reloads. | Применение… рабочий стол один раз мигнёт при перезагрузке. |
 | 254 ✂ | Apply failed: {problem} | Не удалось применить: {problem} |
 | 255 | “{theme}” is on the desktop. Revert puts the previous theme back. | «{theme}» на рабочем столе. «Вернуть» вернёт предыдущую тему. |
-| 256 ✂ | Qt apps now match your theme | Приложения Qt теперь совпадают с вашей темой |
-| 257 | Reverting… the desktop flickers once while it reloads. | Возврат… рабочий стол один раз мигнёт при перезагрузке. |
-| 258 ✂ | Revert failed: {problem} | Не удалось вернуть: {problem} |
-| 259 | The previous theme is back on the desktop. Your settings here are unchanged. | Предыдущая тема снова на рабочем столе. Ваши настройки здесь не изменились. |
-| 260 ✂ | GNOME runtime | среда GNOME |
-| 261 ✂ | KDE runtime | среда KDE |
-| 262 | Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and highlights. Most editors' own schemes follow your theme too. Reopen them to see changes. | Даёт Xed, gedit и Meld цветовую схему из вашей темы, в основном для подсветки синтаксиса и выделений. Собственные схемы большинства редакторов тоже следуют вашей теме. Откройте их заново, чтобы увидеть изменения. |
-| 263 ✂ | Racing stripes | Гоночные полосы |
-| 264 | Binders in your colors: the folder color follows your accent. Racing stripes are off until you pick a color for them; No stripes takes them off again. Every other icon stays as in your current icon theme. Apply to use them. | Папки-скоросшиватели в ваших цветах: цвет папки следует за акцентом. Гоночные полосы выключены, пока вы не выберете для них цвет; «Без полос» снова убирает их. Все остальные значки остаются как в вашей текущей теме значков. Нажмите «Применить», чтобы использовать их. |
-| 265 ✂ | Wavy lines | Волнистые линии |
-| 266 | Binders in your colors: the folder color follows your accent, and the wavy lines a darker shade of it. Choose either and both keep their colors from then on; Reset Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to use them. | Папки-скоросшиватели в ваших цветах: цвет папки следует за акцентом, а волнистые линии — за его более тёмным оттенком. Выберите любой из них, и оба сохранят свои цвета; «Сбросить: Значки» снова следует теме. Все остальные значки остаются как в вашей текущей теме значков. Нажмите «Применить», чтобы использовать их. |
-| 267 | Your Qt apps now use your theme's colors.<br><br>Your previous Qt setup is saved: {saved}.<br><br>Turning off Integration → Qt apps puts it back. | Ваши приложения Qt теперь используют цвета вашей темы.<br><br>Ваша прежняя настройка Qt сохранена: {saved}.<br><br>Выключите «Интеграция → Qt», чтобы вернуть её. |
-| 268 | The first time, log out and back in to see your colors in Qt apps; after that, reopening them is enough. If you had your own Qt setup, it's saved and comes back when this is off. | В первый раз выйдите из сеанса и войдите снова, чтобы увидеть свои цвета в приложениях Qt; потом достаточно открыть их заново. Если у вас была своя настройка Qt, она сохраняется и возвращается, когда это выключено. |
-| 269 | Needs qt5ct: sudo apt install qt5ct | Нужен qt5ct: sudo apt install qt5ct |
-| 270 | give the theme a name (not “Custom”) | дайте теме имя (не «Своя») |
-| 271 | a theme's name can be up to {count} characters ({given} given) | имя темы может быть длиной до {count} символов (сейчас {given}) |
-| 272 | “{theme}” is a built-in theme: choose another name | «{theme}» — встроенная тема: выберите другое имя |
-| 273 | you already have a theme called “{theme}” | у вас уже есть тема «{theme}» |
-| 274 | there's already a theme called “{theme}” | тема «{theme}» уже есть |
-| 275 | couldn't find a free name for the copy | не удалось подобрать свободное имя для копии |
-| 276 | built-in themes can't be renamed: duplicate it instead | встроенные темы нельзя переименовать: продублируйте её |
-| 277 | built-in themes can't be deleted | встроенные темы нельзя удалить |
-| 278 | {file} isn't a Theme Roller theme file | {file} — не файл темы Theme Roller |
-| 279 | This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended. | Эта тема сделана в более новом Theme Roller ({version}). Часть её может выглядеть не так, как задумано; рекомендуется обновить Theme Roller. |
-| 280 | You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style. | У вас уже есть папка стиля «{folder}»: оставлена ваша, так что тема использует вашу копию этого стиля. |
-| 281 | the theme file contains an unsafe path | файл темы содержит небезопасный путь |
-| 282 | The theme's name was longer than {count} characters: shortened to “{theme}”. | Имя темы было длиннее {count} символов: сокращено до «{theme}». |
-| 283 | A theme called “{theme}” already exists: imported as “{copy}”. | Тема «{theme}» уже есть: импортирована как «{copy}». |
-| 284 ✂ | Chevrons | Уголки |
-| 285 ✂ | Regular | Обычный |
-| 286 ✂ | Thin | Тонкие |
-| 287 ✂ | Icon Theme | Тема значков |
-| 288 ✂ | Marks | Знаки |
-| 289 ✂ | Bold | Жирный |
-| 290 ✂ | Classic | Классические |
-| 291 ✂ | Dashed | Штрихи |
-| 292 ✂ | Dotted | Точки |
-| 293 ✂ | Follow global | Следовать Общему |
-| 294 ✂ | Light | Светлый |
-| 295 ✂ | Overlay | Поверх |
-| 296 ✂ | Separate colors | Свои цвета |
-| 297 ✂ | Solid | Сплошная |
+| 256 | Reopen Velocitty to see the changes. | Перезапустите Velocitty, чтобы увидеть изменения. |
+| 257 | Some older apps' title bars change at your next login. | У некоторых старых приложений заголовки окон изменятся при следующем входе в систему. |
+| 258 | These title bars change at your next login: {apps} | Эти заголовки окон изменятся при следующем входе в систему: {apps} |
+| 259 ✂ | Qt apps now match your theme | Приложения Qt теперь совпадают с вашей темой |
+| 260 | Reverting… the desktop flickers once while it reloads. | Возврат… рабочий стол один раз мигнёт при перезагрузке. |
+| 261 ✂ | Revert failed: {problem} | Не удалось вернуть: {problem} |
+| 262 | The previous theme is back on the desktop. Your settings here are unchanged. | Предыдущая тема снова на рабочем столе. Ваши настройки здесь не изменились. |
+| 263 ✂ | GNOME runtime | среда GNOME |
+| 264 ✂ | KDE runtime | среда KDE |
+| 265 | Gives Xed, gedit and Meld a color scheme from your theme, mainly for syntax colors and highlights. Most editors' own schemes follow your theme too. Reopen them to see changes. | Даёт Xed, gedit и Meld цветовую схему из вашей темы, в основном для подсветки синтаксиса и выделений. Собственные схемы большинства редакторов тоже следуют вашей теме. Откройте их заново, чтобы увидеть изменения. |
+| 266 ✂ | Racing stripes | Гоночные полосы |
+| 267 | Binders in your colors: the folder color follows your accent. Racing stripes are off until you pick a color for them; No stripes takes them off again. Every other icon stays as in your current icon theme. Apply to use them. | Папки-скоросшиватели в ваших цветах: цвет папки следует за акцентом. Гоночные полосы выключены, пока вы не выберете для них цвет; «Без полос» снова убирает их. Все остальные значки остаются как в вашей текущей теме значков. Нажмите «Применить», чтобы использовать их. |
+| 268 ✂ | Wavy lines | Волнистые линии |
+| 269 | Binders in your colors: the folder color follows your accent, and the wavy lines a darker shade of it. Choose either and both keep their colors from then on; Reset Icons follows the theme again. Every other icon stays as in your current icon theme. Apply to use them. | Папки-скоросшиватели в ваших цветах: цвет папки следует за акцентом, а волнистые линии — за его более тёмным оттенком. Выберите любой из них, и оба сохранят свои цвета; «Сбросить: Значки» снова следует теме. Все остальные значки остаются как в вашей текущей теме значков. Нажмите «Применить», чтобы использовать их. |
+| 270 | Your Qt apps now use your theme's colors.<br><br>Your previous Qt setup is saved: {saved}.<br><br>Turning off Integration → Qt apps puts it back. | Ваши приложения Qt теперь используют цвета вашей темы.<br><br>Ваша прежняя настройка Qt сохранена: {saved}.<br><br>Выключите «Интеграция → Qt», чтобы вернуть её. |
+| 271 | The first time, log out and back in to see your colors in Qt apps; after that, reopening them is enough. If you had your own Qt setup, it's saved and comes back when this is off. | В первый раз выйдите из сеанса и войдите снова, чтобы увидеть свои цвета в приложениях Qt; потом достаточно открыть их заново. Если у вас была своя настройка Qt, она сохраняется и возвращается, когда это выключено. |
+| 272 | Needs qt5ct: sudo apt install qt5ct | Нужен qt5ct: sudo apt install qt5ct |
+| 273 | give the theme a name (not “Custom”) | дайте теме имя (не «Своя») |
+| 274 | a theme's name can be up to {count} characters ({given} given) | имя темы может быть длиной до {count} символов (сейчас {given}) |
+| 275 | “{theme}” is a built-in theme: choose another name | «{theme}» — встроенная тема: выберите другое имя |
+| 276 | you already have a theme called “{theme}” | у вас уже есть тема «{theme}» |
+| 277 | there's already a theme called “{theme}” | тема «{theme}» уже есть |
+| 278 | couldn't find a free name for the copy | не удалось подобрать свободное имя для копии |
+| 279 | built-in themes can't be renamed: duplicate it instead | встроенные темы нельзя переименовать: продублируйте её |
+| 280 | built-in themes can't be deleted | встроенные темы нельзя удалить |
+| 281 | {file} isn't a Theme Roller theme file | {file} — не файл темы Theme Roller |
+| 282 | This theme was made with a newer Theme Roller ({version}). Some of it may not show as intended; updating Theme Roller is recommended. | Эта тема сделана в более новом Theme Roller ({version}). Часть её может выглядеть не так, как задумано; рекомендуется обновить Theme Roller. |
+| 283 | You already have a style folder “{folder}”: kept yours, so the theme uses your copy of that style. | У вас уже есть папка стиля «{folder}»: оставлена ваша, так что тема использует вашу копию этого стиля. |
+| 284 | the theme file contains an unsafe path | файл темы содержит небезопасный путь |
+| 285 | The theme's name was longer than {count} characters: shortened to “{theme}”. | Имя темы было длиннее {count} символов: сокращено до «{theme}». |
+| 286 | A theme called “{theme}” already exists: imported as “{copy}”. | Тема «{theme}» уже есть: импортирована как «{copy}». |
+| 287 ✂ | Chevrons | Уголки |
+| 288 ✂ | Regular | Обычный |
+| 289 ✂ | Thin | Тонкие |
+| 290 ✂ | Icon Theme | Тема значков |
+| 291 ✂ | Marks | Знаки |
+| 292 ✂ | Bold | Жирный |
+| 293 ✂ | Classic | Классические |
+| 294 ✂ | Dashed | Штрихи |
+| 295 ✂ | Dotted | Точки |
+| 296 ✂ | Follow global | Следовать Общему |
+| 297 ✂ | Light | Светлый |
+| 298 ✂ | Overlay | Поверх |
+| 299 ✂ | Separate colors | Свои цвета |
+| 300 ✂ | Solid | Сплошная |

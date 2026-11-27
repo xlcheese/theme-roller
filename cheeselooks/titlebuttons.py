@@ -994,8 +994,15 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
         bases = ["windowcontrols > button:not(.osd)"]
         img = "windowcontrols > button > image"
     else:
-        bases = ["headerbar button.titlebutton", ".titlebar button.titlebutton"]
-        img = "headerbar button.titlebutton image, .titlebar button.titlebutton image"
+        # ...and title bars GTK draws itself for windows without a header bar
+        # (every such app on Wayland, the Mint 23 beta's default): Mint-Y's base
+        # sizes their buttons 32x24 with a more specific rule, which beat ours,
+        # so our faces and glyphs sat off centre (xl_cheese). .csd only: on X11
+        # Cinnamon draws these from the .ssd rules (_muffin_css)
+        bases = ["headerbar button.titlebutton", ".titlebar button.titlebutton",
+                 ".csd headerbar.default-decoration button.titlebutton",
+                 ".csd .titlebar.default-decoration button.titlebutton"]
+        img = ", ".join(f"{b} image" for b in bases)
 
     def sel(cls: str, pseudo: str) -> str:
         return ", ".join(f"{b}{cls}{pseudo}" for b in bases)
@@ -1030,6 +1037,11 @@ def css(style: str, t: dict[str, str], gtk4: bool = False) -> tuple[str, dict[st
                f"  padding: 0;\n  margin: {margin};\n  -gtk-icon-shadow: none; }}")
     if g.full_height:
         out.append(_edge_rule(gtk4, f"-{pad}px"))
+        if gtk4:
+            # libadwaita pads a header bar's contents above and below (3px, 6px
+            # and 7px in newer releases), which left a strip of title bar over
+            # the buttons (xl_cheese's Velocitty): the buttons set its height
+            out.append("headerbar, headerbar > windowhandle > box { padding-top: 0; padding-bottom: 0; }")
     if g.inner:
         every = ",\n".join(sel(c, p) for c in classes.values() for ps in pseudos.values() for p in ps)
         out.append(every + " {\n  border: none;\n  background-color: transparent;\n  background-image: none;\n"

@@ -1,6 +1,8 @@
 # Changelog
 
-## Next
+## 0.9.1: Wayland, Velocitty and new themes
+
+Ready for the Linux Mint 23 beta: Wayland sessions, and Mint's new terminal, Velocitty. Five new built-in themes, and more for style sheets to set.
 
 - **The theme is called Theme-Roller** in Mint's Themes settings (Applications, Desktop and Icons), not xl-Cheeselooks, so it says which tool to open to change it. Its folders are `~/.themes/Theme-Roller` and `~/.icons/Theme-Roller`. If you used 0.9.0, your next **Apply** moves everything over by itself and removes the old folders; **Revert** still goes back to what you had. The built-in themes and styles keep their xl- names.
 - **More things answer the pointer** in every theme: text fields' borders darken on hover in GNOME-style (GTK 4) apps (more with Hover strength, or a border of your own with `entry` `hover_edge`; GTK 3 apps don't tell themes a text field is hovered), a checked checkbox or radio button lightens like a button does, and switches lighten on and off.
@@ -10,9 +12,20 @@
   - `[panel]` `menu_hover_edge` and `menu_category_edge` for the Cinnamon main menu, and `menu_see_through = true` to let the desktop show through its hovers as it does through the menu.
 
   The lines are drawn inside the item, so nothing shifts. The starter style sheet has examples.
+- **xl-Cakewalk and xl-Cakewalk Dark**, new built-in themes by Wesley Hayslip, styled after KDE's Breeze: the first themes with outlined hovers and selections.
 - **Minted and Minted Dark**, after Mint-Y, Linux Mint's own theme: flat and plain, matched against Mint-Y built from Mint's source, with Theme Roller's fixes. In Mint's default Aqua.
+- **xl-Sa**, a new built-in theme by Ilse Hayslip, after Minted Dark in the list: muted buttons with a thin border, fields set into the window, boxed tabs, a teal accent with coral folders and panel, and Yaru folders.
 - **Style sheets can set the main surfaces** in `[palette]`: `base` (fields, lists, pages), `header` (menu bars, toolbars, title bar) and `sidebar`, as expressions of your colors, so they still follow the color choosers. Minted Dark uses it to match Mint-Y Dark.
-- **Mint's colors one click away:** the accent color chooser opens on Mint-Y's ten accent colors, with + for any other.
+- **The status line is easier to notice:** an icon for the kind of message, a soft glow when a new one appears, errors tinted in the theme's red and things that need your attention in its accent. Still one line, so the window doesn't grow.
+- **Velocitty** (Linux Mint 23's new terminal) follows your theme: Theme Roller gives it a "Theme Roller" palette with your terminal colors and your title bar color, keeping Mint's red and blue warnings for root and remote sessions. It switches Velocitty to it the first time; pick another palette in Velocitty and that's kept. Taking Theme Roller's colors out, or setting GNOME-style apps to Off on the Integration tab, puts your previous palette back. With GNOME-style apps on Full (Integration tab), its window also takes your style: the title bar gradient over Velocitty's own colors (its red for root and blue for remote sessions stay), your window buttons and rounded corners, and a tab strip apart from the header bar, so the header bar is easy to grab. When the header bar takes a session color, its buttons let that color show through. The close button keeps its own hover color there too.
+- **Gargantuan** window buttons reach the top of GTK 4 and libadwaita title bars: libadwaita's padding above them left a strip of title bar showing.
+- **Updating replaces an old theme watcher:** a watcher left running from an older Theme Roller didn't know the name Theme-Roller and took your colors out of GNOME-style apps, Qt apps and text editors right after each Apply. Apply now notices a watcher from another version and starts its own.
+- **Wayland sessions** (the Linux Mint 23 beta's default): Cinnamon can't restart itself there, so Theme Roller no longer tries. Most title bars change right away; older apps running through Xwayland keep their title bars until your next login, and their window button symbols meanwhile. After Apply, Theme Roller names the ones open (with xlsclients, from x11-utils); when none are, it says nothing. Apps without their own header bar get a title bar drawn by GTK there; it now follows Title bar height and your window button style, with the symbols centred.
+- **xl-Big Baddy and xl-Rad folders at small sizes** (16 to 24 pixels, as in Nemo's sidebar and list view) are drawn flat from the front, so they read clearly that small.
+- **Greyed-out header bar and toolbar buttons stay flat**, instead of showing a button face that can't be clicked.
+- **Nemo's sidebar:** the selected row's line runs along its top and bottom only, and its text follows the sidebar selection's text color.
+- **The preview no longer shows the desktop's own theme** through Theme Roller's window.
+- **A tooltip color of your own** on a dark theme keeps its text readable.
 - **Spanish reads naturally now**, thanks to axrusar on the Linux Mint forums, who reworded about half of it.
 - **Qt apps' color scheme is called Theme-Roller** too (qt5ct lists it). The next Apply replaces 0.9.0's xl-Cheeselooks scheme and its lines in `~/.profile`.
 

@@ -8,10 +8,11 @@ fails before the swap, the installed theme is untouched.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from pathlib import Path
 
-from . import render, thumbnail
+from . import reload, render, thumbnail
 
 REQUIRED_FILES = ("index.theme",)
 
@@ -45,6 +46,30 @@ def build(template_dir: Path, tokens: dict[str, str], out_dir: Path) -> list[Pat
     return written
 
 
+def _keep_login_assets(old: Path, new: Path) -> None:
+    """On Wayland, Cinnamon's Muffin reads window borders once, at login, and
+    keeps drawing older apps' (Xwayland) title bars from that theme's CSS. Its
+    window button images are named after their colors, so an Apply took away
+    the files it still pointed at and those buttons lost their glyphs
+    (xl_cheese, Mint 23 beta). Keep the earlier images until the next login:
+    a login loads the current theme, so after one nothing is carried over."""
+    marker = new.parent / f".{new.name}.session"
+    session = os.environ.get("XDG_SESSION_ID", "")
+    try:
+        same_login = marker.read_text(encoding="utf-8").strip() == session
+    except OSError:
+        same_login = False
+    if reload.wayland() and session:
+        if same_login and old.is_dir():
+            for sub in ("gtk-3.0/assets",):
+                src, dst = old / sub, new / sub
+                if src.is_dir() and dst.is_dir():
+                    for f in src.iterdir():
+                        if f.is_file() and not (dst / f.name).exists():
+                            shutil.copy2(f, dst / f.name)
+        marker.write_text(session + "\n", encoding="utf-8")
+
+
 def install(template_dir: Path, tokens: dict[str, str], theme_dir: Path,
             last_good: Path, settings: dict | None = None) -> list[Path]:
     """Generate and swap in the theme. Returns the files written."""
@@ -68,6 +93,7 @@ def install(template_dir: Path, tokens: dict[str, str], theme_dir: Path,
             shutil.copy2(previous, last_good / "settings.json")
         theme_dir.rename(old)
     staging.rename(theme_dir)
+    _keep_login_assets(old, theme_dir)
     _remove(old)
 
     if settings is not None:

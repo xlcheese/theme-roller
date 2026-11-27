@@ -464,6 +464,11 @@ headerbar:backdrop, .titlebar:not(headerbar):backdrop {
   background-image: image({{wb.unfocused}}); }
 headerbar.default-decoration, .titlebar.default-decoration {
   min-height: {{wb.button_h}}px; }
+/* ...but a title bar GTK draws itself (windows without a header bar, on Wayland:
+   the Mint 23 beta's default) is as tall as every other title bar (xl_cheese:
+   Title bar height didn't reach them) */
+.csd headerbar.default-decoration, .csd .titlebar.default-decoration {
+  min-height: {{wb.height_inner}}px; }
 /* Window borders on windows Cinnamon decorates (Muffin 6, Mint 22: it no
    longer reads metacity-1, it draws frames from these CSS nodes, muffin
    src/ui/theme.c). The frame's width is decoration's border and padding,

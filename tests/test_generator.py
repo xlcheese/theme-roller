@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from cheeselooks import cli, paths, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
+from cheeselooks import cli, paths, velocitty, spin, editor, flatpak, icons, qt, reload, watch, gtk4, install, tabs, themes, palette, render, settings, shape, styles, tokens, titlebuttons
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_STYLE = REPO / "styles" / "xl-Cheeselooks"
@@ -298,6 +298,170 @@ class StyleTests(unittest.TestCase):
         (d / "style.toml").write_text('name = "T"\n[palette]\nheader = "#222226"\n')
         with self.assertRaises(styles.StyleError):
             styles.load(d)
+
+    def test_no_restart_on_wayland(self):
+        """On Wayland Cinnamon can't restart (Mint 23 beta): not asked, and the
+        app says window borders change at the next login."""
+        import os
+        from unittest import mock
+        with mock.patch.dict(os.environ, {"XDG_SESSION_TYPE": "wayland"}), \
+                mock.patch("subprocess.run") as run:
+            self.assertEqual(reload.restart_cinnamon(), reload.LOGIN_NEEDED)
+            run.assert_not_called()
+        with mock.patch.dict(os.environ, {"XDG_SESSION_TYPE": "x11"}, clear=False):
+            os.environ.pop("WAYLAND_DISPLAY", None)
+            self.assertFalse(reload.wayland())
+
+    def test_gtk_drawn_title_bars(self):
+        """Title bars GTK draws itself (windows without a header bar on Wayland)
+        get the title bar height and our button sizes (Mint-Y's base gave them
+        32x24 buttons with a more specific rule)."""
+        css = (paths.templates_dir() / "gtk-3.0" / "xl.css.tmpl").read_text()
+        self.assertIn(".csd headerbar.default-decoration, .csd .titlebar.default-decoration {\n"
+                      "  min-height: {{wb.height_inner}}px; }", css)
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        self.assertIn(".csd headerbar.default-decoration button.titlebutton", t["titlebuttons.css"])
+
+    def test_wayland_keeps_login_button_images(self):
+        """On Wayland, Muffin draws older apps' title bars from the theme loaded at
+        login: an Apply keeps the earlier button images until the next login."""
+        import os
+        from unittest import mock
+        root = Path(tempfile.mkdtemp())
+        theme, good = root / "themes" / "Theme-Roller", root / "last-good"
+        s = defaults()
+        s["window_borders"]["button_style"] = "classic"
+        t1 = tokens.build(s, styles.load(DEFAULT_STYLE))
+        s2 = copy.deepcopy(s)
+        s2["global"]["accent"] = "#3366CC"
+        s2["window_borders"]["button_style"] = "drawn"
+        t2 = tokens.build(s2, styles.load(DEFAULT_STYLE))
+        assets = lambda: {f.name for f in (theme / "gtk-3.0" / "assets").iterdir()}
+        env = {"XDG_SESSION_TYPE": "wayland", "XDG_SESSION_ID": "c1"}
+        with mock.patch.dict(os.environ, env):
+            install.install(paths.templates_dir(), t1, theme, good)
+            first = assets()
+            install.install(paths.templates_dir(), t2, theme, good)     # same login
+            self.assertTrue(first <= assets())
+        with mock.patch.dict(os.environ, {**env, "XDG_SESSION_ID": "c2"}):   # a new login
+            install.install(paths.templates_dir(), t2, theme, good)
+            install.install(paths.templates_dir(), t2, theme, good)
+            only_now = assets()
+        clean = root / "clean"
+        install.build(paths.templates_dir(), t2, clean)
+        self.assertEqual(only_now, {f.name for f in (clean / "gtk-3.0" / "assets").iterdir()})
+        self.assertTrue(first - only_now)              # the earlier images are gone after a login
+        with mock.patch.dict(os.environ, {"XDG_SESSION_TYPE": "x11", "XDG_SESSION_ID": "c3"}):
+            os.environ.pop("WAYLAND_DISPLAY", None)
+            install.install(paths.templates_dir(), t1, theme, good)
+            install.install(paths.templates_dir(), t2, theme, good)     # X11: Cinnamon restarts
+            self.assertEqual(assets(), only_now)
+
+    def test_velocitty_palette(self):
+        """Velocitty (Mint 23's terminal): a Theme Roller palette from the theme,
+        switched to the first time, kept when you pick another, your previous
+        palette back when our colors come out. Velocitty reads it as it reads
+        its own (a [Palette] section used for light and dark)."""
+        import os
+        from unittest import mock
+        home = Path(tempfile.mkdtemp())
+        store = {"palette": "Espresso"}
+        def get(schema, key):
+            return f"'{store[key]}'" if schema == velocitty.SCHEMA else None
+        def set_value(schema, key, value):
+            store[key] = value
+            return True
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(home / "data"), "XDG_CONFIG_HOME": str(home / "cfg")}), \
+                mock.patch.object(reload, "available", return_value=True), \
+                mock.patch.object(reload, "get", side_effect=get), \
+                mock.patch.object(reload, "set_value", side_effect=set_value):
+            velocitty.enable(t)
+            self.assertEqual(store["palette"], "Theme Roller")
+            text = velocitty.palette_file().read_text()
+            for key in ("Foreground", "Background", "Titlebar", "Color16", "Admin", "Remote", "Yellow"):
+                self.assertIn(f"\n{key}=", text)
+            self.assertIn(f"Titlebar={t['wb.title']}", text)
+            store["palette"] = "Nord"                     # you pick another: kept
+            velocitty.enable(t)
+            self.assertEqual(store["palette"], "Nord")
+            store["palette"] = "Theme Roller"
+            velocitty.disable()                           # colors out: yours back
+            self.assertEqual(store["palette"], "Espresso")
+            self.assertFalse(velocitty.palette_file().exists())
+
+    def test_velocitty_window_css(self):
+        """Velocitty's window in the theme's style, in the GTK 4 file: the
+        palette's session colors kept (root red, remote blue), the theme's
+        gradient over them, a tab strip apart from the header bar, and the
+        theme's window buttons only on Velocitty in Colors mode."""
+        import os
+        from unittest import mock
+        home = Path(tempfile.mkdtemp())
+        s = defaults()
+        s["window_borders"]["title_gradient"] = 30
+        t = tokens.build(s, styles.load(DEFAULT_STYLE))
+        store = {"palette": "Theme Roller", "color-scheme": "dark"}
+        with mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(home)}), \
+                mock.patch.object(reload, "available", return_value=True), \
+                mock.patch.object(reload, "get", side_effect=lambda sc, k: f"'{store[k]}'" if sc == velocitty.SCHEMA else None):
+            f = velocitty.palette_file()
+            f.parent.mkdir(parents=True)
+            f.write_text(velocitty.palette_text(t))
+            css = velocitty.gtk4_css(t, t["titlebuttons4.css"])
+            block = gtk4.block(paths.templates_dir(), t, css_variables=False)          # Colors
+            full_block = gtk4.block(paths.templates_dir(), t, css_variables=False, full=True)
+        self.assertIn("window.admin headerbar", css)
+        self.assertIn("window.remote headerbar", css)
+        self.assertIn("linear-gradient(to bottom, rgba(255, 255, 255, 0.3", css)   # the gradient, see-through
+        self.assertIn("window.terminal tabbar .box", css)
+        self.assertIn("window.terminal windowcontrols", css)
+        self.assertNotIn("\nwindowcontrols", css)                    # Velocitty's windows only
+        self.assertNotIn("window.maximized window.terminal", css)
+        self.assertEqual(velocitty.scope_to_velocitty("window.maximized windowcontrols > button,\nheaderbar windowcontrols {"),
+                         "window.terminal.maximized windowcontrols > button,\nwindow.terminal headerbar windowcontrols {")
+        self.assertNotIn("window.terminal", block)           # Colors mode: its palette only
+        self.assertIn("window.terminal headerbar", full_block)
+        # a colored tab keeps the tab style's edges under its colored line (full styling)
+        from cheeselooks import tabs as tabs_mod
+        rest = tabs_mod.adw_edges(t)["rest"]
+        if rest != "none":
+            self.assertIn(f"window.terminal tabbar tab.admin {{ box-shadow: inset 0 -3px 0 ", full_block)
+            self.assertIn(rest, full_block.split("window.terminal tabbar tab.admin {")[1].split("}")[0])
+        # in a session color the buttons' faces are a see-through wash, glyphs kept
+        self.assertIn("window.admin windowcontrols > button:not(.osd)", css)
+        self.assertIn("rgba(255, 255, 255, 0.28)", css)                # the hover wash (flat at rest)
+        self.assertIn("window.admin headerbar button:not(.osd)", css)
+        washed = [r for r in css.split("}") if "window.admin windowcontrols" in r and ".minimize" in r
+                  and "background-image" in r]
+        self.assertTrue(washed and all("url(" in r for r in washed))
+        # the close button's own hover, restated in session colors (their rest rule outranked it)
+        self.assertIn("window.admin windowcontrols > button:not(.osd).close:hover", css)
+        self.assertEqual(velocitty.gtk4_css(t), "")                  # not installed: nothing
+
+    def test_old_watcher_replaced(self):
+        """A watcher from another Theme Roller (an older package's, which didn't
+        know the name Theme-Roller and took our colors out after every Apply)
+        is replaced by Apply; ours is left running."""
+        from unittest import mock
+        with mock.patch.object(watch, "running", side_effect=[True, False]), \
+                mock.patch.object(watch, "_same_watcher", return_value=False), \
+                mock.patch.object(watch, "_stop") as stop, \
+                mock.patch("subprocess.Popen") as popen, \
+                mock.patch.object(watch, "system_autostart_file", return_value=Path("/nonexistent")), \
+                mock.patch.object(watch, "autostart_file", return_value=Path(tempfile.mkdtemp()) / "a.desktop"):
+            log = watch.enable()
+        stop.assert_called_once()
+        popen.assert_called_once()
+        self.assertTrue(any("replaced" in line for line in log))
+        with mock.patch.object(watch, "running", return_value=True), \
+                mock.patch.object(watch, "_same_watcher", return_value=True), \
+                mock.patch.object(watch, "_stop") as stop, mock.patch("subprocess.Popen") as popen, \
+                mock.patch.object(watch, "system_autostart_file", return_value=Path("/nonexistent")), \
+                mock.patch.object(watch, "autostart_file", return_value=Path(tempfile.mkdtemp()) / "a.desktop"):
+            watch.enable()
+        stop.assert_not_called()
+        popen.assert_not_called()
 
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
@@ -830,6 +994,16 @@ class RenderAndInstallTests(unittest.TestCase):
         s["window_borders"]["button_style"] = "arrows"                        # renamed
         self.assertEqual(settings.from_dict(s)["window_borders"]["button_style"], "unpretentious")
 
+    def test_gargantuan_reaches_the_top(self):
+        """Gargantuan buttons fill a GTK 4 header bar: libadwaita's padding
+        above and below them is taken out (it left a strip over them)."""
+        rule = "headerbar, headerbar > windowhandle > box { padding-top: 0; padding-bottom: 0; }"
+        for style, expect in (("gargantuan", True), ("dots", False)):
+            s = defaults()
+            s["window_borders"]["button_style"] = style
+            t = tokens.build(s, styles.load(DEFAULT_STYLE))
+            self.assertEqual(rule in t["titlebuttons4.css"], expect, style)
+
     def test_old_button_style_names(self):
         s = defaults()
         s["window_borders"]["button_style"] = "theme"
@@ -947,7 +1121,7 @@ class RenderAndInstallTests(unittest.TestCase):
         names = [n for n, _f, _b in themes.list_themes()]
         self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
                                  "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Pigeon",
-                                 "xl-Cakewalk", "xl-Cakewalk Dark", "Minted", "Minted Dark",
+                                 "xl-Cakewalk", "xl-Cakewalk Dark", "Minted", "Minted Dark", "xl-Sa",
                                  "xl-Vintage", "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),

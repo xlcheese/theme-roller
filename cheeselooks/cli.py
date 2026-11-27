@@ -10,7 +10,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import __version__, editor, palette, flatpak, gtk4, icons, install, paths, qt, reload, watch, settings, styles, themes, tokens
+from . import __version__, editor, velocitty, palette, flatpak, gtk4, icons, install, paths, qt, reload, watch, settings, styles, themes, tokens
 from .shape import DEFAULT_PANEL_HEIGHT
 
 
@@ -123,16 +123,25 @@ def _libadwaita(data: dict, table: dict) -> list[str]:
     # CSS variables for libadwaita 1.6+ always: Flatpak apps bring their own,
     # newer libadwaita, and GTK 4.14 accepts the variables without warnings
     colors = integ.get("libadwaita", "colors") != "off"
+    # Velocitty (Mint 23's terminal, a GNOME-style app): its palette with the
+    # other GNOME-style apps, first, so the GTK 4 file below styles its window
+    # from the palette it will use. Off: Velocitty is left as you set it
+    # (xl_cheese: Apply had put our palette back after GNOME-style apps: Off)
+    if colors:
+        log += velocitty.enable(table)
+    elif velocitty.active():
+        log += velocitty.disable()
     full = integ.get("libadwaita") == "full"
     new = (gtk4.block(paths.templates_dir(), table, css_variables=True, full=full)
            if colors else None)
     log.append(gtk4.write(paths.gtk4_css(), new))
-    if full:
+    if new and gtk4.asset_names(new):          # full styling, or Velocitty's window buttons
         gtk4.copy_assets(new, paths.theme_dir(), paths.gtk4_css())
-        log.append("libadwaita apps: full styling (buttons, title buttons, tabs) in "
-                   f"{paths.gtk4_css()}; reopen open ones")
     else:
         gtk4.remove_assets(paths.gtk4_css())
+    if full:
+        log.append("libadwaita apps: full styling (buttons, title buttons, tabs) in "
+                   f"{paths.gtk4_css()}; reopen open ones")
     if colors:                     # GNOME's own accent setting, to match (part of colors)
         log.append(reload.set_adw_accent(table["adw.accent_name"]) or "")
     log += _flatpak_access(integ.get("flatpak_access", False))

@@ -151,6 +151,13 @@ def block(templates_dir: Path, t: dict[str, str], css_variables: bool, full: boo
     if full:
         css += ("\n/* Full styling for libadwaita apps (Integration): the theme's GTK 4 layer.\n"
                 "   Note: this file outranks apps' own CSS. */\n" + full_css(templates_dir, t))
+    # Velocitty, Linux Mint's terminal: its window in your style with full
+    # styling only (in Colors mode it gets just its palette, xl_cheese: the
+    # light touch, as Colors is for other apps)
+    from . import velocitty
+    vel = velocitty.gtk4_css(t, "", True) if full else ""
+    if vel:
+        css += "\n" + vel.replace('url("assets/', f'url("{ASSETS}/').replace("url('assets/", f"url('{ASSETS}/")
     return f"{BEGIN}\n{css.rstrip()}\n{END}\n"
 
 
