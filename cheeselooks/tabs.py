@@ -248,6 +248,22 @@ def pill_face(t: dict[str, str]) -> tuple[str, str, str]:
     return t["text"], t["button"], t["button_grad"]
 
 
+def adw_edges(t: dict[str, str]) -> dict[str, str]:
+    """The box-shadows that draw a libadwaita tab's edges in the style's tab look,
+    by state (rest, hover, selected): adw_css uses them, and Velocitty's colored
+    tabs add their colored line to them (a box-shadow is one list: setting the
+    line alone took the tab's edges away, xl_cheese)."""
+    kind = t.get("w.tab.tab_kind", "boxed")
+    marker = _marker(t.get("w.tab.active_marker", "none"), "top", t["accent"], pal.luminance(t["base"]) < 0.25)
+    border = t["w.button.border"]
+    hover = f"inset 0 0 0 1px {t['w.tab.hover_border']}"
+    if kind == "pills":
+        return {"rest": "none", "hover": hover,
+                "selected": _join(f"inset 0 0 0 1px {border}", t["w.button.g4_inset_shadow"], marker)}
+    return {"rest": f"inset 0 0 0 1px {border}" if kind == "boxed" else "none", "hover": hover,
+            "selected": _join(f"inset 1px 0 {border}", f"inset -1px 0 {border}", f"inset 0 1px {border}", marker)}
+
+
 def adw_css(t: dict[str, str]) -> str:
     """libadwaita's tab bar (AdwTabBar: tabbar > tabbox > tabboxchild > tab), in the
     style's tab look. Boxed and open tabs sit on the page like notebook tabs;
@@ -256,9 +272,10 @@ def adw_css(t: dict[str, str]) -> str:
     marker = _marker(t.get("w.tab.active_marker", "none"), "top", t["accent"], pal.luminance(t["base"]) < 0.25)
     r = t["r"]
     border = t["w.button.border"]
+    edges = adw_edges(t)
     hover = (f"  color: {t['w.tab.hover_fg']};\n  background-color: {t['w.tab.hover_color']};\n"
              f"  background-image: {t['w.tab.hover_grad']};\n"
-             f"  box-shadow: inset 0 0 0 1px {t['w.tab.hover_border']}; }}")
+             f"  box-shadow: {edges['hover']}; }}")
     out = [f"/* libadwaita tab bar: {kind}, selected marker: "
            f"{t.get('w.tab.active_marker', 'none')} (cheeselooks/tabs.py) */",
            f"tabbar .box {{\n  background-color: {t['header']};\n  background-image: none;\n"
@@ -271,13 +288,13 @@ def adw_css(t: dict[str, str]) -> str:
                 f"tabbar tab:hover:not(:selected) {{\n{hover}",
                 "tabbar tab:selected, tabbar tab:selected:hover {\n  color: %s;\n"
                 "  background-color: %s;\n  background-image: %s;\n" % pill_face(t) +
-                f"  box-shadow: {_join(f'inset 0 0 0 1px {border}', t['w.button.g4_inset_shadow'], marker)}; }}"]
+                f"  box-shadow: {edges['selected']}; }}"]
     else:
         # sit on the page: no gap below the tabs, square bottom corners
         rest_bg = t["header"] if kind == "boxed" else "transparent"
         bar = claude_bar("top", t["accent"]) if kind == "claude" else "none"
         rr = t["r2"] if kind == "claude" else r
-        rest_edge = f"inset 0 0 0 1px {border}" if kind == "boxed" else "none"
+        rest_edge = edges["rest"]
         out += ["tabbar .box { padding-bottom: 0; box-shadow: none; }   /* tabs sit right on the page */",
                 "tabbar tabbox { padding-bottom: 0; }",
                 f"tabbar tabbox > tabboxchild {{ border-radius: {rr}px {rr}px 0 0; }}",
@@ -286,5 +303,5 @@ def adw_css(t: dict[str, str]) -> str:
                 f"tabbar tab:hover:not(:selected) {{\n{hover}",
                 f"tabbar tab:selected, tabbar tab:selected:hover {{\n  color: {t['text']};\n"
                 f"  background-color: {t['base']};\n  background-image: {bar};\n"
-                f"  box-shadow: {_join(f'inset 1px 0 {border}', f'inset -1px 0 {border}', f'inset 0 1px {border}', marker)}; }}"]
+                f"  box-shadow: {edges['selected']}; }}"]
     return "\n".join(out) + "\n"

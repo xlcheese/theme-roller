@@ -422,6 +422,12 @@ class StyleTests(unittest.TestCase):
                          "window.terminal.maximized windowcontrols > button,\nwindow.terminal headerbar windowcontrols {")
         self.assertNotIn("window.terminal", block)           # Colors mode: its palette only
         self.assertIn("window.terminal headerbar", full_block)
+        # a colored tab keeps the tab style's edges under its colored line (full styling)
+        from cheeselooks import tabs as tabs_mod
+        rest = tabs_mod.adw_edges(t)["rest"]
+        if rest != "none":
+            self.assertIn(f"window.terminal tabbar tab.admin {{ box-shadow: inset 0 -3px 0 ", full_block)
+            self.assertIn(rest, full_block.split("window.terminal tabbar tab.admin {")[1].split("}")[0])
         # in a session color the buttons' faces are a see-through wash, glyphs kept
         self.assertIn("window.admin windowcontrols > button:not(.osd)", css)
         self.assertIn("rgba(255, 255, 255, 0.28)", css)                # the hover wash (flat at rest)

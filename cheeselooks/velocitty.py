@@ -164,6 +164,12 @@ def _read_palette(name: str, dark: bool) -> dict[str, str] | None:
     return None
 
 
+def _with(*shadows: str) -> str:
+    """Box-shadows together (none left out)."""
+    parts = [x for x in shadows if x and x != "none"]
+    return ", ".join(parts) or "none"
+
+
 def _readable(bg: str) -> str:
     return "#ffffff" if pal.contrast("#ffffff", bg) >= pal.contrast("#1e1e1e", bg) else "#1e1e1e"
 
@@ -229,12 +235,21 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "", full: bool = False) -> s
     head = "window.terminal headerbar, window.terminal headerbar:backdrop"
     out = ["/* Velocitty (Linux Mint's terminal): its window in your theme, on its own colors (velocitty.py) */",
            f"{head} {{\n  background-color: {title};\n  color: {title_fg};\n  background-image: {gloss}; }}"]
+    from . import tabs as _tabs
+    edges = _tabs.adw_edges(t) if full else {}
     for cls, key in _STATE_KEYS.items():
         if key in p:
             c = p[key]
             out.append(f"window.{cls} headerbar, window.{cls} headerbar:backdrop {{\n"
                        f"  background-color: {c};\n  color: {_readable(c)}; }}")
-            out.append(f"window.terminal tabbar tab.{cls} {{ box-shadow: inset 0 -3px 0 {c}; }}")
+            line = f"inset 0 -3px 0 {c}"
+            if full:   # the line over the tab's own edges (your tab style), not instead of them
+                out.append(f"window.terminal tabbar tab.{cls} {{ box-shadow: {_with(line, edges['rest'])}; }}\n"
+                           f"window.terminal tabbar tab.{cls}:hover:not(:selected) {{ box-shadow: {_with(line, edges['hover'])}; }}\n"
+                           f"window.terminal tabbar tab.{cls}:selected, window.terminal tabbar tab.{cls}:selected:hover "
+                           f"{{ box-shadow: {_with(line, edges['selected'])}; }}")
+            else:
+                out.append(f"window.terminal tabbar tab.{cls} {{ box-shadow: {line}; }}")
     # the tab color swatches (right-click a tab) and the custom tabs' color bars:
     # our button style (full styling) painted over their colors (xl_cheese)
     for name in _TAB_COLORS:
