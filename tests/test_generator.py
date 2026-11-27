@@ -1121,7 +1121,7 @@ class RenderAndInstallTests(unittest.TestCase):
         names = [n for n, _f, _b in themes.list_themes()]
         self.assertEqual(names, ["xl-Cheeselooks", "xl-Cheeselooks Dark", "xl-Classic", "xl-Classic Dark",   # xl_cheese's order
                                  "xl-Gummy", "xl-Gummy Dark", "Claude", "Claude Dark", "xl-Pigeon",
-                                 "xl-Cakewalk", "xl-Cakewalk Dark", "Minted", "Minted Dark",
+                                 "xl-Cakewalk", "xl-Cakewalk Dark", "Minted", "Minted Dark", "xl-Sa",
                                  "xl-Vintage", "xl-Organ Harvest"])
         claude = themes.load("Claude")
         self.assertEqual((claude["theme"], claude["style"]["name"], claude["global"]["accent"]),

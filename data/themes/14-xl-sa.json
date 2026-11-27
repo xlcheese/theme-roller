@@ -1,0 +1,86 @@
+{
+  "format": 1,
+  "name": "xl-Sa",
+  "settings": {
+    "global": {
+      "accent": "#50BCBC",
+      "bg": "#F8F3EE",
+      "text": "#010A0F",
+      "hover_in_ms": 45,
+      "hover_out_ms": 100
+    },
+    "style": {
+      "depth": 0,
+      "unfocused_depth": 0,
+      "name": "xl-Sa"
+    },
+    "panel": {
+      "separate_colors": true,
+      "accent": "#FF7969",
+      "bg": "#F1E9E6",
+      "text": "#1B4661",
+      "panel_opacity": 86,
+      "notification_opacity": 92,
+      "panel_height": 36,
+      "panel_shape": {
+        "roundness": 47
+      },
+      "menu_shape": {
+        "follow_global": false,
+        "roundness": 83,
+        "item_roundness": 47
+      }
+    },
+    "window_borders": {
+      "separate_colors": true,
+      "title_bar": "#DED9D5",
+      "title_text": "#00060A",
+      "border": "#E0D9D6",
+      "title_bar_height": 36,
+      "title_gradient": 0,
+      "window_roundness": 98,
+      "button_roundness": 94,
+      "button_spacing": 12,
+      "button_glyphs": "marks"
+    },
+    "terminal": {
+      "separate_colors": true,
+      "bg": "#2B2B2B",
+      "text": "#E4E4E4"
+    },
+    "details": {
+      "tooltips": {
+        "custom": true,
+        "bg": "#D4E0E6",
+        "text": "#000000"
+      },
+      "scrollbars": {
+        "custom": true,
+        "roundness": 90,
+        "width": 10
+      },
+      "sliders": {
+        "custom": true,
+        "roundness": 76
+      },
+      "switches": {
+        "custom": true,
+        "roundness": 95
+      },
+      "focus_ring": {
+        "custom": true,
+        "color": "#077A9C",
+        "style": "dotted"
+      }
+    },
+    "icons": {
+      "enabled": true,
+      "style": "yaru",
+      "folder_color": "#FF7969",
+      "second_color": "#EB5A49"
+    },
+    "integration": {
+      "libadwaita": "full"
+    }
+  }
+}
