@@ -28,7 +28,7 @@ Somewhere along the way this got lost. Today you get an accent color, a light or
 
 Theme Roller brings it back. Choose your colors, turn some knobs and dials, then click **Apply**. Your entire desktop theme changes within a second. You can make endless color and style changes from just living on the first few tabs of Theme Roller. If you want to dive deeper just click through the rest of the tabs which include the Cinnamon panel and menu, Window borders, Terminal, Icons, and other widgets if you want them.
 
-> **Status:** 0.9.1 is the latest release. It's tested on Linux Mint 22 with Cinnamon, and on the Linux Mint 23 beta (Wayland). If something looks wrong on your desktop, please [open an issue](https://github.com/xlcheese/theme-roller/issues) with a screenshot. What's new is in the [changelog](CHANGELOG.md).
+> **Status:** 0.9.1 is the latest release. It's tested on Linux Mint 22 with Cinnamon, and on the Linux Mint 27 beta (Wayland). If something looks wrong on your desktop, please [open an issue](https://github.com/xlcheese/theme-roller/issues) with a screenshot. What's new is in the [changelog](CHANGELOG.md).
 
 ## Custom colors throughout
 
