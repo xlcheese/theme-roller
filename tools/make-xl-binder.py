@@ -17,9 +17,9 @@ of the cover they vanish (the rings are drawn over them): that's "no stripes".
 Drawn in true perspective from 3D at 32px and up (every point projected),
 the pictures (Mint-Y's for each name, CC BY-SA 4.0) laid on the cover by the
 same projection, as an affine map of their box. At 16, 22 and 24px the
-perspective turns to mush: there the binder is drawn straight on, on whole
-pixels, keeping the flap, the side and the stripes, with Mint-Y's picture at
-its own size. The open folder (drag-accept) has its flap up.
+perspective turns to mush: there the binder is drawn flat, from the front, on
+whole pixels: the cover with its flap and stripes (clipped to the cover), the
+spine a darker band along the bottom, Mint-Y's picture at its own size. The open folder (drag-accept) has its flap up.
 
 Placeholder colours, swapped at Apply (cheeselooks/icons.py):
     #ff0a01 the binder (your folder color)     #ff0a03 racing stripes (second color)
@@ -273,50 +273,57 @@ def _closed_box():
 
 
 # ------------------------------------------------------------------ small sizes, straight on
-SMALL_GEO = {   # size: side width, cover x0, x1, y0 (top), y1 (bottom), flap height, stripe width
-    16: (1, 2, 15, 2, 14, 4, 1),
-    22: (2, 3, 21, 3, 19, 5, 2),
-    24: (2, 3, 23, 3, 21, 6, 2),
+# A flat binder seen from the front (xl_cheese, 27 Nov: the side strip and the
+# paper poking out read as noise at these sizes, and the stripes ran past the
+# cover's top right): the cover fills the icon, the spine a darker band along
+# its bottom, the flap over the top; stripes, band and spine clipped to the
+# cover's rounded outline.
+SMALL_GEO = {   # size: cover x0, x1, y0 (top), y1 (bottom), flap height, stripe width
+    16: (1, 15, 3, 14, 4, 1),
+    22: (1, 21, 4, 19, 5, 2),
+    24: (1, 23, 4, 21, 6, 2),
 }
 
 
 def binder_small(name: str, size: int, opened: bool = False) -> str:
-    sw, x0, x1, y0, y1, fh, st = SMALL_GEO[size]
-    parts = []
-    # the side: a strip at the left, paper inside, the white spine end at the bottom
-    parts.append(f'<rect x="{x0 - sw - 1}" y="{y0 + 1}" width="{sw + 1}" height="{y1 - y0 - 1}" fill="{SIDE}"/>')
-    if sw > 1:
-        parts.append(f'<rect x="{x0 - sw}" y="{y0 + fh}" width="1" height="{y1 - y0 - fh - 2}" fill="{PAPER}"/>')
-    parts.append(f'<rect x="{x0 - sw - 1}" y="{y1 - 1}" width="{sw + 1}" height="1" fill="#E6E6E6"/>')
+    x0, x1, y0, y1, fh, st = SMALL_GEO[size]
     r = 1.5 if size > 16 else 1
-    parts.append(f'<path fill="{F}" d="M{x0} {y0} H{x1 - r} Q{x1} {y0} {x1} {y0 + r} V{y1 - r} Q{x1} {y1} {x1 - r} {y1} H{x0} Z"/>')
+    cover_d = (f"M{x0 + r} {y0} H{x1 - r} Q{x1} {y0} {x1} {y0 + r} V{y1 - r} Q{x1} {y1} {x1 - r} {y1} "
+               f"H{x0 + r} Q{x0} {y1} {x0} {y1 - r} V{y0 + r} Q{x0} {y0} {x0 + r} {y0} Z")
+    parts = [f'<path fill="{F}" d="{cover_d}"/>']
     # stripes, bottom left to top right, on whole-pixel steps (the 80s binder: its checker band)
     slope = (y1 - y0 - 1) / (x1 - x0)
     cell = 1 if size == 16 else 2
-    band_bottom = y1 - 2                          # the lower line; the checks above it; the upper line
+    band_bottom = y1 - 3                          # above the spine: the lower line, the checks, the upper line
     band_top = band_bottom - cell - 1
+    on_cover = []
     if COVER == "checker":
-        parts.append(f'<rect x="{x0}" y="{band_top + 1}" width="{x1 - x0}" height="{cell}" fill="#FFFFFF"/>')
+        on_cover.append(f'<rect x="{x0}" y="{band_top + 1}" width="{x1 - x0}" height="{cell}" fill="#FFFFFF"/>')
         for i, x in enumerate(range(x0, x1, cell)):
             if i % 2:
-                parts.append(f'<rect x="{x}" y="{band_top + 1}" width="{min(cell, x1 - x)}" height="{cell}" fill="#1A1A1A"/>')
+                on_cover.append(f'<rect x="{x}" y="{band_top + 1}" width="{min(cell, x1 - x)}" height="{cell}" fill="#1A1A1A"/>')
         for y in (band_top, band_bottom):
-            parts.append(f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="1" fill="{STRIPE}"/>')
-    for off in (1, 1 + st * 2 + (1 if size > 16 else 0)) if COVER != "checker" else ():
+            on_cover.append(f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="1" fill="{STRIPE}"/>')
+    offs = (2, 2 + st * 2 + (1 if size > 16 else 0)) if COVER != "checker" else ()
+    for off in offs:
         y_left = y1 - off
-        parts.append(f'<path fill="{STRIPE}" d="M{x0} {y_left} L{x1} {y_left - slope * (x1 - x0)} '
-                     f'L{x1} {y_left - slope * (x1 - x0) - st * 1.25} L{x0} {y_left - st * 1.25} Z"/>')
+        on_cover.append(f'<path fill="{STRIPE}" d="M{x0} {y_left} L{x1} {y_left - slope * (x1 - x0)} '
+                        f'L{x1} {y_left - slope * (x1 - x0) - st * 1.25} L{x0} {y_left - st * 1.25} Z"/>')
+    # the spine: a darker band along the bottom, a light line where it meets the cover
+    on_cover.append(f'<rect x="{x0}" y="{y1 - 1}" width="{x1 - x0}" height="1" fill="{SIDE}"/>')
+    parts.append(f'<g clip-path="url(#cover)">{"".join(on_cover)}</g>')
     if opened:
-        parts.append(f'<rect x="{x0 + 1}" y="{y0 - 2}" width="{x1 - x0 - 3}" height="3" fill="{PAPER}"/>')
+        # the flap up and away: the papers' tops over the cover, its back edge above them
+        parts.append(f'<rect x="{x0 + 1}" y="{y0 - 2}" width="{x1 - x0 - 2}" height="2" fill="{PAPER}"/>')
         parts.append(f'<rect x="{x0}" y="{y0 - 3}" width="{x1 - x0}" height="1" fill="{SIDE}"/>')
     else:
         # the flap: the binder's colour over the stripes, its edge a shade and a white piping line
         parts.append(f'<path fill="#000" fill-opacity="0.18" d="M{x0} {y0 + fh} H{x1} V{y0 + fh + 1} H{x0} Z"/>')
-        parts.append(f'<path fill="{F}" d="M{x0} {y0} H{x1 - r} Q{x1} {y0} {x1} {y0 + r} V{y0 + fh} H{x0} Z"/>')
-        slope2 = slope
-        for off in (1, 1 + st * 2 + (1 if size > 16 else 0)) if COVER != "checker" else ():   # stripes, across the flap
+        parts.append(f'<path fill="{F}" d="M{x0 + r} {y0} H{x1 - r} Q{x1} {y0} {x1} {y0 + r} V{y0 + fh} '
+                     f'H{x0} V{y0 + r} Q{x0} {y0} {x0 + r} {y0} Z"/>')
+        for off in offs:   # stripes, across the flap
             y_left = y1 - off
-            ys = [y_left - slope2 * (x - x0) for x in (x0, x1)]
+            ys = [y_left - slope * (x - x0) for x in (x0, x1)]
             parts.append(f'<path fill="{STRIPE}" clip-path="url(#flap)" d="M{x0} {ys[0]} L{x1} {ys[1]} '
                          f'L{x1} {ys[1] - st * 1.25} L{x0} {ys[0] - st * 1.25} Z"/>')
         parts.append(f'<rect x="{x0 + 1}" y="{y0 + fh - 2}" width="{x1 - x0 - 2}" height="1" fill="{RING}" fill-opacity="0.9"/>')
@@ -353,7 +360,9 @@ def binder_small(name: str, size: int, opened: bool = False) -> str:
         pic = (f'<path fill="{EMBLEM}" fill-rule="evenodd" d="M{mx} {my} h{mw} v{mh} h{-mw} Z '
                f'M{mx + 1} {my + 1} v{mh - 2} h{mw - 2} v{-(mh - 2)} Z"/>'
                f'<rect fill="{EMBLEM}" x="{mx + mw // 2 - 1}" y="{my + mh}" width="{3 if mw > 7 else 2}" height="1"/>')
-    defs = f'<defs><clipPath id="flap"><rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{fh}"/></clipPath></defs>'
+    defs = (f'<defs><clipPath id="cover"><path d="{cover_d}"/></clipPath>'
+            f'<clipPath id="flap"><path d="M{x0 + r} {y0} H{x1 - r} Q{x1} {y0} {x1} {y0 + r} V{y0 + fh} '
+            f'H{x0} V{y0 + r} Q{x0} {y0} {x0 + r} {y0} Z"/></clipPath></defs>')
     return (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="{XLINK}" width="{size}" height="{size}" '
             f'viewBox="0 0 {size} {size}" version="1.1">{defs}{"".join(parts)}{pic}</svg>\n')
 
