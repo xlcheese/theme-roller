@@ -435,6 +435,8 @@ class StyleTests(unittest.TestCase):
         washed = [r for r in css.split("}") if "window.admin windowcontrols" in r and ".minimize" in r
                   and "background-image" in r]
         self.assertTrue(washed and all("url(" in r for r in washed))
+        # the close button's own hover, restated in session colors (their rest rule outranked it)
+        self.assertIn("window.admin windowcontrols > button:not(.osd).close:hover", css)
         self.assertEqual(velocitty.gtk4_css(t), "")                  # not installed: nothing
 
     def test_old_watcher_replaced(self):
@@ -991,6 +993,16 @@ class RenderAndInstallTests(unittest.TestCase):
         s = defaults()
         s["window_borders"]["button_style"] = "arrows"                        # renamed
         self.assertEqual(settings.from_dict(s)["window_borders"]["button_style"], "unpretentious")
+
+    def test_gargantuan_reaches_the_top(self):
+        """Gargantuan buttons fill a GTK 4 header bar: libadwaita's padding
+        above and below them is taken out (it left a strip over them)."""
+        rule = "headerbar, headerbar > windowhandle > box { padding-top: 0; padding-bottom: 0; }"
+        for style, expect in (("gargantuan", True), ("dots", False)):
+            s = defaults()
+            s["window_borders"]["button_style"] = style
+            t = tokens.build(s, styles.load(DEFAULT_STYLE))
+            self.assertEqual(rule in t["titlebuttons4.css"], expect, style)
 
     def test_old_button_style_names(self):
         s = defaults()

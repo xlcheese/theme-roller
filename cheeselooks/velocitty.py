@@ -388,8 +388,13 @@ def _state_buttons(t: dict[str, str], p: dict[str, str], states: list[str], titl
         selector, body = m.group(1).strip(), m.group(2)
         if "windowcontrols" not in selector or ("background" not in body and "border" not in body):
             continue
+        sels = [x.strip() for x in selector.split(",")]
+        every = [x.replace("window.terminal", f"window.{cls}", 1) for cls in states for x in sels]
         if ".close" in selector and _state_of(selector) in ("hover", "pressed"):
-            continue                                 # the close button's own warning hover
+            # the close button's own warning hover, restated under the session
+            # classes: their rest rule outranks the theme's plain :hover (xl_cheese)
+            out.append(",\n".join(every) + " {" + body + "}")
+            continue
         state = _state_of(selector)
         decl = []
         bg = re.search(r"background-color:\s*([^;]+);", body)
@@ -410,7 +415,5 @@ def _state_buttons(t: dict[str, str], p: dict[str, str], states: list[str], titl
             decl.append("box-shadow: none;")
         if not decl:
             continue
-        sels = [x.strip() for x in selector.split(",")]
-        every = [x.replace("window.terminal", f"window.{cls}", 1) for cls in states for x in sels]
         out.append(",\n".join(every) + " {\n  " + "\n  ".join(decl) + " }")
     return "\n".join(out) + "\n"
