@@ -275,6 +275,12 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "", full: bool = False) -> s
                        for st in (":hover", ":hover:backdrop"))
             + f" {{\n  color: {t['text']};\n  background-color: {t['menu_hover']};\n  background-image: none;\n"
               f"  border-color: transparent;\n  box-shadow: none; }}",
+            # joined buttons there (the style switch): no shared edge drawn on the
+            # next one for a hovered or pressed neighbour, as they have no faces
+            # (xl_cheese: a dark line beside the hovered one)
+            ",\n".join(f"window.terminal headerbar popover > contents .linked:not(.vertical) > button:not(.osd){st} + button:not(.osd)"
+                       for st in (":hover", ":active", ":checked"))
+            + " {\n  border-color: transparent; }",
             ",\n".join(f"window.terminal headerbar popover > contents button:not(.osd){st}"
                        for st in (":active", ":checked"))
             + f" {{\n  color: {t['text']};\n  background-color: {t['pressed']};\n  background-image: none;\n"
