@@ -28,7 +28,7 @@ Somewhere along the way this got lost. Today you get an accent color, a light or
 
 Theme Roller brings it back. Choose your colors, turn some knobs and dials, then click **Apply**. Your entire desktop theme changes within a second. You can make endless color and style changes from just living on the first few tabs of Theme Roller. If you want to dive deeper just click through the rest of the tabs which include the Cinnamon panel and menu, Window borders, Terminal, Icons, and other widgets if you want them.
 
-> **Status:** 0.9.0 is the first release. It's tested on Linux Mint 22 with Cinnamon. If something looks wrong on your desktop, please [open an issue](https://github.com/xlcheese/theme-roller/issues) with a screenshot. What's new is in the [changelog](CHANGELOG.md).
+> **Status:** 0.9.1 is the latest release. It's tested on Linux Mint 22 with Cinnamon, and on the Linux Mint 23 beta (Wayland). If something looks wrong on your desktop, please [open an issue](https://github.com/xlcheese/theme-roller/issues) with a screenshot. What's new is in the [changelog](CHANGELOG.md).
 
 ## Custom colors throughout
 
@@ -182,6 +182,7 @@ Linux Mint 22.x with Cinnamon 6.x. Everything uses the Python 3 and GTK that Min
 - Inspired by GNOME 2's Clearlooks theme and the GNOME Color Chooser. The xl-Classic styles are styled after ClearlooksClassic, the Clearlooks look from before GNOME 2.20, and the xl-Gummy styles after GNOME 2.20's Clearlooks, known as Gummy while it was being made. No code or images were taken from them.
 - Folder icons from [Mint-Y](https://github.com/linuxmint/mint-y-icons) (CC BY-SA 4.0, Sam Hewitt and Alexey Varfolomeev), [Yaru](https://github.com/ubuntu/yaru) (CC BY-SA 4.0, Canonical and the Yaru contributors) and [Breeze](https://github.com/KDE/breeze-icons) (LGPL 3+, the KDE contributors). Each style's licence is in its folder under `data/icons/`.
 - The Minted styles are after Mint-Y by Clement Lefebvre and the Linux Mint team.
+- The xl-Sa theme and style are by Ilse Hayslip.
 - Spanish revised by axrusar of the Linux Mint forums.
 - xl-Big Baddy and xl-Rad are Wesley Hayslip's designs; the Claude folders and the Claude themes were designed by Claude.
 
