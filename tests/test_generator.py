@@ -420,6 +420,13 @@ class StyleTests(unittest.TestCase):
         self.assertEqual(velocitty.scope_to_velocitty("window.maximized windowcontrols > button,\nheaderbar windowcontrols {"),
                          "window.terminal.maximized windowcontrols > button,\nwindow.terminal headerbar windowcontrols {")
         self.assertIn("window.terminal headerbar", block)
+        # in a session color the buttons' faces are a see-through wash, glyphs kept
+        self.assertIn("window.admin windowcontrols > button:not(.osd)", css)
+        self.assertIn("rgba(255, 255, 255, 0.28)", css)                # the hover wash (flat at rest)
+        self.assertIn("window.admin headerbar button:not(.osd)", css)
+        washed = [r for r in css.split("}") if "window.admin windowcontrols" in r and ".minimize" in r
+                  and "background-image" in r]
+        self.assertTrue(washed and all("url(" in r for r in washed))
         self.assertEqual(velocitty.gtk4_css(t), "")                  # not installed: nothing
 
     def test_old_watcher_replaced(self):

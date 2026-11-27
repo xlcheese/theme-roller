@@ -294,6 +294,12 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "", full: bool = False) -> s
     if titlebuttons:
         # the theme's window buttons, on Velocitty's windows only
         out.append(scope_to_velocitty(titlebuttons))
+    # In a session color (root red, remote blue, a tab's color) the header bar's
+    # buttons let it show through: their faces a see-through wash instead of
+    # the theme's (xl_cheese: xl-Classic's blue faces on a pink header bar)
+    states = [cls for cls, key in _STATE_KEYS.items() if key in p]
+    if states:
+        out.append(_state_buttons(t, p, states, titlebuttons or t.get("titlebuttons4.css", "")))
     return "\n".join(out) + "\n"
 
 
@@ -308,3 +314,77 @@ def running() -> bool:
     except (OSError, subprocess.SubprocessError):
         return False
     return bool(out.strip())
+
+
+_WASH = {"rest": "rgba(255, 255, 255, 0.16)", "backdrop": "rgba(255, 255, 255, 0.10)",
+         "hover": "rgba(255, 255, 255, 0.28)", "pressed": "rgba(0, 0, 0, 0.18)"}
+_WASH_EDGE = "rgba(0, 0, 0, 0.28)"
+
+
+def _state_of(selector: str) -> str:
+    if ":active" in selector or ":checked" in selector:
+        return "pressed"
+    if ":hover" in selector:
+        return "hover"
+    if ":backdrop" in selector:
+        return "backdrop"
+    return "rest"
+
+
+def _clear(value: str) -> bool:
+    """A color nobody sees: transparent, or rgba with alpha 0."""
+    v = value.strip()
+    return v in ("transparent", "none") or bool(__import__("re").search(r"rgba\([^)]*,\s*0(\.0+)?\)$", v))
+
+
+def _state_buttons(t: dict[str, str], p: dict[str, str], states: list[str], titlebuttons: str) -> str:
+    """The window buttons and header bar buttons of Velocitty's session colors:
+    the face a white wash (darker when pressed) and the edge a dark see-through
+    line, so the header bar's color shows through. A button the theme leaves
+    clear at rest stays clear; the close button keeps its own hover; the window
+    buttons' glyphs (the first background layer) stay."""
+    import re
+    out = ["/* Velocitty's session colors show through the header bar's buttons */"]
+    # header bar buttons (the menu, new tab, custom tabs): icons, so the face is the background
+    flat = _clear(t.get("w.toolbar_button.border", "transparent"))
+    for cls in states:
+        fg = _readable(p[_STATE_KEYS[cls]])
+        base = f"window.{cls} headerbar button:not(.osd)"
+        rest = "transparent" if flat else _WASH["rest"]
+        out.append(f"{base}, {base}:backdrop {{\n  color: {fg};\n  background-color: {rest};\n"
+                   f"  background-image: none;\n  border-color: {'transparent' if flat else _WASH_EDGE};\n"
+                   f"  box-shadow: none; }}")
+        out.append(f"{base}:hover {{\n  color: {fg};\n  background-color: {_WASH['hover']};\n"
+                   f"  background-image: none;\n  border-color: {_WASH_EDGE};\n  box-shadow: none; }}")
+        out.append(f"{base}:active, {base}:checked {{\n  color: {fg};\n  background-color: {_WASH['pressed']};\n"
+                   f"  background-image: none;\n  border-color: {_WASH_EDGE};\n  box-shadow: none; }}")
+    # window buttons: the theme's rules, their faces washed, for every session class at once
+    scoped = scope_to_velocitty(titlebuttons)
+    for m in re.finditer(r"(?s)([^{}]+?)\{([^{}]*)\}", scoped):
+        selector, body = m.group(1).strip(), m.group(2)
+        if "windowcontrols" not in selector or ("background" not in body and "border" not in body):
+            continue
+        if ".close" in selector and _state_of(selector) in ("hover", "pressed"):
+            continue                                 # the close button's own warning hover
+        state = _state_of(selector)
+        decl = []
+        bg = re.search(r"background-color:\s*([^;]+);", body)
+        if bg:
+            decl.append(f"background-color: {'transparent' if _clear(bg.group(1)) and state in ('rest', 'backdrop') else _WASH[state]};")
+        img = re.search(r"background-image:\s*([^;]+);", body)
+        if img:
+            layers = [x.strip() for x in re.split(r",(?![^(]*\))", img.group(1))]
+            glyph = [x for x in layers if x.startswith("url(")]
+            decl.append(f"background-image: {', '.join(glyph + ['image(transparent)'] * (len(layers) - len(glyph)))};")
+        border = re.search(r"border:\s*(\d+px)\s+solid\s+([^;]+);", body)
+        if border:
+            clear = _clear(border.group(2)) and state in ("rest", "backdrop")
+            decl.append(f"border: {border.group(1)} solid {'transparent' if clear else _WASH_EDGE};")
+        if "box-shadow" in body:
+            decl.append("box-shadow: none;")
+        if not decl:
+            continue
+        sels = [x.strip() for x in selector.split(",")]
+        every = [x.replace("window.terminal", f"window.{cls}", 1) for cls in states for x in sels]
+        out.append(",\n".join(every) + " {\n  " + "\n  ".join(decl) + " }")
+    return "\n".join(out) + "\n"
