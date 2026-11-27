@@ -263,6 +263,22 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "", full: bool = False) -> s
             # text (xl_cheese): the theme's menu colors, both
             f"window.terminal popover > contents, window.terminal popover > arrow {{\n"
             f"  background-color: {t['menu_bg']};\n  color: {t['text']}; }}",
+            # ...and the buttons in them (the zoom row of the main menu): the menu
+            # opens from a header bar button, so the header bar's button rules (its
+            # white text) reached them, white on white (xl_cheese)
+            # (drawn as the theme's menu items: no face at rest, the menu's hover)
+            ",\n".join(f"window.terminal headerbar popover > contents button:not(.osd){st}"
+                       for st in ("", ":backdrop"))
+            + f" {{\n  color: {t['text']};\n  background-color: transparent;\n  background-image: none;\n"
+              f"  border-color: transparent;\n  box-shadow: none; }}",
+            ",\n".join(f"window.terminal headerbar popover > contents button:not(.osd){st}"
+                       for st in (":hover", ":hover:backdrop"))
+            + f" {{\n  color: {t['text']};\n  background-color: {t['menu_hover']};\n  background-image: none;\n"
+              f"  border-color: transparent;\n  box-shadow: none; }}",
+            ",\n".join(f"window.terminal headerbar popover > contents button:not(.osd){st}"
+                       for st in (":active", ":checked"))
+            + f" {{\n  color: {t['text']};\n  background-color: {t['pressed']};\n  background-image: none;\n"
+              f"  border-color: transparent;\n  box-shadow: none; }}",
             # the tab overview keeps Velocitty's own look
             f"window.terminal toolbarview.overview headerbar {{\n  background-color: {pal.mix(bg, fg, 0.10)};\n"
             f"  color: {fg};\n  background-image: none; }}",
