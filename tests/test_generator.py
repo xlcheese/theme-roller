@@ -422,6 +422,30 @@ class StyleTests(unittest.TestCase):
         self.assertIn("window.terminal headerbar", block)
         self.assertEqual(velocitty.gtk4_css(t), "")                  # not installed: nothing
 
+    def test_old_watcher_replaced(self):
+        """A watcher from another Theme Roller (an older package's, which didn't
+        know the name Theme-Roller and took our colors out after every Apply)
+        is replaced by Apply; ours is left running."""
+        from unittest import mock
+        with mock.patch.object(watch, "running", side_effect=[True, False]), \
+                mock.patch.object(watch, "_same_watcher", return_value=False), \
+                mock.patch.object(watch, "_stop") as stop, \
+                mock.patch("subprocess.Popen") as popen, \
+                mock.patch.object(watch, "system_autostart_file", return_value=Path("/nonexistent")), \
+                mock.patch.object(watch, "autostart_file", return_value=Path(tempfile.mkdtemp()) / "a.desktop"):
+            log = watch.enable()
+        stop.assert_called_once()
+        popen.assert_called_once()
+        self.assertTrue(any("replaced" in line for line in log))
+        with mock.patch.object(watch, "running", return_value=True), \
+                mock.patch.object(watch, "_same_watcher", return_value=True), \
+                mock.patch.object(watch, "_stop") as stop, mock.patch("subprocess.Popen") as popen, \
+                mock.patch.object(watch, "system_autostart_file", return_value=Path("/nonexistent")), \
+                mock.patch.object(watch, "autostart_file", return_value=Path(tempfile.mkdtemp()) / "a.desktop"):
+            watch.enable()
+        stop.assert_not_called()
+        popen.assert_not_called()
+
     def test_panel_button_padding(self):
         t = tokens.build(defaults(), styles.Style(name="Fixture", path=None))
         self.assertEqual(t["panel.w.panel_button.padding"], "4")

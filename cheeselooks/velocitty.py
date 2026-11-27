@@ -233,6 +233,9 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "") -> str:
             f"window.terminal.bell headerbar, window.terminal.bell headerbar:backdrop {{\n"
             f"  background-image: {run}, {run}, {gloss}; }}",
             # the tab strip: neither the header bar nor the terminal; the open tab joins the terminal
+            # (on the tab bar itself too: newer libadwaita draws the strip there,
+            # or lets the top bar's color behind it show, xl_cheese's Mint 23 beta)
+            f"window.terminal tabbar, window.terminal tabbar:backdrop,\n"
             f"window.terminal tabbar .box, window.terminal tabbar .box:backdrop {{\n"
             f"  background-color: {strip};\n  color: {strip_fg};\n  background-image: none; }}",
             f"window.terminal tabbar tab {{ color: {strip_fg}; background-color: transparent; }}",

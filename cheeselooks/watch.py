@@ -41,6 +41,20 @@ def is_ours(theme: str | None) -> bool:
     return bool(theme) and theme in names + tuple(f".{n}-reloading" for n in names)
 
 
+def id_file() -> Path:
+    """Which Theme Roller the running watcher is: see identity()."""
+    return paths.config_dir() / "watcher-id"
+
+
+def identity() -> str:
+    """This Theme Roller: its version and where its code is. A watcher of
+    another (an older package's, from before the theme was called Theme-Roller)
+    took our colors out after every Apply: it didn't know the new name
+    (xl_cheese, Mint 23 beta). Apply replaces such a watcher (enable)."""
+    from . import __version__
+    return f"{__version__} {tokens.THEME_NAME} {Path(__file__).resolve().parent}"
+
+
 def lock_file() -> Path:
     return paths.config_dir() / "applying"
 
@@ -125,6 +139,11 @@ def run() -> int:
     if not reload.available() or shutil.which("gsettings") is None:
         print("gsettings not found: nothing to watch", file=sys.stderr)
         return 1
+    try:
+        id_file().parent.mkdir(parents=True, exist_ok=True)
+        id_file().write_text(identity() + "\n", encoding="utf-8")
+    except OSError:
+        pass
     _act(_current())                         # a change made while we weren't running
     proc = subprocess.Popen(["gsettings", "monitor", SCHEMA, KEY],
                             stdout=subprocess.PIPE, text=True)
@@ -198,6 +217,9 @@ def enable() -> list[str]:
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(text, encoding="utf-8")
         log.append("the theme watcher starts at login")
+    if running() and not _same_watcher():
+        _stop()                  # another Theme Roller's (an older one's): ours takes over
+        log.append("replaced a theme watcher from another version of Theme Roller")
     if not running():
         try:
             subprocess.Popen(command(), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
@@ -206,6 +228,25 @@ def enable() -> list[str]:
         except OSError:
             pass
     return log
+
+
+def _same_watcher() -> bool:
+    try:
+        return id_file().read_text(encoding="utf-8").strip() == identity()
+    except OSError:
+        return False             # watchers before 0.9.1 wrote none
+
+
+def _stop() -> None:
+    try:
+        subprocess.run(["pkill", "-u", str(os.getuid()), "-f", WATCH_PATTERN],
+                       capture_output=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    for _ in range(20):          # give it a moment to go
+        if not running():
+            break
+        time.sleep(0.1)
 
 
 def disable() -> list[str]:
