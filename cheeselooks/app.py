@@ -38,7 +38,7 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gdk, GdkPixbuf, Gio, GLib, Gtk, Pango  # noqa: E402
 
-from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, icons, qt, reload, render, settings, styles, themes, titlebuttons, tokens, watch  # noqa: E402
+from . import cli, editor, flatpak, imagecolors, palette as pal, panelmarker, paths, icons, qt, reload, render, settings, styles, themes, titlebuttons, tokens, velocitty, watch  # noqa: E402
 from . import shape  # noqa: E402
 from .i18n import _, N_  # noqa: E402
 from .shape import DEFAULT_PANEL_HEIGHT  # noqa: E402
@@ -1942,6 +1942,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         self._come_back()
         self.applied = data
         note, apps = self._login_note(log)
+        note += self._reopen_note()
         self.say(_("“{theme}” is on the desktop. Revert puts the previous theme back.")
                  .format(theme=_(data["theme"]) if data["theme"] == themes.CUSTOM else data["theme"])
                  + note, "attention" if note else "done")
@@ -1954,6 +1955,11 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             qt.notice_shown()
             GLib.timeout_add(3200, self._qt_notice, notice)   # after the window comes back
         return False
+
+    @staticmethod
+    def _reopen_note() -> str:
+        """Velocitty open: it reads its new look only when it starts."""
+        return (" " + _("Reopen Velocitty to see the changes.")) if velocitty.running() else ""
 
     def _login_note(self, log: list[str]) -> tuple[str, str | None]:
         """On Wayland, the title bars Cinnamon draws (older apps, through
@@ -2002,6 +2008,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.applied = restored
         self.revert_btn.hide()
         note, apps = self._login_note(log)
+        note += self._reopen_note()
         self.say(_("The previous theme is back on the desktop. Your settings here are unchanged.")
                  + note, "attention" if note else "done")
         self.status.set_tooltip_text(apps)

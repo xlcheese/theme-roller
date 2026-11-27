@@ -186,7 +186,7 @@ def scope_to_velocitty(css: str) -> str:
     return re.sub(r"(?m)^([^{}/\n][^{}]*?)\s*\{", rule, css)
 
 
-def gtk4_css(t: dict[str, str], titlebuttons: str = "") -> str:
+def gtk4_css(t: dict[str, str], titlebuttons: str = "", full: bool = False) -> str:
     """Velocitty's window in the theme's style, on top of its own palette CSS
     (this file outranks an app's CSS): the header bar keeps the palette's color
     for each session (root red, remote blue, a tab's own color), with the
@@ -215,8 +215,16 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "") -> str:
         pass
     gloss = f"linear-gradient(to bottom, rgba(255, 255, 255, {amount:.3f}), rgba(255, 255, 255, 0))" \
         if amount > 0.005 else "none"
-    strip = pal.mix(title, bg, 0.45)
-    strip_fg = fg if pal.contrast(fg, strip) >= 4.5 else _readable(strip)
+    if full:
+        # with full styling the tabs are your theme's (as Nemo's): their strip too
+        from . import tabs
+        under = min(t["bg"], t["header"], t["base"], key=pal.luminance)
+        dark_theme = pal.luminance(t["bg"]) < 0.25
+        strip = pal.darker(under, tabs.STRIP_DARKER[dark_theme]) if float(t["r"]) > 0 else t["bg"]
+        strip_fg = t["text"]
+    else:
+        strip = pal.mix(title, bg, 0.45)
+        strip_fg = fg if pal.contrast(fg, strip) >= 4.5 else _readable(strip)
     r = t.get("wb.r", "0")
     head = "window.terminal headerbar, window.terminal headerbar:backdrop"
     out = ["/* Velocitty (Linux Mint's terminal): its window in your theme, on its own colors (velocitty.py) */",
@@ -249,10 +257,12 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "") -> str:
             f"window.terminal tabbar, window.terminal tabbar:backdrop,\n"
             f"window.terminal tabbar .box, window.terminal tabbar .box:backdrop {{\n"
             f"  background-color: {strip};\n  color: {strip_fg};\n  background-image: none; }}",
-            f"window.terminal tabbar tab {{ color: {strip_fg}; background-color: transparent; }}",
-            f"window.terminal tabbar tab:selected, window.terminal tabbar tab:selected:hover {{\n"
-            f"  color: {fg};\n  background-color: {bg}; }}",
             f"window.terminal tabbar tab.running {{ background-image: {run}; }}",
+            # Velocitty's menus take its header bar's colors (white text on its
+            # blue); full styling gave them our menu background, under the white
+            # text (xl_cheese): the theme's menu colors, both
+            f"window.terminal popover > contents, window.terminal popover > arrow {{\n"
+            f"  background-color: {t['menu_bg']};\n  color: {t['text']}; }}",
             # the tab overview keeps Velocitty's own look
             f"window.terminal toolbarview.overview headerbar {{\n  background-color: {pal.mix(bg, fg, 0.10)};\n"
             f"  color: {fg};\n  background-image: none; }}",
@@ -260,7 +270,25 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "") -> str:
             f"window.terminal.csd:not(.maximized):not(.tiled):not(.fullscreen) revealer.top-bar > windowhandle,\n"
             f"window.terminal.csd:not(.maximized):not(.tiled):not(.fullscreen) headerbar {{\n"
             f"  border-radius: {r}px {r}px 0 0; }}"]
+    if not full:
+        # without full styling the tabs are libadwaita's: the open one joins the terminal
+        out += [f"window.terminal tabbar tab {{ color: {strip_fg}; background-color: transparent; }}",
+                f"window.terminal tabbar tab:selected, window.terminal tabbar tab:selected:hover {{\n"
+                f"  color: {fg};\n  background-color: {bg}; }}"]
     if titlebuttons:
         # the theme's window buttons, on Velocitty's windows only
         out.append(scope_to_velocitty(titlebuttons))
     return "\n".join(out) + "\n"
+
+
+def running() -> bool:
+    """A Velocitty window is open: it reads the GTK 4 file only when it starts,
+    so after an Apply it needs reopening (the app says so)."""
+    import os
+    import subprocess
+    try:
+        out = subprocess.run(["pgrep", "-u", str(os.getuid()), "-f", "bin/velocitty"],
+                             capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return bool(out.strip())

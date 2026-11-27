@@ -155,7 +155,7 @@ def block(templates_dir: Path, t: dict[str, str], css_variables: bool, full: boo
     # window buttons are already everyone's)
     from . import velocitty
     buttons = "" if full else t.get("titlebuttons4.css", "") + _window_button_margins(t)
-    vel = velocitty.gtk4_css(t, buttons)
+    vel = velocitty.gtk4_css(t, buttons, full)
     if vel:
         css += "\n" + vel.replace('url("assets/', f'url("{ASSETS}/').replace("url('assets/", f"url('{ASSETS}/")
     return f"{BEGIN}\n{css.rstrip()}\n{END}\n"

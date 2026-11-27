@@ -1098,34 +1098,38 @@ msgstr ""
 msgid "Apply failed: {problem}"
 msgstr ""
 
-#: cheeselooks/app.py:1945
+#: cheeselooks/app.py:1946
 #, python-brace-format
 msgid "“{theme}” is on the desktop. Revert puts the previous theme back."
 msgstr ""
 
-#: cheeselooks/app.py:1966
+#: cheeselooks/app.py:1962
+msgid "Reopen Velocitty to see the changes."
+msgstr ""
+
+#: cheeselooks/app.py:1972
 msgid "Some older apps' title bars change at your next login."
 msgstr ""
 
-#: cheeselooks/app.py:1971
+#: cheeselooks/app.py:1977
 #, python-brace-format
 msgid "These title bars change at your next login: {apps}"
 msgstr ""
 
-#: cheeselooks/app.py:1976
+#: cheeselooks/app.py:1982
 msgid "Qt apps now match your theme"
 msgstr ""
 
-#: cheeselooks/app.py:1989
+#: cheeselooks/app.py:1995
 msgid "Reverting… the desktop flickers once while it reloads."
 msgstr ""
 
-#: cheeselooks/app.py:1996
+#: cheeselooks/app.py:2002
 #, python-brace-format
 msgid "Revert failed: {problem}"
 msgstr ""
 
-#: cheeselooks/app.py:2005
+#: cheeselooks/app.py:2012
 msgid ""
 "The previous theme is back on the desktop. Your settings here are unchanged."
 msgstr ""

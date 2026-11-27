@@ -1136,35 +1136,39 @@ msgstr "Application… le bureau clignote une fois pendant le rechargement."
 msgid "Apply failed: {problem}"
 msgstr "Échec d'Appliquer : {problem}"
 
-#: cheeselooks/app.py:1945
+#: cheeselooks/app.py:1946
 #, python-brace-format
 msgid "“{theme}” is on the desktop. Revert puts the previous theme back."
 msgstr "« {theme} » est sur le bureau. Annuler remet le thème précédent."
 
-#: cheeselooks/app.py:1966
+#: cheeselooks/app.py:1962
+msgid "Reopen Velocitty to see the changes."
+msgstr "Rouvrez Velocitty pour voir les changements."
+
+#: cheeselooks/app.py:1972
 msgid "Some older apps' title bars change at your next login."
 msgstr ""
 "Les barres de titre de certaines anciennes applications changeront à la prochaine connexion."
 
-#: cheeselooks/app.py:1971
+#: cheeselooks/app.py:1977
 #, python-brace-format
 msgid "These title bars change at your next login: {apps}"
 msgstr "Ces barres de titre changeront à la prochaine connexion : {apps}"
 
-#: cheeselooks/app.py:1976
+#: cheeselooks/app.py:1982
 msgid "Qt apps now match your theme"
 msgstr "Les applications Qt s'accordent maintenant avec votre thème"
 
-#: cheeselooks/app.py:1989
+#: cheeselooks/app.py:1995
 msgid "Reverting… the desktop flickers once while it reloads."
 msgstr "Annulation… le bureau clignote une fois pendant le rechargement."
 
-#: cheeselooks/app.py:1996
+#: cheeselooks/app.py:2002
 #, python-brace-format
 msgid "Revert failed: {problem}"
 msgstr "Échec d'Annuler : {problem}"
 
-#: cheeselooks/app.py:2005
+#: cheeselooks/app.py:2012
 msgid ""
 "The previous theme is back on the desktop. Your settings here are unchanged."
 msgstr ""
