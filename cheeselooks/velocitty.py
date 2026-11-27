@@ -370,7 +370,10 @@ def _state_buttons(t: dict[str, str], p: dict[str, str], states: list[str], titl
         decl = []
         bg = re.search(r"background-color:\s*([^;]+);", body)
         if bg:
-            decl.append(f"background-color: {'transparent' if _clear(bg.group(1)) and state in ('rest', 'backdrop') else _WASH[state]};")
+            # only where the theme paints a face: a style that draws its face
+            # on the inner node leaves the button (its larger click area) clear,
+            # and a wash there spread past the face's edge (xl_cheese)
+            decl.append(f"background-color: {'transparent' if _clear(bg.group(1)) else _WASH[state]};")
         img = re.search(r"background-image:\s*([^;]+);", body)
         if img:
             layers = [x.strip() for x in re.split(r",(?![^(]*\))", img.group(1))]
@@ -378,8 +381,7 @@ def _state_buttons(t: dict[str, str], p: dict[str, str], states: list[str], titl
             decl.append(f"background-image: {', '.join(glyph + ['image(transparent)'] * (len(layers) - len(glyph)))};")
         border = re.search(r"border:\s*(\d+px)\s+solid\s+([^;]+);", body)
         if border:
-            clear = _clear(border.group(2)) and state in ("rest", "backdrop")
-            decl.append(f"border: {border.group(1)} solid {'transparent' if clear else _WASH_EDGE};")
+            decl.append(f"border: {border.group(1)} solid {'transparent' if _clear(border.group(2)) else _WASH_EDGE};")
         if "box-shadow" in body:
             decl.append("box-shadow: none;")
         if not decl:
