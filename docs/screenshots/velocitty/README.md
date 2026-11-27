@@ -6,11 +6,13 @@ Theme Roller gives Velocitty a "Theme Roller" palette with your terminal colors 
 
 These screenshots need the development version of Theme Roller (the `v1-generator` branch). Close and reopen Velocitty after Apply.
 
-## Mint-Y look
+## Minted
 
-![Velocitty in the Mint-Y look](MintY.png)
+Styled after Mint-Y, Linux Mint's own theme.
 
-![Velocitty in the Mint-Y look, color-marked tab selected](MintyMarkedTab.png)
+![Velocitty in Minted](Minted.png)
+
+![Velocitty in Minted, color-marked tab selected](MintedMarkedTab.png)
 
 ## xl-Classic
 
