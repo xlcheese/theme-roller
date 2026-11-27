@@ -227,6 +227,17 @@ def gtk4_css(t: dict[str, str], titlebuttons: str = "") -> str:
             out.append(f"window.{cls} headerbar, window.{cls} headerbar:backdrop {{\n"
                        f"  background-color: {c};\n  color: {_readable(c)}; }}")
             out.append(f"window.terminal tabbar tab.{cls} {{ box-shadow: inset 0 -3px 0 {c}; }}")
+    # the tab color swatches (right-click a tab) and the custom tabs' color bars:
+    # our button style (full styling) painted over their colors (xl_cheese)
+    for name in _TAB_COLORS:
+        if name in p:
+            c, sel = p[name], f"window.terminal button.custom-swatch.custom-{name.lower()}"
+            out.append(f"{sel}, {sel}:hover, {sel}:active, {sel}:checked, {sel}:backdrop,\n"
+                       f"window.terminal .color-bar.custom-{name.lower()} {{\n"
+                       f"  background-color: {c};\n  background-image: none;\n  border-color: transparent; }}")
+            out.append(f"{sel} {{ box-shadow: none; }}\n"
+                       f"{sel}:hover {{ box-shadow: 0 0 0 2px {pal.rgba(fg if pal.luminance(bg) < 0.179 else '#000000', 0.25)}; }}\n"
+                       f"{sel}:checked {{ box-shadow: 0 0 0 2px {fg}; }}")
     run = f"linear-gradient({shade}, {shade})"
     out += [f"window.terminal.running headerbar, window.terminal.running headerbar:backdrop {{\n"
             f"  background-image: {run}, {gloss}; }}",
