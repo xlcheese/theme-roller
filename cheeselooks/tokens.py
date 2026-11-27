@@ -505,9 +505,16 @@ def build(settings: dict, style: sty.Style, panel_height: int = shape.DEFAULT_PA
     t["adw.accent_name"] = nearest_adw_accent(theme["accent"])
     _add_face_gradients(t, style)      # again, for the panel, menu and title-bar tokens
     # the panel itself, at its opacity (split / glass like the buttons on it)
-    t["panel.bar_st"] = pal.st_gradient(t["panel.panel_top"], t["panel.panel_bottom"],
-                                        style.gradient_shape, style.split_step,
-                                        style.glass_return, float(t["panel.opacity"]))
+    bar = (t["panel.panel_top"], t["panel.panel_bottom"], style.gradient_shape,
+           style.split_step, style.glass_return, float(t["panel.opacity"]))
+    t["panel.bar_st"] = pal.st_gradient(*bar)
+    # side panels run left to right (empty for smooth faces)
+    side = pal.st_gradient_image(*bar, direction="to right")
+    t["panel.bar_st_side"] = "\n  " + side if side else ""
+    # where a rule turns the gradient off: a linear-gradient() isn't turned off
+    # by background-gradient-direction: none (empty for smooth styles)
+    t["st_image_none"] = ("\n  background-image: none;"
+                          if style.gradient_shape != "smooth" else "")
     _title_gradient(t, style)
     t["lists.css"], t["lists4.css"] = _lists_css(g["roundness"], int(t["r"]), t["frame"],
                                                  (t["w.sidebar_row.hover_ring"], t["w.sidebar_row.selected_ring"]),

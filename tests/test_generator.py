@@ -2249,18 +2249,19 @@ class RenderAndInstallTests(unittest.TestCase):
         out = settings.apply_style_defaults(defaults(), {"unfocused_depth": 40})
         self.assertEqual(out["style"]["unfocused_depth"], 40)
 
-    def test_cinnamon_middle_stops(self):
+    def test_cinnamon_linear_gradient(self):
         # smooth faces write only start and end, exactly as before
         self.assertEqual(palette.st_gradient("#ffffff", "#000000"),
                          "background-gradient-start: #ffffff;\n  background-gradient-end: #000000;")
-        # split and glass add the two middle stops (St with the middle-stop patch
-        # draws the step; older Cinnamon ignores them and fades start to end)
+        # split and glass keep start and end (older Cinnamon draws that fade) and
+        # add a linear-gradient() with all four stops, which newer St draws instead
         for shape in ("split", "glass"):
             stops = palette.gradient_stops("#ffffff", "#000000", shape, 0.7, 0.7)
             st = palette.st_gradient("#ffffff", "#000000", shape, 0.7, 0.7)
-            self.assertIn(f"background-gradient-middle-start: {stops[1][1]};", st)
-            self.assertIn(f"background-gradient-middle-end: {stops[2][1]};", st)
-            self.assertTrue(st.endswith(f"background-gradient-end: {stops[3][1]};"))
+            self.assertTrue(st.startswith("background-gradient-start: #ffffff;\n"
+                                          "  background-gradient-end: #000000;\n"))
+            self.assertIn(f"background-image: linear-gradient(to bottom, {stops[0][1]}, "
+                          f"{stops[1][1]} 50%, {stops[2][1]} 50%, {stops[3][1]});", st)
         gummy = styles.load(REPO / "styles" / "xl-Gummy")
         t = tokens.build(defaults(), gummy)
         with tempfile.TemporaryDirectory() as tmp:
@@ -2268,11 +2269,19 @@ class RenderAndInstallTests(unittest.TestCase):
             install.build(REPO / "templates", t, out)
             css = (out / "cinnamon" / "cinnamon.css").read_text()
         self.assertIn(t["panel.w.panel_button.hover_st"], css)
-        self.assertIn("background-gradient-middle-start:", t["panel.w.panel_button.hover_st"])
-        # the panel bar too, at the panel's opacity
+        self.assertIn("linear-gradient(to bottom,", t["panel.w.panel_button.hover_st"])
+        # the panel bar too, at the panel's opacity, and left to right on side panels
         self.assertIn(t["panel.bar_st"], css)
-        self.assertIn(f"background-gradient-middle-start: rgba(", t["panel.bar_st"])
-        self.assertIn(f", {t['panel.opacity']});", t["panel.bar_st"])
+        self.assertIn(f"linear-gradient(to bottom, rgba(", t["panel.bar_st"])
+        self.assertIn(f", {t['panel.opacity']}));", t["panel.bar_st"])
+        self.assertIn("background-gradient-direction: horizontal;\n  background-image: "
+                      "linear-gradient(to right, rgba(", css)
+        # a pressed applet turns the hover's linear-gradient() off too
+        self.assertIn("background-gradient-direction: none;\n  background-image: none;", css)
+        # smooth styles: no linear-gradient() at all
+        t = tokens.build(defaults(), styles.load(DEFAULT_STYLE))
+        self.assertEqual(t["panel.bar_st_side"], "")
+        self.assertEqual(t["st_image_none"], "")
 
     def test_menu_style(self):
         s = defaults()

@@ -19,7 +19,7 @@
   background-gradient-direction: vertical;
   {{panel.bar_st}} }
 .panel-left, .panel-right {
-  background-gradient-direction: horizontal; }
+  background-gradient-direction: horizontal;{{panel.bar_st_side}} }
 .panel-top { box-shadow: 0 1px {{alpha(panel.border, 0.8)}}; }
 .panel-bottom { box-shadow: 0 -1px {{alpha(panel.border, 0.8)}}; }
 .panel-left { box-shadow: 1px 0 {{alpha(panel.border, 0.8)}}; }
@@ -65,7 +65,7 @@
   color: {{panel.text}};
   border-color: {{panel.w.panel_button.pressed_border}};
   background-color: {{panel.pressed}};
-  background-gradient-direction: none;
+  background-gradient-direction: none;{{st_image_none}}
   box-shadow: {{panel.w.panel_button.pressed_st_shadow}}; }
 .applet-box:hover .applet-label, .applet-box:checked .applet-label,
 .applet-box:hover > .applet-icon, .applet-box:checked > .applet-icon {

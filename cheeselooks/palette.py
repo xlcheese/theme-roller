@@ -167,22 +167,37 @@ def gradient_css(top: str, bottom: str, shape: str = "smooth", step: float = 0.4
 
 
 def st_gradient(top: str, bottom: str, shape: str = "smooth", step: float = 0.4,
-                glass_return: float = 0.4, alpha: float | None = None) -> str:
-    """The face as St (Cinnamon) background-gradient-* declarations. Cinnamon
-    with the middle-stop patch draws split and glass with the step; older
-    Cinnamon ignores the -middle- properties without a warning and draws a
-    smooth fade from the first stop to the last. Smooth faces write only start
-    and end, exactly as before. With alpha, every stop is rgba() at that
-    opacity (the panel)."""
-    stops = gradient_stops(top, bottom, shape, step, glass_return)
-    if alpha is not None:
-        stops = [(o, rgba(c, alpha)) for o, c in stops]
-    lines = [f"background-gradient-start: {stops[0][1]};"]
-    if len(stops) == 4:
-        lines += [f"background-gradient-middle-start: {stops[1][1]};",
-                  f"background-gradient-middle-end: {stops[2][1]};"]
-    lines.append(f"background-gradient-end: {stops[-1][1]};")
+                glass_return: float = 0.4, alpha: float | None = None,
+                direction: str = "to bottom") -> str:
+    """The face as St (Cinnamon) declarations. Every face writes
+    background-gradient-start / -end, top to bottom, as before. Split and glass
+    faces add background-image: linear-gradient() with all four stops, which a
+    Cinnamon with linear-gradient() support draws in their place (it takes
+    precedence); older Cinnamon ignores it without a warning and draws the
+    two-colour fade. With alpha, every colour is rgba() at that opacity (the
+    panel)."""
+    def c(color: str) -> str:
+        return rgba(color, alpha) if alpha is not None else color
+    lines = [f"background-gradient-start: {c(top)};",
+             f"background-gradient-end: {c(bottom)};"]
+    image = st_gradient_image(top, bottom, shape, step, glass_return, alpha, direction)
+    if image:
+        lines.append(image)
     return "\n  ".join(lines)
+
+
+def st_gradient_image(top: str, bottom: str, shape: str = "smooth", step: float = 0.4,
+                      glass_return: float = 0.4, alpha: float | None = None,
+                      direction: str = "to bottom") -> str:
+    """background-image: linear-gradient(...); for a split or glass face, or ""
+    for a smooth one (see st_gradient)."""
+    stops = gradient_stops(top, bottom, shape, step, glass_return)
+    if len(stops) == 2:
+        return ""
+    if alpha is not None:
+        stops = [(o, rgba(col, alpha)) for o, col in stops]
+    parts = [stops[0][1]] + [f"{col} {o * 100:g}%" for o, col in stops[1:-1]] + [stops[-1][1]]
+    return f"background-image: linear-gradient({direction}, {', '.join(parts)});"
 
 
 def title_gradient(color: str, amount: float) -> tuple[str, str]:
