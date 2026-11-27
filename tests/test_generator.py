@@ -409,7 +409,8 @@ class StyleTests(unittest.TestCase):
             f.parent.mkdir(parents=True)
             f.write_text(velocitty.palette_text(t))
             css = velocitty.gtk4_css(t, t["titlebuttons4.css"])
-            block = gtk4.block(paths.templates_dir(), t, css_variables=False)
+            block = gtk4.block(paths.templates_dir(), t, css_variables=False)          # Colors
+            full_block = gtk4.block(paths.templates_dir(), t, css_variables=False, full=True)
         self.assertIn("window.admin headerbar", css)
         self.assertIn("window.remote headerbar", css)
         self.assertIn("linear-gradient(to bottom, rgba(255, 255, 255, 0.3", css)   # the gradient, see-through
@@ -419,7 +420,8 @@ class StyleTests(unittest.TestCase):
         self.assertNotIn("window.maximized window.terminal", css)
         self.assertEqual(velocitty.scope_to_velocitty("window.maximized windowcontrols > button,\nheaderbar windowcontrols {"),
                          "window.terminal.maximized windowcontrols > button,\nwindow.terminal headerbar windowcontrols {")
-        self.assertIn("window.terminal headerbar", block)
+        self.assertNotIn("window.terminal", block)           # Colors mode: its palette only
+        self.assertIn("window.terminal headerbar", full_block)
         # in a session color the buttons' faces are a see-through wash, glyphs kept
         self.assertIn("window.admin windowcontrols > button:not(.osd)", css)
         self.assertIn("rgba(255, 255, 255, 0.28)", css)                # the hover wash (flat at rest)

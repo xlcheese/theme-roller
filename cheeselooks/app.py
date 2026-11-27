@@ -1942,7 +1942,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         self._come_back()
         self.applied = data
         note, apps = self._login_note(log)
-        note += self._reopen_note()
+        note += self._reopen_note(data)
         self.say(_("“{theme}” is on the desktop. Revert puts the previous theme back.")
                  .format(theme=_(data["theme"]) if data["theme"] == themes.CUSTOM else data["theme"])
                  + note, "attention" if note else "done")
@@ -1957,9 +1957,11 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
         return False
 
     @staticmethod
-    def _reopen_note() -> str:
-        """Velocitty open: it reads its new look only when it starts."""
-        return (" " + _("Reopen Velocitty to see the changes.")) if velocitty.running() else ""
+    def _reopen_note(data: dict) -> str:
+        """Velocitty open with full styling: it reads its window's look only
+        when it starts (its palette, all Colors mode gives it, changes at once)."""
+        full = data.get("integration", {}).get("libadwaita") == "full"
+        return (" " + _("Reopen Velocitty to see the changes.")) if full and velocitty.running() else ""
 
     def _login_note(self, log: list[str]) -> tuple[str, str | None]:
         """On Wayland, the title bars Cinnamon draws (older apps, through
@@ -2008,7 +2010,7 @@ frame.xl-prev-window > border {{ border: {t['wb.border_width']}px solid {t['wb.b
             self.applied = restored
         self.revert_btn.hide()
         note, apps = self._login_note(log)
-        note += self._reopen_note()
+        note += self._reopen_note(restored or self.data)
         self.say(_("The previous theme is back on the desktop. Your settings here are unchanged.")
                  + note, "attention" if note else "done")
         self.status.set_tooltip_text(apps)
